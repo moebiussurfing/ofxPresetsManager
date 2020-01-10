@@ -19,7 +19,25 @@
 #include "ofMain.h"
 #include "ofxImGui.h"
 
+//TIMEMEASUREMENTS
+#define TIME_SAMPLE_OFX_FONTSTASH2 //comment this line to remove ofxTimeMeasurements dependency
+#ifdef TIME_SAMPLE_OFX_FONTSTASH2
+#include "ofxTimeMeasurements.h"
+
+#else
+#define TS_START_NIF
+#define TS_STOP_NIF
+#define TS_START_ACC
+#define TS_STOP_ACC
+#define TS_START
+#define TS_STOP
+#define TSGL_START
+#define TSGL_STOP
+#endif
+
 //-------------------------------
+
+#pragma mark - DEFINE DATA TYPES
 
 // DEFINE MODE:
 
@@ -43,25 +61,33 @@
 
 #define NUM_OF_PRESETS 8
 
-//-
+//---
 
 class ofxPresetsManager
 {
 
 public:
 
-    ofParameter<int> PRESET_selected;//from 1 to 8 i.e.
-
     //-
+
+#pragma mark - OF
 
     ofxPresetsManager();
     ~ofxPresetsManager();
 
     void setup();
-
     void update();
 
+    // draw some info, when the gui is drawn you can also click on the button to change / save presets
+    void draw();
+    void draw(int x, int y, int cellSize);
+
+    // set the key you have to hold for saving, default is OF_KEY_CONTROL
+    void setModeKey(int key);
+
     //-
+
+#pragma mark - DIFFERENT DATA TYPES METHODS
 
     // A. ofParameterGroup
 
@@ -88,34 +114,9 @@ public:
         void add( DataGrid & grid, initializer_list<int> keysList );
 #endif
 
-    // set the key you have to hold for saving, default is OF_KEY_CONTROL
-    void setModeKey(int key);
+    //--
 
-    // draw some info, when the gui is drawn you can also click on the button to change / save presets
-    void draw();
-    void draw(int x, int y, int cellSize);
-
-    //-
-
-    // DELAYED LOADING
-
-    // if you set it to true the preset will be loaded only when you call (false is the default behavior)
-    void setDelayedLoading(bool active);
-    // make preset change effective when setDelayedLoading() is set to true
-    void delayedUpdate();
-    // if setDelayedLoading() is set to true stages a load action
-    void delayedLoad(int presetIndex, int guiIndex = 0);
-    void delayedLoad(int presetIndex, string guiName);
-
-    // switch on or off the control with the keys
-    void toggleKeysControl(bool active);
-
-    //set keys active
-    void set_ENABLE_Keys(bool active)
-    {
-        bKeys = active;
-        ENABLE_shortcuts = active;
-    }
+#pragma mark - CALLBACKS HELPERS
 
     // TODO: easy listener temp solution for ofxSEQ integration
     ofParameter<bool> DONE_load;
@@ -137,25 +138,23 @@ public:
         return isDone;
     }
 
-    bool bMouseOver_Changed = false;
+    //--
 
-    bool isMouseOver_Changed()
-    {
-        if (bMouseOver_Changed)
-        {
-            //bMouseOver_Changed = false;//reset
-            return true;
-        }
-    }
-
-    bool getIsMouseOver()
-    {
-        return gui_MouseOver;
-    }
-
-    //-
+#pragma mark - API
 
     // API
+
+    //set keys active
+    void set_ENABLE_Keys(bool active)
+    {
+        bKeys = active;
+        ENABLE_shortcuts = active;
+    }
+
+    int getCurrentPreset()
+    {
+        return PRESET_selected;
+    }
 
     void load_Next()
     {
@@ -174,6 +173,43 @@ public:
             PRESET_selected = 1;
         }
     }
+
+    //--
+
+    //BUG: trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
+    void refresh()
+    {
+        preset_filesRefresh();
+
+        //-
+
+        ofLogNotice("ofxPresetsManager") << "refresh";
+        selected_PRE = -1;
+        PRESET_selected = PRESET_selected;
+        ofLogNotice("ofxPresetsManager") << "PRESET_selected:" << PRESET_selected;
+    }
+
+
+    //load presets from preset folder, not from favorites presets folders
+    void preset_load(string name);
+    void preset_save(string name);
+    void preset_filesRefresh();
+
+    void setHelpVisible(bool b)
+    {
+        debugClicker = b;
+    }
+
+    //-
+
+    // API for CONTROL
+    void loadPreset(int p);
+    //void getNumPresets();
+    //void getNumPresets();
+
+    //-
+
+#pragma mark - GUI
 
     //gui
     void set_GUI_Position(int x, int y)
@@ -205,37 +241,7 @@ public:
 
     //-
 
-    void set_pathKit_Folder(string folder);
-    void set_path_PresetsFolder(string folder);
-
-    //BUG: trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
-    void refresh()
-    {
-        preset_filesRefresh();
-
-        //-
-
-        ofLogNotice("ofxPresetsManager") << "refresh";
-        selected_PRE = -1;
-        PRESET_selected = PRESET_selected;
-        ofLogNotice("ofxPresetsManager") << "PRESET_selected:" << PRESET_selected;
-    }
-
-    //--
-
-    //load presets from preset folder, not from favorites presets folders
-    void preset_load(string name);
-    void preset_save(string name);
-    void preset_filesRefresh();
-
-    bool debugClicker = true;
-
-    void setHelpVisible(bool b)
-    {
-        debugClicker = b;
-    }
-
-    //-
+#pragma mark - SETTINGS
 
     void set_PathControl_Settings(string str)
     {
@@ -243,13 +249,51 @@ public:
         pathControl = str;
     }
 
-    // API for CONTROL
-    void loadPreset(int p);
-    //void getNumPresets();
-    //void getNumPresets();
+    void set_pathKit_Folder(string folder);
+    void set_path_PresetsFolder(string folder);
 
+    //---
+
+
+#pragma mark - PRIVATE
 
 private:
+
+    bool isMouseOver_Changed()
+    {
+        if (bMouseOver_Changed)
+        {
+            //bMouseOver_Changed = false;//reset
+            return true;
+        }
+    }
+
+    bool getIsMouseOver()
+    {
+        return gui_MouseOver;
+    }
+
+    ofParameter<int> PRESET_selected;//from 1 to 8 i.e.
+
+    bool bMouseOver_Changed = false;
+    bool debugClicker = true;
+
+    //-
+
+    // DELAYED LOADING
+
+    // if you set it to true the preset will be loaded only when you call (false is the default behavior)
+    void setDelayedLoading(bool active);
+    // make preset change effective when setDelayedLoading() is set to true
+    void delayedUpdate();
+    // if setDelayedLoading() is set to true stages a load action
+    void delayedLoad(int presetIndex, int guiIndex = 0);
+    void delayedLoad(int presetIndex, string guiName);
+
+    // switch on or off the control with the keys
+    void toggleKeysControl(bool active);
+
+    //-
 
     string path_KitFolder = "assets/groups/kit_1";//default kit folder for live/favorites presets
     string path_PresetsFolder = "assets/groups/presets";//default presets folder

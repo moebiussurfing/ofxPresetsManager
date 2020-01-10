@@ -94,6 +94,16 @@ ofxPresetsManager::ofxPresetsManager()
 //--------------------------------------------------------------
 void ofxPresetsManager::setup()
 {
+#ifdef TIME_SAMPLE_OFX_FONTSTASH2
+    //TIME_SAMPLE_SET_FRAMERATE(fps); //specify a target framerate
+    TIME_SAMPLE_ENABLE();
+    TIME_SAMPLE_SET_AVERAGE_RATE(0.1);
+    TIME_SAMPLE_SET_DRAW_LOCATION(TIME_SAMPLE_DRAW_LOC_BOTTOM_LEFT);
+    TIME_SAMPLE_SET_PRECISION(4);
+
+    TIME_SAMPLE_GET_INSTANCE()->setEnabled(true);
+#endif
+
     //ofSetLogLevel("ofxPresetsManager", OF_LOG_VERBOSE);
 
     //selected_PRE = -1;
@@ -364,6 +374,8 @@ void ofxPresetsManager::add( DataGrid & grid, initializer_list<int> keysList ) {
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, int guiIndex)
 {
+    TS_START("save1");
+
     if (guiIndex >= 0 && guiIndex < (int) groups.size())
     {
         ofLogNotice("ofxPresetsManager") << "DONE_save";
@@ -377,11 +389,14 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
         ofSerialize(settings, groups[guiIndex]);
         settings.save(path_KitFolder + "/" + n);
     }
+
+    TS_STOP("save1");
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, string guiName)
 {
+    TS_START(897"save2");
     int guiIndex = getGuiIndex(guiName);
 
     if (guiIndex >= 0 && guiIndex < (int) groups.size())
@@ -397,48 +412,57 @@ void ofxPresetsManager::save(int presetIndex, string guiName)
         ofSerialize(settings, groups[guiIndex]);
         settings.save(path_KitFolder + "/" + n);
     }
+TS_STOP("save2");
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, int guiIndex)
 {
-    if (guiIndex >= 0 && guiIndex < (int) groups.size())
-    {
-        string str = presetName(groups[guiIndex].getName(), presetIndex);
+    TS_START("load1");
 
-        ofXml settings;
-        settings.load(path_KitFolder + "/" + str);
-        ofDeserialize(settings, groups[guiIndex]);
+        if (guiIndex >= 0 && guiIndex < (int) groups.size())
+        {
+            string str = presetName(groups[guiIndex].getName(), presetIndex);
 
-        lastIndices[guiIndex] = presetIndex;
+            ofXml settings;
+            settings.load(path_KitFolder + "/" + str);
+            ofDeserialize(settings, groups[guiIndex]);
 
-        //-
+            lastIndices[guiIndex] = presetIndex;
 
-        ofLogNotice("ofxPresetsManager") << "DONE_load";
-        DONE_load = true;//callback
-    }
+            //-
+
+            ofLogNotice("ofxPresetsManager") << "DONE_load";
+            DONE_load = true;//callback
+        }
+
+    TS_STOP("load1");
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, string guiName)
 {
-    int guiIndex = getGuiIndex(guiName);
+    TS_START("load2");
 
-    if (guiIndex >= 0 && guiIndex < (int) groups.size())
-    {
-        string n = presetName(guiName, presetIndex);
+        int guiIndex = getGuiIndex(guiName);
 
-        ofXml settings;
-        settings.load(path_KitFolder + "/" + n);
-        ofDeserialize(settings, groups[guiIndex]);
+        if (guiIndex >= 0 && guiIndex < (int) groups.size())
+        {
+            string n = presetName(guiName, presetIndex);
 
-        lastIndices[guiIndex] = presetIndex;
+            ofXml settings;
+            settings.load(path_KitFolder + "/" + n);
+            ofDeserialize(settings, groups[guiIndex]);
 
-        //-
+            lastIndices[guiIndex] = presetIndex;
 
-        ofLogNotice("ofxPresetsManager") << "DONE_load";
-        DONE_load = true;
-    }
+            //-
+
+            ofLogNotice("ofxPresetsManager") << "DONE_load";
+            DONE_load = true;
+        }
+
+    TS_STOP("load2");
 }
 
 #endif
@@ -450,6 +474,8 @@ void ofxPresetsManager::load(int presetIndex, string guiName)
 //--------------------------------------------------------------
 void ofxPresetsManager::save( int presetIndex, int guiIndex )
 {
+    //TS_START("save");
+
     if(guiIndex>=0 && guiIndex<(int)grids.size())
     {
         ofLogNotice("ofxPresetsManager") << "DONE_save";
@@ -467,10 +493,16 @@ void ofxPresetsManager::save( int presetIndex, int guiIndex )
 
         grids[guiIndex]->save_JSON(path_KitFolder + "/" + n);
     }
+
+    //TS_STOP("save");
 }
+
 
 //--------------------------------------------------------------
 void ofxPresetsManager::save( int presetIndex, string guiName ) {
+
+    //TS_START("save2");
+
     int guiIndex = getGuiIndex(guiName);
 
     if(guiIndex>=0 && guiIndex<(int)grids.size())
@@ -489,6 +521,8 @@ void ofxPresetsManager::save( int presetIndex, string guiName ) {
 
         grids[guiIndex]->save_JSON( path_KitFolder + "/" + n );
     }
+
+    //TS_STOP("save2");
 }
 
 //--------------------------------------------------------------
@@ -779,6 +813,7 @@ void ofxPresetsManager::removeKeysListeners()
     ofRemoveListener(ofEvents().keyPressed, this, &ofxPresetsManager::keyPressed);
     ofRemoveListener(ofEvents().keyReleased, this, &ofxPresetsManager::keyReleased);
 }
+
 //-----------------------------------------------------
 void ofxPresetsManager::mousePressed(int x, int y)
 {
@@ -831,7 +866,8 @@ void ofxPresetsManager::mousePressed(int x, int y)
             // 2. last button (save button)
         else if (xIndex == presets[yIndex])
         {
-            ofLogNotice("ofxPresetsManager") << "saveButton: ( lastIndices[yIndex], yIndex ): " << lastIndices[yIndex]
+            ofLogNotice("ofxPresetsManager") << "saveButton: ( lastIndices[yIndex], yIndex ): "
+                                             << lastIndices[yIndex]
                                              << ", " << yIndex;
 
             // save
