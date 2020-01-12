@@ -396,7 +396,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, string guiName)
 {
-    TS_START(897"save2");
+    TS_START("save2");
     int guiIndex = getGuiIndex(guiName);
 
     if (guiIndex >= 0 && guiIndex < (int) groups.size())
