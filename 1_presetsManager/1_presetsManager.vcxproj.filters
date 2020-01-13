@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\ofApp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ofApp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\BaseEngine.cpp">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\DefaultTheme.cpp">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\EngineGLFW.cpp">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\EngineOpenGLES.cpp">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\EngineVk.cpp">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\Gui.cpp">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\Helpers.cpp">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\ofxImGuiLoggerChannel.cpp">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui.cpp">
+      <Filter>addons\ofxImGui\libs\imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui_demo.cpp">
+      <Filter>addons\ofxImGui\libs\imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui_draw.cpp">
+      <Filter>addons\ofxImGui\libs\imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui_widgets.cpp">
+      <Filter>addons\ofxImGui\libs\imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxPresetsManager\src\DataGrid.cpp">
+      <Filter>addons\ofxPresetsManager\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxPresetsManager\src\ofxPresetsManager.cpp">
+      <Filter>addons\ofxPresetsManager\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxTimeMeasurements\src\ofxTimeMeasurements.cpp">
+      <Filter>addons\ofxTimeMeasurements\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxBaseGui.cpp">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxButton.cpp">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxColorPicker.cpp">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxGuiGroup.cpp">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxInputField.cpp">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxLabel.cpp">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxPanel.cpp">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxSlider.cpp">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxSliderGroup.cpp">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ofxGui\src\ofxToggle.cpp">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{d8376475-7454-4a24-b08a-aac121d3ad6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons">
+      <UniqueIdentifier>{71834F65-F3A9-211E-73B8-DC85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxImGui">
+      <UniqueIdentifier>{0CD6A942-69FF-3BAA-3AF1-ADD1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxImGui\src">
+      <UniqueIdentifier>{18028A43-13D3-1DD5-471A-BE87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxImGui\libs">
+      <UniqueIdentifier>{BE2F957E-7DA7-055C-DC70-3070}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxImGui\libs\imgui">
+      <UniqueIdentifier>{296AD70B-2F2E-1462-9E7C-6030}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxImGui\libs\imgui\src">
+      <UniqueIdentifier>{5962BF19-1468-EB82-01C0-2E72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJsonUtils">
+      <UniqueIdentifier>{D87C9337-DC53-3301-56D3-17E0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJsonUtils\src">
+      <UniqueIdentifier>{4E4FDD8E-7DF2-C36E-BDD4-3EA8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJsonUtils\libs">
+      <UniqueIdentifier>{1449B1FD-3661-F798-6AD2-ECB0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJsonUtils\libs\bbb">
+      <UniqueIdentifier>{651CEC9C-B019-2021-0EFD-8B58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJsonUtils\libs\bbb\json">
+      <UniqueIdentifier>{91B66E03-8C4D-AFD0-B3E2-B6F4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJsonUtils\libs\bbb\json\libs">
+      <UniqueIdentifier>{CC80A0BD-2EE1-EA4B-8F57-795F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJsonUtils\libs\bbb\json\libs\nlohmann_json">
+      <UniqueIdentifier>{EC344530-A2EC-4D39-A6F1-2C2C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJsonUtils\libs\bbb\json\libs\nlohmann_json\src">
+      <UniqueIdentifier>{DE191EA2-EC9B-5E6F-E122-90B8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJsonUtils\libs\bbb\json\utils">
+      <UniqueIdentifier>{AB0E8F92-9D39-469D-49AB-ACD7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxPresetsManager">
+      <UniqueIdentifier>{BB2EF8F6-0238-A345-71F9-E81D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxPresetsManager\src">
+      <UniqueIdentifier>{6D4036D4-3974-1DF4-4960-DEB0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxTimeMeasurements">
+      <UniqueIdentifier>{751cfcb4-4d27-494e-83ca-58b74975f3dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxTimeMeasurements\src">
+      <UniqueIdentifier>{1ad40017-d2b5-44b7-8ed9-a6cbd6aa320f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxGui">
+      <UniqueIdentifier>{2a6ecd18-034f-43f3-bcd6-e2f03cb4e54b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxGui\src">
+      <UniqueIdentifier>{53c2124e-df30-4aa7-ab84-635cc9aca949}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\ofApp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ofApp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\src\BaseEngine.h">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\src\BaseTheme.h">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\src\DefaultTheme.h">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\src\EngineGLFW.h">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\src\EngineOpenGLES.h">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\src\EngineVk.h">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\src\Gui.h">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\src\Helpers.h">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\src\imconfig.h">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\src\ofxImGui.h">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\src\ofxImGuiLoggerChannel.h">
+      <Filter>addons\ofxImGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui.h">
+      <Filter>addons\ofxImGui\libs\imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui_internal.h">
+      <Filter>addons\ofxImGui\libs\imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\libs\imgui\src\imstb_rectpack.h">
+      <Filter>addons\ofxImGui\libs\imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\libs\imgui\src\imstb_textedit.h">
+      <Filter>addons\ofxImGui\libs\imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxImGui\libs\imgui\src\imstb_truetype.h">
+      <Filter>addons\ofxImGui\libs\imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\src\ofJson_compatible.h">
+      <Filter>addons\ofxJsonUtils\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\src\ofxJsonConvertFunctions.h">
+      <Filter>addons\ofxJsonUtils\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\src\ofxJsonify.h">
+      <Filter>addons\ofxJsonUtils\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\src\ofxJsonParseFunctions.h">
+      <Filter>addons\ofxJsonUtils\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\src\ofxJsonUtils.h">
+      <Filter>addons\ofxJsonUtils\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\src\ofxJsonUtilsCommon.h">
+      <Filter>addons\ofxJsonUtils\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\src\ofxJsonUtilsSetting.h">
+      <Filter>addons\ofxJsonUtils\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\src\ofxJsonUtilsTypeTraits.h">
+      <Filter>addons\ofxJsonUtils\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\libs\bbb\bbb_json.hpp">
+      <Filter>addons\ofxJsonUtils\libs\bbb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\libs\bbb\json\libs\nlohmann_json\src\json.hpp">
+      <Filter>addons\ofxJsonUtils\libs\bbb\json\libs\nlohmann_json\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\libs\bbb\json\utils\common.hpp">
+      <Filter>addons\ofxJsonUtils\libs\bbb\json\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\libs\bbb\json\utils\constants.hpp">
+      <Filter>addons\ofxJsonUtils\libs\bbb\json\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\libs\bbb\json\utils\convert.hpp">
+      <Filter>addons\ofxJsonUtils\libs\bbb\json\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\libs\bbb\json\utils\parse.hpp">
+      <Filter>addons\ofxJsonUtils\libs\bbb\json\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\libs\bbb\json\utils\type_traits.hpp">
+      <Filter>addons\ofxJsonUtils\libs\bbb\json\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\libs\bbb\json\utils\utility.hpp">
+      <Filter>addons\ofxJsonUtils\libs\bbb\json\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJsonUtils\libs\bbb\json\utils.hpp">
+      <Filter>addons\ofxJsonUtils\libs\bbb\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxPresetsManager\src\DataGrid.h">
+      <Filter>addons\ofxPresetsManager\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxPresetsManager\src\ofxPresetsManager.h">
+      <Filter>addons\ofxPresetsManager\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxTimeMeasurements\src\GL_Measurement.h">
+      <Filter>addons\ofxTimeMeasurements\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxTimeMeasurements\src\ofxTimeMeasurements.h">
+      <Filter>addons\ofxTimeMeasurements\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxTimeMeasurements\src\ofxTimeMeasurementsMacros.h">
+      <Filter>addons\ofxTimeMeasurements\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxTimeMeasurements\src\ofxTimeMeasurementsScoped.h">
+      <Filter>addons\ofxTimeMeasurements\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxBaseGui.h">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxButton.h">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxColorPicker.h">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxGui.h">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxGuiGroup.h">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxGuiUtils.h">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxInputField.h">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxLabel.h">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxPanel.h">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxSlider.h">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxSliderGroup.h">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ofxGui\src\ofxToggle.h">
+      <Filter>addons\ofxGui\src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="icon.rc" />
+  </ItemGroup>
+</Project>

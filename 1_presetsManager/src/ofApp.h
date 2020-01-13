@@ -4,38 +4,14 @@
 
 #include "ofxPresetsManager.h"
 //#include "ofxImGui.h"
-
-//-
-
-// DEFINE MODE:
-
-// un-comment one of the two modes only! can't use both together:
-// NOTE: must do the same into the ofxPresetsManager.h
-
-// A. ofParameterGroup
-
-#define USE_OF_PARAMETER_GROUP
-
-//-
-
-// B. custom DataGrid class
-
-//#define USE_CUSTOM_DATAGRID
-
-//-
-
-//#ifdef USE_CUSTOM_DATAGRID
-//#include "DataGrid.h"
-//#endif
-
-//-
-
-//--
+#include "ofxGui.h"
 
 class ofApp : public ofBaseApp
 {
 
 public:
+
+	ofxPanel gui;
 
     //ofxImGui::Gui guiApp;
     //bool imGui();
@@ -66,11 +42,10 @@ public:
     ofxPresetsManager manager;
     string pathKit = "assets/groups/kit_1";
 
-    //-
+    //--
 
     // group
 
-#ifdef USE_OF_PARAMETER_GROUP
     ofParameterGroup params;
     ofParameter<int> numSquares;
     ofParameter<int> separation;
@@ -84,20 +59,10 @@ public:
     ofParameter<float> myFloat;
     ofParameter<float> myFloat2;
     ofParameterGroup paramsFull;
-#endif
 
-    //-
-
-    // custom class
-
-#ifdef USE_CUSTOM_DATAGRID
-    DataGrid myDataGrid;
-#endif
-
-    //--
+	//-
 
     // TODO: easy listener temp solution..
     void Changed_DONE_load(bool &DONE_load);
     void Changed_DONE_save(bool &DONE_save);
-
 };

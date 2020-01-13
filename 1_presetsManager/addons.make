@@ -1,3 +1,5 @@
+ofxGui
 ofxImGui
 ofxJsonUtils
 ofxPresetsManager
+ofxTimeMeasurements

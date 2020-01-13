@@ -4,15 +4,20 @@
 // changes and customized by moebiussurfing:
 //
 // TODO:
-// ++ each 8 presets can be a selection of best presets to trig handly and fast
-// ++ add browser from colorManager
-// + could make tween when changing params
-// + save full kit of presets to avoid blocking main thread when switching presets
-// because json loadings
-// + use pointers bewteen classes (ofxSequencer) to share the data struct
-// from DataGrid class,
-// ofxSEQ, or wherever is used ... almost done. but maybe should add listeners
-// re players when preset are loaded/saved..
+
+//+++ add mode without files, vectors
+//+++ add auto trig mode or not
+//++ improve callback system ?
+
+//++ each 8 presets can be a selection of best presets to trig handly and fast
+//++ add browser from colorManager
+//+ could make tween when changing params
+//+ save full kit of presets to avoid blocking main thread when switching presets
+//because json loadings
+//+ use pointers bewween classes (ofxSequencer) to share the data struct
+//from DataGrid class,
+//ofxSEQ, or wherever is used ... almost done. but maybe should add listeners
+//re players when preset are loaded/saved..
 
 #pragma once
 
@@ -69,6 +74,10 @@ class ofxPresetsManager
 public:
 
     //-
+
+    void kit_Build();
+    void kit_Freeze();
+
 
 #pragma mark - OF
 
@@ -252,8 +261,20 @@ public:
     void set_pathKit_Folder(string folder);
     void set_path_PresetsFolder(string folder);
 
-    //---
+    //--
 
+	ofParameter<int> PRESET_selected;//from 1 to 8 i.e.
+
+	void setAutoLoad(bool b)
+	{
+		autoLoad = b;
+	}
+	void setAutoSave(bool b)
+	{
+		autoSave= b;
+	}
+
+	//--
 
 #pragma mark - PRIVATE
 
@@ -271,9 +292,7 @@ private:
     bool getIsMouseOver()
     {
         return gui_MouseOver;
-    }
-
-    ofParameter<int> PRESET_selected;//from 1 to 8 i.e.
+    }	  
 
     bool bMouseOver_Changed = false;
     bool debugClicker = true;

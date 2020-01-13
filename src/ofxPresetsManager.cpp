@@ -6,6 +6,33 @@
 
 #include "ofxPresetsManager.h"
 
+//--------------------------------------------------------------
+void ofxPresetsManager::kit_Build()
+{
+    int i = 0;
+    cout<<"groups:"<<groups.size()<<endl;
+    for (auto g:groups)
+    {
+        i++;
+        ofJson j;
+        ofSerialize(j, g);
+        string str = "TEST/group" + ofToString(i) + ".json";
+        ofSavePrettyJson(str, j);
+    }
+
+    //ofJson a;
+    //a["data1"] = "mydata1";
+    //
+    //ofJson b;
+    //b["data1"] = "mydata1b";
+    //
+    //ofJson data;
+    //data.push_back(a);
+    //data.push_back(b);
+    //
+    //std::cout << data.dump(4) << std::endl;
+}
+
 
 #pragma mark - OF
 
@@ -52,7 +79,7 @@ ofxPresetsManager::ofxPresetsManager()
 
     //-
 
-    myTTF = "fonts/PragmataProR_0822.ttf";
+    myTTF = "assets/fonts/PragmataProR_0822.ttf";
     sizeTTF = 8;
     myFont.load(myTTF, sizeTTF, true, true);
 
@@ -94,13 +121,13 @@ ofxPresetsManager::ofxPresetsManager()
 //--------------------------------------------------------------
 void ofxPresetsManager::setup()
 {
+
 #ifdef TIME_SAMPLE_OFX_FONTSTASH2
     //TIME_SAMPLE_SET_FRAMERATE(fps); //specify a target framerate
     TIME_SAMPLE_ENABLE();
     TIME_SAMPLE_SET_AVERAGE_RATE(0.1);
     TIME_SAMPLE_SET_DRAW_LOCATION(TIME_SAMPLE_DRAW_LOC_BOTTOM_LEFT);
     TIME_SAMPLE_SET_PRECISION(4);
-
     TIME_SAMPLE_GET_INSTANCE()->setEnabled(true);
 #endif
 
@@ -224,6 +251,9 @@ ofxPresetsManager::~ofxPresetsManager()
 
     removeKeysListeners();
     ofRemoveListener(params.parameterChangedE(), this, &ofxPresetsManager::Changed_Params);
+
+    //TODO:
+    kit_Build();
 }
 
 //-
@@ -375,20 +405,25 @@ void ofxPresetsManager::add( DataGrid & grid, initializer_list<int> keysList ) {
 void ofxPresetsManager::save(int presetIndex, int guiIndex)
 {
     TS_START("save1");
+	//TODO:
+	//Windows
+	if (presetIndex > 0)
+	{
 
-    if (guiIndex >= 0 && guiIndex < (int) groups.size())
-    {
-        ofLogNotice("ofxPresetsManager") << "DONE_save";
-        DONE_save = true;
+		if (guiIndex >= 0 && guiIndex < (int)groups.size())
+		{
+			ofLogNotice("ofxPresetsManager") << "DONE_save";
+			DONE_save = true;
 
-        //-
+			//-
 
-        std::string n = presetName(groups[guiIndex].getName(), presetIndex);
+			std::string n = presetName(groups[guiIndex].getName(), presetIndex);
 
-        ofXml settings;
-        ofSerialize(settings, groups[guiIndex]);
-        settings.save(path_KitFolder + "/" + n);
-    }
+			ofXml settings;
+			ofSerialize(settings, groups[guiIndex]);
+			settings.save(path_KitFolder + "/" + n);
+		}
+	}
 
     TS_STOP("save1");
 }
@@ -397,22 +432,22 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 void ofxPresetsManager::save(int presetIndex, string guiName)
 {
     TS_START("save2");
-    int guiIndex = getGuiIndex(guiName);
+        int guiIndex = getGuiIndex(guiName);
 
-    if (guiIndex >= 0 && guiIndex < (int) groups.size())
-    {
-        ofLogNotice("ofxPresetsManager") << "DONE_save";
-        DONE_save = true;
+        if (guiIndex >= 0 && guiIndex < (int) groups.size())
+        {
+            ofLogNotice("ofxPresetsManager") << "DONE_save";
+            DONE_save = true;
 
-        //-
+            //-
 
-        string n = presetName(guiName, presetIndex);
+            string n = presetName(guiName, presetIndex);
 
-        ofXml settings;
-        ofSerialize(settings, groups[guiIndex]);
-        settings.save(path_KitFolder + "/" + n);
-    }
-TS_STOP("save2");
+            ofXml settings;
+            ofSerialize(settings, groups[guiIndex]);
+            settings.save(path_KitFolder + "/" + n);
+        }
+    TS_STOP("save2");
 }
 
 //--------------------------------------------------------------
@@ -1075,8 +1110,19 @@ void ofxPresetsManager::preset_filesRefresh()
 void ofxPresetsManager::loadPreset(int p)
 {
     ofLogNotice("ofxPresetsManager") << "> API > LOAD PRESET " << ofToString(p);
-    if (PRESET_selected > 0 && PRESET_selected <= num_presets)
-        PRESET_selected = p;
+
+	//TODO:
+	//Windows
+
+	if (false)
+	{
+		if (PRESET_selected > 0 && PRESET_selected <= num_presets)
+			PRESET_selected = p;
+	}
+	else
+	{
+		cout << "IGNORE" << endl;
+	}
 }
 
 //--------------------------------------------------------------
@@ -1239,33 +1285,46 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 
         //-
 
-        if (autoSave)
-        {
-            DONE_save = true;//callback
-            save(selected_PRE - 1, 0);
-        }
+		//TODO:
+		//Windows
+		if (selected_PRE > 0 && PRESET_selected>=1)
+		{
 
-        //-
+			if (autoSave)
+			{
+				DONE_save = true;//callback
+				save(selected_PRE - 1, 0);
+			}
 
-        selected_PRE = PRESET_selected;
-        int xIndex = PRESET_selected - 1;
-        int yIndex = 0;//this should handle when using multiple kits together. yIndex = ?
+			//-
 
-        //-
+			selected_PRE = PRESET_selected;
+			int xIndex = PRESET_selected - 1;
+			int yIndex = 0;//this should handle when using multiple kits together. yIndex = ?
 
-        if (autoLoad)
-        {
-            load(xIndex, yIndex);
-            ofLogNotice("ofxPresetsManager") << "load( xIndex, yIndex): " << xIndex << ", " << yIndex;
+			//-
 
-            DONE_load = true;//callback
-        }
-        else
-        {
-            lastIndices[yIndex] = xIndex;//?this is to move clicker selector
-            ofLogNotice("ofxPresetsManager") << "lastIndices[yIndex]: " << xIndex;
-            ofLogNotice("ofxPresetsManager") << "autoLoad: " << autoLoad;
-        }
+			if (autoLoad)
+			{
+				load(xIndex, yIndex);
+				ofLogNotice("ofxPresetsManager") << "load( xIndex, yIndex): " << xIndex << ", " << yIndex;
+
+				DONE_load = true;//callback
+			}
+			else
+			{
+				lastIndices[yIndex] = xIndex;//?this is to move clicker selector
+				ofLogNotice("ofxPresetsManager") << "lastIndices[yIndex]: " << xIndex;
+				ofLogNotice("ofxPresetsManager") << "autoLoad: " << autoLoad;
+			}
+
+		}
+		//TODO:
+		//Windows
+		else
+		{
+			cout << "IGNORE" << endl;
+		}
         //}
     }
 }
