@@ -64,6 +64,8 @@ public:
 
 	ofxPanel guiControl;
 
+	ofParameter<bool> MODE_MemoryLive;
+
 	vector<ofParameterGroup> groupsMem;
 	void loadAllKitToMemory();
 
@@ -432,7 +434,9 @@ private:
     //--
 
     //autosave
-    bool bAutosave = true;
+	ofParameter<bool> bAutosave;
+    //bool bAutosave = true;
+
     uint64_t timerLast_Autosave = 0;
     int timeToAutosave = 5000;
 

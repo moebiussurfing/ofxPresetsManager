@@ -67,7 +67,9 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//-
 
-	myTTF = "assets/fonts/PragmataProR_0822.ttf";
+	//gui font
+	myTTF = "assets/fonts/overpass-mono-bold.otf";
+	//myTTF = "assets/fonts/PragmataProR_0822.ttf";
 	sizeTTF = 8;
 	myFont.load(myTTF, sizeTTF, true, true);
 
@@ -77,8 +79,10 @@ ofxPresetsManager::ofxPresetsManager()
 
 	PRESET_selected.set("PRESETS", 1, 1, num_presets);
 	bSave.set("SAVE", false);
+	MODE_MemoryLive.set("MODE MEMORY", false);
 	autoLoad.set("AUTO LOAD", false);
 	autoSave.set("AUTO SAVE", false);
+	bAutosave.set("TIMER AUTO SAVE", false);
 	bCloneRight.set("CLONE >", false);
 	SHOW_menu.set("SHOW MENU", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", false);
@@ -87,24 +91,29 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Favorites.setName("FAVORITES");
 	params_Favorites.add(PRESET_selected);
 	params_Favorites.add(bSave);
+	params_Favorites.add(MODE_MemoryLive);
+
 	params_Options.setName("OPTIONS");
 	params_Options.add(autoLoad);
 	params_Options.add(autoSave);
+	params_Options.add(bAutosave);
+
 	params_Gui.setName("GUI");
 	params_Gui.add(SHOW_ClickPanel);
 	params_Gui.add(SHOW_menu);
 	params_Gui.add(ENABLE_shortcuts);
+
 	params_Tools.setName("TOOLS");
 	params_Tools.add(bCloneRight);
 
 	//nested params for callbacks and storage settings
+	params.setName("ofxPresetsManager");
 	params.add(params_Favorites);
 	params.add(params_Options);
 	params.add(params_Gui);
 	params.add(params_Tools);
 
 	ofAddListener(params.parameterChangedE(), this, &ofxPresetsManager::Changed_Params);
-
 }
 
 //--------------------------------------------------------------
@@ -121,13 +130,13 @@ void ofxPresetsManager::loadAllKitToMemory()
 		folder = "/"; //without subfolder. must ends with "/"
 		string prefixName = "myGroupParameters";
 		string str1;
-	
+
 		str1 = (folder + prefixName + "_preset_" + ofToString(i) + ".xml");
 		string str = path_KitFolder + str1;
-		
+
 		ofXml settings;
 		settings.load(str);
-	
+
 		ofParameterGroup g;
 		ofDeserialize(settings, g);
 		groupsMem.push_back(g);
@@ -154,7 +163,6 @@ void ofxPresetsManager::loadAllKitToMemory()
 
 		ofLogNotice("ofxPresetsManager") << i << ": " << ofToString(str);
 	}
-
 }
 
 //--------------------------------------------------------------
@@ -192,6 +200,16 @@ void ofxPresetsManager::setup()
 	guiControl.setup("CONTROL");
 	guiControl.add(params);
 	guiControl.setPosition(ofGetWidth() - 210, 10);
+	
+	//theme
+	string str = "assets/fonts/overpass-mono-bold.otf";
+	ofxGuiSetFont(str, 9);
+	ofxGuiSetDefaultHeight(20);
+	ofxGuiSetBorderColor(32);
+	ofxGuiSetFillColor(ofColor(48));
+	ofxGuiSetTextColor(ofColor::white);
+	ofxGuiSetHeaderColor(ofColor(24));
+	//ofxGuiSetBackgroundColor(ofColor::black);
 
 	//-
 

@@ -20,7 +20,7 @@ void ofApp::setup()
     params.add(separation.set("separation", 5, 1, 100));
     params.add(squareSide.set("square side", 50, 5, 200));
 
-	gui.setup("gui");
+	gui.setup("ofApp::gui");
 	gui.add(params);
 	gui.setPosition(400, 50);
 
@@ -58,14 +58,17 @@ void ofApp::setup()
 
     // STARUP SETTINGS
 
+	//imGui
     manager.set_GUI_Visible(true);
     manager.set_GUI_Position(10, 30);
-    manager.set_GUI_Size(100, 300);
-    manager.set_CLICKER_Position(10, ofGetHeight() - 120, 40);
+    manager.set_GUI_Size(250, 300);
+
+	//user clicker
+    manager.set_CLICKER_Position(250, ofGetHeight() - 75, 40);
     manager.set_CLICKER_Visible(true);
 
-	manager.setAutoLoad(true);
-	manager.setAutoSave(true);
+	//manager.setAutoLoad(true);
+	//manager.setAutoSave(true);
 
     //--
 }
@@ -119,7 +122,7 @@ void ofApp::draw()
 
     string str;
     int x = 20;
-    int y = 500;
+    int y = 20;
     int pad = 20;
     int i = 0;
     {
