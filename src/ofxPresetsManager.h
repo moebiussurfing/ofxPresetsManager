@@ -22,7 +22,9 @@
 #pragma once
 
 #include "ofMain.h"
+
 #include "ofxImGui.h"
+#include "ofxGui.h"
 
 //TIMEMEASUREMENTS
 #define TIME_SAMPLE_OFX_FONTSTASH2 //comment this line to remove ofxTimeMeasurements dependency
@@ -44,24 +46,6 @@
 
 #pragma mark - DEFINE DATA TYPES
 
-// DEFINE MODE:
-
-// un-comment one of the two modes only! can't use both together:
-
-// A. use ofParameterGroup
-#define USE_OF_PARAMETER_GROUP
-
-//-
-
-// B. use custom DataGrid class
-//#define USE_CUSTOM_DATAGRID
-
-//-------------------------------
-
-#ifdef USE_CUSTOM_DATAGRID
-#include "DataGrid.h"
-#endif
-
 //-
 
 #define NUM_OF_PRESETS 8
@@ -73,7 +57,15 @@ class ofxPresetsManager
 
 public:
 
+	void load_ControlSettings();
+	void save_ControlSettings();
+
     //-
+
+	ofxPanel guiControl;
+
+	vector<ofParameterGroup> groupsMem;
+	void loadAllKitToMemory();
 
     void kit_Build();
     void kit_Freeze();
@@ -98,30 +90,10 @@ public:
 
 #pragma mark - DIFFERENT DATA TYPES METHODS
 
-    // A. ofParameterGroup
-
-#ifdef USE_OF_PARAMETER_GROUP
     // add a gui for preset saving
     void add(ofParameterGroup params, int numPresets = 8);
     // adds and activate key switch
     void add(ofParameterGroup params, initializer_list<int> keysList);
-#endif
-
-    //-
-
-    // B. custom DataGrid class
-
-#ifdef USE_CUSTOM_DATAGRID
-    //    // add a gui for preset saving
-    //    void add( DataGrid grid, int numPresets=NUM_OF_PRESETS );
-    //    // adds and activate key switch
-    //    void add( DataGrid grid, initializer_list<int> keysList );
-
-        // add a gui for preset saving
-        void add( DataGrid & grid, int numPresets=8 );
-        // adds and activate key switch
-        void add( DataGrid & grid, initializer_list<int> keysList );
-#endif
 
     //--
 
@@ -382,18 +354,9 @@ private:
     // DATA
 
     // A. ofParameterGroup
-#ifdef USE_OF_PARAMETER_GROUP
     vector<ofParameterGroup> groups;
-#endif
 
     //ofParameterGroup params_gui;
-
-    //-
-
-    // B. custom DataGrid class
-#ifdef USE_CUSTOM_DATAGRID
-    vector<DataGrid*> grids;
-#endif
 
     //-
 
@@ -435,9 +398,6 @@ private:
 
     //control panel settings/states
     string pathControl = "assets/settings/PRESET_MANAGER_control.xml";
-    void load_ControlSettings();
-    void save_ControlSettings();
-
 
     void Changed_Params(ofAbstractParameter &e);
 

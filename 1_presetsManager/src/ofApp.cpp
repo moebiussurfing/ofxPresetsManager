@@ -37,12 +37,14 @@ void ofApp::setup()
     manager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
     manager.DONE_load.addListener(this, &ofApp::Changed_DONE_load);
 
+	manager.setup();
+
     //-
 
     // STARTUP INIT
 
 //    //this loads selected preset number and gui state
-//    manager.load_ControlSettings();
+    //manager.load_ControlSettings();
 
     //-
 
@@ -51,6 +53,7 @@ void ofApp::setup()
 //    manager.selected = manager.selected;
 //    cout << "selected:" << manager.selected << endl;
     manager.refresh();
+
     //---
 
     // STARUP SETTINGS
