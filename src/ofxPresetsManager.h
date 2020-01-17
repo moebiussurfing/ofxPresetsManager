@@ -5,6 +5,11 @@
 //
 //TODO:
 
+//++++ ERROR: do not loads group preset
+//++++ reapair bugs with folder names... bug when goes back to MODE MEMORY off
+
+//+++ think way to handle groups with pointers or not. 
+// but vector is not filled at loadAllKitToMemory()
 //+++ add mode without files, vectors
 //+++ add auto trig mode or not
 //++ improve callback system ?
@@ -54,6 +59,9 @@ class ofxPresetsManager
 
 public:
 
+	ofParameterGroup *group_TARGET;
+	void addGroup_TARGET(ofParameterGroup *g);
+
 	//-
 
 	//settings paths
@@ -93,9 +101,6 @@ public:
 	//draw some info, when the gui is drawn you can also click on the button to change / save presets
 	void draw();
 	void draw(int x, int y, int cellSize);
-
-	//set the key you have to hold for saving, default is OF_KEY_CONTROL
-	void setModeKey(int key);
 
 	//-
 
@@ -145,6 +150,9 @@ public:
 
 	//API
 
+	//set the key you have to hold for saving, default is OF_KEY_CONTROL
+	void setModeKey(int key);
+
 	//set keys active
 	void set_ENABLE_Keys(bool active)
 	{
@@ -175,12 +183,18 @@ public:
 		}
 	}
 
+	void loadPreset(int p);
+	//void getNumPresets();
+	//void getNumPresets();
+
 	//--
+
+	//browser
 
 	//BUG: trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
 	void refresh()
 	{
-		//big browser
+		//browser
 		preset_filesRefresh();
 
 		//-
@@ -204,16 +218,8 @@ public:
 
 	//-
 
-	//API for CONTROL
-	void loadPreset(int p);
-	//void getNumPresets();
-	//void getNumPresets();
-
-	//-
-
 #pragma mark - GUI
 
-	//gui
 	void set_GUI_Position(int x, int y)
 	{
 		guiPos = ofVec2f(x, y);
@@ -241,7 +247,7 @@ public:
 		SHOW_ClickPanel = visible;
 	}
 
-	//-
+	//--
 
 #pragma mark - SETTINGS
 
@@ -255,18 +261,25 @@ public:
 	void set_path_PresetsFolder(string folder);
 	void set_GlobalFolder(string folder);
 
-	//--
-
-	ofParameter<int> PRESET_selected;//from 1 to 8 i.e.
-
 	void setAutoLoad(bool b)
 	{
 		autoLoad = b;
 	}
+
 	void setAutoSave(bool b)
 	{
 		autoSave = b;
 	}
+
+	void setAutoSaveTimer(bool b)
+	{
+		bAutosaveTimer = b;
+	}
+
+	//--
+
+	//from 1 to 8. (indexed vars starts from 0)
+	ofParameter<int> PRESET_selected;
 
 	//--
 
@@ -274,6 +287,7 @@ public:
 
 private:
 
+	//browse
 	bool isMouseOver_Changed()
 	{
 		if (bMouseOver_Changed)
@@ -327,6 +341,7 @@ private:
 
 	//-
 
+	//browser
 	//Gui
 
 	ofxImGui::Gui gui;
@@ -371,13 +386,17 @@ private:
 
 	//A. ofParameterGroup
 	std::vector<ofParameterGroup> groups;
+	//to store multiple group targets. 
+	//when using only one ofParameterGroup, there's only one group element!
 
 	//ofParameterGroup params_gui;
 
 	//-
 
-	std::vector<int> lastIndices;
-	std::vector<int> presets;
+	std::vector<int> lastIndices;//?
+	std::vector<int> presets;//?
+
+	//-
 
 	void addKeysListeners();
 	void removeKeysListeners();
@@ -395,6 +414,14 @@ private:
 
 	bool bDelayedLoading;
 	std::vector<int> newIndices;
+
+	//-
+
+	int num_presets;
+	int selected_PRE = -1;
+
+	void doCloneRight(int patternNum);
+	void doSave(int patternNum);
 
 	//-
 
@@ -418,9 +445,9 @@ private:
 
 	//-
 
-	//control manager panel to selec presets, clone, save..
+	//control manager params
+	//to selec presets, clone, save..
 	ofParameterGroup params;
-	//ofParameter<int> PRESET_selected;//from 1 to 8 i.e.
 	ofParameter<bool> SHOW_menu;
 	ofParameter<bool> SHOW_ClickPanel;
 	ofParameter<bool> bSave;
@@ -434,22 +461,14 @@ private:
 	ofParameterGroup params_Options;
 	ofParameterGroup params_Tools;
 
-	int num_presets;
-	int selected_PRE = -1;
-
-	void doCloneRight(int patternNum);
-	void doSave(int patternNum);
-
 	//-
 
 	bool SHOW_Gui;
 
 	//--
 
-	//autosave
-	ofParameter<bool> bAutosave;
-	//bool bAutosave = true;
-
+	//timer autosave
+	ofParameter<bool> bAutosaveTimer;
 	uint64_t timerLast_Autosave = 0;
 	int timeToAutosave = 5000;
 

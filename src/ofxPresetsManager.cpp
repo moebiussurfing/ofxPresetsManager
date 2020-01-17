@@ -5,6 +5,15 @@
 
 #include "ofxPresetsManager.h"
 
+
+//--------------------------------------------------------------
+void ofxPresetsManager::addGroup_TARGET(ofParameterGroup *g)
+{
+	ofLogNotice("ofxPresetsManager") << "addGroup_TARGET:" << "" << endl;
+
+	group_TARGET = g;
+}
+
 //--------------------------------------------------------------
 void ofxPresetsManager::kit_Build()
 {
@@ -93,7 +102,7 @@ ofxPresetsManager::ofxPresetsManager()
 	loadToMemory.set("LOAD TO MEMORY", false);
 	autoLoad.set("AUTO LOAD", false);
 	autoSave.set("AUTO SAVE", false);
-	bAutosave.set("TIMER AUTO SAVE", false);
+	bAutosaveTimer.set("TIMER AUTO SAVE", false);
 	bCloneRight.set("CLONE >", false);
 	SHOW_menu.set("SHOW MENU", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", false);
@@ -108,7 +117,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Options.setName("OPTIONS");
 	params_Options.add(autoLoad);
 	params_Options.add(autoSave);
-	params_Options.add(bAutosave);
+	params_Options.add(bAutosaveTimer);
 
 	params_Gui.setName("GUI");
 	params_Gui.add(SHOW_ClickPanel);
@@ -141,30 +150,44 @@ void ofxPresetsManager::loadAllKitToMemory()
 	{
 		//assets/groups/kit_1ofxPresetsManager/myGroupParameters_preset_2.xml
 		//myGroupParameters"_preset_xx.xml"
+
 		string folder;
 		//folder = "/patterns/"; //using subfolder
 		//folder = path_GloabalFolder; //without subfolder. must ends with "/"
 		folder = "/"; //without subfolder. must ends with "/"
 		string prefixName = "myGroupParameters";
-		string str1;
 
+		string str1;
 		str1 = (folder + prefixName + "_preset_" + ofToString(i) + ".xml");
 		string str = path_KitFolder + str1;
 
 		ofXml settings;
 		settings.load(str);
 
+		//TODO:
+		//do not loads the group content
 		ofParameterGroup g;
-		ofDeserialize(settings, g);
-		groupsMem.push_back(g);
+		
+		//this do not works because we can load into an empty group!
+		//should copy group estructure from original one
+		g = groups[0];
 
+		ofDeserialize(settings, g);
+
+		//groupsMem.push_back(g);
+		groupsMem[i] = g;//ERROR could be here..
+		//TODO: think to use pointers
+		
 		//debug
-		ofLogNotice("ofxPresetsManager") << "[" << i << "] " << str;
-		ofLogNotice("ofxPresetsManager") << ofToString(settings.toString());
+		ofLogNotice("ofxPresetsManager") << "[" << i << "]";
+		ofLogNotice("ofxPresetsManager") << "File: " << str << "\n" << ofToString(settings.toString());
 	}
 
+	//debug params
 	for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{
+		ofLogNotice("ofxPresetsManager") << i;
+
 		ofParameterGroup g;
 		g = groupsMem[i];
 
@@ -175,9 +198,10 @@ void ofxPresetsManager::loadAllKitToMemory()
 		{
 			str += gi;
 		}
-		str += ofToString(gg) + ",";
+		str += ofToString(gg) + "\n";
 
-		ofLogNotice("ofxPresetsManager") << i << ": " << ofToString(str);
+		ofLogNotice("ofxPresetsManager") << ofToString(str);
+		//ofLogNotice("ofxPresetsManager") << i << ": " << ofToString(str);
 	}
 }
 
@@ -202,6 +226,7 @@ void ofxPresetsManager::setup()
 
 	//-
 
+	//browser
 	gui_Visible = true;
 
 	//gui.setup();
@@ -246,7 +271,7 @@ void ofxPresetsManager::update()
 
 	//autosave
 	//bAutosave = false;
-	if (bAutosave && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
+	if (bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
 	{
 		//DISABLE_Callbacks = true;
 		////get gui position before save
@@ -385,16 +410,17 @@ string ofxPresetsManager::presetName(string guiName, int presetIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)
 {
-	//add a gui for preset saving
+	//add a gui/ofParameterGroup for preset saving
 
 	groups.push_back(params);
 
-	lastIndices.push_back(0);
-	newIndices.push_back(0);
-	presets.push_back(_num_presets);
+	lastIndices.push_back(0);//?
+	newIndices.push_back(0);//?
+	presets.push_back(_num_presets);//?
 
 	//-
 
+	//update gui params
 	num_presets = _num_presets;
 	PRESET_selected.setMax(num_presets);
 }
@@ -426,19 +452,19 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 	//TODO:
 	//Windows
 
-	if (guiIndex >= 0 && guiIndex < (int)groups.size() 
+	if (guiIndex >= 0 && guiIndex < (int)groups.size()
 		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
-		ofLogNotice("ofxPresetsManager") << "DONE_save (2)";
+		ofLogNotice("ofxPresetsManager") << "DONE_save (1)";
 
 		//it's important if this line is before or after ofSerialize
 		DONE_save = true;
 
 		//-
 
-		if (!MODE_MemoryLive)
+		//if (!MODE_MemoryLive)
 		{
-			//MODE A
+			//MODE A: from hd file
 			TS_START("save1");
 
 			std::string n = presetName(groups[guiIndex].getName(), presetIndex);
@@ -449,22 +475,22 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 			TS_STOP("save1");
 		}
-		else
-		{
-			//MODE B
-			TS_START("saveMem");
+		//else
+		//{
+		//	//MODE B: direct from memory
+		//	TS_START("saveMem");
 
-			ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
+		//	ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
 
-			TS_STOP("saveMem");
-		}
+		//	TS_STOP("saveMem");
+		//}
 
 		////it's important if this line is before or after ofSerialize
 		//DONE_save = true;
 	}
 	else
 	{
-		ofLogError("ofxPresetsManager") << "BYPASS: SAVE";
+		ofLogError("ofxPresetsManager") << "OUT OF RANGE SAVE";
 	}
 }
 
@@ -481,6 +507,8 @@ void ofxPresetsManager::save(int presetIndex, string guiName)
 		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
 		ofLogNotice("ofxPresetsManager") << "DONE_save (2)";
+
+		//it's important if this line is before or after ofSerialize
 		DONE_save = true;
 
 		//-
@@ -490,10 +518,13 @@ void ofxPresetsManager::save(int presetIndex, string guiName)
 		ofXml settings;
 		ofSerialize(settings, groups[guiIndex]);
 		settings.save(path_KitFolder + "/" + n);
+
+		////it's important if this line is before or after ofSerialize
+		//DONE_save = true;
 	}
 	else
 	{
-		ofLogError("ofxPresetsManager") << "BYPASS: SAVE";
+		ofLogError("ofxPresetsManager") << "OUT OF RANGE SAVE";
 	}
 
 	TS_STOP("save2");
@@ -513,7 +544,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	{
 		if (!MODE_MemoryLive)
 		{
-			//MODE A
+			//MODE A: from hd file
 			TS_START("load1");
 
 			string str = presetName(groups[guiIndex].getName(), presetIndex);
@@ -528,18 +559,28 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 		}
 		else
 		{
-			//MODE B
+			//MODE B: direct from memory
 			TS_START("loadMem");
 
 			ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
 
-			ofParameterGroup g;
-			g = groupsMem[presetIndex];
-			groups[guiIndex] = g;
+			//TODO:
+			//ERROR do not loads the group content
+			//ofParameterGroup g;
+			//g = groupsMem[presetIndex];
+			////groups[guiIndex] = g;
+			//groups[0] = g;
 
-			//groups[guiIndex] = groupsMem[presetIndex];
+			groups[0] = groupsMem[presetIndex];
 
-			lastIndices[guiIndex] = presetIndex;//? this is to move clicker selector
+			//pointer way
+			//if (group_TARGET != nullptr)
+			//{
+			//	group_TARGET = &g;
+			//}
+
+			//? this is to move clicker selector
+			lastIndices[guiIndex] = presetIndex;
 
 			TS_STOP("loadMem");
 		}
@@ -555,7 +596,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	}
 	else
 	{
-		ofLogError("ofxPresetsManager") << "BYPASS: LOAD";
+		ofLogError("ofxPresetsManager") << "OUT OF RANGE LOAD";
 	}
 }
 
@@ -586,13 +627,13 @@ void ofxPresetsManager::load(int presetIndex, string guiName)
 	}
 	else
 	{
-		ofLogError("ofxPresetsManager") << "BYPASS: LOAD";
+		ofLogError("ofxPresetsManager") << "OUT OF RANGE LOAD";
 	}
 
 	TS_STOP("load2");
 }
 
-//-
+//--
 
 //--------------------------------------------------------------
 int ofxPresetsManager::getPresetIndex(int guiIndex) const
@@ -750,14 +791,19 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				if (key == keys[i][k])
 				{
+					ofLogNotice("ofxPresetsManager") << "-> Key: " << key;
+
 					if (bKeySave)
 					{
 						save(k, i);
 					}
 					else
 					{
-						ofLogNotice("ofxPresetsManager") << "-> Key: "
-							<< k << " [" << i << "]";
+						ofLogNotice("ofxPresetsManager") << "["
+							<< k << "][" << i << "]";
+
+						PRESET_selected = 1 + k;
+
 						//if (bDelayedLoading)
 						//{
 						//   //newIndices[i] = k;
@@ -766,8 +812,8 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 						//}
 						//else
 						//{
-						PRESET_selected = 1 + k;//first row/gui only
-						//}
+						//PRESET_selected = 1 + k;//first row/gui only
+						//}*/
 					}
 					return;
 				}
@@ -815,7 +861,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 	yIndex = (y > 0) ? yIndex : -1;
 
 	if (xIndex != -1 && yIndex != -1)
-		ofLogNotice("ofxPresetsManager") << "> mousePressed (xIndex, yIndex): (" << xIndex << "," << yIndex << ")";
+		ofLogNotice("ofxPresetsManager") << "-> mousePressed: (" << xIndex << "," << yIndex << ")";
 
 	//-
 
@@ -850,11 +896,12 @@ void ofxPresetsManager::mousePressed(int x, int y)
 		//2. last button (save button)
 		else if (xIndex == presets[yIndex])
 		{
-			ofLogNotice("ofxPresetsManager") << "saveButton: ( lastIndices[yIndex], yIndex ): "
-				<< lastIndices[yIndex]
-				<< ", " << yIndex;
+			ofLogNotice("ofxPresetsManager") << "-> saveButton: (" << yIndex << ")";
 
-			//save
+			//ofLogNotice("ofxPresetsManager") << "-> saveButton: ("
+			//	<< lastIndices[yIndex]
+			//	<< ", " << yIndex << ")";
+
 			//save( lastIndices[yIndex], yIndex );
 			doSave(lastIndices[yIndex]);
 		}
@@ -1112,14 +1159,15 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 	{
 		ofLogNotice("ofxPresetsManager") << "[NOT Changed] PRESET PRESET_selected: " << e;
 		ofLogNotice("ofxPresetsManager") << "BUT not changed, but re-trig PRESET_selected preset";
-		
+
 		//callbacks
 		DONE_load = true;
 		bIsDoneLoad = true;
 	}
 	else if (WIDGET == "PRESETS" && (PRESET_selected != selected_PRE))
 	{
-		ofLogNotice("ofxPresetsManager") << "Changed PRESET PRESET_selected: " << e;
+		ofLogNotice("ofxPresetsManager") << "Changed PRESET";
+		ofLogNotice("ofxPresetsManager") << e;
 		/*
 		//load
 		//if (bDelayedLoading)//TODO: not implemented
@@ -1153,7 +1201,9 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 		{
 			if (autoSave)
 			{
-				DONE_save = true;//callback
+				//TODO:2020
+				//DONE_save = true;//callback
+
 				save(selected_PRE - 1, 0);
 			}
 
@@ -1162,9 +1212,12 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 			//remember this PRE state to know if changed or not
 			selected_PRE = PRESET_selected;
 
-			int xIndex = PRESET_selected - 1;//indexes starts from 0, not from 1 like presets
-			//this should handle when using multiple gui kits together. 
-			//yIndex = ?
+			//-
+
+			//indexes starts from 0, not from 1 like presets
+			int xIndex = PRESET_selected - 1;
+			//yIndex = gui/group-parameter number
+			//this should handle when using multiple gui/group-parameter kits together. 
 			int yIndex = 0;
 
 			//-

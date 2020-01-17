@@ -64,6 +64,8 @@ void ofApp::setup()
 	//manager.setAutoSave(true);
 
     //--
+
+	manager.addGroup_TARGET(&params);
 }
 
 //--------------------------------------------------------------
