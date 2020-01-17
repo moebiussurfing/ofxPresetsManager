@@ -1,4 +1,5 @@
 ofxGui
+ofxHistoryPlot
 ofxImGui
 ofxJsonUtils
 ofxPresetsManager

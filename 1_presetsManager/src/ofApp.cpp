@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-    ofSetFrameRate(30);
+    ofSetFrameRate(60);
 
     //-
 
@@ -33,7 +33,7 @@ void ofApp::setup()
 	
     //NOTE: take care with path folders, they must exist before we can write inside!
 
-    //-
+    //--
 
     //callbacks to trig when save/load is done
     manager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
@@ -94,7 +94,7 @@ void ofApp::exit()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
-    ofBackground(128);
+    ofBackground(64);
 
     //-
 
@@ -125,10 +125,8 @@ void ofApp::draw()
     {
         str = "numSquares: " + ofToString(numSquares);
         ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-
         str = "separation: " + ofToString(separation);
         ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-
         str = "squareSide: " + ofToString(squareSide);
         ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 	}
@@ -140,7 +138,7 @@ void ofApp::draw()
     ofSetColor(ofColor::white);
     ofNoFill();
     ofPushMatrix();
-    ofTranslate(120, 300);
+    ofTranslate(300, 50);
     for (int i = 0; i < numSquares; ++i)
     {
         ofDrawRectangle(0, 0, squareSide, squareSide);

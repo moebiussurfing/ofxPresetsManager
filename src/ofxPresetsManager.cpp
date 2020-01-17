@@ -1,7 +1,6 @@
 
 //ofxPresetsManager.h
 //based into Nicola Pisanti' code in pisanti/ofxGuiPresetSelector, MIT License, 2016
-//
 //changes by moebiussurfing
 
 #include "ofxPresetsManager.h"
@@ -91,6 +90,7 @@ ofxPresetsManager::ofxPresetsManager()
 	PRESET_selected.set("PRESETS", 1, 1, num_presets);
 	bSave.set("SAVE", false);
 	MODE_MemoryLive.set("MODE MEMORY", false);
+	loadToMemory.set("LOAD TO MEMORY", false);
 	autoLoad.set("AUTO LOAD", false);
 	autoSave.set("AUTO SAVE", false);
 	bAutosave.set("TIMER AUTO SAVE", false);
@@ -103,6 +103,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Favorites.add(PRESET_selected);
 	params_Favorites.add(bSave);
 	params_Favorites.add(MODE_MemoryLive);
+	params_Favorites.add(loadToMemory);
 
 	params_Options.setName("OPTIONS");
 	params_Options.add(autoLoad);
@@ -138,10 +139,12 @@ void ofxPresetsManager::loadAllKitToMemory()
 
 	for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{
+		//assets/groups/kit_1ofxPresetsManager/myGroupParameters_preset_2.xml
+		//myGroupParameters"_preset_xx.xml"
 		string folder;
 		//folder = "/patterns/"; //using subfolder
-		folder = path_GloabalFolder; //without subfolder. must ends with "/"
-		//folder = "/"; //without subfolder. must ends with "/"
+		//folder = path_GloabalFolder; //without subfolder. must ends with "/"
+		folder = "/"; //without subfolder. must ends with "/"
 		string prefixName = "myGroupParameters";
 		string str1;
 
@@ -156,8 +159,8 @@ void ofxPresetsManager::loadAllKitToMemory()
 		groupsMem.push_back(g);
 
 		//debug
-		ofLogNotice("ofxPresetsManager") << i << ": " << str;
-		ofLogNotice("ofxPresetsManager") << i << ": \n" << ofToString(settings.toString());
+		ofLogNotice("ofxPresetsManager") <<"[" << i << "] " << str;
+		ofLogNotice("ofxPresetsManager") << ofToString(settings.toString());
 	}
 
 	for (int i = 0; i < NUM_OF_PRESETS; i++)
@@ -182,7 +185,7 @@ void ofxPresetsManager::loadAllKitToMemory()
 void ofxPresetsManager::setup()
 {
 
-#ifdef TIME_SAMPLE_OFX_FONTSTASH2
+#ifdef TIME_SAMPLE_MEASURES
 	//TIME_SAMPLE_SET_FRAMERATE(fps); //specify a target framerate
 	TIME_SAMPLE_ENABLE();
 	TIME_SAMPLE_SET_AVERAGE_RATE(0.1);
@@ -233,6 +236,14 @@ void ofxPresetsManager::setup()
 //--------------------------------------------------------------
 void ofxPresetsManager::update()
 {
+	//plotters
+	//TS_START("load1");
+	//TS_STOP("load1");
+	//TS_START("load2");
+	//TS_STOP("load2");
+	//TS_START("loadMem");
+	//TS_STOP("loadMem");
+
 	//autosave
 	//bAutosave = false;
 	if (bAutosave && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
@@ -339,7 +350,7 @@ ofxPresetsManager::~ofxPresetsManager()
 	ofRemoveListener(params.parameterChangedE(), this, &ofxPresetsManager::Changed_Params);
 
 	//TODO:
-	kit_Build();
+	//kit_Build();
 }
 
 //-
@@ -1077,6 +1088,12 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 		bCloneRight = false;
 		doCloneRight(PRESET_selected - 1);
 	}
+	else if (WIDGET == "LOAD TO MEMORY"&& loadToMemory)
+	{
+		ofLogNotice("ofxPresetsManager") << "loadToMemory:"<<e;
+		loadToMemory = false;
+		loadAllKitToMemory();
+	}
 	//TODO
 	//BUG
 	//we try to load anyway?
@@ -1211,7 +1228,7 @@ void ofxPresetsManager::set_GlobalFolder(string folder)
 
 #pragma mark - GUI
 
-
+//* browser
 //--------------------------------------------------------------
 bool ofxPresetsManager::gui_draw()
 {
