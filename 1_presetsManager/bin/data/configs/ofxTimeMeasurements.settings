@@ -1,5 +1,6 @@
 update()=1|1
-save1=1|1
 draw()=1|1
 load1=1|1
-keyPressed()=1|1
+save1=1|1
+saveMem=1|1
+loadMem=1|1

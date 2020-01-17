@@ -7,56 +7,48 @@ void ofApp::setup()
 
     //-
 
-    //// Gui
-    //
+    ////Gui
     //guiApp.setup();
     //guiVisible = true;
 
     //--
 
-    // define and group parameters
+    //local parameters
     params.setName("myGroupParameters");
     params.add(numSquares.set("num squares", 1, 1, 24));
     params.add(separation.set("separation", 5, 1, 100));
     params.add(squareSide.set("square side", 50, 5, 200));
 
+	//local gui
 	gui.setup("ofApp::gui");
 	gui.add(params);
-	gui.setPosition(400, 50);
+	gui.setPosition(20, 100);
 
-    manager.set_pathKit_Folder(pathKit);
-    manager.add(params, {'1', '2', '3', '4', '5', '6', '7', '8'});
+	//---
+
+	//preset manager 
+	manager.set_GlobalFolder("ofxPresetsManager/");//TODO:
+	manager.set_pathKit_Folder(pathKit);
+	manager.add(params, {'1', '2', '3', '4', '5', '6', '7', '8'});
 	
-    // NOTE: take care with path folders, that must exist before write inside!
+    //NOTE: take care with path folders, they must exist before we can write inside!
 
     //-
 
-    // TODO: easy listener temp solution to trig when save/load is done
-    // then will load refresh grid sequencer states
-
+    //callbacks to trig when save/load is done
     manager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
     manager.DONE_load.addListener(this, &ofApp::Changed_DONE_load);
 
+	//apply setup
 	manager.setup();
 
-    //-
-
-    // STARTUP INIT
-
-//    //this loads selected preset number and gui state
+    //this loads selected preset number and gui state
     //manager.load_ControlSettings();
 
-    //-
-
-//    // trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
-//    manager.selected_PRE = -1;
-//    manager.selected = manager.selected;
-//    cout << "selected:" << manager.selected << endl;
+   //trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
     manager.refresh();
 
-    //---
-
-    // STARUP SETTINGS
+    //--
 
 	//imGui
     manager.set_GUI_Visible(true);
@@ -64,28 +56,37 @@ void ofApp::setup()
     manager.set_GUI_Size(250, 300);
 
 	//user clicker
-    manager.set_CLICKER_Position(250, ofGetHeight() - 75, 40);
+    manager.set_CLICKER_Position(400, ofGetHeight() - 100, 40);//position and boxes sizes
     manager.set_CLICKER_Visible(true);
 
+	//some settings
 	//manager.setAutoLoad(true);
 	//manager.setAutoSave(true);
 
     //--
 }
 
-
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    ofSetWindowTitle(ofToString((int) ofGetFrameRate()));
+	string str;
+	str = ofToString((int)ofGetFrameRate()) + " FPS";
+    ofSetWindowTitle(str);
+
+	//-
+
+	manager.update();
+
+	//simple callback when preset is loaded 
+	if (manager.isDoneLoad())
+	{
+		ofLogNotice("ofApp") << "+ MANAGER DONE LOAD";
+	}
 }
 
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-    // TODO: easy listener temp solution to trig when save/load is done
-    // then will load refresh grid sequencer states
-
     manager.DONE_save.removeListener(this, &ofApp::Changed_DONE_save);
     manager.DONE_load.removeListener(this, &ofApp::Changed_DONE_load);
 }
@@ -95,16 +96,14 @@ void ofApp::draw()
 {
     ofBackground(128);
 
-	gui.draw();
-
     //-
 
-    // Gui
+    //Gui
 
     //mouseOverGui = false;
     //if (guiVisible)
     //{
-    //    mouseOverGui = imGui();
+    //   mouseOverGui = imGui();
     //}
     //if (mouseOverGui)
     //{
@@ -117,9 +116,7 @@ void ofApp::draw()
 
     //-
 
-    //TODO
-    // DEBUG OBJECT LINKED TO GROUPED PARAMETERS
-
+    //DEBUG OBJECT LINKED TO GROUPED PARAMETERS
     string str;
     int x = 20;
     int y = 20;
@@ -138,8 +135,7 @@ void ofApp::draw()
 
     //-
 
-    // SCENE DRAW OBJECT LINKED TO GROUPED PARAMETERS
-
+    //SCENE DRAW OBJECT LINKED TO GROUPED PARAMETERS
     ofPushStyle();
     ofSetColor(ofColor::white);
     ofNoFill();
@@ -155,6 +151,10 @@ void ofApp::draw()
 
     //-
 
+	//local gui parameters
+	gui.draw();
+
+	//addon gui
     manager.draw();
 }
 
@@ -224,13 +224,13 @@ void ofApp::dragEvent(ofDragInfo dragInfo)
 
 }
 
-// TODO: easy listener temp solution
+//callback
 //--------------------------------------------------------------
 void ofApp::Changed_DONE_save(bool &DONE_save)
 {
     ofLogNotice("ofApp") << "Changed_DONE_save: " << ofToString(DONE_save ? "TRUE" : "FALSE");
 
-    // extra stuff when finish loading/saving
+    //extra stuff when finish loading/saving
 	if (manager.DONE_save)
     {
         manager.DONE_save = false;
@@ -242,7 +242,7 @@ void ofApp::Changed_DONE_load(bool &DONE_load)
 {
     ofLogNotice("ofApp") << "Changed_DONE_load: " << ofToString(DONE_load ? "TRUE" : "FALSE");
 
-    // extra stuff when finish loading/saving
+    //extra stuff when finish loading/saving
 	if (manager.DONE_load)
     {
         manager.DONE_load = false;
@@ -252,47 +252,47 @@ void ofApp::Changed_DONE_load(bool &DONE_load)
 ////--------------------------------------------------------------
 //bool ofApp::imGui()
 //{
-//    static bool Show_Preset_settings = true;
-//    auto mainSettings = ofxImGui::Settings();
-//    int x, y, w, h, pad;
-//    pad = 5;
-//    w = 200;
-//    h = 400;
-//    x = ofGetWidth() - 2 * w - pad;
-//    y = 30;
-//    mainSettings.windowPos = ofVec2f(x, y);
-//    mainSettings.windowSize = ofVec2f(w, h);
+//   static bool Show_Preset_settings = true;
+//   auto mainSettings = ofxImGui::Settings();
+//   int x, y, w, h, pad;
+//   pad = 5;
+//   w = 200;
+//   h = 400;
+//   x = ofGetWidth() - 2 * w - pad;
+//   y = 30;
+//   mainSettings.windowPos = ofVec2f(x, y);
+//   mainSettings.windowSize = ofVec2f(w, h);
 //
-//    this->guiApp.begin();
-//    {
-//        if (Show_Preset_settings)
-//        {
-//            if (ofxImGui::BeginWindow("Preset", mainSettings, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
-//            {
-//                ofxImGui::AddGroup(this->paramsFull, mainSettings);
+//   this->guiApp.begin();
+//   {
+//       if (Show_Preset_settings)
+//       {
+//           if (ofxImGui::BeginWindow("Preset", mainSettings, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
+//           {
+//               ofxImGui::AddGroup(this->paramsFull, mainSettings);
 //
-//                //-
+//               //-
 //
-//                //NOT REQUIRED...
-//                //                // NESTED GROUPS
-//                ////WORKING
-//                //                for (auto parameter : paramsFull)
-//                //                {
-//                //                    // Group.
-//                //                    auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
-//                //                    if (parameterGroup)
-//                //                    {
-//                //                        // Recurse through contents.
-//                //                        ofxImGui::AddGroup(*parameterGroup, mainSettings);
-//                //                        continue;
-//                //                    }
-//                //                }
+//               //NOT REQUIRED...
+//               //               //NESTED GROUPS
+//               ////WORKING
+//               //               for (auto parameter : paramsFull)
+//               //               {
+//               //                   //Group.
+//               //                   auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
+//               //                   if (parameterGroup)
+//               //                   {
+//               //                       //Recurse through contents.
+//               //                       ofxImGui::AddGroup(*parameterGroup, mainSettings);
+//               //                       continue;
+//               //                   }
+//               //               }
 //
-//                ofxImGui::EndWindow(mainSettings);
-//            }
-//        }
-//    }
+//               ofxImGui::EndWindow(mainSettings);
+//           }
+//       }
+//   }
 //
-//    this->guiApp.end();
-//    return mainSettings.mouseOverGui;
+//   this->guiApp.end();
+//   return mainSettings.mouseOverGui;
 //}

@@ -5,12 +5,15 @@
 #include "ofxPresetsManager.h"
 //#include "ofxImGui.h"
 #include "ofxGui.h"
+#include "ofxWindowApp.h"
 
 class ofApp : public ofBaseApp
 {
 
 public:
 
+	ofxWindowApp WindowApp;
+	
 	ofxPanel gui;
 
     //ofxImGui::Gui guiApp;

@@ -2,4 +2,6 @@ ofxGui
 ofxImGui
 ofxJsonUtils
 ofxPresetsManager
+ofxSerializer
 ofxTimeMeasurements
+ofxWindowApp

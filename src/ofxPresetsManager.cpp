@@ -1,8 +1,8 @@
 
-// ofxPresetsManager.h
-// based into Nicola Pisanti' code in pisanti/ofxGuiPresetSelector, MIT License, 2016
+//ofxPresetsManager.h
+//based into Nicola Pisanti' code in pisanti/ofxGuiPresetSelector, MIT License, 2016
 //
-// changes by moebiussurfing
+//changes by moebiussurfing
 
 #include "ofxPresetsManager.h"
 
@@ -39,6 +39,17 @@ void ofxPresetsManager::kit_Build()
 //--------------------------------------------------------------
 ofxPresetsManager::ofxPresetsManager()
 {
+	//settings paths
+	path_GloabalFolder = "/";//default addon folder
+	//path_GloabalFolder = "ofxPresetsManager/";
+	pathControl = "assets/settings/PRESET_MANAGER_control.xml";
+	path_KitFolder = "assets/groups/kit_1";//default kit folder for live/favorites presets
+	//big browser
+	path_PresetsFolder = "assets/groups/presets";//default presets folder
+	PRESET_name = "_emptyPreset";//default preset
+
+	//-
+
 	ofSetLogLevel("ofxPresetsManager", OF_LOG_NOTICE);
 
 	modeKey = OF_KEY_CONTROL;
@@ -60,7 +71,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//-
 
-	// TODO: easy listener temp solution for ofxSEQ integration
+	//TODO: easy callback to ofAppintegration
 	DONE_load.set("DONE LOAD", false);
 	DONE_save.set("DONE SAVE", false);
 	//can use too isDoneLoad() to check in update() as callback
@@ -68,14 +79,14 @@ ofxPresetsManager::ofxPresetsManager()
 	//-
 
 	//gui font
-	myTTF = "assets/fonts/overpass-mono-bold.otf";
+	myTTF = path_GloabalFolder + "assets/fonts/overpass-mono-bold.otf";
 	//myTTF = "assets/fonts/PragmataProR_0822.ttf";
 	sizeTTF = 8;
 	myFont.load(myTTF, sizeTTF, true, true);
 
 	//-
 
-	// PRESETS
+	//PRESETS
 
 	PRESET_selected.set("PRESETS", 1, 1, num_presets);
 	bSave.set("SAVE", false);
@@ -119,6 +130,8 @@ ofxPresetsManager::ofxPresetsManager()
 //--------------------------------------------------------------
 void ofxPresetsManager::loadAllKitToMemory()
 {
+	ofLogNotice("ofxPresetsManager") << "loadAllKitToMemory()";
+
 	groupsMem.clear();
 	groupsMem.reserve(NUM_OF_PRESETS);
 	groupsMem.resize(NUM_OF_PRESETS);
@@ -127,7 +140,8 @@ void ofxPresetsManager::loadAllKitToMemory()
 	{
 		string folder;
 		//folder = "/patterns/"; //using subfolder
-		folder = "/"; //without subfolder. must ends with "/"
+		folder = path_GloabalFolder; //without subfolder. must ends with "/"
+		//folder = "/"; //without subfolder. must ends with "/"
 		string prefixName = "myGroupParameters";
 		string str1;
 
@@ -146,7 +160,6 @@ void ofxPresetsManager::loadAllKitToMemory()
 		ofLogNotice("ofxPresetsManager") << i << ": \n" << ofToString(settings.toString());
 	}
 
-	ofLogNotice("ofxPresetsManager") << "loadAllKitToMemory()";
 	for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{
 		ofParameterGroup g;
@@ -180,11 +193,11 @@ void ofxPresetsManager::setup()
 
 	//ofSetLogLevel("ofxPresetsManager", OF_LOG_VERBOSE);
 
-	//selected_PRE = -1;
 	load_ControlSettings();
 
-	//TODO
 	selected_PRE = -1;
+
+	//-
 
 	gui_Visible = true;
 
@@ -192,7 +205,7 @@ void ofxPresetsManager::setup()
 	//gui_imGui_theme();
 
 	//TODO
-	//bug on startuo, not loading fine some param
+	//bug on startup, not loading fine some param
 	//PRESET_selected = 0;
 
 	//-
@@ -200,7 +213,7 @@ void ofxPresetsManager::setup()
 	guiControl.setup("CONTROL");
 	guiControl.add(params);
 	guiControl.setPosition(ofGetWidth() - 210, 10);
-	
+
 	//theme
 	string str = "assets/fonts/overpass-mono-bold.otf";
 	ofxGuiSetFont(str, 9);
@@ -233,6 +246,7 @@ void ofxPresetsManager::update()
 		//save current preset
 		doSave(PRESET_selected - 1);
 
+		//auto save timer
 		timerLast_Autosave = ofGetElapsedTimeMillis();
 		ofLogNotice("ofxPresetsManager") << "Autosave DONE";
 	}
@@ -245,7 +259,7 @@ void ofxPresetsManager::draw()
 
 	//TODO
 
-	//// Gui
+	////Gui
 	//bMouseOver_Changed = false;
 	//bool gui_MouseOver_PRE = gui_MouseOver;
 	//gui_MouseOver = false;
@@ -255,8 +269,8 @@ void ofxPresetsManager::draw()
 	//
 	//if (gui_Visible)
 	//{
-	//    gui_MouseOver = gui_draw();
-	//    //ofLogNotice("ofxPresetsManager") << "gui_MouseOver:" << (gui_MouseOver?"IN":"OUT");
+	//   gui_MouseOver = gui_draw();
+	//   //ofLogNotice("ofxPresetsManager") << "gui_MouseOver:" << (gui_MouseOver?"IN":"OUT");
 	//}
 	//if (gui_MouseOver)
 	//{
@@ -270,20 +284,20 @@ void ofxPresetsManager::draw()
 	////TODO
 	//if (gui_MouseOver != gui_MouseOver_PRE)
 	//{
-	//    bMouseOver_Changed = true;
+	//   bMouseOver_Changed = true;
 	//}
 
 	////debug
 	//if (bMouseOver_Changed)
 	//{
-	//    if (gui_MouseOver)
-	//    {
-	//        ofLogNotice("ofxPresetsManager") << "MOUSE OVER GUI";
-	//    }
-	//    else
-	//    {
-	//        ofLogNotice("ofxPresetsManager") << "MOUSE OUT OF GUI";
-	//    }
+	//   if (gui_MouseOver)
+	//   {
+	//       ofLogNotice("ofxPresetsManager") << "MOUSE OVER GUI";
+	//   }
+	//   else
+	//   {
+	//       ofLogNotice("ofxPresetsManager") << "MOUSE OUT OF GUI";
+	//   }
 	//}
 
 	//-
@@ -298,12 +312,12 @@ void ofxPresetsManager::draw()
 	//TODO
 	////groupDebug
 	//{
-	//    ofParameterGroup g;
-	//    if (groups.size() > 0)
-	//    {
-	//        g = groups[0];
-	//        groupDebug(g);
-	//    }
+	//   ofParameterGroup g;
+	//   if (groups.size() > 0)
+	//   {
+	//       g = groups[0];
+	//       groupDebug(g);
+	//   }
 	//}
 
 	//-
@@ -360,7 +374,7 @@ string ofxPresetsManager::presetName(string guiName, int presetIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)
 {
-	// add a gui for preset saving
+	//add a gui for preset saving
 
 	groups.push_back(params);
 
@@ -396,34 +410,45 @@ void ofxPresetsManager::add(ofParameterGroup params, initializer_list<int> keysL
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, int guiIndex)
 {
-	TS_START("save1");
-
 	ofLogNotice("ofxPresetsManager") << "save(" << presetIndex << "," << guiIndex << ")";
 
 	//TODO:
 	//Windows
-	if (presetIndex >= 0)
-	{
-		if (guiIndex >= 0 && guiIndex < (int)groups.size())
-		{
-			ofLogNotice("ofxPresetsManager") << "DONE_save";
-			DONE_save = true;
 
-			//-
+	if (guiIndex >= 0 && guiIndex < (int)groups.size() && (presetIndex >= 0))
+	{
+		ofLogNotice("ofxPresetsManager") << "DONE_save (2)";
+		DONE_save = true;
+
+		//-
+
+		if (!MODE_MemoryLive)
+		{
+			//MODE A
+			TS_START("save1");
 
 			std::string n = presetName(groups[guiIndex].getName(), presetIndex);
 
 			ofXml settings;
 			ofSerialize(settings, groups[guiIndex]);
 			settings.save(path_KitFolder + "/" + n);
+
+			TS_STOP("save1");
+		}
+		else
+		{
+			//MODE B
+			TS_START("saveMem");
+
+			ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
+
+			TS_STOP("saveMem");
 		}
 	}
 	else
 	{
-		ofLogNotice("ofxPresetsManager") << "BYPASS";
+		ofLogError("ofxPresetsManager") << "BYPASS";
 	}
-
-	TS_STOP("save1");
 }
 
 //--------------------------------------------------------------
@@ -437,7 +462,7 @@ void ofxPresetsManager::save(int presetIndex, string guiName)
 
 	if (guiIndex >= 0 && guiIndex < (int)groups.size())
 	{
-		ofLogNotice("ofxPresetsManager") << "DONE_save";
+		ofLogNotice("ofxPresetsManager") << "DONE_save (2)";
 		DONE_save = true;
 
 		//-
@@ -450,7 +475,7 @@ void ofxPresetsManager::save(int presetIndex, string guiName)
 	}
 	else
 	{
-		ofLogNotice("ofxPresetsManager") << "BYPASS";
+		ofLogError("ofxPresetsManager") << "BYPASS";
 	}
 
 	TS_STOP("save2");
@@ -459,31 +484,60 @@ void ofxPresetsManager::save(int presetIndex, string guiName)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, int guiIndex)
 {
-	TS_START("load1");
-
 	ofLogNotice("ofxPresetsManager") << "load(" << presetIndex << "," << guiIndex << ")";
+
+	//TODO:
+	//ERROR: guiIndex is not the preset position, it's for multiplye guis!
+	//its the target group, only one for all the presets (in only-one-gui-mode)
 
 	if (guiIndex >= 0 && guiIndex < (int)groups.size())
 	{
-		string str = presetName(groups[guiIndex].getName(), presetIndex);
+		if (!MODE_MemoryLive)
+		{
+			//MODE A
+			TS_START("load1");
 
-		ofXml settings;
-		settings.load(path_KitFolder + "/" + str);
-		ofDeserialize(settings, groups[guiIndex]);
+			string str = presetName(groups[guiIndex].getName(), presetIndex);
 
-		lastIndices[guiIndex] = presetIndex;
+			ofXml settings;
+			settings.load(path_KitFolder + "/" + str);
+			ofDeserialize(settings, groups[guiIndex]);
+
+			lastIndices[guiIndex] = presetIndex;
+
+			TS_STOP("load1");
+		}
+		else
+		{
+			//MODE B
+			TS_START("loadMem");
+
+			ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
+
+			ofParameterGroup g;
+			g = groupsMem[presetIndex];
+			groups[guiIndex] = g;
+
+			//groups[guiIndex] = groupsMem[presetIndex];
+			
+			lastIndices[guiIndex] = presetIndex;//? this is to move clicker selector
+
+			TS_STOP("loadMem");
+		}
 
 		//-
 
-		ofLogNotice("ofxPresetsManager") << "DONE_load";
+		//callback
+		ofLogNotice("ofxPresetsManager") << "DONE_load (1)";
 		DONE_load = true;//callback
+
+		//simple callback
+		bIsDoneLoad = true;
 	}
 	else
 	{
-		ofLogNotice("ofxPresetsManager") << "BYPASS";
+		ofLogError("ofxPresetsManager") << "BYPASS";
 	}
-
-	TS_STOP("load1");
 }
 
 //--------------------------------------------------------------
@@ -507,12 +561,12 @@ void ofxPresetsManager::load(int presetIndex, string guiName)
 
 		//-
 
-		ofLogNotice("ofxPresetsManager") << "DONE_load";
+		ofLogNotice("ofxPresetsManager") << "DONE_load (1)";
 		DONE_load = true;
 	}
 	else
 	{
-		ofLogNotice("ofxPresetsManager") << "BYPASS";
+		ofLogError("ofxPresetsManager") << "BYPASS";
 	}
 
 	TS_STOP("load2");
@@ -558,8 +612,8 @@ void ofxPresetsManager::setModeKey(int key)
 //--------------------------------------------------------------
 void ofxPresetsManager::draw_CLICKER()
 {
-	// draws some minimalistic graphics to monitor the active preset
-	// when graphics are drawn you can also click on them for saving/loading
+	//draws some minimalistic graphics to monitor the active preset
+	//when graphics are drawn you can also click on them for saving/loading
 
 	if (!lastMouseButtonState && ofGetMousePressed())
 	{
@@ -606,7 +660,7 @@ void ofxPresetsManager::draw_CLICKER()
 				ofDrawRectangle(clicker_cellSize * k + 4, clicker_cellSize * i + 4, clicker_cellSize - 8, clicker_cellSize - 8);
 		}
 
-		// save button
+		//save button
 		ofDrawRectangle(clicker_cellSize * k, clicker_cellSize * i, clicker_cellSize, clicker_cellSize);
 		myFont.drawString("SAVE",
 			clicker_cellSize * k + 0.5 * clicker_cellSize - 1.30 * sizeTTF,
@@ -615,7 +669,7 @@ void ofxPresetsManager::draw_CLICKER()
 
 		//-
 
-		// kit name
+		//kit name
 
 		//ofDrawBitmapString( groups[i].getName(), clicker_cellSize*k+8, clicker_cellSize*i+18 );
 
@@ -684,9 +738,9 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 					{
 						//if (bDelayedLoading)
 						//{
-						//    // newIndices[i] = k;
-						//    // ofLogNotice("ofxPresetsManager") << "newIndices[i] = k;" <<  k << ", " << i;
-						//    // PRESET_selected = 1 + k;
+						//   //newIndices[i] = k;
+						//   //ofLogNotice("ofxPresetsManager") << "newIndices[i] = k;" <<  k << ", " << i;
+						//   //PRESET_selected = 1 + k;
 						//}
 						//else
 						//{
@@ -743,7 +797,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 	//-
 
-	// 1. key presets buttons
+	//1. key presets buttons
 	if (yIndex >= 0 && yIndex < (int)groups.size())
 	{
 		if (xIndex >= 0 && xIndex < presets[yIndex])
@@ -761,30 +815,28 @@ void ofxPresetsManager::mousePressed(int x, int y)
 			{
 				//if (bDelayedLoading)
 				//{
-				//    //newIndices[yIndex] = xIndex;
+				//   //newIndices[yIndex] = xIndex;
 				//}
 				//else
 				//{
 				PRESET_selected = 1 + xIndex;
-				//    //load( xIndex, yIndex);
+				//   //load( xIndex, yIndex);
 				//}
 			}
 		}
 
-		// 2. last button (save button)
+		//2. last button (save button)
 		else if (xIndex == presets[yIndex])
 		{
 			ofLogNotice("ofxPresetsManager") << "saveButton: ( lastIndices[yIndex], yIndex ): "
 				<< lastIndices[yIndex]
 				<< ", " << yIndex;
 
-			// save
+			//save
 			//save( lastIndices[yIndex], yIndex );
 			doSave(lastIndices[yIndex]);
 		}
 	}
-
-
 }
 
 #pragma mark - ENGINE
@@ -809,17 +861,17 @@ void ofxPresetsManager::doSave(int patternNum)
 ////--------------------------------------------------------------
 //void ofxPresetsManager::gui_loadFromFile(const std::string &filename, ofAbstractParameter &parameter)
 //{
-//    ofXml xml;
-//    xml.load(filename);
-//    ofDeserialize(xml, parameter);
+//   ofXml xml;
+//   xml.load(filename);
+//   ofDeserialize(xml, parameter);
 //}
 //
 ////--------------------------------------------------------------
 //void ofxPresetsManager::gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter)
 //{
-//    ofXml xml;
-//    ofSerialize(xml, parameter);
-//    xml.save(filename);
+//   ofXml xml;
+//   ofSerialize(xml, parameter);
+//   xml.save(filename);
 //}
 //
 ////--------------------------------------------------------------
@@ -865,10 +917,9 @@ void ofxPresetsManager::preset_load(string name)//without xml extension
 	ofXml settings;
 	settings.load(path_PresetsFolder + "/" + name + ".xml");
 
-	//TODO
+	//TODO:
+	//using one gui only! 0
 	ofDeserialize(settings, groups[0]);
-	//ofDeserialize(settings, params_FONT_ANIMATOR);
-	//ofDeserialize(settings, groups[PRESET_selected - 1]);
 
 	//-
 
@@ -884,11 +935,11 @@ void ofxPresetsManager::preset_filesRefresh()
 
 	ofLogNotice("ofxPresetsManager") << "preset_filesRefresh path:" << path_PresetsFolder;
 
-	// clear files and filenames vectors
+	//clear files and filenames vectors
 	files.clear();
 	fileNames.clear();
 
-	// load all folder files in one call
+	//load all folder files in one call
 	files = dataDirectory.getFiles();
 
 	for (size_t i = 0; i < files.size(); i++)
@@ -902,9 +953,9 @@ void ofxPresetsManager::preset_filesRefresh()
 	//TODO
 	//void to go to 1st...
 
-	// 1. load same position preset
-	// if preset is deleted goes to nextone..
-	// should check names because sorting changes..
+	//1. load same position preset
+	//if preset is deleted goes to nextone..
+	//should check names because sorting changes..
 	if (fileNames.size() > 0)
 	{
 		if (currentFile > fileNames.size() - 1)
@@ -919,18 +970,18 @@ void ofxPresetsManager::preset_filesRefresh()
 		ofLogError("ofxPresetsManager") << "FILE PRESET NOT FOUND!";
 	}
 
-	//// 2. always goes to 1st preset 0
+	////2. always goes to 1st preset 0
 	////that's because saving re sort the files
 	////and we don't know the position of last saves preset..
 	//if (fileNames.size() > 0)
 	//{
-	//    currentFile = 0;
-	//    PRESET_name = fileNames[currentFile];
-	//    preset_load(PRESET_name);
+	//   currentFile = 0;
+	//   PRESET_name = fileNames[currentFile];
+	//   preset_load(PRESET_name);
 	//}
 	//else
 	//{
-	//    ofLogError("ofxColorManager") << "NOT FOUND ANY FILE PRESET!";
+	//   ofLogError("ofxColorManager") << "NOT FOUND ANY FILE PRESET!";
 	//}
 }
 
@@ -1042,25 +1093,25 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 		//load
 		//if (bDelayedLoading)//TODO: not implemented
 		//{
-		//    ofLogNotice("ofxPresetsManager") << "bDelayedLoading: " << bDelayedLoading;
+		//   ofLogNotice("ofxPresetsManager") << "bDelayedLoading: " << bDelayedLoading;
 		//
-		//    //byKey
-		//    //newIndices[i] = k;
-		//    //ofLogNotice("ofxPresetsManager") << "newIndices[i] = k;" <<  k << ", " << i;
+		//   //byKey
+		//   //newIndices[i] = k;
+		//   //ofLogNotice("ofxPresetsManager") << "newIndices[i] = k;" <<  k << ", " << i;
 		//
-		//    //byMousePressed
-		//    //ofLogNotice("ofxPresetsManager") << "newIndices[yIndex] = xIndex:" <<  yIndex << " = " << xIndex;
+		//   //byMousePressed
+		//   //ofLogNotice("ofxPresetsManager") << "newIndices[yIndex] = xIndex:" <<  yIndex << " = " << xIndex;
 		//}
 		//
 		//else
 		//{
-		//    //byKey
-		//    //load( k, i );
-		//    //ofLogNotice("ofxPresetsManager") << "load( k, i ):" <<  k << ", " << i;
+		//   //byKey
+		//   //load( k, i );
+		//   //ofLogNotice("ofxPresetsManager") << "load( k, i ):" <<  k << ", " << i;
 		//
-		//    //byMousePressed
-		//    //load( xIndex, yIndex);
-		//    //ofLogNotice("ofxPresetsManager") << "load( xIndex, yIndex):" <<  xIndex << ", " << yIndex;
+		//   //byMousePressed
+		//   //load( xIndex, yIndex);
+		//   //ofLogNotice("ofxPresetsManager") << "load( xIndex, yIndex):" <<  xIndex << ", " << yIndex;
 
 		//-
 
@@ -1094,7 +1145,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 			{
 				if (lastIndices.size() > 0)
 				{
-					lastIndices[yIndex] = xIndex;//?this is to move clicker selector
+					lastIndices[yIndex] = xIndex;//? this is to move clicker selector
 					ofLogNotice("ofxPresetsManager") << "lastIndices[yIndex]: " << xIndex;
 					ofLogNotice("ofxPresetsManager") << "autoLoad: " << autoLoad;
 				}
@@ -1151,6 +1202,12 @@ void ofxPresetsManager::set_path_PresetsFolder(string folder)
 	path_PresetsFolder = folder;
 }
 
+//--------------------------------------------------------------
+void ofxPresetsManager::set_GlobalFolder(string folder)
+{
+	path_GloabalFolder = folder;
+}
+
 
 #pragma mark - GUI
 
@@ -1171,8 +1228,8 @@ bool ofxPresetsManager::gui_draw()
 		{
 			if (ofxImGui::BeginWindow("PRESET MANAGER", mainSettings, false))
 				//if (ofxImGui::BeginWindow("PRESET MANAGER", mainSettings,
-				//    ImGuiWindowFlags_NoCollapse |
-				//    ImGuiWindowFlags_AlwaysAutoResize))
+				//   ImGuiWindowFlags_NoCollapse |
+				//   ImGuiWindowFlags_AlwaysAutoResize))
 			{
 				ImGui::PushItemWidth(100);
 
@@ -1291,11 +1348,11 @@ void ofxPresetsManager::groupDebug(ofParameterGroup &group)
 
 	for (auto parameter : group)
 	{
-		// Group.
+		//Group.
 		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
 		if (parameterGroup)
 		{
-			// Recurse through contents.
+			//Recurse through contents.
 			//ofxImGui::AddGroup(*parameterGroup, settings);
 			groupDebug(*parameterGroup);
 
@@ -1305,7 +1362,7 @@ void ofxPresetsManager::groupDebug(ofParameterGroup &group)
 			continue;
 		}
 
-		// Parameter, try everything we know how to handle.
+		//Parameter, try everything we know how to handle.
 #if OF_VERSION_MINOR >= 10
 		auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
 		if (parameterVec2f)
@@ -1407,7 +1464,7 @@ void ofxPresetsManager::gui_imGui_PresetManager()
 		ImGui::Text("NAME:");
 		string textInput_temp = PRESET_name;
 
-		// loaded string into char array
+		//loaded string into char array
 		char tab2[32];
 		strncpy(tab2, textInput_temp.c_str(), sizeof(tab2));
 		tab2[sizeof(tab2) - 1] = 0;
@@ -1425,13 +1482,13 @@ void ofxPresetsManager::gui_imGui_PresetManager()
 
 		//--
 
-		// arrow buttons
+		//arrow buttons
 		static int counter = currentFile;
 		float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
 
 		ImGui::PushButtonRepeat(true);
 
-		// prev
+		//prev
 		if (ImGui::ArrowButton("##left", ImGuiDir_Left))
 		{
 			if (counter > 0)
@@ -1450,7 +1507,7 @@ void ofxPresetsManager::gui_imGui_PresetManager()
 			}
 		}
 
-		// next
+		//next
 		ImGui::SameLine(0.0f, spacing);
 		if (ImGui::ArrowButton("##right", ImGuiDir_Right))
 		{
@@ -1479,7 +1536,7 @@ void ofxPresetsManager::gui_imGui_PresetManager()
 
 		//-
 
-		// scrollable list
+		//scrollable list
 		if (!fileNames.empty())
 		{
 			int currentFileIndex = currentFile;
@@ -1501,7 +1558,7 @@ void ofxPresetsManager::gui_imGui_PresetManager()
 
 		//-
 
-		// 2. presets
+		//2. presets
 
 		ImGui::Text("PRESETS");
 
@@ -1512,8 +1569,8 @@ void ofxPresetsManager::gui_imGui_PresetManager()
 			//TODO
 			//should re load by same name and get what position on vector
 			//is to reload current preset number
-			//            textInput_temp = ofToString(tab2);
-			//            ofLogNotice("ofxPresetsManager") << "textInput_temp:" << textInput_temp << endl;
+			//           textInput_temp = ofToString(tab2);
+			//           ofLogNotice("ofxPresetsManager") << "textInput_temp:" << textInput_temp << endl;
 
 			PRESET_name = textInput_temp;
 			ofLogNotice("ofxPresetsManager") << "PRESET_name: " << PRESET_name << endl;
@@ -1532,7 +1589,7 @@ void ofxPresetsManager::gui_imGui_PresetManager()
 
 			//delete old file
 			files[currentFile].remove();
-			// preset_filesRefresh();
+			//preset_filesRefresh();
 
 			//save new one
 			preset_save(PRESET_name);
@@ -1566,8 +1623,8 @@ void ofxPresetsManager::gui_imGui_PresetManager()
 		//ImGui::SameLine();
 		//if (ImGui::Button("REFRESH"))//current preset
 		//{
-		//    ofLogNotice("ofxPresetsManager") << "REFRESH" << endl;
-		//    preset_filesRefresh();
+		//   ofLogNotice("ofxPresetsManager") << "REFRESH" << endl;
+		//   preset_filesRefresh();
 		//}
 
 		//-
@@ -1579,7 +1636,7 @@ void ofxPresetsManager::gui_imGui_PresetManager()
 			ImGui::Separator();
 			ImGui::Text("NEW PRESET!");
 
-			// loaded string into char array
+			//loaded string into char array
 			char tab[32];
 			strncpy(tab, textInput_New.c_str(), sizeof(tab));
 			tab[sizeof(tab) - 1] = 0;
@@ -1591,7 +1648,7 @@ void ofxPresetsManager::gui_imGui_PresetManager()
 				ofLogNotice("ofxPresetsManager") << "textInput_New:" << textInput_New << endl;
 			}
 
-			// WORKFLOW: when it's editing a new preset..
+			//WORKFLOW: when it's editing a new preset..
 
 			ImGui::PushID(1);
 			int n = 30;
@@ -1620,12 +1677,12 @@ void ofxPresetsManager::gui_imGui_PresetManager()
 //--------------------------------------------------------------
 void ofxPresetsManager::gui_imGui_theme()
 {
-	// must be done after setup the gui
+	//must be done after setup the gui
 
 	ImGuiStyle *style = &ImGui::GetStyle();
 
-	// my dark theme
-	//    ImVec4* colors = ImGui::GetStyle().Colors;
+	//my dark theme
+	//   ImVec4* colors = ImGui::GetStyle().Colors;
 	style->Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 	style->Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 	style->Colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
@@ -1670,19 +1727,19 @@ void ofxPresetsManager::gui_imGui_theme()
 	style->Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	style->Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 
-	//    // 2. defaut dark theme exported
-	//    style->WindowMinSize = ImVec2(160, 65);
-	//    style->FramePadding = ImVec2(4, 2);
-	//    style->ItemSpacing = ImVec2(6, 2);
-	//    style->ItemInnerSpacing = ImVec2(6, 4);
-	//    style->Alpha = 1.0f;
-	//    style->WindowRounding = 0.0f;
-	//    style->FrameRounding = 0.0f;
-	//    style->IndentSpacing = 6.0f;
-	//    style->ItemInnerSpacing = ImVec2(2, 4);
-	//    style->ColumnsMinSpacing = 50.0f;
-	//    style->GrabMinSize = 14.0f;
-	//    style->GrabRounding = 0.0f;
-	//    style->ScrollbarSize = 12.0f;
-	//    style->ScrollbarRounding = 0.0f;
+	//   //2. defaut dark theme exported
+	//   style->WindowMinSize = ImVec2(160, 65);
+	//   style->FramePadding = ImVec2(4, 2);
+	//   style->ItemSpacing = ImVec2(6, 2);
+	//   style->ItemInnerSpacing = ImVec2(6, 4);
+	//   style->Alpha = 1.0f;
+	//   style->WindowRounding = 0.0f;
+	//   style->FrameRounding = 0.0f;
+	//   style->IndentSpacing = 6.0f;
+	//   style->ItemInnerSpacing = ImVec2(2, 4);
+	//   style->ColumnsMinSpacing = 50.0f;
+	//   style->GrabMinSize = 14.0f;
+	//   style->GrabRounding = 0.0f;
+	//   style->ScrollbarSize = 12.0f;
+	//   style->ScrollbarRounding = 0.0f;
 }
