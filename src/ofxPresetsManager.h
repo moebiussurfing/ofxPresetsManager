@@ -53,6 +53,7 @@
 //-
 
 #define NUM_OF_PRESETS 8
+#define NUM_MAX_GUIS 4
 
 //---
 
@@ -61,9 +62,11 @@ class ofxPresetsManager
 
 public:
 
-	//TODO:
-	ofParameterGroup group_TARGET;
-	void addGroup_TARGET(ofParameterGroup &g);
+	ofXml settingsArray[NUM_OF_PRESETS];
+
+	////TODO:
+	//ofParameterGroup group_TARGET;
+	//void addGroup_TARGET(ofParameterGroup &g);
 
 	//-
 

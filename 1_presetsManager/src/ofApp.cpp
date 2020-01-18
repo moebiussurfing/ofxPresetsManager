@@ -66,7 +66,7 @@ void ofApp::setup()
 	//--
 
 	//TODO:
-	manager.addGroup_TARGET(params);
+	//manager.addGroup_TARGET(params);
 }
 
 //--------------------------------------------------------------
