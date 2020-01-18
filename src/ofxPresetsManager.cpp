@@ -24,7 +24,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//-
 
-	//settings paths
+	//default settings paths
 
 	//top parent folder
 	path_GloabalFolder = "/";//default addon folder
@@ -66,11 +66,11 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//-
 
-	//gui font
-	myTTF = path_GloabalFolder + "assets/fonts/overpass-mono-bold.otf";
-	//myTTF = "assets/fonts/PragmataProR_0822.ttf";
-	sizeTTF = 8;
-	myFont.load(myTTF, sizeTTF, true, true);
+	////gui font
+	//myTTF = path_GloabalFolder + "assets/fonts/overpass-mono-bold.otf";
+	////myTTF = "assets/fonts/PragmataProR_0822.ttf";
+	//sizeTTF = 8;
+	//myFont.load(myTTF, sizeTTF, true, true);
 
 	//-
 
@@ -130,13 +130,23 @@ void ofxPresetsManager::setup()
 
 	//-
 
+	//gui font
+
+	myTTF = path_GloabalFolder + "fonts/overpass-mono-bold.otf";
+	//myTTF = "assets/fonts/PragmataProR_0822.ttf";
+	sizeTTF = 8;
+	myFont.load(myTTF, sizeTTF, true, true);
+
+	//-
+
 	//control gui
 	guiControl.setup("CONTROL");
 	guiControl.add(params);
-	guiControl.setPosition(ofGetWidth() - 210, 10);
+	//guiControl.setPosition(ofGetWidth() - 210, 10);
+	guiControl.setPosition(1300, 600);
 
 	//theme
-	string str = "assets/fonts/overpass-mono-bold.otf";
+	string str = path_GloabalFolder + "fonts/overpass-mono-bold.otf";
 	ofxGuiSetFont(str, 9);
 	ofxGuiSetDefaultHeight(20);
 	ofxGuiSetBorderColor(32);
@@ -357,9 +367,12 @@ void ofxPresetsManager::draw_CLICKER()
 		//-
 
 		//kit name
-		ofDrawBitmapString(groups[i].getName(),
-			clicker_cellSize*k + 15,
-			clicker_cellSize*i + 22);
+		if (SHOW_GroupName)
+		{
+			ofDrawBitmapString(groups[i].getName(),
+				clicker_cellSize*k + 15,
+				clicker_cellSize*i + 22);
+		}
 	}
 
 	//-
@@ -420,7 +433,8 @@ string ofxPresetsManager::presetName(string guiName, int presetIndex)
 	string strPath;
 
 	strFolder = path_GloabalFolder + path_KitFolder + "/";
-	strFile = guiName + "_preset_" + ofToString(presetIndex) + ".xml";
+	//strFile = guiName + "_preset_" + ofToString(presetIndex) + ".xml";
+	strFile = groupName + "_preset_" + ofToString(presetIndex) + ".xml";
 	strPath = strFolder + strFile;
 
 	return strPath;
@@ -447,6 +461,7 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)
 
 	//path folder file names
 	groupName = groups[0].getName();//TODO: one group only
+	ofLogNotice("ofxPresetsManager") << "groupName: " << groupName << endl;
 }
 
 //--------------------------------------------------------------
@@ -505,7 +520,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 			TS_START("saveMem1");
 
-			ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
+			//ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
 
 			ofSerialize(settingsArray[presetIndex], groups[guiIndex]);
 
@@ -560,7 +575,7 @@ void ofxPresetsManager::save(int presetIndex, string guiName)
 
 			TS_START("saveMem2");
 
-			ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
+			//ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
 
 			ofSerialize(settingsArray[presetIndex], groups[guiIndex]);
 
@@ -605,7 +620,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 
 			TS_START("loadMem1");
 
-			ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
+			//ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
 
 			//using xml array
 			ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
@@ -668,7 +683,7 @@ void ofxPresetsManager::load(int presetIndex, string guiName)
 
 			TS_START("loadMem2");
 
-			ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
+			//ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
 
 			ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
 
@@ -1859,9 +1874,13 @@ void ofxPresetsManager::saveAllKitFromMemory()
 	}
 
 	//debug params
-	for (int i = 0; i < NUM_OF_PRESETS; i++)
+	bool bDEBUG = false;
+	if (bDEBUG)
 	{
-		ofLogNotice("ofxPresetsManager") << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
+		for (int i = 0; i < NUM_OF_PRESETS; i++)
+		{
+			ofLogNotice("ofxPresetsManager") << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
+		}
 	}
 }
 
@@ -1902,9 +1921,13 @@ void ofxPresetsManager::loadAllKitToMemory()
 		settings.load(strPath);
 
 		//debug
-		ofLogNotice("ofxPresetsManager") << "[" << i << "]";
-		ofLogNotice("ofxPresetsManager") << "File: " << strPath
-			<< "\n" << ofToString(settings.toString());
+		bool bDEBUG = false;
+		if (bDEBUG)
+		{
+			ofLogNotice("ofxPresetsManager") << "[" << i << "]";
+			ofLogNotice("ofxPresetsManager") << "File: " << strPath
+				<< "\n" << ofToString(settings.toString());
+		}
 
 		//-
 
@@ -1919,11 +1942,14 @@ void ofxPresetsManager::loadAllKitToMemory()
 	ofLogNotice("ofxPresetsManager") << "---------------------------------";
 
 	//debug params
-	for (int i = 0; i < NUM_OF_PRESETS; i++)
+	bool bDEBUG = false;
+	if (bDEBUG)
 	{
-		ofLogNotice("ofxPresetsManager") << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
+		for (int i = 0; i < NUM_OF_PRESETS; i++)
+		{
+			ofLogNotice("ofxPresetsManager") << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
+		}
 	}
-
 	////debug params
 	//for (int i = 0; i < NUM_OF_PRESETS; i++)
 	//{

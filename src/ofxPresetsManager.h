@@ -2,27 +2,17 @@
 //ofxPresetsManager.h
 //based on original addon by Nicola Pisanti, MIT License, 2016
 //changes and customized by moebiussurfing:
-//
+
 //TODO:
 
-//++++ ERROR: do not loads group preset
-//++++ reapair bugs with folder names... bug when goes back to MODE MEMORY off
-//now erases all presets..
-
-//++add randomizer for testing
-//+++ think way to handle groups with pointers or not. 
-// but vector is not filled at loadAllKitToMemory()
-//+++ add mode without files, vectors
-//+++ add auto trig mode or not
-//++ improve callback system ?
-
-//+ save full kit of presets to avoid blocking main thread when switching presets
-//because json loadings
-//+ use pointers bewween classes (ofxSequencer) to share the data struct
+//browser
 //++ add ImGui browser list like from colorManager
 //+ each 8 presets can be a selection of best presets to trig handly and fast
-//+ could make tween when changing params
 
+//+++ add auto trig mode or not
+//++ improve callback system ?
+//+ use pointers bewween classes (ofxSequencer) to share the data struct
+//+ could make tween when changing params
 
 #pragma once
 
@@ -53,7 +43,7 @@
 //-
 
 #define NUM_OF_PRESETS 8
-#define NUM_MAX_GUIS 4
+#define NUM_MAX_GUIS 4//only one it's implemented! can't add more than one group!
 
 //---
 
@@ -61,10 +51,6 @@ class ofxPresetsManager
 {
 
 public:
-
-	////TODO:
-	//ofParameterGroup group_TARGET;
-	//void addGroup_TARGET(ofParameterGroup &g);
 
 	//-
 
@@ -93,12 +79,12 @@ public:
 	void loadAllKitToMemory();
 	void saveAllKitFromMemory();
 
-	//data
-	//vector<ofParameterGroup> groupsMem;
-	ofXml settingsArray[NUM_OF_PRESETS];
+	////TODO:
+	//ofParameterGroup group_TARGET;
+	//void addGroup_TARGET(ofParameterGroup &g);	//vector<ofParameterGroup> groupsMem;
 
-	//void kit_Build();
-	//void kit_Freeze();
+	//data
+	ofXml settingsArray[NUM_OF_PRESETS];
 
 	//--
 
@@ -202,6 +188,13 @@ public:
 	//void getNumPresets();
 	//void getNumPresets();
 
+	//draws group name into clicker boxes panel
+	bool SHOW_GroupName = false;
+	void setShowGroupName(bool b)
+	{
+		SHOW_GroupName = b;
+	}
+
 	//--
 
 	//browser
@@ -209,8 +202,8 @@ public:
 	//BUG: trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
 	void refresh()
 	{
-		//browser
-		preset_filesRefresh();
+		////browser
+		//preset_filesRefresh();
 
 		//-
 
@@ -268,7 +261,6 @@ public:
 
 	void set_PathControl_Settings(string str)
 	{
-		//"assets/settings/PRESET_MANAGER_control.xml"
 		pathControl = str;
 	}
 
@@ -322,6 +314,7 @@ private:
 
 	//--
 
+	//TODO: what is this for ?
 	//delayed loading
 
 	//if you set it to true the preset will be loaded only when you call (false is the default behavior)
@@ -357,7 +350,8 @@ private:
 	//-
 
 	//browser
-	//Gui
+
+	bool SHOW_Gui;
 
 	ofxImGui::Gui gui;
 	//ofxImGui::Settings mainSettings = ofxImGui::Settings();
@@ -474,10 +468,6 @@ private:
 	ofParameterGroup params_Gui;
 	ofParameterGroup params_Options;
 	ofParameterGroup params_Tools;
-
-	//-
-
-	bool SHOW_Gui;
 
 	//--
 
