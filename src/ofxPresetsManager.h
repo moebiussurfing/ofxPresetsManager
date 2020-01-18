@@ -78,6 +78,8 @@ public:
 	//-
 
 	//app settings
+
+	//this loads selected preset, autosave/autoload...gui states
 	void load_ControlSettings();
 	void save_ControlSettings();
 

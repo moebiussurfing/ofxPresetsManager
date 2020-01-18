@@ -13,28 +13,33 @@ void ofApp::setup()
 
 	//--
 
-	//local parameters
+	//local group parameters / preset
 	params.setName("myGroupParameters");
 	params.add(numSquares.set("num squares", 1, 1, 24));
 	params.add(separation.set("separation", 5, 1, 100));
 	params.add(squareSide.set("square side", 50, 5, 200));
 
-	//local gui
+	//local gui (to debug params too)
 	gui.setup("ofApp::gui");
 	gui.add(params);
 	gui.setPosition(20, 100);
 
 	//---
 
-	//preset manager 
+	//preset manager
+
+	//customize path folders
+	//NOTE: take care with path folders, they must exist before we can write inside!
 	//manager.set_GlobalFolder("ofxPresetsManager/");//TODO:
 	//manager.set_pathKit_Folder(pathKit);
+	
+	//some settings
+	//manager.setAutoLoad(true);
+	//manager.setAutoSave(true);
 
-	//target group. this is "the preset" itself
+	//add target group. this is "the preset" container itself
 	manager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
-
-	//NOTE: take care with path folders, they must exist before we can write inside!
-
+	
 	//--
 
 	//callbacks to trig when save/load is done
@@ -44,26 +49,19 @@ void ofApp::setup()
 	//apply setup
 	manager.setup();
 
-	//this loads selected preset number and gui state
-	//manager.load_ControlSettings();
-
    //trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
 	manager.refresh();
 
 	//--
 
-	//imGui
-	manager.set_GUI_Visible(true);
-	manager.set_GUI_Position(10, 30);
-	manager.set_GUI_Size(250, 300);
-
 	//user clicker
 	manager.set_CLICKER_Position(400, ofGetHeight() - 100, 40);//position and boxes sizes
 	manager.set_CLICKER_Visible(true);
 
-	//some settings
-	//manager.setAutoLoad(true);
-	//manager.setAutoSave(true);
+	//imGui
+	manager.set_GUI_Visible(true);
+	manager.set_GUI_Position(10, 30);
+	manager.set_GUI_Size(250, 300);
 
 	//--
 
@@ -80,12 +78,14 @@ void ofApp::update()
 
 	//-
 
+	//preset manager
 	manager.update();
 
 	//simple callback when preset is loaded 
 	if (manager.isDoneLoad())
 	{
 		ofLogNotice("ofApp") << "+ MANAGER DONE LOAD";
+		ofLogNotice("ofApp") << endl;
 	}
 }
 
@@ -103,6 +103,7 @@ void ofApp::draw()
 
 	//-
 
+	//browser
 	//Gui
 
 	//mouseOverGui = false;
@@ -121,7 +122,7 @@ void ofApp::draw()
 
 	//-
 
-	//DEBUG OBJECT LINKED TO GROUPED PARAMETERS
+	//debug object linked to grouped parameters
 	string str;
 	int x = 20;
 	int y = 20;
@@ -138,7 +139,7 @@ void ofApp::draw()
 
 	//-
 
-	//SCENE DRAW OBJECT LINKED TO GROUPED PARAMETERS
+	//scene draw object linked to grouped parameters
 	ofPushStyle();
 	ofSetColor(ofColor::white);
 	ofNoFill();
@@ -238,6 +239,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo)
 void ofApp::Changed_DONE_save(bool &DONE_save)
 {
 	ofLogNotice("ofApp") << "Changed_DONE_save: " << ofToString(DONE_save ? "TRUE" : "FALSE");
+	ofLogNotice("ofApp") << endl;
 
 	//extra stuff when finish loading/saving
 	if (manager.DONE_save)
@@ -250,6 +252,7 @@ void ofApp::Changed_DONE_save(bool &DONE_save)
 void ofApp::Changed_DONE_load(bool &DONE_load)
 {
 	ofLogNotice("ofApp") << "Changed_DONE_load: " << ofToString(DONE_load ? "TRUE" : "FALSE");
+	ofLogNotice("ofApp") << endl;
 
 	//extra stuff when finish loading/saving
 	if (manager.DONE_load)
@@ -258,6 +261,7 @@ void ofApp::Changed_DONE_load(bool &DONE_load)
 	}
 }
 
+//browser
 ////--------------------------------------------------------------
 //bool ofApp::imGui()
 //{

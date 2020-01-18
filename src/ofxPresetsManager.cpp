@@ -52,13 +52,13 @@ ofxPresetsManager::ofxPresetsManager()
 	//top parent folder
 	path_GloabalFolder = "/";//default addon folder
 	//path_GloabalFolder = "ofxPresetsManager/";
-	
+
 	//default kit folder for live/favorites presets
 	path_KitFolder = "assets/groups/kit_1";
-	
+
 	//app settings
 	pathControl = "assets/settings/PRESET_MANAGER_control.xml";
-	
+
 	//big browser
 	path_PresetsFolder = "assets/groups/presets";//default presets folder
 	PRESET_name = "_emptyPreset";//default preset
@@ -105,12 +105,15 @@ ofxPresetsManager::ofxPresetsManager()
 
 	PRESET_selected.set("PRESETS", 1, 1, num_presets);
 	bSave.set("SAVE", false);
+	bSave.setSerializable(false);
 	MODE_MemoryLive.set("MODE MEMORY", false);
 	loadToMemory.set("LOAD TO MEMORY", false);
+	loadToMemory.setSerializable(false);
 	autoLoad.set("AUTO LOAD", false);
 	autoSave.set("AUTO SAVE", false);
 	bAutosaveTimer.set("TIMER AUTO SAVE", false);
 	bCloneRight.set("CLONE >", false);
+	bCloneRight.setSerializable(false);
 	SHOW_menu.set("SHOW MENU", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", false);
 	ENABLE_shortcuts.set("ENABLE SHORTCUTS [TAB]", true);
@@ -166,16 +169,13 @@ void ofxPresetsManager::loadAllKitToMemory()
 		//assets/groups/kit_1ofxPresetsManager/myGroupParameters_preset_2.xml
 		//myGroupParameters"_preset_xx.xml"
 
-		string folder;
-		//folder = path_GloabalFolder;//without subfolder. must ends with "/"
-		//folder = "/patterns/";//using subfolder
-		//folder = "/";//without subfolder. must ends with "/"
-		folder = path_GloabalFolder + path_KitFolder+ "/";
+		string strFolder;
+		string strFile;
+		string strPath;
 
-		//string str1;
-		//string str = path_KitFolder + str1;
-		string strFile = groupName + "_preset_" + ofToString(i) + ".xml";
-		string strPath = (folder + strFile);
+		strFolder = path_GloabalFolder + path_KitFolder + "/";
+		strFile = groupName + "_preset_" + ofToString(i) + ".xml";
+		strPath = strFolder + strFile;
 
 		//load xml file
 		ofXml settings;
@@ -183,27 +183,11 @@ void ofxPresetsManager::loadAllKitToMemory()
 
 		//debug
 		ofLogNotice("ofxPresetsManager") << "[" << i << "]";
-		ofLogNotice("ofxPresetsManager") << "File: " << strPath << "\n" << ofToString(settings.toString());
+		ofLogNotice("ofxPresetsManager") << "File: " << strPath
+			<< "\n" << ofToString(settings.toString());
 
 		//-
 
-		//A.
-		////TODO:
-		////do not loads the group content
-		//ofParameterGroup g;
-		//
-		////this do not works because we can't load into an empty group!
-		////should copy group estructure from original one:
-		//g = groups[0];
-
-		//ofDeserialize(settings, g);
-
-		////TODO:
-		//groupsMem[i] = g;//ERROR could be here..
-
-		//-
-
-		//B.
 		ofDeserialize(settings, groupsMem[i]);
 
 		//-
@@ -411,11 +395,15 @@ int ofxPresetsManager::getGuiIndex(string name) const
 //--------------------------------------------------------------
 string ofxPresetsManager::presetName(string guiName, int presetIndex)
 {
-	string folder;
-	//folder = "/patterns/"; //using subfolder
-	folder = "/"; //without subfolder. must ends with "/"
+	string strFolder;
+	string strFile;
+	string strPath;
 
-	return (folder + guiName + "_preset_" + ofToString(presetIndex) + ".xml");
+	strFolder = path_GloabalFolder + path_KitFolder + "/";
+	strFile = guiName + "_preset_" + ofToString(presetIndex) + ".xml";
+	strPath = strFolder + strFile;
+
+	return strPath;
 }
 
 //-
@@ -480,11 +468,15 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 			//MODE A: from hd file
 			TS_START("save1");
 
-			std::string n = presetName(groups[guiIndex].getName(), presetIndex);
+			//std::string n = presetName(groups[guiIndex].getName(), presetIndex);
+			//ofXml settings;
+			//ofSerialize(settings, groups[guiIndex]);
+			//settings.save(path_KitFolder + "/" + n);
 
+			std::string strPath = presetName(groups[guiIndex].getName(), presetIndex);
 			ofXml settings;
 			ofSerialize(settings, groups[guiIndex]);
-			settings.save(path_KitFolder + "/" + n);
+			settings.save(strPath);
 
 			TS_STOP("save1");
 		}
@@ -526,11 +518,15 @@ void ofxPresetsManager::save(int presetIndex, string guiName)
 
 		//-
 
-		string n = presetName(guiName, presetIndex);
+		//string n = presetName(guiName, presetIndex);
+		//ofXml settings;
+		//ofSerialize(settings, groups[guiIndex]);
+		//settings.save(path_KitFolder + "/" + n);
 
+		std::string strPath = presetName(guiName, presetIndex);
 		ofXml settings;
 		ofSerialize(settings, groups[guiIndex]);
-		settings.save(path_KitFolder + "/" + n);
+		settings.save(strPath);
 
 		////it's important if this line is before or after ofSerialize
 		//DONE_save = true;
@@ -560,12 +556,17 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 			//MODE A: from hd file
 			TS_START("load1");
 
-			string str = presetName(groups[guiIndex].getName(), presetIndex);
+			//string str = presetName(groups[guiIndex].getName(), presetIndex);
+			//ofXml settings;
+			//settings.load(path_KitFolder + "/" + str);
+			//ofDeserialize(settings, groups[guiIndex]);
 
+			std::string strPath = presetName(groups[guiIndex].getName(), presetIndex);
 			ofXml settings;
-			settings.load(path_KitFolder + "/" + str);
+			settings.load(strPath);
 			ofDeserialize(settings, groups[guiIndex]);
 
+			//mark selected
 			lastIndices[guiIndex] = presetIndex;
 
 			TS_STOP("load1");
@@ -627,12 +628,17 @@ void ofxPresetsManager::load(int presetIndex, string guiName)
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
 		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
-		string n = presetName(guiName, presetIndex);
+		//string n = presetName(guiName, presetIndex);
+		//ofXml settings;
+		//settings.load(path_KitFolder + "/" + n);
+		//ofDeserialize(settings, groups[guiIndex]);
 
+		std::string strPath = presetName(guiName, presetIndex);
 		ofXml settings;
-		settings.load(path_KitFolder + "/" + n);
+		settings.load(strPath);
 		ofDeserialize(settings, groups[guiIndex]);
 
+		//mark selected
 		lastIndices[guiIndex] = presetIndex;
 
 		//-
@@ -1294,7 +1300,7 @@ void ofxPresetsManager::load_ControlSettings()
 
 	ofLogNotice("ofxPresetsManager") << "load_ControlSettings:\n" << path;
 
-	ofLogNotice("ofxPresetsManager") << "load_ControlSettings > PRESET_selected: " << PRESET_selected << endl;
+	ofLogNotice("ofxPresetsManager") << "load_ControlSettings: PRESET_selected: " << PRESET_selected;
 }
 
 //--------------------------------------------------------------
