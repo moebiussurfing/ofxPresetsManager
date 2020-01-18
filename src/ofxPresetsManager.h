@@ -62,8 +62,6 @@ class ofxPresetsManager
 
 public:
 
-	ofXml settingsArray[NUM_OF_PRESETS];
-
 	////TODO:
 	//ofParameterGroup group_TARGET;
 	//void addGroup_TARGET(ofParameterGroup &g);
@@ -89,15 +87,20 @@ public:
 	//-
 
 	ofxPanel guiControl;
-	vector<ofParameterGroup> groupsMem;
 	ofParameter<bool> MODE_MemoryLive;
 	ofParameter<bool> loadToMemory;
+	ofParameter<bool> saveFromMemory;
 	void loadAllKitToMemory();
+	void saveAllKitFromMemory();
+
+	//data
+	//vector<ofParameterGroup> groupsMem;
+	ofXml settingsArray[NUM_OF_PRESETS];
 
 	//void kit_Build();
 	//void kit_Freeze();
 
-	//-
+	//--
 
 #pragma mark - OF
 
@@ -110,10 +113,10 @@ public:
 	//draw some info, when the gui is drawn you can also click on the button to change / save presets
 	void draw();
 	void draw(int x, int y, int cellSize);
-	
+
 	//clickeable box panel
 	void draw_CLICKER();
-	
+
 	//-
 
 #pragma mark - DIFFERENT DATA TYPES METHODS

@@ -6,47 +6,24 @@
 #include "ofxPresetsManager.h"
 
 
-////--------------------------------------------------------------
-//void ofxPresetsManager::addGroup_TARGET(ofParameterGroup &g)
-//{
-//	ofLogNotice("ofxPresetsManager") << "addGroup_TARGET:" << "" << endl;
-//
-//	group_TARGET = g;
-//}
-
-////--------------------------------------------------------------
-//void ofxPresetsManager::kit_Build()
-//{
-//	int i = 0;
-//	ofLogNotice("ofxPresetsManager") << "groups:" << groups.size() << endl;
-//	for (auto g : groups)
-//	{
-//		i++;
-//		ofJson j;
-//		ofSerialize(j, g);
-//		string str = "TEST/group" + ofToString(i) + ".json";
-//		ofSavePrettyJson(str, j);
-//	}
-//
-//	//ofJson a;
-//	//a["data1"] = "mydata1";
-//	//
-//	//ofJson b;
-//	//b["data1"] = "mydata1b";
-//	//
-//	//ofJson data;
-//	//data.push_back(a);
-//	//data.push_back(b);
-//	//
-//	//std::ofLogNotice("ofxPresetsManager") << data.dump(4) << std::endl;
-//}
-
-
 #pragma mark - OF
 
 //--------------------------------------------------------------
 ofxPresetsManager::ofxPresetsManager()
 {
+	//-
+
+#ifdef TIME_SAMPLE_MEASURES
+	//TIME_SAMPLE_SET_FRAMERATE(fps); //specify a target framerate
+	TIME_SAMPLE_ENABLE();
+	TIME_SAMPLE_SET_AVERAGE_RATE(0.1);
+	TIME_SAMPLE_SET_DRAW_LOCATION(TIME_SAMPLE_DRAW_LOC_BOTTOM_LEFT);
+	TIME_SAMPLE_SET_PRECISION(4);
+	TIME_SAMPLE_GET_INSTANCE()->setEnabled(true);
+#endif
+
+	//-
+
 	//settings paths
 
 	//top parent folder
@@ -63,27 +40,24 @@ ofxPresetsManager::ofxPresetsManager()
 	path_PresetsFolder = "assets/groups/presets";//default presets folder
 	PRESET_name = "_emptyPreset";//default preset
 
-	//-
-
-	ofSetLogLevel("ofxPresetsManager", OF_LOG_NOTICE);
+	//--
 
 	modeKey = OF_KEY_CONTROL;
 	bKeys = false;
 	keysNotActivated = true;
 	bKeySave = false;
 
-	//-
-
-	groups.reserve(NUM_MAX_GUIS);//TODO: this multidimension is for multiple panels ?
-	lastIndices.reserve(NUM_MAX_GUIS);//TODO: this multidimension is for multiple panels ?
-	keys.reserve(NUM_MAX_GUIS);//TODO: this multidimension is for multiple panels ?
-
-	//-
-
 	lastMouseButtonState = false;
 	bDelayedLoading = false;
 
-	//-
+	//--
+
+	//this multidimension is for multiple gui/groups
+	groups.reserve(NUM_MAX_GUIS);
+	lastIndices.reserve(NUM_MAX_GUIS);
+	keys.reserve(NUM_MAX_GUIS);
+
+	//--
 
 	//TODO: easy callback to ofAppintegration
 	DONE_load.set("DONE LOAD", false);
@@ -100,7 +74,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//-
 
-	//PRESETS
+	//control parameters
 
 	PRESET_selected.set("PRESETS", 1, 1, num_presets);
 	bSave.set("SAVE", false);
@@ -108,6 +82,8 @@ ofxPresetsManager::ofxPresetsManager()
 	MODE_MemoryLive.set("MODE MEMORY", false);
 	loadToMemory.set("LOAD TO MEMORY", false);
 	loadToMemory.setSerializable(false);
+	saveFromMemory.set("SAVE FROM MEMORY", false);
+	saveFromMemory.setSerializable(false);
 	autoLoad.set("AUTO LOAD", false);
 	autoSave.set("AUTO SAVE", false);
 	bAutosaveTimer.set("TIMER AUTO SAVE", false);
@@ -117,13 +93,14 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", false);
 	ENABLE_shortcuts.set("ENABLE SHORTCUTS [TAB]", true);
 
-	params_Favorites.setName("FAVORITES");
+	params_Favorites.setName("USER");
 	params_Favorites.add(PRESET_selected);
 	params_Favorites.add(bSave);
-	params_Favorites.add(MODE_MemoryLive);
-	params_Favorites.add(loadToMemory);
 
 	params_Options.setName("OPTIONS");
+	params_Options.add(MODE_MemoryLive);
+	params_Options.add(loadToMemory);
+	params_Options.add(saveFromMemory);
 	params_Options.add(autoLoad);
 	params_Options.add(autoSave);
 	params_Options.add(bAutosaveTimer);
@@ -133,7 +110,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.add(SHOW_menu);
 	params_Gui.add(ENABLE_shortcuts);
 
-	params_Tools.setName("TOOLS");
+	params_Tools.setName("HELPER TOOLS");
 	params_Tools.add(bCloneRight);
 
 	//nested params for callbacks and storage settings
@@ -147,119 +124,9 @@ ofxPresetsManager::ofxPresetsManager()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::loadAllKitToMemory()
-{
-	ofLogNotice("ofxPresetsManager") << "loadAllKitToMemory()";
-
-	//TODO:
-	groupName = groups[0].getName();
-	ofLogNotice("ofxPresetsManager") << "groups[0].getName(): " << groupName;
-
-	groupsMem.clear();
-	groupsMem.reserve(NUM_OF_PRESETS);
-	groupsMem.resize(NUM_OF_PRESETS);
-
-	for (int i = 0; i < NUM_OF_PRESETS; i++)
-	{
-		//TODO:
-		//PROBLEM:
-		//this is not working because all the groups of the vector are shallow copies,
-		//so all are changing together
-		//pre-create params inside the group not avoid emptyness
-
-		//A
-		//groupsMem[i] = groups[0];
-		//this way makes all groups equals at the end
-
-		//B
-		//const ofParameterGroup g = (ofParameterGroup) groups[0];
-		ofParameterGroup g = groups[0];
-		groupsMem[i] = g;
-
-		//-
-
-		string strFolder;
-		string strFile;
-		string strPath;
-
-		strFolder = path_GloabalFolder + path_KitFolder + "/";
-		strFile = groupName + "_preset_" + ofToString(i) + ".xml";
-		strPath = strFolder + strFile;
-
-		//load xml file
-		ofXml settings;
-		settings.load(strPath);
-
-		//debug
-		ofLogNotice("ofxPresetsManager") << "[" << i << "]";
-		ofLogNotice("ofxPresetsManager") << "File: " << strPath
-			<< "\n" << ofToString(settings.toString());
-
-		//-
-
-		//TODO:
-		ofDeserialize(settings, groupsMem[i]);
-
-		//TODO:
-		settingsArray[i] = settings;
-
-		ofLogNotice("ofxPresetsManager") << "ofParameterGroup: " << i << "\n" << ofToString(groupsMem[i]);
-
-		//-
-
-		//TODO: think to use pointers
-	}
-
-	ofLogNotice("ofxPresetsManager") << "---------------------------------";
-
-	//debug params
-	for (int i = 0; i < NUM_OF_PRESETS; i++)
-	{
-		ofLogNotice("ofxPresetsManager") << "groupsMem[" << i << "]\n" << ofToString(groupsMem[i]);
-	}
-
-	//debug params
-	for (int i = 0; i < NUM_OF_PRESETS; i++)
-	{
-		ofLogNotice("ofxPresetsManager") << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
-	}
-}
-
-//--------------------------------------------------------------
 void ofxPresetsManager::setup()
 {
-	//ofSetLogLevel("ofxPresetsManager", OF_LOG_VERBOSE);
-
-	//-
-
-#ifdef TIME_SAMPLE_MEASURES
-	//TIME_SAMPLE_SET_FRAMERATE(fps); //specify a target framerate
-	TIME_SAMPLE_ENABLE();
-	TIME_SAMPLE_SET_AVERAGE_RATE(0.1);
-	TIME_SAMPLE_SET_DRAW_LOCATION(TIME_SAMPLE_DRAW_LOC_BOTTOM_LEFT);
-	TIME_SAMPLE_SET_PRECISION(4);
-	TIME_SAMPLE_GET_INSTANCE()->setEnabled(true);
-#endif
-
-	//-
-
-	//startup
-
-	load_ControlSettings();
-
-	selected_PRE = -1;
-
-	//-
-
-	//browser
-	gui_Visible = true;
-
-	//gui.setup();
-	//gui_imGui_theme();
-
-	//TODO
-	//bug on startup, not loading fine some param
-	//PRESET_selected = 0;
+	ofSetLogLevel("ofxPresetsManager", OF_LOG_NOTICE);
 
 	//-
 
@@ -280,8 +147,29 @@ void ofxPresetsManager::setup()
 
 	//-
 
-	//TODO:
-	loadAllKitToMemory();
+	//browser
+	gui_Visible = true;
+	//gui.setup();
+	//gui_imGui_theme();
+
+	//-
+
+	//memory mode
+	//if (MODE_MemoryLive)
+	{
+		loadAllKitToMemory();
+	}
+
+	//-
+
+	//startup
+
+	load_ControlSettings();
+
+	selected_PRE = -1;
+	//TODO
+	//bug on startup, not loading fine some param
+	//PRESET_selected = 0;
 }
 
 //--------------------------------------------------------------
@@ -385,7 +273,6 @@ void ofxPresetsManager::draw()
 	//-
 
 	guiControl.draw();
-
 }
 
 
@@ -499,16 +386,26 @@ void ofxPresetsManager::draw_CLICKER()
 //--------------------------------------------------------------
 ofxPresetsManager::~ofxPresetsManager()
 {
-	//save PRESET_selected preset on exit
-	doSave(PRESET_selected - 1);
+	//autosave PRESET_selected preset on exit
+	if (autoSave)
+	{
+		doSave(PRESET_selected - 1);
+	}
 
+	//app settings
 	save_ControlSettings();
 
+	//destroy callbacks
 	removeKeysListeners();
 	ofRemoveListener(params.parameterChangedE(), this, &ofxPresetsManager::Changed_Params);
 
-	//TODO:
-	//kit_Build();
+	//-
+
+	//MODE B: direct from memory
+	if (MODE_MemoryLive)
+	{
+		saveAllKitFromMemory();
+	}
 }
 
 //-
@@ -547,6 +444,9 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)
 	//update gui params
 	num_presets = _num_presets;
 	PRESET_selected.setMax(num_presets);
+
+	//path folder file names
+	groupName = groups[0].getName();//TODO: one group only
 }
 
 //--------------------------------------------------------------
@@ -690,14 +590,14 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 		{
 			//MODE A: from hd file
 
-			TS_START("load1");
+			TS_START("loadFile1");
 
 			std::string strPath = presetName(groups[guiIndex].getName(), presetIndex);
 			ofXml settings;
 			settings.load(strPath);
 			ofDeserialize(settings, groups[guiIndex]);
 
-			TS_STOP("load1");
+			TS_STOP("loadFile1");
 		}
 		else
 		{
@@ -753,14 +653,14 @@ void ofxPresetsManager::load(int presetIndex, string guiName)
 		{
 			//MODE A: from hd file
 
-			TS_START("load2");
+			TS_START("loadFile2");
 
 			std::string strPath = presetName(guiName, presetIndex);
 			ofXml settings;
 			settings.load(strPath);
 			ofDeserialize(settings, groups[guiIndex]);
 
-			TS_STOP("load2");
+			TS_STOP("loadFile2");
 		}
 		else
 		{
@@ -1222,12 +1122,38 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 		bCloneRight = false;
 		doCloneRight(PRESET_selected - 1);
 	}
-	else if (WIDGET == "LOAD TO MEMORY"&& loadToMemory)
+
+	//-
+
+	else if (WIDGET == "LOAD TO MEMORY" && loadToMemory)
 	{
 		ofLogNotice("ofxPresetsManager") << "loadToMemory:" << e;
 		loadToMemory = false;
 		loadAllKitToMemory();
 	}
+	else if (WIDGET == "SAVE FROM MEMORY" && saveFromMemory)
+	{
+		ofLogNotice("ofxPresetsManager") << "saveFromMemory:" << e;
+		saveFromMemory = false;
+		saveAllKitFromMemory();
+	}
+	else if (WIDGET == "MODE MEMORY")
+	{
+		ofLogNotice("ofxPresetsManager") << "MODE MEMORY: " << e;
+
+		if (MODE_MemoryLive)
+		{
+			//reload all xml preset files to memory
+			loadAllKitToMemory();
+		}
+		else
+		{
+			//save all xml preset files to disk from memory
+			saveAllKitFromMemory();
+		}
+	}
+
+	//-
 
 	//TODO: should be nice to add toggle to auto retrig or not same pre loaded preset
 	else if (WIDGET == "PRESETS" && (PRESET_selected == selected_PRE))
@@ -1910,3 +1836,105 @@ void ofxPresetsManager::gui_imGui_theme()
 	//   style->ScrollbarSize = 12.0f;
 	//   style->ScrollbarRounding = 0.0f;
 }
+
+//-
+
+//memory mode
+//--------------------------------------------------------------
+void ofxPresetsManager::saveAllKitFromMemory()
+{
+	ofLogNotice("ofxPresetsManager") << "saveAllKitFromMemory()";
+
+	for (int i = 0; i < NUM_OF_PRESETS; i++)
+	{
+		string strFolder;
+		string strFile;
+		string strPath;
+
+		strFolder = path_GloabalFolder + path_KitFolder + "/";
+		strFile = groupName + "_preset_" + ofToString(i) + ".xml";
+		strPath = strFolder + strFile;
+
+		settingsArray[i].save(strPath);
+	}
+
+	//debug params
+	for (int i = 0; i < NUM_OF_PRESETS; i++)
+	{
+		ofLogNotice("ofxPresetsManager") << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
+	}
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::loadAllKitToMemory()
+{
+	ofLogNotice("ofxPresetsManager") << "loadAllKitToMemory()";
+
+	////TODO:
+	//groupName = groups[0].getName();
+	//ofLogNotice("ofxPresetsManager") << "groups[0].getName(): " << groupName;
+	//groupsMem.clear();
+	//groupsMem.reserve(NUM_OF_PRESETS);
+	//groupsMem.resize(NUM_OF_PRESETS);
+
+	for (int i = 0; i < NUM_OF_PRESETS; i++)
+	{
+		//TODO:
+		//PROBLEM:
+		//this is not working because all the groups of the vector are shallow copies,
+		//so all are changing together
+		//pre-create params inside the group not avoid emptyness
+		//ofParameterGroup g = groups[0];
+		//groupsMem[i] = g;
+
+		//-
+
+		string strFolder;
+		string strFile;
+		string strPath;
+
+		strFolder = path_GloabalFolder + path_KitFolder + "/";
+		strFile = groupName + "_preset_" + ofToString(i) + ".xml";
+		strPath = strFolder + strFile;
+
+		//load xml file
+		ofXml settings;
+		settings.load(strPath);
+
+		//debug
+		ofLogNotice("ofxPresetsManager") << "[" << i << "]";
+		ofLogNotice("ofxPresetsManager") << "File: " << strPath
+			<< "\n" << ofToString(settings.toString());
+
+		//-
+
+		////TODO:
+		//ofDeserialize(settings, groupsMem[i]);
+		//ofLogNotice("ofxPresetsManager") << "ofParameterGroup: " << i << "\n" << ofToString(groupsMem[i]);
+
+		//TODO:
+		settingsArray[i] = settings;
+	}
+
+	ofLogNotice("ofxPresetsManager") << "---------------------------------";
+
+	//debug params
+	for (int i = 0; i < NUM_OF_PRESETS; i++)
+	{
+		ofLogNotice("ofxPresetsManager") << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
+	}
+
+	////debug params
+	//for (int i = 0; i < NUM_OF_PRESETS; i++)
+	//{
+	//	ofLogNotice("ofxPresetsManager") << "groupsMem[" << i << "]\n" << ofToString(groupsMem[i]);
+	//}
+}
+
+////--------------------------------------------------------------
+//void ofxPresetsManager::addGroup_TARGET(ofParameterGroup &g)
+//{
+//	ofLogNotice("ofxPresetsManager") << "addGroup_TARGET:" << "" << endl;
+//
+//	group_TARGET = g;
+//}

@@ -1,5 +1,7 @@
 update()=1|1|0
+loadFile1=1|1|0
+saveMem1=1|1|0
 draw()=1|1|0
-load1=1|1|0
+saveFile1=1|1|0
 keyPressed()=1|1|0
-save1=1|1|0
+loadMem1=1|1|0
