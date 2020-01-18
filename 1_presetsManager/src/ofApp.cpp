@@ -3,21 +3,21 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-    ofSetFrameRate(60);
+	ofSetFrameRate(60);
 
-    //-
+	//-
 
-    ////Gui
-    //guiApp.setup();
-    //guiVisible = true;
+	////Gui
+	//guiApp.setup();
+	//guiVisible = true;
 
-    //--
+	//--
 
-    //local parameters
-    params.setName("myGroupParameters");
-    params.add(numSquares.set("num squares", 1, 1, 24));
-    params.add(separation.set("separation", 5, 1, 100));
-    params.add(squareSide.set("square side", 50, 5, 200));
+	//local parameters
+	params.setName("myGroupParameters");
+	params.add(numSquares.set("num squares", 1, 1, 24));
+	params.add(separation.set("separation", 5, 1, 100));
+	params.add(squareSide.set("square side", 50, 5, 200));
 
 	//local gui
 	gui.setup("ofApp::gui");
@@ -29,43 +29,46 @@ void ofApp::setup()
 	//preset manager 
 	manager.set_GlobalFolder("ofxPresetsManager/");//TODO:
 	manager.set_pathKit_Folder(pathKit);
-	manager.add(params, {'1', '2', '3', '4', '5', '6', '7', '8'});
-	
-    //NOTE: take care with path folders, they must exist before we can write inside!
 
-    //--
+	//target group. this is "the preset" itself
+	manager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
 
-    //callbacks to trig when save/load is done
-    manager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
-    manager.DONE_load.addListener(this, &ofApp::Changed_DONE_load);
+	//NOTE: take care with path folders, they must exist before we can write inside!
+
+	//--
+
+	//callbacks to trig when save/load is done
+	manager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
+	manager.DONE_load.addListener(this, &ofApp::Changed_DONE_load);
 
 	//apply setup
 	manager.setup();
 
-    //this loads selected preset number and gui state
-    //manager.load_ControlSettings();
+	//this loads selected preset number and gui state
+	//manager.load_ControlSettings();
 
    //trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
-    manager.refresh();
+	manager.refresh();
 
-    //--
+	//--
 
 	//imGui
-    manager.set_GUI_Visible(true);
-    manager.set_GUI_Position(10, 30);
-    manager.set_GUI_Size(250, 300);
+	manager.set_GUI_Visible(true);
+	manager.set_GUI_Position(10, 30);
+	manager.set_GUI_Size(250, 300);
 
 	//user clicker
-    manager.set_CLICKER_Position(400, ofGetHeight() - 100, 40);//position and boxes sizes
-    manager.set_CLICKER_Visible(true);
+	manager.set_CLICKER_Position(400, ofGetHeight() - 100, 40);//position and boxes sizes
+	manager.set_CLICKER_Visible(true);
 
 	//some settings
 	//manager.setAutoLoad(true);
 	//manager.setAutoSave(true);
 
-    //--
+	//--
 
-	manager.addGroup_TARGET(&params);
+	//TODO:
+	manager.addGroup_TARGET(params);
 }
 
 //--------------------------------------------------------------
@@ -73,7 +76,7 @@ void ofApp::update()
 {
 	string str;
 	str = ofToString((int)ofGetFrameRate()) + " FPS";
-    ofSetWindowTitle(str);
+	ofSetWindowTitle(str);
 
 	//-
 
@@ -89,79 +92,85 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-    manager.DONE_save.removeListener(this, &ofApp::Changed_DONE_save);
-    manager.DONE_load.removeListener(this, &ofApp::Changed_DONE_load);
+	manager.DONE_save.removeListener(this, &ofApp::Changed_DONE_save);
+	manager.DONE_load.removeListener(this, &ofApp::Changed_DONE_load);
 }
 
 //--------------------------------------------------------------
 void ofApp::draw()
 {
-    ofBackground(64);
+	ofBackground(64);
 
-    //-
+	//-
 
-    //Gui
+	//Gui
 
-    //mouseOverGui = false;
-    //if (guiVisible)
-    //{
-    //   mouseOverGui = imGui();
-    //}
-    //if (mouseOverGui)
-    //{
-    //
-    //}
-    //else
-    //{
-    //
-    //}
+	//mouseOverGui = false;
+	//if (guiVisible)
+	//{
+	//   mouseOverGui = imGui();
+	//}
+	//if (mouseOverGui)
+	//{
+	//
+	//}
+	//else
+	//{
+	//
+	//}
 
-    //-
+	//-
 
-    //DEBUG OBJECT LINKED TO GROUPED PARAMETERS
-    string str;
-    int x = 20;
-    int y = 20;
-    int pad = 20;
-    int i = 0;
-    {
-        str = "numSquares: " + ofToString(numSquares);
-        ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-        str = "separation: " + ofToString(separation);
-        ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-        str = "squareSide: " + ofToString(squareSide);
-        ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+	//DEBUG OBJECT LINKED TO GROUPED PARAMETERS
+	string str;
+	int x = 20;
+	int y = 20;
+	int pad = 20;
+	int i = 0;
+	{
+		str = "numSquares: " + ofToString(numSquares);
+		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		str = "separation: " + ofToString(separation);
+		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		str = "squareSide: " + ofToString(squareSide);
+		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 	}
 
-    //-
+	//-
 
-    //SCENE DRAW OBJECT LINKED TO GROUPED PARAMETERS
-    ofPushStyle();
-    ofSetColor(ofColor::white);
-    ofNoFill();
-    ofPushMatrix();
-    ofTranslate(300, 50);
-    for (int i = 0; i < numSquares; ++i)
-    {
-        ofDrawRectangle(0, 0, squareSide, squareSide);
-        ofTranslate(separation, separation);
-    }
-    ofPopMatrix();
-    ofPopStyle();
+	//SCENE DRAW OBJECT LINKED TO GROUPED PARAMETERS
+	ofPushStyle();
+	ofSetColor(ofColor::white);
+	ofNoFill();
+	ofPushMatrix();
+	ofTranslate(300, 50);
+	for (int i = 0; i < numSquares; ++i)
+	{
+		ofDrawRectangle(0, 0, squareSide, squareSide);
+		ofTranslate(separation, separation);
+	}
+	ofPopMatrix();
+	ofPopStyle();
 
-    //-
+	//-
 
 	//local gui parameters
 	gui.draw();
 
 	//addon gui
-    manager.draw();
+	manager.draw();
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-
+	//randomize
+	if (key == ' ')
+	{
+		numSquares = ofRandom(numSquares.getMin(), numSquares.getMax());
+		separation = ofRandom(separation.getMin(), separation.getMax());
+		squareSide = ofRandom(squareSide.getMin(), squareSide.getMax());
+	}
 }
 
 //--------------------------------------------------------------
@@ -228,25 +237,25 @@ void ofApp::dragEvent(ofDragInfo dragInfo)
 //--------------------------------------------------------------
 void ofApp::Changed_DONE_save(bool &DONE_save)
 {
-    ofLogNotice("ofApp") << "Changed_DONE_save: " << ofToString(DONE_save ? "TRUE" : "FALSE");
+	ofLogNotice("ofApp") << "Changed_DONE_save: " << ofToString(DONE_save ? "TRUE" : "FALSE");
 
-    //extra stuff when finish loading/saving
+	//extra stuff when finish loading/saving
 	if (manager.DONE_save)
-    {
-        manager.DONE_save = false;
+	{
+		manager.DONE_save = false;
 	}
 }
 
 //--------------------------------------------------------------
 void ofApp::Changed_DONE_load(bool &DONE_load)
 {
-    ofLogNotice("ofApp") << "Changed_DONE_load: " << ofToString(DONE_load ? "TRUE" : "FALSE");
+	ofLogNotice("ofApp") << "Changed_DONE_load: " << ofToString(DONE_load ? "TRUE" : "FALSE");
 
-    //extra stuff when finish loading/saving
+	//extra stuff when finish loading/saving
 	if (manager.DONE_load)
-    {
-        manager.DONE_load = false;
-    }
+	{
+		manager.DONE_load = false;
+	}
 }
 
 ////--------------------------------------------------------------

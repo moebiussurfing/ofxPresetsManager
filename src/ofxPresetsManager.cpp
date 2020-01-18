@@ -7,7 +7,7 @@
 
 
 //--------------------------------------------------------------
-void ofxPresetsManager::addGroup_TARGET(ofParameterGroup *g)
+void ofxPresetsManager::addGroup_TARGET(ofParameterGroup &g)
 {
 	ofLogNotice("ofxPresetsManager") << "addGroup_TARGET:" << "" << endl;
 
@@ -50,8 +50,8 @@ ofxPresetsManager::ofxPresetsManager()
 	//settings paths
 	path_GloabalFolder = "/";//default addon folder
 	//path_GloabalFolder = "ofxPresetsManager/";
-	pathControl = "assets/settings/PRESET_MANAGER_control.xml";
 	path_KitFolder = "assets/groups/kit_1";//default kit folder for live/favorites presets
+	pathControl = "assets/settings/PRESET_MANAGER_control.xml";
 	//big browser
 	path_PresetsFolder = "assets/groups/presets";//default presets folder
 	PRESET_name = "_emptyPreset";//default preset
@@ -142,66 +142,72 @@ void ofxPresetsManager::loadAllKitToMemory()
 {
 	ofLogNotice("ofxPresetsManager") << "loadAllKitToMemory()";
 
+	//TODO:
+	groupName = groups[0].getName();
+	ofLogNotice("ofxPresetsManager") << "groups[0].getName(): " << groupName;
+
 	groupsMem.clear();
 	groupsMem.reserve(NUM_OF_PRESETS);
 	groupsMem.resize(NUM_OF_PRESETS);
 
 	for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{
+		//TODO:
+		//pre-create params inside the group not avoid emptyness
+		groupsMem[i] = groups[0];
+
 		//assets/groups/kit_1ofxPresetsManager/myGroupParameters_preset_2.xml
 		//myGroupParameters"_preset_xx.xml"
 
 		string folder;
-		//folder = "/patterns/"; //using subfolder
-		//folder = path_GloabalFolder; //without subfolder. must ends with "/"
-		folder = "/"; //without subfolder. must ends with "/"
-		string prefixName = "myGroupParameters";
+		//folder = path_GloabalFolder;//without subfolder. must ends with "/"
+		//folder = "/patterns/";//using subfolder
+		//folder = "/";//without subfolder. must ends with "/"
+		folder = path_GloabalFolder + path_KitFolder+ "/";
 
-		string str1;
-		str1 = (folder + prefixName + "_preset_" + ofToString(i) + ".xml");
-		string str = path_KitFolder + str1;
+		//string str1;
+		//string str = path_KitFolder + str1;
+		string strFile = groupName + "_preset_" + ofToString(i) + ".xml";
+		string strPath = (folder + strFile);
 
+		//load xml file
 		ofXml settings;
-		settings.load(str);
+		settings.load(strPath);
 
-		//TODO:
-		//do not loads the group content
-		ofParameterGroup g;
-		
-		//this do not works because we can load into an empty group!
-		//should copy group estructure from original one
-		g = groups[0];
-
-		ofDeserialize(settings, g);
-
-		//groupsMem.push_back(g);
-		groupsMem[i] = g;//ERROR could be here..
-		//TODO: think to use pointers
-		
 		//debug
 		ofLogNotice("ofxPresetsManager") << "[" << i << "]";
-		ofLogNotice("ofxPresetsManager") << "File: " << str << "\n" << ofToString(settings.toString());
+		ofLogNotice("ofxPresetsManager") << "File: " << strPath << "\n" << ofToString(settings.toString());
+
+		//-
+
+		//A.
+		////TODO:
+		////do not loads the group content
+		//ofParameterGroup g;
+		//
+		////this do not works because we can't load into an empty group!
+		////should copy group estructure from original one:
+		//g = groups[0];
+
+		//ofDeserialize(settings, g);
+
+		////TODO:
+		//groupsMem[i] = g;//ERROR could be here..
+
+		//-
+
+		//B.
+		ofDeserialize(settings, groupsMem[i]);
+
+		//-
+
+		//TODO: think to use pointers
 	}
 
 	//debug params
 	for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{
-		ofLogNotice("ofxPresetsManager") << i;
-
-		ofParameterGroup g;
-		g = groupsMem[i];
-
-		string str = "";
-		str += g.getName() + ",";
-		auto gg = g.getGroupHierarchyNames();
-		for (auto gi : gg)
-		{
-			str += gi;
-		}
-		str += ofToString(gg) + "\n";
-
-		ofLogNotice("ofxPresetsManager") << ofToString(str);
-		//ofLogNotice("ofxPresetsManager") << i << ": " << ofToString(str);
+		ofLogNotice("ofxPresetsManager") << i << "\n" << ofToString(groupsMem[i]);
 	}
 }
 
@@ -571,7 +577,9 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 			////groups[guiIndex] = g;
 			//groups[0] = g;
 
+			//TODO:
 			groups[0] = groupsMem[presetIndex];
+			//group_TARGET = groupsMem[presetIndex];
 
 			//pointer way
 			//if (group_TARGET != nullptr)
@@ -688,29 +696,39 @@ void ofxPresetsManager::draw_CLICKER()
 
 	//-
 
-	//back box
+	//0. inner box back
 	ofFill();
 	ofSetColor(0, 128);
 	ofDrawRectangle(0, 0, clicker_cellSize * (keys[0].size() + 1), clicker_cellSize);
 
 	//-
 
-	//trigger boxes
+	//trigger boxes and save button
 	ofNoFill();
 	ofSetColor(ofColor::white);
 
-	for (size_t i = 0; i < keys.size(); ++i)
+	for (size_t i = 0; i < keys.size(); ++i)//draw all guis/groups
 	{
 		size_t k = 0;
 		for (; k < keys[i].size(); ++k)
 		{
+			//1. outbox
 			ofDrawRectangle(clicker_cellSize * k, clicker_cellSize * i, clicker_cellSize, clicker_cellSize);
 
-			//ofDrawBitmapString( ofToString((char)keys[i][k]), clicker_cellSize*k+8, clicker_cellSize*i+18 );
-			myFont.drawString(ofToString((char)keys[i][k]),
-				clicker_cellSize * k + 0.5 * clicker_cellSize - 0.25 * sizeTTF,
-				clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF);
+			if (!myFont.isLoaded())//without ttf font
+			{
+				ofDrawBitmapString(ofToString((char)keys[i][k]),
+					clicker_cellSize*k + 8,
+					clicker_cellSize*i + 18);
+			}
+			else//custom font 
+			{
+				myFont.drawString(ofToString((char)keys[i][k]),
+					clicker_cellSize * k + 0.5 * clicker_cellSize - 0.25 * sizeTTF,
+					clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF);
+			}
 
+			//2. inner box. double mark current selected preset
 			if (lastIndices[i] == k)
 				ofDrawRectangle(clicker_cellSize * k + 4, clicker_cellSize * i + 4, clicker_cellSize - 8, clicker_cellSize - 8);
 		}
@@ -721,44 +739,44 @@ void ofxPresetsManager::draw_CLICKER()
 				ofDrawRectangle(clicker_cellSize * k + 4, clicker_cellSize * i + 4, clicker_cellSize - 8, clicker_cellSize - 8);
 		}
 
-		//save button
+		//3. save button
 		ofDrawRectangle(clicker_cellSize * k, clicker_cellSize * i, clicker_cellSize, clicker_cellSize);
-		myFont.drawString("SAVE",
-			clicker_cellSize * k + 0.5 * clicker_cellSize - 1.30 * sizeTTF,
-			clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF);
+		//label
+		if (!myFont.isLoaded())//without ttf font
+		{
+			ofDrawBitmapString("SAVE",
+				clicker_cellSize*k + 8,
+				clicker_cellSize*i + 18);
+		}
+		else//custom font 
+		{
+			myFont.drawString("SAVE",
+				clicker_cellSize * k + 0.5 * clicker_cellSize - 1.30 * sizeTTF,
+				clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF);
+		}
 		k++;
 
 		//-
 
 		//kit name
-
-		//ofDrawBitmapString( groups[i].getName(), clicker_cellSize*k+8, clicker_cellSize*i+18 );
-
-		//-
+		ofDrawBitmapString(groups[i].getName(),
+			clicker_cellSize*k + 15,
+			clicker_cellSize*i + 22);
 	}
 
 	//-
 
-	//help text
+	//4. help info text
 	if (debugClicker && ENABLE_shortcuts)
 	{
 		string info;
-
 		info = "MOUSE-CLICK OR KEYS [1-8] TO LOAD PRESET\n";
 		info += "HOLD [CTRL] TO SAVE/COPY PRESET\n";
 
-		//info = "MOUSE:\n";
-		//info += "CLICK TO LOAD PRESET\n";
-		//info += "[CTRL]+CLICK TO SAVE/COPY PRESET\n";
-		//info += "KEYS:\n";
-		//info += "[1-8] TO LOAD PRESET\n";
-		//info += "[CTRL]+[1-8] TO SAVE/COPY PRESET\n";
-
 		//double font to improve different background colors
-		float gap = 1.0;
+		int gap = 1;
 		ofSetColor(ofColor::black);
 		myFont.drawString(info, 0 + gap, clicker_cellSize + 15 + gap);
-
 		ofSetColor(ofColor::white);
 		myFont.drawString(info, 0, clicker_cellSize + 15);
 	}
@@ -791,7 +809,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				if (key == keys[i][k])
 				{
-					ofLogNotice("ofxPresetsManager") << "-> Key: " << key;
+					ofLogNotice("ofxPresetsManager") << "-> Key: " << (char)key;
 
 					if (bKeySave)
 					{

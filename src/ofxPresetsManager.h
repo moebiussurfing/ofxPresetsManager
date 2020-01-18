@@ -7,7 +7,9 @@
 
 //++++ ERROR: do not loads group preset
 //++++ reapair bugs with folder names... bug when goes back to MODE MEMORY off
+//now erases all presets..
 
+//++add randomizer for testing
 //+++ think way to handle groups with pointers or not. 
 // but vector is not filled at loadAllKitToMemory()
 //+++ add mode without files, vectors
@@ -59,30 +61,32 @@ class ofxPresetsManager
 
 public:
 
-	ofParameterGroup *group_TARGET;
-	void addGroup_TARGET(ofParameterGroup *g);
+	//TODO:
+	ofParameterGroup group_TARGET;
+	void addGroup_TARGET(ofParameterGroup &g);
 
 	//-
 
 	//settings paths
-	std::string pathControl;
+	std::string groupName;//get from ofParameterGroup name
+	std::string path_GloabalFolder;//top parent folder
+	std::string pathControl;//app settings
+	std::string path_KitFolder;//folder for kit of selected preset
+	std::string path_PresetsFolder;//for browse
 	std::string PRESET_name;
-	string path_KitFolder;
-	string path_PresetsFolder;
-	string path_GloabalFolder;
 
 	//-
 
+	//app settings
 	void load_ControlSettings();
 	void save_ControlSettings();
 
 	//-
 
 	ofxPanel guiControl;
-
+	vector<ofParameterGroup> groupsMem;
 	ofParameter<bool> MODE_MemoryLive;
 	ofParameter<bool> loadToMemory;
-	vector<ofParameterGroup> groupsMem;
 	void loadAllKitToMemory();
 
 	void kit_Build();
@@ -101,7 +105,10 @@ public:
 	//draw some info, when the gui is drawn you can also click on the button to change / save presets
 	void draw();
 	void draw(int x, int y, int cellSize);
-
+	
+	//clickeable box panel
+	void draw_CLICKER();
+	
 	//-
 
 #pragma mark - DIFFERENT DATA TYPES METHODS
@@ -113,7 +120,7 @@ public:
 
 	//--
 
-#pragma mark - CALLBACKS HELPERS
+#pragma mark - CALLBACKS
 
 	ofParameter<bool> DONE_load;
 	ofParameter<bool> DONE_save;
@@ -278,7 +285,7 @@ public:
 
 	//--
 
-	//from 1 to 8. (indexed vars starts from 0)
+	//from 1 to 8. (indexed vector vars starts from 0)
 	ofParameter<int> PRESET_selected;
 
 	//--
@@ -305,9 +312,9 @@ private:
 	bool bMouseOver_Changed = false;
 	bool debugClicker = true;
 
-	//-
+	//--
 
-	//DELAYED LOADING
+	//delayed loading
 
 	//if you set it to true the preset will be loaded only when you call (false is the default behavior)
 	void setDelayedLoading(bool active);
@@ -321,6 +328,8 @@ private:
 	void toggleKeysControl(bool active);
 
 	//-
+
+	//engine
 
 	//save to a preset
 	void save(int presetIndex, int guiIndex = 0);
@@ -336,8 +345,6 @@ private:
 
 	int getGuiIndex(string name) const;
 	string presetName(string guiName, int presetIndex);
-
-	void draw_CLICKER();
 
 	//-
 
@@ -367,12 +374,12 @@ private:
 
 	//--
 
-	//PRESETS
+	//presets
 
 	bool MODE_newPreset = false;
 	string textInput_New = "new preset";
 
-	//FILES
+	//files
 	std::vector<std::string> fileNames;
 	std::vector<ofFile> files;
 	int currentFile = 0;
@@ -382,13 +389,12 @@ private:
 
 	//-
 
-	//DATA
+	//data
 
 	//A. ofParameterGroup
 	std::vector<ofParameterGroup> groups;
 	//to store multiple group targets. 
 	//when using only one ofParameterGroup, there's only one group element!
-
 	//ofParameterGroup params_gui;
 
 	//-

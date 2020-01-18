@@ -1,5 +1,4 @@
 update()=1|1|0
-loadMem=1|1|0
-load1=1|1|0
 draw()=1|1|0
+load1=1|1|0
 save1=1|1|0
