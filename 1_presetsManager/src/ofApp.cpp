@@ -27,8 +27,8 @@ void ofApp::setup()
 	//---
 
 	//preset manager 
-	manager.set_GlobalFolder("ofxPresetsManager/");//TODO:
-	manager.set_pathKit_Folder(pathKit);
+	//manager.set_GlobalFolder("ofxPresetsManager/");//TODO:
+	//manager.set_pathKit_Folder(pathKit);
 
 	//target group. this is "the preset" itself
 	manager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });

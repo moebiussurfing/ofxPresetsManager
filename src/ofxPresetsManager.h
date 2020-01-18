@@ -89,8 +89,8 @@ public:
 	ofParameter<bool> loadToMemory;
 	void loadAllKitToMemory();
 
-	void kit_Build();
-	void kit_Freeze();
+	//void kit_Build();
+	//void kit_Freeze();
 
 	//-
 

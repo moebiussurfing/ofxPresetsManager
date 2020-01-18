@@ -14,32 +14,32 @@ void ofxPresetsManager::addGroup_TARGET(ofParameterGroup &g)
 	group_TARGET = g;
 }
 
-//--------------------------------------------------------------
-void ofxPresetsManager::kit_Build()
-{
-	int i = 0;
-	ofLogNotice("ofxPresetsManager") << "groups:" << groups.size() << endl;
-	for (auto g : groups)
-	{
-		i++;
-		ofJson j;
-		ofSerialize(j, g);
-		string str = "TEST/group" + ofToString(i) + ".json";
-		ofSavePrettyJson(str, j);
-	}
-
-	//ofJson a;
-	//a["data1"] = "mydata1";
-	//
-	//ofJson b;
-	//b["data1"] = "mydata1b";
-	//
-	//ofJson data;
-	//data.push_back(a);
-	//data.push_back(b);
-	//
-	//std::ofLogNotice("ofxPresetsManager") << data.dump(4) << std::endl;
-}
+////--------------------------------------------------------------
+//void ofxPresetsManager::kit_Build()
+//{
+//	int i = 0;
+//	ofLogNotice("ofxPresetsManager") << "groups:" << groups.size() << endl;
+//	for (auto g : groups)
+//	{
+//		i++;
+//		ofJson j;
+//		ofSerialize(j, g);
+//		string str = "TEST/group" + ofToString(i) + ".json";
+//		ofSavePrettyJson(str, j);
+//	}
+//
+//	//ofJson a;
+//	//a["data1"] = "mydata1";
+//	//
+//	//ofJson b;
+//	//b["data1"] = "mydata1b";
+//	//
+//	//ofJson data;
+//	//data.push_back(a);
+//	//data.push_back(b);
+//	//
+//	//std::ofLogNotice("ofxPresetsManager") << data.dump(4) << std::endl;
+//}
 
 
 #pragma mark - OF
@@ -48,10 +48,17 @@ void ofxPresetsManager::kit_Build()
 ofxPresetsManager::ofxPresetsManager()
 {
 	//settings paths
+
+	//top parent folder
 	path_GloabalFolder = "/";//default addon folder
 	//path_GloabalFolder = "ofxPresetsManager/";
-	path_KitFolder = "assets/groups/kit_1";//default kit folder for live/favorites presets
+	
+	//default kit folder for live/favorites presets
+	path_KitFolder = "assets/groups/kit_1";
+	
+	//app settings
 	pathControl = "assets/settings/PRESET_MANAGER_control.xml";
+	
 	//big browser
 	path_PresetsFolder = "assets/groups/presets";//default presets folder
 	PRESET_name = "_emptyPreset";//default preset
@@ -1280,11 +1287,12 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 //--------------------------------------------------------------
 void ofxPresetsManager::load_ControlSettings()
 {
-	ofLogNotice("ofxPresetsManager") << "load_ControlSettings " << pathControl;
-
 	ofXml settings;
-	settings.load(pathControl);
+	string path = path_GloabalFolder + pathControl;
+	settings.load(path);
 	ofDeserialize(settings, params);
+
+	ofLogNotice("ofxPresetsManager") << "load_ControlSettings:\n" << path;
 
 	ofLogNotice("ofxPresetsManager") << "load_ControlSettings > PRESET_selected: " << PRESET_selected << endl;
 }
@@ -1292,11 +1300,11 @@ void ofxPresetsManager::load_ControlSettings()
 //--------------------------------------------------------------
 void ofxPresetsManager::save_ControlSettings()
 {
-	ofLogNotice("ofxPresetsManager") << "save_ControlSettings " << pathControl;
-
 	ofXml settings;
 	ofSerialize(settings, params);
-	settings.save(pathControl);
+	string path = path_GloabalFolder + pathControl;
+	settings.save(path);
+	ofLogNotice("ofxPresetsManager") << "save_ControlSettings:\n" << path;
 }
 
 //--------------------------------------------------------------
