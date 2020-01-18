@@ -39,14 +39,12 @@ void ofApp::setup()
 	//NOTE: take care with path folders, they must exist before we can write inside!
 	//manager.set_GlobalFolder("ofxPresetsManager/");//TODO:
 	//manager.set_pathKit_Folder(pathKit);
+	manager.set_pathKit_Folder("assets/groups/kit");
 
 	//add target group. this is "the preset" container itself
-	//manager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
-	//manager.add(params, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
-
-	manager.set_pathKit_Folder("assets/groups/kit");
-	
 	manager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
+	//manager.add(params, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
+	
 	//manager.add(params2, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
 
 	//--

@@ -12,7 +12,8 @@
 //--------------------------------------------------------------
 ofxPresetsManager::ofxPresetsManager()
 {
-	DISABLE_Callbacks = true;
+	BLOCK_CALLBACKS = true;
+	//DISABLE_Callbacks = true;
 
 	//-
 
@@ -131,7 +132,8 @@ ofxPresetsManager::ofxPresetsManager()
 //--------------------------------------------------------------
 void ofxPresetsManager::setup()
 {
-	ofSetLogLevel("ofxPresetsManager", OF_LOG_NOTICE);
+	//ofSetLogLevel("ofxPresetsManager", OF_LOG_NOTICE);
+	ofLogNotice("ofxPresetsManager") << "> setup()";
 
 	//-
 
@@ -167,21 +169,28 @@ void ofxPresetsManager::setup()
 	//gui.setup();
 	//gui_imGui_theme();
 
+	//timer auto save
+	timerLast_Autosave = ofGetElapsedTimeMillis();
+
 	//-
 
 	//memory mode
 	loadAllKitToMemory();
 
-	//-
+	//-------
 
 	//startup
 
 	//app settings
 	load_ControlSettings();
 
+	//TODO:
 	selected_PRE = -1;
 
-	DISABLE_Callbacks = false;
+	//--------
+
+	BLOCK_CALLBACKS = false;
+	//DISABLE_Callbacks = false;
 }
 
 //--------------------------------------------------------------
@@ -211,7 +220,7 @@ void ofxPresetsManager::update()
 
 		//auto save timer
 		timerLast_Autosave = ofGetElapsedTimeMillis();
-		ofLogNotice("ofxPresetsManager") << "Autosave DONE";
+		ofLogVerbose("ofxPresetsManager") << "Autosave DONE";
 	}
 }
 
@@ -423,12 +432,13 @@ ofxPresetsManager::~ofxPresetsManager()
 
 	//destroy callbacks
 	removeKeysListeners();
+
 	ofRemoveListener(params.parameterChangedE(), this, &ofxPresetsManager::Changed_Params);
 
 	//-
 
 	//MODE B: direct from memory
-	if (MODE_MemoryLive)
+	if (MODE_MemoryLive && autoSave)
 	{
 		saveAllKitFromMemory();
 	}
@@ -458,6 +468,8 @@ string ofxPresetsManager::presetName(string gName, int presetIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main adder
 {
+	ofLogNotice("ofxPresetsManager") << "> added group";
+
 	//add a gui/ofParameterGroup for preset saving
 
 	groups.push_back(params);//each enqued group-param handles all 8 presets
@@ -477,7 +489,7 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 	groupName = groups[0].getName();//TODO: one group only
 	//groupName2 = groups[1].getName();//TODO: one group only
 
-	ofLogNotice("ofxPresetsManager") << "groupName: " << groupName << endl;
+	ofLogNotice("ofxPresetsManager") << "groupName: " << groupName;
 }
 
 //--------------------------------------------------------------
@@ -562,7 +574,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
 		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
-		ofLogNotice("ofxPresetsManager") << "DONE_save (2)";
+		ofLogVerbose("ofxPresetsManager") << "DONE_save (2)";
 
 		//it's important if this line is before or after ofSerialize
 		DONE_save = true;
@@ -658,7 +670,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 		//-
 
 		//callback
-		ofLogNotice("ofxPresetsManager") << "DONE_load (1)";
+		ofLogVerbose("ofxPresetsManager") << "DONE_load (1)";
 		DONE_load = true;//callback
 
 		//simple callback
@@ -713,7 +725,7 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 
 		//-
 
-		ofLogNotice("ofxPresetsManager") << "DONE_load (1)";
+		ofLogVerbose("ofxPresetsManager") << "DONE_load (1)";
 		DONE_load = true;
 	}
 	else
@@ -1000,7 +1012,7 @@ void ofxPresetsManager::preset_load(string name)//without xml extension
 
 	//-
 
-	ofLogNotice("ofxPresetsManager") << "DONE_load";
+	ofLogVerbose("ofxPresetsManager") << "DONE_load";
 	DONE_load = true;
 }
 
@@ -1136,156 +1148,159 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 {
 	string WIDGET = e.getName();
 
-	ofLogNotice("ofxPresetsManager") << "Changed_Params '" << WIDGET << "': " << e;
+	if (!BLOCK_CALLBACKS)
+	{
+		ofLogVerbose("ofxPresetsManager") << "Changed_Params '" << WIDGET << "': " << e;
 
-	if (WIDGET == "SAVE" && bSave)
-	{
-		ofLogNotice("ofxPresetsManager") << "SAVE: " << e;
-		bSave = false;
-		doSave(PRESET_selected - 1);
-	}
-	else if (WIDGET == "ENABLE KEYS [TAB]")
-	{
-
-	}
-	else if (WIDGET == "CLONE >" && bCloneRight)
-	{
-		ofLogNotice("ofxPresetsManager") << "CLONE >: " << e;
-		bCloneRight = false;
-		doCloneRight(PRESET_selected - 1);
-	}
-
-	//-
-
-	else if (WIDGET == "LOAD TO MEMORY" && loadToMemory)
-	{
-		ofLogNotice("ofxPresetsManager") << "loadToMemory:" << e;
-		loadToMemory = false;
-		loadAllKitToMemory();
-	}
-	else if (WIDGET == "SAVE FROM MEMORY" && saveFromMemory)
-	{
-		ofLogNotice("ofxPresetsManager") << "saveFromMemory:" << e;
-		saveFromMemory = false;
-		saveAllKitFromMemory();
-	}
-	else if (WIDGET == "MODE MEMORY")
-	{
-		ofLogNotice("ofxPresetsManager") << "MODE MEMORY: " << e;
-
-		if (MODE_MemoryLive)
+		if (WIDGET == "SAVE" && bSave)
 		{
-			//reload all xml preset files to memory
-			loadAllKitToMemory();
+			ofLogNotice("ofxPresetsManager") << "SAVE: " << e;
+			bSave = false;
+			doSave(PRESET_selected - 1);
 		}
-		else
+		else if (WIDGET == "ENABLE KEYS [TAB]")
 		{
-			//save all xml preset files to disk from memory
-			saveAllKitFromMemory();
+
 		}
-	}
+		else if (WIDGET == "CLONE >" && bCloneRight)
+		{
+			ofLogNotice("ofxPresetsManager") << "CLONE >: " << e;
+			bCloneRight = false;
+			doCloneRight(PRESET_selected - 1);
+		}
 
-	//-
-
-	//TODO: should be nice to add toggle to auto retrig or not same pre loaded preset
-	else if (WIDGET == "PRESETS" && (PRESET_selected == selected_PRE))
-	{
-		ofLogNotice("ofxPresetsManager") << "[NOT Changed] PRESET PRESET_selected: " << e;
-		ofLogNotice("ofxPresetsManager") << "BUT not changed, but re-trig PRESET_selected preset";
-
-		//callbacks
-		DONE_load = true;
-		bIsDoneLoad = true;
-	}
-	else if (WIDGET == "PRESETS" && (PRESET_selected != selected_PRE))
-	{
-		ofLogNotice("ofxPresetsManager") << "Changed PRESET";
-		ofLogNotice("ofxPresetsManager") << e;
-		/*
-		//load
-		//if (bDelayedLoading)//TODO: not implemented
-		//{
-		//   ofLogNotice("ofxPresetsManager") << "bDelayedLoading: " << bDelayedLoading;
-		//
-		//   //byKey
-		//   //newIndices[i] = k;
-		//   //ofLogNotice("ofxPresetsManager") << "newIndices[i] = k;" <<  k << ", " << i;
-		//
-		//   //byMousePressed
-		//   //ofLogNotice("ofxPresetsManager") << "newIndices[yIndex] = xIndex:" <<  yIndex << " = " << xIndex;
-		//}
-		//
-		//else
-		//{
-		//   //byKey
-		//   //load( k, i );
-		//   //ofLogNotice("ofxPresetsManager") << "load( k, i ):" <<  k << ", " << i;
-		//
-		//   //byMousePressed
-		//   //load( xIndex, yIndex);
-		//   //ofLogNotice("ofxPresetsManager") << "load( xIndex, yIndex):" <<  xIndex << ", " << yIndex;
-		*/
 		//-
 
-		//TODO:
-		//Windows
-		//if (selected_PRE > 0 && PRESET_selected>=1)
-		if (true)
+		else if (WIDGET == "LOAD TO MEMORY" && loadToMemory)
 		{
-			if (autoSave)
+			ofLogNotice("ofxPresetsManager") << "loadToMemory:" << e;
+			loadToMemory = false;
+			loadAllKitToMemory();
+		}
+		else if (WIDGET == "SAVE FROM MEMORY" && saveFromMemory)
+		{
+			ofLogNotice("ofxPresetsManager") << "saveFromMemory:" << e;
+			saveFromMemory = false;
+			saveAllKitFromMemory();
+		}
+		else if (WIDGET == "MODE MEMORY")
+		{
+			ofLogNotice("ofxPresetsManager") << "MODE MEMORY: " << e;
+
+			if (MODE_MemoryLive)
 			{
-				//TODO:2020
-				//DONE_save = true;//callback
-
-				save(selected_PRE - 1, 0);
-			}
-
-			//-
-
-			//remember this PRE state to know if changed or not
-			selected_PRE = PRESET_selected;
-
-			//-
-
-			//indexes starts from 0, not from 1 like presets
-			int xIndex = PRESET_selected - 1;
-			//yIndex = gui/group-parameter number
-			//this should handle when using multiple gui/group-parameter kits together. 
-			int yIndex = 0;
-
-			//-
-
-			if (autoLoad)
-			{
-				load(xIndex, yIndex);
-				//ofLogNotice("ofxPresetsManager") << "load( xIndex, yIndex): " << xIndex << ", " << yIndex;
-
-				//DONE_load = true;//callback
+				//reload all xml preset files to memory
+				loadAllKitToMemory();
 			}
 			else
 			{
-				//TODO:
-				//lastIndices it's only the gui box clicekd only, not important.. ?
-				if (lastIndices.size() > 0
-					&& yIndex < lastIndices.size()
-					&& xIndex < NUM_OF_PRESETS)
+				//save all xml preset files to disk from memory
+				saveAllKitFromMemory();
+			}
+		}
+
+		//-
+
+		//TODO: should be nice to add toggle to auto retrig or not same pre loaded preset
+		else if (WIDGET == "PRESETS" && (PRESET_selected == selected_PRE))
+		{
+			ofLogNotice("ofxPresetsManager") << "[PRESET NOT Changed]: " << e;
+			ofLogNotice("ofxPresetsManager") << "BUT RETRIG PRESET";
+
+			//callbacks
+			DONE_load = true;
+			bIsDoneLoad = true;
+		}
+		else if (WIDGET == "PRESETS" && (PRESET_selected != selected_PRE))
+		{
+			ofLogNotice("ofxPresetsManager") << "PRESET:";
+			ofLogNotice("ofxPresetsManager") << e;
+			/*
+			//load
+			//if (bDelayedLoading)//TODO: not implemented
+			//{
+			//   ofLogNotice("ofxPresetsManager") << "bDelayedLoading: " << bDelayedLoading;
+			//
+			//   //byKey
+			//   //newIndices[i] = k;
+			//   //ofLogNotice("ofxPresetsManager") << "newIndices[i] = k;" <<  k << ", " << i;
+			//
+			//   //byMousePressed
+			//   //ofLogNotice("ofxPresetsManager") << "newIndices[yIndex] = xIndex:" <<  yIndex << " = " << xIndex;
+			//}
+			//
+			//else
+			//{
+			//   //byKey
+			//   //load( k, i );
+			//   //ofLogNotice("ofxPresetsManager") << "load( k, i ):" <<  k << ", " << i;
+			//
+			//   //byMousePressed
+			//   //load( xIndex, yIndex);
+			//   //ofLogNotice("ofxPresetsManager") << "load( xIndex, yIndex):" <<  xIndex << ", " << yIndex;
+			*/
+			//-
+
+			//TODO:
+			//Windows
+			//if (selected_PRE > 0 && PRESET_selected>=1)
+			if (true)
+			{
+				if (autoSave)
 				{
-					//? this is only to move clicker selector
-					lastIndices[yIndex] = xIndex;
-					ofLogNotice("ofxPresetsManager") << "lastIndices[yIndex]: " << xIndex;
-					ofLogNotice("ofxPresetsManager") << "autoLoad: " << autoLoad;
+					//TODO:2020
+					//DONE_save = true;//callback
+
+					save(selected_PRE - 1, 0);
+				}
+
+				//-
+
+				//remember this PRE state to know if changed or not
+				selected_PRE = PRESET_selected;
+
+				//-
+
+				//indexes starts from 0, not from 1 like presets
+				int xIndex = PRESET_selected - 1;
+				//yIndex = gui/group-parameter number
+				//this should handle when using multiple gui/group-parameter kits together. 
+				int yIndex = 0;//TODO: one group only
+
+				//-
+
+				if (autoLoad)
+				{
+					load(xIndex, yIndex);
+					//ofLogNotice("ofxPresetsManager") << "load( xIndex, yIndex): " << xIndex << ", " << yIndex;
+
+					//DONE_load = true;//callback
 				}
 				else
 				{
-					ofLogNotice("ofxPresetsManager") << "lastIndices 0 size!";
+					//TODO:
+					//lastIndices it's only the gui box clicked only, not important.. ?
+					if (lastIndices.size() > 0
+						&& yIndex < lastIndices.size()
+						&& xIndex < NUM_OF_PRESETS)
+					{
+						//mark selector
+						lastIndices[yIndex] = xIndex;
+						//ofLogNotice("ofxPresetsManager") << "lastIndices[yIndex]: " << xIndex;
+						//ofLogNotice("ofxPresetsManager") << "autoLoad: " << autoLoad;
+					}
+					else
+					{
+						ofLogNotice("ofxPresetsManager") << "lastIndices has 0 size!";
+					}
 				}
 			}
-		}
-		//TODO:
-		//Windows
-		else
-		{
-			ofLogError("ofxPresetsManager") << "IGNORED PRESETS CHANGE";
+			//TODO:
+			//Windows
+			else
+			{
+				ofLogError("ofxPresetsManager") << "IGNORED PRESETS CHANGE";
+			}
 		}
 	}
 }
@@ -1300,9 +1315,8 @@ void ofxPresetsManager::load_ControlSettings()
 	settings.load(path);
 	ofDeserialize(settings, params);
 
-	ofLogNotice("ofxPresetsManager") << "load_ControlSettings:\n" << path;
-
-	ofLogNotice("ofxPresetsManager") << "load_ControlSettings: PRESET_selected: " << PRESET_selected;
+	ofLogNotice("ofxPresetsManager") << "> load_ControlSettings:\n" << path;
+	ofLogNotice("ofxPresetsManager") << "> load_ControlSettings: PRESET " << PRESET_selected;
 }
 
 //--------------------------------------------------------------
@@ -1312,7 +1326,7 @@ void ofxPresetsManager::save_ControlSettings()
 	ofSerialize(settings, params);
 	string path = path_GloabalFolder + pathControl;
 	settings.save(path);
-	ofLogNotice("ofxPresetsManager") << "save_ControlSettings:\n" << path;
+	ofLogNotice("ofxPresetsManager") << "> save_ControlSettings:\n" << path;
 }
 
 //--------------------------------------------------------------
@@ -1904,7 +1918,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 //--------------------------------------------------------------
 void ofxPresetsManager::loadAllKitToMemory()
 {
-	ofLogNotice("ofxPresetsManager") << "loadAllKitToMemory()";
+	ofLogNotice("ofxPresetsManager") << "> loadAllKitToMemory()";
 
 	////TODO:
 	//groupName = groups[0].getName();
@@ -1956,7 +1970,8 @@ void ofxPresetsManager::loadAllKitToMemory()
 		settingsArray[i] = settings;
 	}
 
-	ofLogNotice("ofxPresetsManager") << "---------------------------------";
+	ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";
+
 
 	//debug params
 	bool bDEBUG = false;

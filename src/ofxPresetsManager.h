@@ -118,6 +118,8 @@ public:
 
 #pragma mark - CALLBACKS
 
+	bool BLOCK_CALLBACKS = true;
+	
 	ofParameter<bool> DONE_load;
 	ofParameter<bool> DONE_save;
 
@@ -214,10 +216,10 @@ public:
 
 		//-
 
-		ofLogNotice("ofxPresetsManager") << "refresh";
+		ofLogNotice("ofxPresetsManager") << "> refresh()";
 		selected_PRE = -1;
 		PRESET_selected = PRESET_selected;
-		ofLogNotice("ofxPresetsManager") << "PRESET_selected:" << PRESET_selected;
+		ofLogNotice("ofxPresetsManager") << "PRESET " << PRESET_selected;
 	}
 
 
@@ -491,7 +493,7 @@ private:
 	//updating some params before save will trigs also the group callbacks
 	//so we disable this callbacks just in case params updatings are required
 	//in this case we will need to update gui position param
-	bool DISABLE_Callbacks = false;
+	//bool DISABLE_Callbacks = false;
 
 	//--
 
