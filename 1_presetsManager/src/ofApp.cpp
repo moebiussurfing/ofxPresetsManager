@@ -14,40 +14,49 @@ void ofApp::setup()
 	//--
 
 	//local group parameters / preset
+	
+	//group1
 	params.setName("myGroupParameters");
 	params.add(numSquares.set("num squares", 1, 1, 24));
 	params.add(separation.set("separation", 5, 1, 100));
 	params.add(squareSide.set("square side", 50, 5, 200));
 
-	//local gui (to debug params too)
-	gui.setup("ofApp::gui");
-	gui.add(params);
-	gui.setPosition(20, 100);
-
+	////group2
+	//params2.setName("circlesParams");
+	//params2.add(numCircles.set("num circles", 1, 1, 24));
+	//params2.add(circleSeparation.set("circle separation", 5, 1, 100));
+	//params2.add(circleSide.set("circles side", 50, 5, 200));
+	
 	//---
 
 	//preset manager
+
+	//some settings
+	//manager.setAutoLoad(true);
+	//manager.setAutoSave(true);
 
 	//customize path folders
 	//NOTE: take care with path folders, they must exist before we can write inside!
 	//manager.set_GlobalFolder("ofxPresetsManager/");//TODO:
 	//manager.set_pathKit_Folder(pathKit);
-	
-	//some settings
-	//manager.setAutoLoad(true);
-	//manager.setAutoSave(true);
 
 	//add target group. this is "the preset" container itself
-	manager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
+	//manager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
+	//manager.add(params, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
+
+	manager.set_pathKit_Folder("assets/groups/kit");
 	
+	manager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
+	//manager.add(params2, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
+
 	//--
+
+	//apply setup
+	manager.setup();
 
 	//callbacks to trig when save/load is done
 	manager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
 	manager.DONE_load.addListener(this, &ofApp::Changed_DONE_load);
-
-	//apply setup
-	manager.setup();
 
    //trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
 	manager.refresh();
@@ -55,7 +64,7 @@ void ofApp::setup()
 	//--
 
 	//user clicker
-	manager.set_CLICKER_Position(400, ofGetHeight() - 100, 40);//position and boxes sizes
+	manager.set_CLICKER_Position(400, ofGetHeight() - 200, 50);//position and boxes sizes
 	manager.set_CLICKER_Visible(true);
 
 	//imGui
@@ -65,8 +74,11 @@ void ofApp::setup()
 
 	//--
 
-	//TODO:
-	//manager.addGroup_TARGET(params);
+	//local gui (to debug params too)
+	gui.setup("ofApp::gui");
+	gui.add(params);
+	//gui.add(params2);
+	gui.setPosition(20, 100);
 }
 
 //--------------------------------------------------------------
@@ -99,7 +111,7 @@ void ofApp::exit()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
-	ofBackground(64);
+	ofBackground(ofColor::darkBlue);
 
 	//-
 
@@ -171,6 +183,11 @@ void ofApp::keyPressed(int key)
 		numSquares = ofRandom(numSquares.getMin(), numSquares.getMax());
 		separation = ofRandom(separation.getMin(), separation.getMax());
 		squareSide = ofRandom(squareSide.getMin(), squareSide.getMax());
+	}
+	//switch keys control enabled
+	else if (key == OF_KEY_TAB)
+	{
+		manager.set_ENABLE_Keys(!manager.isKeysEnabled());
 	}
 }
 

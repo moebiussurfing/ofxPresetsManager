@@ -43,7 +43,7 @@
 //-
 
 #define NUM_OF_PRESETS 8
-#define NUM_MAX_GUIS 4//only one it's implemented! can't add more than one group!
+#define NUM_MAX_GUIS 1//only one it's implemented! can't add more than one group!
 
 //---
 
@@ -56,6 +56,8 @@ public:
 
 	//settings paths
 	std::string groupName;//get from ofParameterGroup name
+	//std::string groupName2;//get from ofParameterGroup name
+	
 	std::string path_GloabalFolder;//top parent folder
 	std::string pathControl;//app settings
 	std::string path_KitFolder;//folder for kit of selected preset
@@ -159,6 +161,11 @@ public:
 	{
 		bKeys = active;
 		ENABLE_shortcuts = active;
+	}
+
+	bool isKeysEnabled()
+	{
+		return ENABLE_shortcuts;
 	}
 
 	int getCurrentPreset()
@@ -287,7 +294,11 @@ public:
 
 	//from 1 to 8. (indexed vector vars starts from 0)
 	ofParameter<int> PRESET_selected;
+	int selected_PRE = -1;
 
+	//ofParameter<int> PRESET2_selected;
+	//int selected2_PRE = -1;
+	
 	//--
 
 #pragma mark - PRIVATE
@@ -426,10 +437,11 @@ private:
 	//-
 
 	int num_presets;
-	int selected_PRE = -1;
-
-	void doCloneRight(int patternNum);
-	void doSave(int patternNum);
+	
+	void doCloneRight(int pIndex);
+	
+	void doSave(int pIndex);
+	//void doSave2(int pIndex);
 
 	//-
 

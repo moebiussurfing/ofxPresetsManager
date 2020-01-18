@@ -43,25 +43,22 @@ public:
     // PRESET MANAGER
 
     ofxPresetsManager manager;
-    string pathKit = "assets/groups/kit_1";
 
     //--
 
     // group
 
+	//group1
     ofParameterGroup params;
     ofParameter<int> numSquares;
     ofParameter<int> separation;
     ofParameter<int> squareSide;
-    ofParameterGroup paramsSub;
-    ofParameter<int> numSquaresSub;
-    ofParameter<int> separationSub;
-    ofParameter<int> squareSideSub;
-    ofParameterGroup params2;
-    ofParameter<bool> myBool;
-    ofParameter<float> myFloat;
-    ofParameter<float> myFloat2;
-    ofParameterGroup paramsFull;
+
+	////group2
+	//ofParameterGroup params2;
+	//ofParameter<int> numCircles;
+	//ofParameter<int> circleSeparation;
+	//ofParameter<int> circleSide;
 
 	//-
 
