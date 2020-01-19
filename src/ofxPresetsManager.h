@@ -252,6 +252,11 @@ public:
 		SHOW_Gui = visible;
 	}
 
+	bool is_GUI_Visible()
+	{
+		return SHOW_Gui;
+	}
+
 	void set_CLICKER_Position(int x, int y, int _cellSize)
 	{
 		clicker_Pos.x = x;

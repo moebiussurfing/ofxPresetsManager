@@ -96,7 +96,7 @@ ofxPresetsManager::ofxPresetsManager()
 	bCloneRight.setSerializable(false);
 	SHOW_menu.set("SHOW MENU", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", false);
-	ENABLE_shortcuts.set("ENABLE KEYS [TAB]", true);
+	ENABLE_shortcuts.set("ENABLE KEYS", true);
 
 	params_Favorites.setName("USER");
 	params_Favorites.add(PRESET_selected);
@@ -204,23 +204,38 @@ void ofxPresetsManager::update()
 	//TS_START("loadMem");
 	//TS_STOP("loadMem");
 
-	//autosave
-	//bAutosave = false;
-	if (bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
+	if (autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
 	{
+		//app settings
+		save_ControlSettings();
+
+		//save current preset
+		doSave(PRESET_selected - 1);
+		//doSave2(PRESET2_selected - 1);
+
+		if (!MODE_MemoryLive)
+		{
+			//MODE A: from hd file
+		}
+		else
+		{
+			//MODE B: direct from memory
+			saveAllKitFromMemory();
+		}
+
+		//-
+
 		//DISABLE_Callbacks = true;
 		////get gui position before save
 		//Gui_Position = glm::vec2(gui.getPosition());
 		//saveParams(params, path_GLOBAL + path_Params);
 		//DISABLE_Callbacks = false;
 
-		//save current preset
-		doSave(PRESET_selected - 1);
-		//doSave2(PRESET2_selected - 1);
+		//-
 
 		//auto save timer
 		timerLast_Autosave = ofGetElapsedTimeMillis();
-		ofLogVerbose("ofxPresetsManager") << "Autosave DONE";
+		ofLogNotice("ofxPresetsManager") << "Autosave DONE";
 	}
 }
 
@@ -294,7 +309,10 @@ void ofxPresetsManager::draw()
 
 	//-
 
-	guiControl.draw();
+	if (SHOW_Gui)
+	{
+		guiControl.draw();
+	}
 }
 
 
@@ -522,7 +540,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
 		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
-		ofLogNotice("ofxPresetsManager") << "DONE_save (1)";
+		ofLogVerbose("ofxPresetsManager") << "DONE_save (1)";
 
 		//it's important if this line is before or after ofSerialize
 		DONE_save = true;
@@ -942,7 +960,7 @@ void ofxPresetsManager::doCloneRight(int pIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::doSave(int pIndex)
 {
-	ofLogNotice("ofxPresetsManager") << "doSave: pIndex: " << pIndex;
+	ofLogVerbose("ofxPresetsManager") << "doSave: pIndex: " << pIndex;
 	save(pIndex, 0);
 	//only 1 row (gui) / data content
 }
@@ -1083,10 +1101,9 @@ void ofxPresetsManager::loadPreset(int p)
 
 	//TODO:
 	//Windows
-	if (true)
+	if (PRESET_selected > 0 && PRESET_selected <= num_presets)
 	{
-		if (PRESET_selected > 0 && PRESET_selected <= num_presets)
-			PRESET_selected = p;
+		PRESET_selected = p;
 	}
 	else
 	{
@@ -1152,13 +1169,15 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 	{
 		ofLogVerbose("ofxPresetsManager") << "Changed_Params '" << WIDGET << "': " << e;
 
+		//-
+
 		if (WIDGET == "SAVE" && bSave)
 		{
 			ofLogNotice("ofxPresetsManager") << "SAVE: " << e;
 			bSave = false;
 			doSave(PRESET_selected - 1);
 		}
-		else if (WIDGET == "ENABLE KEYS [TAB]")
+		else if (WIDGET == "ENABLE KEYS")
 		{
 
 		}
@@ -1205,7 +1224,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 		else if (WIDGET == "PRESETS" && (PRESET_selected == selected_PRE))
 		{
 			ofLogNotice("ofxPresetsManager") << "[PRESET NOT Changed]: " << e;
-			ofLogNotice("ofxPresetsManager") << "BUT RETRIG PRESET";
+			ofLogNotice("ofxPresetsManager") << "RE TRIG PRESET";
 
 			//callbacks
 			DONE_load = true;
