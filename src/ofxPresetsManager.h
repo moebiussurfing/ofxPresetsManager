@@ -205,6 +205,23 @@ public:
 	}
 
 	//--
+	
+	//used when preset has not changed but we like to retrig
+	bool bMustTrig = false;
+	bool mustTrig()
+	{
+		if (bMustTrig)
+		{
+			bMustTrig = false;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	//-
 
 	//browser
 
@@ -240,6 +257,11 @@ public:
 	void set_GUI_Position(int x, int y)
 	{
 		guiPos = ofVec2f(x, y);
+	}
+	void set_GUI_ControlPosition(int x, int y)
+	{
+		guiPos_Control = ofVec2f(x, y);
+		guiControl.setPosition(guiPos_Control.x, guiPos_Control.y);
 	}
 
 	void set_GUI_Size(int w, int h)
@@ -335,13 +357,15 @@ private:
 	//TODO: what is this for ?
 	//delayed loading
 
-	//if you set it to true the preset will be loaded only when you call (false is the default behavior)
-	void setDelayedLoading(bool active);
-	//make preset change effective when setDelayedLoading() is set to true
-	void delayedUpdate();
-	//if setDelayedLoading() is set to true stages a load action
-	void delayedLoad(int presetIndex, int guiIndex = 0);
-	void delayedLoad(int presetIndex, string guiName);
+	////if you set it to true the preset will be loaded only when you call (false is the default behavior)
+	//void setDelayedLoading(bool active);
+	////make preset change effective when setDelayedLoading() is set to true
+	//void delayedUpdate();
+	////if setDelayedLoading() is set to true stages a load action
+	//void delayedLoad(int presetIndex, int guiIndex = 0);
+	//void delayedLoad(int presetIndex, string guiName);
+
+	//-
 
 	//switch on or off the control with the keys
 	void toggleKeysControl(bool active);
@@ -387,6 +411,7 @@ private:
 	//void gui_SaveAsSettings();
 
 	ofVec2f guiPos = ofVec2f(500, 500);
+	ofVec2f guiPos_Control = ofVec2f(500, 500);
 	ofVec2f guiSize = ofVec2f(100, 100);
 	int clicker_cellSize = 80;
 	ofVec2f clicker_Pos = ofVec2f(500, 500);
@@ -438,7 +463,7 @@ private:
 	bool lastMouseButtonState;
 	void mousePressed(int x, int y);
 
-	bool bDelayedLoading;
+	//bool bDelayedLoading;
 	std::vector<int> newIndices;
 
 	//-

@@ -52,7 +52,7 @@ ofxPresetsManager::ofxPresetsManager()
 	bKeySave = false;
 
 	lastMouseButtonState = false;
-	bDelayedLoading = false;
+	//bDelayedLoading = false;
 
 	//--
 
@@ -235,7 +235,7 @@ void ofxPresetsManager::update()
 
 		//auto save timer
 		timerLast_Autosave = ofGetElapsedTimeMillis();
-		ofLogNotice("ofxPresetsManager") << "Autosave DONE";
+		ofLogNotice("ofxPresetsManager") << "Autosave DONE"<<endl;
 	}
 }
 
@@ -1095,62 +1095,65 @@ void ofxPresetsManager::preset_filesRefresh()
 //--------------------------------------------------------------
 void ofxPresetsManager::loadPreset(int p)
 {
-	ofLogNotice("ofxPresetsManager") << "> API > LOAD PRESET " << ofToString(p);
-	ofLogNotice("ofxPresetsManager") << "> loadPreset()";
-	ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";
-
-	//TODO:
-	//Windows
-	if (PRESET_selected > 0 && PRESET_selected <= num_presets)
+	if (!BLOCK_CALLBACKS)
 	{
-		PRESET_selected = p;
-	}
-	else
-	{
-		ofLogNotice("ofxPresetsManager") << "IGNORE LOAD PRESET";
-	}
-}
+		ofLogNotice("ofxPresetsManager") << "> API > LOAD PRESET " << ofToString(p);
+		ofLogNotice("ofxPresetsManager") << "> loadPreset()";
+		ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";
 
-//--------------------------------------------------------------
-void ofxPresetsManager::setDelayedLoading(bool active)
-{
-	bDelayedLoading = active;
-}
-
-//--------------------------------------------------------------
-void ofxPresetsManager::delayedLoad(int presetIndex, int guiIndex)
-{
-	//-
-
-	if (guiIndex >= 0 && guiIndex < (int)groups.size())
-	{
-		newIndices[guiIndex] = presetIndex;
-	}
-
-}
-
-//--------------------------------------------------------------
-void ofxPresetsManager::delayedLoad(int presetIndex, string gName)
-{
-	int guiIndex = getGuiIndex(gName);
-
-	if (guiIndex >= 0 && guiIndex < (int)groups.size())
-	{
-		newIndices[guiIndex] = presetIndex;
-	}
-
-}
-
-void ofxPresetsManager::delayedUpdate()
-{
-	for (size_t i = 0; i < groups.size(); ++i)
-	{
-		if (newIndices[i] != lastIndices[i])
+		//TODO:
+		//Windows
+		if (PRESET_selected > 0 && PRESET_selected <= num_presets)
 		{
-			load(newIndices[i], i);
+			PRESET_selected = p;
+		}
+		else
+		{
+			ofLogNotice("ofxPresetsManager") << "IGNORE LOAD PRESET";
 		}
 	}
 }
+//
+////--------------------------------------------------------------
+//void ofxPresetsManager::setDelayedLoading(bool active)
+//{
+//	bDelayedLoading = active;
+//}
+//
+////--------------------------------------------------------------
+//void ofxPresetsManager::delayedLoad(int presetIndex, int guiIndex)
+//{
+//	//-
+//
+//	if (guiIndex >= 0 && guiIndex < (int)groups.size())
+//	{
+//		newIndices[guiIndex] = presetIndex;
+//	}
+//
+//}
+//
+////--------------------------------------------------------------
+//void ofxPresetsManager::delayedLoad(int presetIndex, string gName)
+//{
+//	int guiIndex = getGuiIndex(gName);
+//
+//	if (guiIndex >= 0 && guiIndex < (int)groups.size())
+//	{
+//		newIndices[guiIndex] = presetIndex;
+//	}
+//
+//}
+//
+//void ofxPresetsManager::delayedUpdate()
+//{
+//	for (size_t i = 0; i < groups.size(); ++i)
+//	{
+//		if (newIndices[i] != lastIndices[i])
+//		{
+//			load(newIndices[i], i);
+//		}
+//	}
+//}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::toggleKeysControl(bool active)
@@ -1225,6 +1228,8 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 		{
 			ofLogNotice("ofxPresetsManager") << "[PRESET NOT Changed]: " << e;
 			ofLogNotice("ofxPresetsManager") << "RE TRIG PRESET";
+
+			bMustTrig = true;
 
 			//callbacks
 			DONE_load = true;
@@ -1345,7 +1350,7 @@ void ofxPresetsManager::save_ControlSettings()
 	ofSerialize(settings, params);
 	string path = path_GloabalFolder + pathControl;
 	settings.save(path);
-	ofLogNotice("ofxPresetsManager") << "> save_ControlSettings:\n" << path;
+	ofLogNotice("ofxPresetsManager") << "> save_ControlSettings:\n" << path<<endl;
 }
 
 //--------------------------------------------------------------
