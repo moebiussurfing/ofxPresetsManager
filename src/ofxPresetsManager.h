@@ -295,14 +295,14 @@ public:
 
 #pragma mark - SETTINGS
 
-	void set_PathControl_Settings(string str)
+	void set_Path_ControlSettings(string str)
 	{
 		pathControl = str;
 	}
 
-	void set_pathKit_Folder(string folder);
-	void set_path_PresetsFolder(string folder);
-	void set_GlobalFolder(string folder);
+	void set_Path_KitFolder(string folder);
+	void set_Path_PresetsFolder(string folder);
+	void set_Path_GlobalFolder(string folder);
 
 	void setAutoLoad(bool b)
 	{

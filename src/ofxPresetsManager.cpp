@@ -1354,19 +1354,19 @@ void ofxPresetsManager::save_ControlSettings()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::set_pathKit_Folder(string folder)
+void ofxPresetsManager::set_Path_KitFolder(string folder)
 {
 	path_KitFolder = folder;
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::set_path_PresetsFolder(string folder)
+void ofxPresetsManager::set_Path_PresetsFolder(string folder)
 {
 	path_PresetsFolder = folder;
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::set_GlobalFolder(string folder)
+void ofxPresetsManager::set_Path_GlobalFolder(string folder)
 {
 	path_GloabalFolder = folder;
 }
