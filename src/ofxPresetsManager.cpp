@@ -162,6 +162,9 @@ void ofxPresetsManager::setup()
 	//guiControl.setPosition(ofGetWidth() - 210, 10);
 	guiControl.setPosition(1300, 600);
 
+	//collapse
+	guiControl.getGroup("ofxPresetsManager").minimize();
+
 	//-
 
 	//browser
