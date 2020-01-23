@@ -828,8 +828,9 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//hide control gui
 		if (key == 'G')
 		{
-			bool b = is_GUI_Visible();
-			set_GUI_Visible(!b);
+			SHOW_Gui = !SHOW_Gui;
+			//bool b = is_GUI_Visible();
+			//set_GUI_Visible(!b);
 		}
 
 		//presets triggers
