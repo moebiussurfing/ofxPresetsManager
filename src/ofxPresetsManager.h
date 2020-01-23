@@ -393,7 +393,8 @@ private:
 
 	//browser
 
-	bool SHOW_Gui;
+	//bool SHOW_Gui;
+	ofParameter<bool> SHOW_Gui;
 
 	ofxImGui::Gui gui;
 	//ofxImGui::Settings mainSettings = ofxImGui::Settings();

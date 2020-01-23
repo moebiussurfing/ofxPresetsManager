@@ -95,6 +95,7 @@ ofxPresetsManager::ofxPresetsManager()
 	bCloneRight.set("CLONE >", false);
 	bCloneRight.setSerializable(false);
 	SHOW_menu.set("SHOW MENU", false);
+	SHOW_Gui.set("SHOW CONTROL GUI ", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", false);
 	ENABLE_shortcuts.set("ENABLE KEYS", true);
 
@@ -112,6 +113,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Options.add(bAutosaveTimer);
 
 	params_Gui.setName("GUI");
+	params_Gui.add(SHOW_Gui);
 	params_Gui.add(SHOW_ClickPanel);
 	params_Gui.add(SHOW_menu);
 	params_Gui.add(ENABLE_shortcuts);
@@ -821,6 +823,13 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			bKeySave = true;
 			ofLogVerbose("ofxPresetsManager") << "-> modeKey TRUE" << endl;
 			return;
+		}
+
+		//hide control gui
+		if (key == 'G')
+		{
+			bool b = is_GUI_Visible();
+			set_GUI_Visible(!b);
 		}
 
 		//presets triggers
