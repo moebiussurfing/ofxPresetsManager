@@ -825,7 +825,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			return;
 		}
 
-		//hide control gui
+		//hide/show control gui
 		if (key == 'G')
 		{
 			SHOW_Gui = !SHOW_Gui;

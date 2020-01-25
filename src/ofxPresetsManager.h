@@ -5,6 +5,7 @@
 
 //TODO:
 
+//+ (if disabled at first), control gui must still hidden after back to live/active mode
 //browser
 //++ add ImGui browser list like from colorManager
 //+ each 8 presets can be a selection of best presets to trig handly and fast
