@@ -155,7 +155,11 @@ void ofxPresetsManager::setup()
 	myTTF = path_GloabalFolder + "fonts/overpass-mono-bold.otf";
 	//myTTF = path_GloabalFolder + "fonts/PragmataProR_0822.ttf";
 	bool bLoaded = myFont.load(myTTF, sizeTTF, true, true);
-	ERROR_fonts = !bLoaded;
+	if (!bLoaded)
+	{
+		ERROR_fonts = true;
+		ERROR_fonts_str = myTTF;
+	}
 
 	//-
 
@@ -337,18 +341,18 @@ void ofxPresetsManager::draw()
 	//--
 
 	//display errors on files loading
-	if (ofGetFrameNum() % 60 > 20)
+	if ((ofGetFrameNum() % 120) > 20)
 	{
 		int xx, yy;
-		xx = ofGetWidth()*0.5 - 200;
-		yy = 50;
+		xx = 20;
+		yy = 30;
 		if (ERROR_fonts)
 		{
-			ofDrawBitmapStringHighlight("ERROR! FONT PATH NOT FOUND", xx, yy, ofColor::red, ofColor::black);
+			ofDrawBitmapStringHighlight("ERROR! FONT PATH NOT FOUND:\t'"+ ERROR_fonts_str +"'", xx, yy, ofColor::red, ofColor::black);
 		}
 		if (ERROR_data)
 		{
-			ofDrawBitmapStringHighlight("ERROR! DATA PATH NOT FOUND", xx, yy + 20, ofColor::red, ofColor::black);
+			ofDrawBitmapStringHighlight("ERROR! DATA PATH NOT FOUND:\t'" + ERROR_data_str + "'", xx, yy + 20, ofColor::red, ofColor::black);
 		}
 	}
 }
@@ -1411,7 +1415,11 @@ void ofxPresetsManager::load_ControlSettings()
 	ofXml settings;
 	string path = path_GloabalFolder + path_Control;
 	bool bLoaded = settings.load(path);
-	ERROR_data = !bLoaded;
+	if (!bLoaded)
+	{
+		ERROR_data = true;
+		ERROR_data_str = myTTF;
+	}
 
 	ofLogNotice("ofxPresetsManager") << "> load_ControlSettings:\n" << path;
 	ofLogNotice("ofxPresetsManager") << "> load_ControlSettings: PRESET " << PRESET_selected;
@@ -2087,7 +2095,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 		else
 		{
 			ofLogError("ofxPresetsManager") << "FILE '" << strPath << "' NOT FOUND!";
-			ERROR_data = !bLoaded;
+			ERROR_data = true;
+			ERROR_fonts_str = strPath;
 		}
 
 	}

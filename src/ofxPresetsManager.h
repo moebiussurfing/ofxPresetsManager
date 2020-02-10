@@ -486,6 +486,8 @@ private:
 
 	bool ERROR_fonts = false;
 	bool ERROR_data = false;
+	string ERROR_fonts_str;
+	string ERROR_data_str;
 
 	//-
 
