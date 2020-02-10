@@ -80,7 +80,7 @@ public:
 	ofParameter<bool> MODE_MemoryLive;
 	ofParameter<bool> loadToMemory;
 	ofParameter<bool> saveFromMemory;
-	void loadAllKitToMemory();
+	void load_AllKit_ToMemory();
 	void save_AllKit_FromMemory();
 
 	////TODO:
@@ -483,6 +483,9 @@ private:
 	ofTrueTypeFont myFont;
 	string myTTF;//gui font for all gui theme
 	int sizeTTF;
+
+	bool ERROR_fonts = false;
+	bool ERROR_data = false;
 
 	//-
 
