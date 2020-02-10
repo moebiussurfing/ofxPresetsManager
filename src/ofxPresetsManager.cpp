@@ -176,8 +176,11 @@ void ofxPresetsManager::setup()
 	//collapse
 	//guiControl.getGroup("ofxPresetsManager").minimize();
 
-	auto &gGui = guiControl.getGroup("ofxPresetsManager");
-	gGui.getGroup("GUI").minimize();
+	auto &gPanel= guiControl.getGroup("ofxPresetsManager");
+	auto &gGui = gPanel.getGroup("GUI");
+	gGui.minimize();
+	auto &gGuiPos = gGui.getGroup("GUI POSITION");
+	gGuiPos.minimize();
 
 	//-
 
@@ -236,7 +239,7 @@ void ofxPresetsManager::update()
 		else
 		{
 			//MODE B: direct from memory
-			saveAllKitFromMemory();
+			save_AllKit_FromMemory();
 		}
 
 		//-
@@ -251,7 +254,7 @@ void ofxPresetsManager::update()
 
 		//auto save timer
 		timerLast_Autosave = ofGetElapsedTimeMillis();
-		ofLogNotice("ofxPresetsManager") << "\t\t\t\t\t\t[AUTOSAVE]" << endl;
+		ofLogNotice("ofxPresetsManager") << "\t\t\t\t\t\t[AUTOSAVE]";
 	}
 }
 
@@ -474,7 +477,7 @@ ofxPresetsManager::~ofxPresetsManager()
 	//MODE B: direct from memory
 	if (MODE_MemoryLive && autoSave)
 	{
-		saveAllKitFromMemory();
+		save_AllKit_FromMemory();
 	}
 }
 
@@ -1253,7 +1256,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 		{
 			ofLogNotice("ofxPresetsManager") << "saveFromMemory:" << e;
 			saveFromMemory = false;
-			saveAllKitFromMemory();
+			save_AllKit_FromMemory();
 		}
 		else if (WIDGET == "MODE MEMORY")
 		{
@@ -1267,7 +1270,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 			else
 			{
 				//save all xml preset files to disk from memory
-				saveAllKitFromMemory();
+				save_AllKit_FromMemory();
 			}
 		}
 
@@ -1411,7 +1414,7 @@ void ofxPresetsManager::save_ControlSettings()
 	ofSerialize(settings, params);
 	string path = path_GloabalFolder + path_Control;
 	settings.save(path);
-	ofLogNotice("ofxPresetsManager") << "> save_ControlSettings:\n" << path << endl;
+	ofLogVerbose("ofxPresetsManager") << "> save_ControlSettings:\n" << path;
 }
 
 //--------------------------------------------------------------
@@ -1972,9 +1975,9 @@ void ofxPresetsManager::set_Path_GlobalFolder(string folder)
 
 //memory mode
 //--------------------------------------------------------------
-void ofxPresetsManager::saveAllKitFromMemory()
+void ofxPresetsManager::save_AllKit_FromMemory()
 {
-	ofLogNotice("ofxPresetsManager") << "saveAllKitFromMemory()";
+	ofLogNotice("ofxPresetsManager") << "save_AllKit_FromMemory()";
 
 	for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{

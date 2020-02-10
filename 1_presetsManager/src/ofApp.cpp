@@ -67,7 +67,7 @@ void ofApp::setup()
 	//--
 
 	//local gui (to debug params too)
-	gui.setup("ofApp::gui");
+	gui.setup("ofApp");
 	gui.add(params);
 	//gui.add(params2);
 	gui.setPosition(20, 400);

@@ -81,7 +81,7 @@ public:
 	ofParameter<bool> loadToMemory;
 	ofParameter<bool> saveFromMemory;
 	void loadAllKitToMemory();
-	void saveAllKitFromMemory();
+	void save_AllKit_FromMemory();
 
 	////TODO:
 	//ofParameterGroup group_TARGET;
@@ -401,13 +401,13 @@ private:
 	//ofxImGui::Gui gui;
 	//ofxImGui::Settings mainSettings = ofxImGui::Settings();
 
-	bool gui_draw();
-	bool gui_Visible;
+	//bool gui_draw();
+	//bool gui_Visible;
 	bool gui_MouseOver;
 
-	void gui_draw_MenuBar();
-	void gui_draw_MenuFile();
-	void gui_imGui_theme();
+	//void gui_draw_MenuBar();
+	//void gui_draw_MenuFile();
+	//void gui_imGui_theme();
 
 	//void gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter);
 	//void gui_loadFromFile(const std::string &filename, ofAbstractParameter &parameter);
