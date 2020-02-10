@@ -63,6 +63,7 @@ public:
 	std::string path_Control;//app settings
 	std::string path_KitFolder;//folder for kit of selected preset
 	std::string path_PresetsFolder;//for browse
+
 	std::string PRESET_name;
 
 	//-
@@ -514,6 +515,8 @@ private:
 	ofParameterGroup params_Gui;
 	ofParameterGroup params_Options;
 	ofParameterGroup params_Tools;
+
+	ofParameter<glm::vec2> Gui_Position;
 
 	//--
 

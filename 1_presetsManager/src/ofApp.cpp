@@ -3,18 +3,14 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-	//ofSetFrameRate(60);
-
-	//-
-
-	////Gui
-	//guiApp.setup();
-	//guiVisible = true;
+	WindowApp.setDEBUG_Position(0);
+	//WindowApp.setSettingsFps(60);
+	//WindowApp.setSettingsVsync(true);
 
 	//--
 
 	//local group parameters / preset
-	
+
 	//group1
 	params.setName("myGroupParameters");
 	params.add(numSquares.set("num squares", 1, 1, 24));
@@ -26,25 +22,23 @@ void ofApp::setup()
 	//params2.add(numCircles.set("num circles", 1, 1, 24));
 	//params2.add(circleSeparation.set("circle separation", 5, 1, 100));
 	//params2.add(circleSide.set("circles side", 50, 5, 200));
-	
+
 	//---
 
 	//preset manager
 
-	//some settings
-	//manager.setAutoLoad(true);
-	//manager.setAutoSave(true);
-
 	//customize path folders
 	//NOTE: take care with path folders, they must exist before we can write inside!
-	//manager.set_GlobalFolder("ofxPresetsManager/");//TODO:
-	//manager.set_pathKit_Folder(pathKit);
+	manager.set_Path_GlobalFolder("ofxPresetsManager/");//TODO:
+	//manager.set_Path_KitFolder(pathKit);
 	manager.set_Path_KitFolder("assets/groups/kit");
 
 	//add target group. this is "the preset" container itself
 	manager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
 	//manager.add(params, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
-	
+
+	//TODO:
+	//multiple groups
 	//manager.add(params2, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
 
 	//--
@@ -56,7 +50,7 @@ void ofApp::setup()
 	manager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
 	manager.DONE_load.addListener(this, &ofApp::Changed_DONE_load);
 
-   //trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
+	//trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
 	manager.refresh();
 
 	//--
@@ -65,7 +59,7 @@ void ofApp::setup()
 	manager.set_CLICKER_Position(400, ofGetHeight() - 200, 50);//position and boxes sizes
 	manager.set_CLICKER_Visible(true);
 
-	//imGui
+	//ofxGui/imGui
 	manager.set_GUI_Visible(true);
 	manager.set_GUI_Position(10, 30);
 	manager.set_GUI_Size(250, 300);
@@ -76,7 +70,13 @@ void ofApp::setup()
 	gui.setup("ofApp::gui");
 	gui.add(params);
 	//gui.add(params2);
-	gui.setPosition(20, 100);
+	gui.setPosition(20, 400);
+
+	//-
+
+	////Gui
+	//guiApp.setup();
+	//guiVisible = true;
 }
 
 //--------------------------------------------------------------
@@ -135,7 +135,7 @@ void ofApp::draw()
 	//debug object linked to grouped parameters
 	string str;
 	int x = 20;
-	int y = 20;
+	int y = 100;
 	int pad = 20;
 	int i = 0;
 	{
@@ -250,11 +250,12 @@ void ofApp::dragEvent(ofDragInfo dragInfo)
 }
 
 //callback
+//TODO: improve adding isChanged method
 //--------------------------------------------------------------
 void ofApp::Changed_DONE_save(bool &DONE_save)
 {
 	ofLogNotice("ofApp") << "Changed_DONE_save: " << ofToString(DONE_save ? "TRUE" : "FALSE");
-	ofLogNotice("ofApp") << endl;
+	ofLogNotice("ofApp") << "";
 
 	//extra stuff when finish loading/saving
 	if (manager.DONE_save)
@@ -267,7 +268,7 @@ void ofApp::Changed_DONE_save(bool &DONE_save)
 void ofApp::Changed_DONE_load(bool &DONE_load)
 {
 	ofLogNotice("ofApp") << "Changed_DONE_load: " << ofToString(DONE_load ? "TRUE" : "FALSE");
-	ofLogNotice("ofApp") << endl;
+	ofLogNotice("ofApp") << "";
 
 	//extra stuff when finish loading/saving
 	if (manager.DONE_load)

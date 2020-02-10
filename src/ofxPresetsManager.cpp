@@ -18,11 +18,12 @@ ofxPresetsManager::ofxPresetsManager()
 
 #ifdef TIME_SAMPLE_MEASURES
 	//TIME_SAMPLE_SET_FRAMERATE(fps); //specify a target framerate
-	TIME_SAMPLE_ENABLE();
+	//TIME_SAMPLE_ENABLE();
 	TIME_SAMPLE_SET_AVERAGE_RATE(0.1);
 	TIME_SAMPLE_SET_DRAW_LOCATION(TIME_SAMPLE_DRAW_LOC_BOTTOM_LEFT);
 	TIME_SAMPLE_SET_PRECISION(4);
 	TIME_SAMPLE_GET_INSTANCE()->setEnabled(true);
+	TIME_SAMPLE_DISABLE();
 #endif
 
 	//--
@@ -97,6 +98,11 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Gui.set("SHOW CONTROL GUI ", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", false);
 	ENABLE_shortcuts.set("ENABLE KEYS", true);
+	Gui_Position.set("GUI POSITION",
+		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
+		glm::vec2(0, 0),
+		glm::vec2(ofGetWidth(), ofGetHeight())
+	);
 
 	params_Favorites.setName("USER");
 	params_Favorites.add(PRESET_selected);
@@ -116,6 +122,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.add(SHOW_ClickPanel);
 	params_Gui.add(SHOW_menu);
 	params_Gui.add(ENABLE_shortcuts);
+	params_Gui.add(Gui_Position);
 
 	params_Tools.setName("HELPER TOOLS");
 	params_Tools.add(bCloneRight);
@@ -164,11 +171,14 @@ void ofxPresetsManager::setup()
 	guiControl.setup("CONTROL");
 	guiControl.add(params);
 
-	//guiControl.setPosition(ofGetWidth() - 210, 10);
-	guiControl.setPosition(1300, 600);
+	guiControl.setPosition(ofGetWidth() - 210, 10);
+	//guiControl.setPosition(500, 600);
 
 	//collapse
 	guiControl.getGroup("ofxPresetsManager").minimize();
+
+	auto &gGui = guiControl.getGroup("ofxPresetsManager");
+	gGui.getGroup("GUI").minimize();
 
 	//-
 
@@ -190,6 +200,7 @@ void ofxPresetsManager::setup()
 	//STARTUP
 
 	//app settings
+	DISABLE_CALLBACKS = false;
 	load_ControlSettings();
 
 	//TODO:
@@ -197,7 +208,6 @@ void ofxPresetsManager::setup()
 
 	//--------
 
-	//DISABLE_CALLBACKS = false;
 }
 
 //--------------------------------------------------------------
@@ -242,7 +252,7 @@ void ofxPresetsManager::update()
 
 		//auto save timer
 		timerLast_Autosave = ofGetElapsedTimeMillis();
-		ofLogNotice("ofxPresetsManager") << "Autosave DONE" << endl;
+		ofLogNotice("ofxPresetsManager") << "\t\t\t\t\t\t[AUTOSAVE]" << endl;
 	}
 }
 
@@ -828,11 +838,29 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		}
 
 		//hide/show control gui
-		if (key == 'G')
+		if (key == 'G' || key == 'g')
 		{
 			SHOW_Gui = !SHOW_Gui;
 			//bool b = is_GUI_Visible();
 			//set_GUI_Visible(!b);
+		}
+
+		//browse presets
+		else if (key == OF_KEY_RIGHT)
+		{
+			int i = PRESET_selected;
+			i++;
+			if (i > NUM_OF_PRESETS)
+				i = NUM_OF_PRESETS;
+			PRESET_selected = i;
+		}
+		else if (key == OF_KEY_LEFT)
+		{
+			int i = PRESET_selected;
+			i--;
+			if (i < 1)
+				i = 1;
+			PRESET_selected = i;
 		}
 
 		//presets triggers
@@ -1205,6 +1233,14 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 			bCloneRight = false;
 			doCloneRight(PRESET_selected - 1);
 		}
+		else if (WIDGET == "GUI POSITION")
+		{
+			ofLogNotice("ofxPresetsManager") << "GUI POSITION: " << e;
+			float x, y;
+			x = ofClamp(Gui_Position.get().x, 0, ofGetWidth() - 200);
+			y = ofClamp(Gui_Position.get().y, 0, ofGetHeight());
+			guiControl.setPosition(x, y);
+		}
 
 		//-
 
@@ -1279,7 +1315,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 			//   //load( xIndex, yIndex);
 			//   //ofLogNotice("ofxPresetsManager") << "load( xIndex, yIndex):" <<  xIndex << ", " << yIndex;
 			*/
-			
+
 			//-
 
 			//TODO:
@@ -1351,7 +1387,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 //--------------------------------------------------------------
 void ofxPresetsManager::load_ControlSettings()
 {
-	if (!DISABLE_CALLBACKS)
+	//if (!DISABLE_CALLBACKS)
 	{
 		ofXml settings;
 		string path = path_GloabalFolder + path_Control;
@@ -1366,6 +1402,12 @@ void ofxPresetsManager::load_ControlSettings()
 //--------------------------------------------------------------
 void ofxPresetsManager::save_ControlSettings()
 {
+	//get gui position to update param
+	float x, y;
+	x = guiControl.getPosition().x;
+	y = guiControl.getPosition().y;
+	Gui_Position = glm::vec2(x, y);
+
 	ofXml settings;
 	ofSerialize(settings, params);
 	string path = path_GloabalFolder + path_Control;
@@ -1962,7 +2004,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 //--------------------------------------------------------------
 void ofxPresetsManager::loadAllKitToMemory()
 {
-	if (!DISABLE_CALLBACKS)
+	//if (!DISABLE_CALLBACKS)
 	{
 		ofLogNotice("ofxPresetsManager") << "> loadAllKitToMemory()";
 
