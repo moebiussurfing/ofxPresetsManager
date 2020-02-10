@@ -871,7 +871,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		}
 
 		//browse presets
-		else if (key == OF_KEY_RIGHT)
+		else if (key == OF_KEY_RIGHT && ENABLE_KeysArrowBrowse)
 		{
 			int i = PRESET_selected;
 			i++;
@@ -879,7 +879,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				i = NUM_OF_PRESETS;
 			PRESET_selected = i;
 		}
-		else if (key == OF_KEY_LEFT)
+		else if (key == OF_KEY_LEFT && ENABLE_KeysArrowBrowse)
 		{
 			int i = PRESET_selected;
 			i--;

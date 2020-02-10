@@ -537,4 +537,9 @@ private:
 
 	//--
 
+	bool ENABLE_KeysArrowBrowse = false;
+	void set_ENABLE_KeysArrowBrowse(bool b)
+	{
+		ENABLE_KeysArrowBrowse = b;
+	}
 };
