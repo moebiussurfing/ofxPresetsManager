@@ -171,11 +171,10 @@ void ofxPresetsManager::setup()
 	guiControl.setup("CONTROL");
 	guiControl.add(params);
 
-	guiControl.setPosition(ofGetWidth() - 210, 10);
-	//guiControl.setPosition(500, 600);
+	guiControl.setPosition(ofGetWidth() - 210, 10);//default
 
 	//collapse
-	guiControl.getGroup("ofxPresetsManager").minimize();
+	//guiControl.getGroup("ofxPresetsManager").minimize();
 
 	auto &gGui = guiControl.getGroup("ofxPresetsManager");
 	gGui.getGroup("GUI").minimize();
@@ -183,7 +182,7 @@ void ofxPresetsManager::setup()
 	//-
 
 	//browser
-	gui_Visible = true;
+	//gui_Visible = true;
 	//gui.setup();
 	//gui_imGui_theme();
 
@@ -1238,7 +1237,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 			ofLogNotice("ofxPresetsManager") << "GUI POSITION: " << e;
 			float x, y;
 			x = ofClamp(Gui_Position.get().x, 0, ofGetWidth() - 200);
-			y = ofClamp(Gui_Position.get().y, 0, ofGetHeight());
+			y = ofClamp(Gui_Position.get().y, 0, ofGetHeight()-20);
 			guiControl.setPosition(x, y);
 		}
 
