@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-	ofSetFrameRate(60);
+	//ofSetFrameRate(60);
 
 	//-
 
@@ -39,7 +39,7 @@ void ofApp::setup()
 	//NOTE: take care with path folders, they must exist before we can write inside!
 	//manager.set_GlobalFolder("ofxPresetsManager/");//TODO:
 	//manager.set_pathKit_Folder(pathKit);
-	manager.set_pathKit_Folder("assets/groups/kit");
+	manager.set_Path_KitFolder("assets/groups/kit");
 
 	//add target group. this is "the preset" container itself
 	manager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });

@@ -19,7 +19,7 @@
 
 #include "ofMain.h"
 
-#include "ofxImGui.h"
+//#include "ofxImGui.h"
 #include "ofxGui.h"
 
 //TIMEMEASUREMENTS
@@ -60,7 +60,7 @@ public:
 	//std::string groupName2;//get from ofParameterGroup name
 	
 	std::string path_GloabalFolder;//top parent folder
-	std::string pathControl;//app settings
+	std::string path_Control;//app settings
 	std::string path_KitFolder;//folder for kit of selected preset
 	std::string path_PresetsFolder;//for browse
 	std::string PRESET_name;
@@ -119,7 +119,7 @@ public:
 
 #pragma mark - CALLBACKS
 
-	bool BLOCK_CALLBACKS = true;
+	bool DISABLE_CALLBACKS = true;
 	
 	ofParameter<bool> DONE_load;
 	ofParameter<bool> DONE_save;
@@ -298,7 +298,7 @@ public:
 
 	void set_Path_ControlSettings(string str)
 	{
-		pathControl = str;
+		path_Control = str;
 	}
 
 	void set_Path_KitFolder(string folder);
@@ -397,7 +397,7 @@ private:
 	//bool SHOW_Gui;
 	ofParameter<bool> SHOW_Gui;
 
-	ofxImGui::Gui gui;
+	//ofxImGui::Gui gui;
 	//ofxImGui::Settings mainSettings = ofxImGui::Settings();
 
 	bool gui_draw();
