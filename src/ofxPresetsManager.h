@@ -66,6 +66,8 @@ public:
 
 	std::string PRESET_name;
 
+	std::string gui_name = "CONTROL";//default gui panel name
+
 	//-
 
 	//app settings
@@ -98,6 +100,7 @@ public:
 	~ofxPresetsManager();
 
 	void setup();
+	void setup(std::string name);//to set gui panel name header label
 	void update();
 
 	//draw some info, when the gui is drawn you can also click on the button to change / save presets
