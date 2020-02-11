@@ -139,6 +139,13 @@ ofxPresetsManager::ofxPresetsManager()
 }
 
 //--------------------------------------------------------------
+void ofxPresetsManager::setup(std::string name)
+{
+	gui_name = name;
+	setup();
+}
+
+//--------------------------------------------------------------
 void ofxPresetsManager::setup()
 {
 	DISABLE_CALLBACKS = true;
@@ -155,18 +162,30 @@ void ofxPresetsManager::setup()
 	myTTF = path_GloabalFolder + "fonts/overpass-mono-bold.otf";
 	//myTTF = path_GloabalFolder + "fonts/PragmataProR_0822.ttf";
 	bool bLoaded = myFont.load(myTTF, sizeTTF, true, true);
-	if (!bLoaded)
+
+	ERROR_fonts = !bLoaded;
+	if (ERROR_fonts)
 	{
-		ERROR_fonts = true;
-		ERROR_fonts_str = myTTF;
+		ERROR_fonts_str = myTTF + " " + gui_name;
+		ofLogError("ofxPresetsManager") << "> setup(): ERROR_fonts: " << myTTF;
 	}
 
 	//-
 
-	//theme
-	string str = path_GloabalFolder + "fonts/overpass-mono-bold.otf";
-	if (bLoaded)//must check this font if it's differents than myFont
-		ofxGuiSetFont(str, 9);
+	//ofxGui theme
+
+	string pathFont = path_GloabalFolder + "fonts/overpass-mono-bold.otf";
+	//must check this font file is detected
+	ofFile file(pathFont);
+	if (file.exists())
+	{
+		ofxGuiSetFont(pathFont, 9);
+	}
+	else
+	{
+		ofLogError("ofxPresetsManager") << "CAN'T LOAD ofxGui FONT. FILE '" << pathFont << "' NOT FOUND!";
+	}
+
 	ofxGuiSetDefaultHeight(20);
 	ofxGuiSetBorderColor(32);
 	ofxGuiSetFillColor(ofColor(48));
@@ -175,7 +194,7 @@ void ofxPresetsManager::setup()
 	//ofxGuiSetBackgroundColor(ofColor::black);
 
 	//control gui
-	guiControl.setup("CONTROL");
+	guiControl.setup(gui_name);
 	guiControl.add(params);
 	guiControl.setPosition(ofGetWidth() - 210, 10);//default
 
@@ -186,6 +205,8 @@ void ofxPresetsManager::setup()
 	gGui.minimize();
 	auto &gGuiPos = gGui.getGroup("GUI POSITION");
 	gGuiPos.minimize();
+	auto &gOptions = gPanel.getGroup("OPTIONS");
+	gOptions.minimize();
 
 	//-
 
@@ -348,7 +369,7 @@ void ofxPresetsManager::draw()
 		yy = 30;
 		if (ERROR_fonts)
 		{
-			ofDrawBitmapStringHighlight("ERROR! FONT PATH NOT FOUND:\t'"+ ERROR_fonts_str +"'", xx, yy, ofColor::red, ofColor::black);
+			ofDrawBitmapStringHighlight("ERROR! FONT PATH NOT FOUND:\t'" + ERROR_fonts_str + "'", xx, yy, ofColor::red, ofColor::black);
 		}
 		if (ERROR_data)
 		{
@@ -1415,10 +1436,12 @@ void ofxPresetsManager::load_ControlSettings()
 	ofXml settings;
 	string path = path_GloabalFolder + path_Control;
 	bool bLoaded = settings.load(path);
-	if (!bLoaded)
+
+	ERROR_data = !bLoaded;
+	if (ERROR_data)
 	{
-		ERROR_data = true;
-		ERROR_data_str = myTTF;
+		ERROR_data_str = myTTF + " " + gui_name;
+		ofLogError("ofxPresetsManager") << "> load_ControlSettings(): ERROR_data: " << path;
 	}
 
 	ofLogNotice("ofxPresetsManager") << "> load_ControlSettings:\n" << path;
@@ -2088,15 +2111,15 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 		//ofLogNotice("ofxPresetsManager") << "ofParameterGroup: " << i << "\n" << ofToString(groupsMem[i]);
 
 		//TODO:
+		ERROR_data = !bLoaded;
 		if (bLoaded)
 		{
 			settingsArray[i] = settings;
 		}
 		else
 		{
-			ofLogError("ofxPresetsManager") << "FILE '" << strPath << "' NOT FOUND!";
-			ERROR_data = true;
-			ERROR_fonts_str = strPath;
+			ofLogError("ofxPresetsManager") << "ERROR_data. FILE '" << strPath << "' NOT FOUND!";
+			ERROR_data_str = strPath + " " + gui_name;
 		}
 
 	}
