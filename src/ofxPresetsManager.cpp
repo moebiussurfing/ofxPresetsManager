@@ -158,16 +158,13 @@ void ofxPresetsManager::setup()
 	//-
 
 	//gui font
-	sizeTTF = 8;
 	myTTF = path_GloabalFolder + "fonts/overpass-mono-bold.otf";
-	//myTTF = path_GloabalFolder + "fonts/PragmataProR_0822.ttf";
+	sizeTTF = 8;
 	bool bLoaded = myFont.load(myTTF, sizeTTF, true, true);
 
-	ERROR_fonts = !bLoaded;
-	if (ERROR_fonts)
+	if (!bLoaded)
 	{
-		ERROR_fonts_str = myTTF + " " + gui_name;
-		ofLogError("ofxPresetsManager") << "> setup(): ERROR_fonts: " << myTTF;
+		errorsDEBUG.addError(gui_name + " ofxPresetsManager", "setup() myFont", myTTF);
 	}
 
 	//-
@@ -183,7 +180,7 @@ void ofxPresetsManager::setup()
 	}
 	else
 	{
-		ofLogError("ofxPresetsManager") << "CAN'T LOAD ofxGui FONT. FILE '" << pathFont << "' NOT FOUND!";
+		errorsDEBUG.addError(gui_name + "ofxPresetsManager", "setup() ofxGui", pathFont);
 	}
 
 	ofxGuiSetDefaultHeight(20);
@@ -191,7 +188,6 @@ void ofxPresetsManager::setup()
 	ofxGuiSetFillColor(ofColor(48));
 	ofxGuiSetTextColor(ofColor::white);
 	ofxGuiSetHeaderColor(ofColor(24));
-	//ofxGuiSetBackgroundColor(ofColor::black);
 
 	//control gui
 	guiControl.setup(gui_name);
@@ -207,6 +203,7 @@ void ofxPresetsManager::setup()
 	gGuiPos.minimize();
 	auto &gOptions = gPanel.getGroup("OPTIONS");
 	gOptions.minimize();
+	gPanel.getGroup("HELPER TOOLS").minimize();
 
 	//-
 
@@ -218,10 +215,10 @@ void ofxPresetsManager::setup()
 	//timer auto save
 	timerLast_Autosave = ofGetElapsedTimeMillis();
 
-	//-
+	////-
 
-	//memory mode
-	load_AllKit_ToMemory();
+	////memory mode
+	//load_AllKit_ToMemory();
 
 	//-------
 
@@ -232,7 +229,7 @@ void ofxPresetsManager::setup()
 	load_ControlSettings();
 
 	//TODO:
-	selected_PRE = -1;
+	//selected_PRE = -1;
 
 	//--------
 
@@ -361,21 +358,7 @@ void ofxPresetsManager::draw()
 
 	//--
 
-	//display errors on files loading
-	if ((ofGetFrameNum() % 120) > 20)
-	{
-		int xx, yy;
-		xx = 20;
-		yy = 30;
-		if (ERROR_fonts)
-		{
-			ofDrawBitmapStringHighlight("ERROR! FONT PATH NOT FOUND:\t'" + ERROR_fonts_str + "'", xx, yy, ofColor::red, ofColor::black);
-		}
-		if (ERROR_data)
-		{
-			ofDrawBitmapStringHighlight("ERROR! DATA PATH NOT FOUND:\t'" + ERROR_data_str + "'", xx, yy + 20, ofColor::red, ofColor::black);
-		}
-	}
+	errorsDEBUG.draw();
 }
 
 
@@ -571,6 +554,11 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 	//groupName2 = groups[1].getName();//TODO: one group only
 
 	ofLogNotice("ofxPresetsManager") << "groupName: " << groupName;
+
+	//-
+
+	//memory mode
+	load_AllKit_ToMemory();
 }
 
 //--------------------------------------------------------------
@@ -1437,11 +1425,9 @@ void ofxPresetsManager::load_ControlSettings()
 	string path = path_GloabalFolder + path_Control;
 	bool bLoaded = settings.load(path);
 
-	ERROR_data = !bLoaded;
-	if (ERROR_data)
+	if (!bLoaded)
 	{
-		ERROR_data_str = myTTF + " " + gui_name;
-		ofLogError("ofxPresetsManager") << "> load_ControlSettings(): ERROR_data: " << path;
+		errorsDEBUG.addError(gui_name + " ofxPresetsManager", "load_ControlSettings()", path);
 	}
 
 	ofLogNotice("ofxPresetsManager") << "> load_ControlSettings:\n" << path;
@@ -2083,24 +2069,23 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 
 		//-
 
-		string strFolder;
-		string strFile;
-		string strPath;
+		string strFolder1;
+		string strFile1;
+		string strPath1;
 
-		strFolder = path_GloabalFolder + path_KitFolder + "/";
-		strFile = groupName + "_preset_" + ofToString(i) + ".xml";
-		strPath = strFolder + strFile;
+		strFolder1 = path_GloabalFolder + path_KitFolder + "/";
+		strFile1 = groupName + "_preset_" + ofToString(i) + ".xml";
+		strPath1 = strFolder1 + strFile1;
 
 		//load xml file
 		ofXml settings;
-		bool bLoaded = settings.load(strPath);
+		bool bLoaded = settings.load(strPath1);
 
 		//debug
-		bool bDEBUG = false;
-		if (bDEBUG)
+		if (false)
 		{
 			ofLogNotice("ofxPresetsManager") << "[" << i << "]";
-			ofLogNotice("ofxPresetsManager") << "File: " << strPath
+			ofLogNotice("ofxPresetsManager") << "File: " << strPath1
 				<< "\n" << ofToString(settings.toString());
 		}
 
@@ -2110,18 +2095,14 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 		//ofDeserialize(settings, groupsMem[i]);
 		//ofLogNotice("ofxPresetsManager") << "ofParameterGroup: " << i << "\n" << ofToString(groupsMem[i]);
 
-		//TODO:
-		ERROR_data = !bLoaded;
 		if (bLoaded)
 		{
 			settingsArray[i] = settings;
 		}
-		else
+		else if (!bLoaded)
 		{
-			ofLogError("ofxPresetsManager") << "ERROR_data. FILE '" << strPath << "' NOT FOUND!";
-			ERROR_data_str = strPath + " " + gui_name;
+			errorsDEBUG.addError(gui_name + " ofxPresetsManager", "load_AllKit_ToMemory()", strPath1);
 		}
-
 	}
 
 	ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";

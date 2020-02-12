@@ -1,9 +1,13 @@
 
 //ofxPresetsManager.h
-//based on original addon by Nicola Pisanti, MIT License, 2016
-//changes and customized by moebiussurfing:
+//this addon based in the original ofxGuiPresetSelector addon 
+//by Nicola Pisanti, MIT License, 2016
+//https://github.com/npisanti/ofxGuiPresetSelector
+//modifications and new features by moebiussurfing
 
 //TODO:
+
+//++ add key mod to swap presets like control is used now to save
 
 //+ (if disabled at first), control gui must still hidden after back to live/active mode
 //browser
@@ -18,6 +22,8 @@
 #pragma once
 
 #include "ofMain.h"
+
+#include "ofxDEBUG_errors.h"
 
 //#include "ofxImGui.h"
 #include "ofxGui.h"
@@ -53,6 +59,8 @@ class ofxPresetsManager
 
 public:
 
+	ofxDEBUG_errors errorsDEBUG;
+	
 	//-
 
 	//settings paths
@@ -486,11 +494,6 @@ private:
 	ofTrueTypeFont myFont;
 	string myTTF;//gui font for all gui theme
 	int sizeTTF;
-
-	bool ERROR_fonts = false;
-	bool ERROR_data = false;
-	string ERROR_fonts_str;
-	string ERROR_data_str;
 
 	//-
 
