@@ -23,7 +23,10 @@
 
 #include "ofMain.h"
 
+#define INCLUDE_DEBUG_ERRORS
+#ifdef INCLUDE_DEBUG_ERRORS
 #include "ofxDEBUG_errors.h"
+#endif
 
 //#include "ofxImGui.h"
 #include "ofxGui.h"
@@ -59,7 +62,9 @@ class ofxPresetsManager
 
 public:
 
+#ifdef INCLUDE_DEBUG_ERRORS
 	ofxDEBUG_errors errorsDEBUG;
+#endif
 	
 	//-
 

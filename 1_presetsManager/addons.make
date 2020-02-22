@@ -1,4 +1,5 @@
 ofxGui
+ofxDEBUG_errors
 ofxHistoryPlot
 ofxImGui
 ofxJsonUtils

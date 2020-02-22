@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-	WindowApp.setDEBUG_Position(0);
+	//WindowApp.setDEBUG_Position(0);//top position
 	//WindowApp.setSettingsFps(60);
 	//WindowApp.setSettingsVsync(true);
 
@@ -17,6 +17,8 @@ void ofApp::setup()
 	params.add(separation.set("separation", 5, 1, 100));
 	params.add(squareSide.set("square side", 50, 5, 200));
 
+	//-
+
 	////group2
 	//params2.setName("circlesParams");
 	//params2.add(numCircles.set("num circles", 1, 1, 24));
@@ -28,14 +30,20 @@ void ofApp::setup()
 	//preset manager
 
 	//customize path folders
+
 	//NOTE: take care with path folders, they must exist before we can write inside!
 	manager.set_Path_GlobalFolder("ofxPresetsManager/");//TODO:
-	//manager.set_Path_KitFolder(pathKit);
 	manager.set_Path_KitFolder("assets/groups/kit");
+	//manager.set_Path_KitFolder(pathKit);
+
+	//-
 
 	//add target group. this is "the preset" container itself
+
 	manager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
 	//manager.add(params, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
+
+	//-
 
 	//TODO:
 	//multiple groups
@@ -46,18 +54,20 @@ void ofApp::setup()
 	//apply setup
 	manager.setup();
 
-	//callbacks to trig when save/load is done
-	manager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
-	manager.DONE_load.addListener(this, &ofApp::Changed_DONE_load);
+	////callbacks to trig when save/load is done
+	//manager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
+	//manager.DONE_load.addListener(this, &ofApp::Changed_DONE_load);
 
 	//trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
 	manager.refresh();
 
 	//--
 
+	//customize gui positions
+
 	//user clicker
-	manager.set_CLICKER_Position(400, ofGetHeight() - 200, 50);//position and boxes sizes
 	manager.set_CLICKER_Visible(true);
+	manager.set_CLICKER_Position(400, ofGetHeight() - 200, 50);//position and boxes sizes
 
 	//ofxGui/imGui
 	manager.set_GUI_Visible(true);
@@ -70,9 +80,10 @@ void ofApp::setup()
 	gui.setup("ofApp");
 	gui.add(params);
 	//gui.add(params2);
+
 	gui.setPosition(20, 400);
 
-	//-
+	//--
 
 	////Gui
 	//guiApp.setup();
@@ -82,19 +93,13 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-	string str;
-	str = ofToString((int)ofGetFrameRate()) + " FPS";
-	ofSetWindowTitle(str);
-
-	//-
-
 	//preset manager
 	manager.update();
 
 	//simple callback when preset is loaded 
 	if (manager.isDoneLoad())
 	{
-		ofLogNotice("ofApp") << "+ MANAGER DONE LOAD";
+		ofLogNotice("ofApp") << "PRESET MANAGER DONE LOAD";
 		ofLogNotice("ofApp") << endl;
 	}
 }
@@ -102,8 +107,8 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-	manager.DONE_save.removeListener(this, &ofApp::Changed_DONE_save);
-	manager.DONE_load.removeListener(this, &ofApp::Changed_DONE_load);
+	//manager.DONE_save.removeListener(this, &ofApp::Changed_DONE_save);
+	//manager.DONE_load.removeListener(this, &ofApp::Changed_DONE_load);
 }
 
 //--------------------------------------------------------------
@@ -189,93 +194,6 @@ void ofApp::keyPressed(int key)
 	}
 }
 
-//--------------------------------------------------------------
-void ofApp::keyReleased(int key)
-{
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y)
-{
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button)
-{
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button)
-{
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button)
-{
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y)
-{
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y)
-{
-
-}
-
-//--------------------------------------------------------------
-void ofApp::windowResized(int w, int h)
-{
-
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg)
-{
-
-}
-
-//--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo)
-{
-
-}
-
-//callback
-//TODO: improve adding isChanged method
-//--------------------------------------------------------------
-void ofApp::Changed_DONE_save(bool &DONE_save)
-{
-	ofLogNotice("ofApp") << "Changed_DONE_save: " << ofToString(DONE_save ? "TRUE" : "FALSE");
-	ofLogNotice("ofApp") << "";
-
-	//extra stuff when finish loading/saving
-	if (manager.DONE_save)
-	{
-		manager.DONE_save = false;
-	}
-}
-
-//--------------------------------------------------------------
-void ofApp::Changed_DONE_load(bool &DONE_load)
-{
-	ofLogNotice("ofApp") << "Changed_DONE_load: " << ofToString(DONE_load ? "TRUE" : "FALSE");
-	ofLogNotice("ofApp") << "";
-
-	//extra stuff when finish loading/saving
-	if (manager.DONE_load)
-	{
-		manager.DONE_load = false;
-	}
-}
 
 //browser
 ////--------------------------------------------------------------
@@ -324,4 +242,32 @@ void ofApp::Changed_DONE_load(bool &DONE_load)
 //
 //   this->guiApp.end();
 //   return mainSettings.mouseOverGui;
+//}
+
+////callback
+////TODO: improve adding isChanged method
+////--------------------------------------------------------------
+//void ofApp::Changed_DONE_save(bool &DONE_save)
+//{
+//	ofLogNotice("ofApp") << "Changed_DONE_save: " << ofToString(DONE_save ? "TRUE" : "FALSE");
+//	ofLogNotice("ofApp") << "";
+//
+//	//extra stuff when finish loading/saving
+//	if (manager.DONE_save)
+//	{
+//		manager.DONE_save = false;
+//	}
+//}
+//
+////--------------------------------------------------------------
+//void ofApp::Changed_DONE_load(bool &DONE_load)
+//{
+//	ofLogNotice("ofApp") << "Changed_DONE_load: " << ofToString(DONE_load ? "TRUE" : "FALSE");
+//	ofLogNotice("ofApp") << "";
+//
+//	//extra stuff when finish loading/saving
+//	if (manager.DONE_load)
+//	{
+//		manager.DONE_load = false;
+//	}
 //}

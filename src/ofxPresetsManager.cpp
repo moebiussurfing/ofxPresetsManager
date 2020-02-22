@@ -164,7 +164,9 @@ void ofxPresetsManager::setup()
 
 	if (!bLoaded)
 	{
+#ifdef INCLUDE_DEBUG_ERRORS
 		errorsDEBUG.addError(gui_name + " ofxPresetsManager", "setup() myFont", myTTF);
+#endif
 	}
 
 	//-
@@ -180,7 +182,9 @@ void ofxPresetsManager::setup()
 	}
 	else
 	{
+#ifdef INCLUDE_DEBUG_ERRORS
 		errorsDEBUG.addError(gui_name + "ofxPresetsManager", "setup() ofxGui", pathFont);
+#endif
 	}
 
 	ofxGuiSetDefaultHeight(20);
@@ -1427,7 +1431,9 @@ void ofxPresetsManager::load_ControlSettings()
 
 	if (!bLoaded)
 	{
+#ifdef INCLUDE_DEBUG_ERRORS
 		errorsDEBUG.addError(gui_name + " ofxPresetsManager", "load_ControlSettings()", path);
+#endif
 	}
 
 	ofLogNotice("ofxPresetsManager") << "> load_ControlSettings:\n" << path;
@@ -2101,7 +2107,9 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 		}
 		else if (!bLoaded)
 		{
+#ifdef INCLUDE_DEBUG_ERRORS
 			errorsDEBUG.addError(gui_name + " ofxPresetsManager", "load_AllKit_ToMemory()", strPath1);
+#endif
 		}
 	}
 
