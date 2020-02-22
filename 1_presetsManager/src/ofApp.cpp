@@ -27,52 +27,52 @@ void ofApp::setup()
 
 	//---
 
-	//preset manager
+	//preset presetsManager
 
 	//customize path folders
 
 	//NOTE: take care with path folders, they must exist before we can write inside!
-	manager.set_Path_GlobalFolder("ofxPresetsManager/");//TODO:
-	manager.set_Path_KitFolder("assets/groups/kit");
-	//manager.set_Path_KitFolder(pathKit);
+	presetsManager.set_Path_GlobalFolder("ofxPresetsManager/");//TODO:
+	presetsManager.set_Path_KitFolder("assets/groups/kit");
+	//presetsManager.set_Path_KitFolder(pathKit);
 
 	//-
 
 	//add target group. this is "the preset" container itself
 
-	manager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
-	//manager.add(params, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
+	presetsManager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
+	//presetsManager.add(params, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
 
 	//-
 
 	//TODO:
 	//multiple groups
-	//manager.add(params2, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
+	//presetsManager.add(params2, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
 
 	//--
 
 	//apply setup
-	manager.setup();
+	presetsManager.setup();
 
 	////callbacks to trig when save/load is done
-	//manager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
-	//manager.DONE_load.addListener(this, &ofApp::Changed_DONE_load);
+	//presetsManager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
+	//presetsManager.DONE_load.addListener(this, &ofApp::Changed_DONE_load);
 
 	//trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
-	manager.refresh();
+	presetsManager.refresh();
 
 	//--
 
 	//customize gui positions
 
 	//user clicker
-	manager.set_CLICKER_Visible(true);
-	manager.set_CLICKER_Position(400, ofGetHeight() - 200, 50);//position and boxes sizes
+	presetsManager.set_CLICKER_Visible(true);
+	presetsManager.set_CLICKER_Position(400, ofGetHeight() - 200, 50);//position and boxes sizes
 
 	//ofxGui/imGui
-	manager.set_GUI_Visible(true);
-	manager.set_GUI_Position(10, 30);
-	manager.set_GUI_Size(250, 300);
+	presetsManager.set_GUI_Visible(true);
+	presetsManager.set_GUI_Position(10, 30);
+	presetsManager.set_GUI_Size(250, 300);
 
 	//--
 
@@ -93,11 +93,11 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-	//preset manager
-	manager.update();
+	//preset presetsManager
+	presetsManager.update();
 
 	//simple callback when preset is loaded 
-	if (manager.isDoneLoad())
+	if (presetsManager.isDoneLoad())
 	{
 		ofLogNotice("ofApp") << "PRESET MANAGER DONE LOAD";
 		ofLogNotice("ofApp") << endl;
@@ -107,8 +107,8 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-	//manager.DONE_save.removeListener(this, &ofApp::Changed_DONE_save);
-	//manager.DONE_load.removeListener(this, &ofApp::Changed_DONE_load);
+	//presetsManager.DONE_save.removeListener(this, &ofApp::Changed_DONE_save);
+	//presetsManager.DONE_load.removeListener(this, &ofApp::Changed_DONE_load);
 }
 
 //--------------------------------------------------------------
@@ -118,9 +118,9 @@ void ofApp::draw()
 
 	//-
 
-	//browser
-	//Gui
+	//explorer browser
 
+	//Gui
 	//mouseOverGui = false;
 	//if (guiVisible)
 	//{
@@ -174,7 +174,7 @@ void ofApp::draw()
 	gui.draw();
 
 	//addon gui
-	manager.draw();
+	presetsManager.draw();
 }
 
 //--------------------------------------------------------------
@@ -187,15 +187,26 @@ void ofApp::keyPressed(int key)
 		separation = ofRandom(separation.getMin(), separation.getMax());
 		squareSide = ofRandom(squareSide.getMin(), squareSide.getMax());
 	}
+
 	//switch keys control enabled
 	else if (key == OF_KEY_TAB)
 	{
-		manager.set_ENABLE_Keys(!manager.isKeysEnabled());
+		presetsManager.set_ENABLE_Keys(!presetsManager.isKeysEnabled());
+	}
+
+	//browse
+	else if (key == OF_KEY_RIGHT)
+	{
+		presetsManager.load_Next();
+	}
+	else if (key == OF_KEY_LEFT)
+	{
+		presetsManager.load_Previous();
 	}
 }
 
 
-//browser
+//explorer browser
 ////--------------------------------------------------------------
 //bool ofApp::imGui()
 //{
@@ -253,9 +264,9 @@ void ofApp::keyPressed(int key)
 //	ofLogNotice("ofApp") << "";
 //
 //	//extra stuff when finish loading/saving
-//	if (manager.DONE_save)
+//	if (presetsManager.DONE_save)
 //	{
-//		manager.DONE_save = false;
+//		presetsManager.DONE_save = false;
 //	}
 //}
 //
@@ -266,8 +277,8 @@ void ofApp::keyPressed(int key)
 //	ofLogNotice("ofApp") << "";
 //
 //	//extra stuff when finish loading/saving
-//	if (manager.DONE_load)
+//	if (presetsManager.DONE_load)
 //	{
-//		manager.DONE_load = false;
+//		presetsManager.DONE_load = false;
 //	}
 //}

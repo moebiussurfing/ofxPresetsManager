@@ -23,16 +23,17 @@
 
 #include "ofMain.h"
 
+//--
+
+//optional to debug
+
 #define INCLUDE_DEBUG_ERRORS
 #ifdef INCLUDE_DEBUG_ERRORS
 #include "ofxDEBUG_errors.h"
 #endif
 
-//#include "ofxImGui.h"
-#include "ofxGui.h"
-
 //TIMEMEASUREMENTS
-#define TIME_SAMPLE_MEASURES //comment this line to remove ofxTimeMeasurements dependency
+//#define TIME_SAMPLE_MEASURES //comment this line to remove ofxTimeMeasurements dependency
 #ifdef TIME_SAMPLE_MEASURES
 #include "ofxTimeMeasurements.h"
 #else
@@ -46,6 +47,11 @@
 #define TSGL_STOP
 #endif
 
+//--
+
+//#include "ofxImGui.h"
+#include "ofxGui.h"
+
 //-------------------------------
 
 #pragma mark - DEFINE DATA TYPES
@@ -57,7 +63,7 @@
 
 //---
 
-class ofxPresetsManager
+class ofxPresetsManager : public ofBaseApp
 {
 
 public:
@@ -72,14 +78,15 @@ public:
 	std::string groupName;//get from ofParameterGroup name
 	//std::string groupName2;//get from ofParameterGroup name
 	
-	std::string path_GloabalFolder;//top parent folder
-	std::string path_Control;//app settings
-	std::string path_KitFolder;//folder for kit of selected preset
-	std::string path_PresetsFolder;//for browse
+	std::string path_GLOBAL_Folder;//top parent folder
+	std::string path_Control;//app state session settings
+	std::string path_KitFolder;//folder for kit of selected presets. live kit
+	std::string path_PresetsFolder;//for browse other presets. archive kit
+	//all folder names must go without '/'
 
 	std::string PRESET_name;
 
-	std::string gui_name = "CONTROL";//default gui panel name
+	std::string gui_name = "NO_NAME";//default gui panel name
 
 	//-
 
@@ -114,11 +121,14 @@ public:
 
 	void setup();
 	void setup(std::string name);//to set gui panel name header label
-	void update();
+	
+	void update(ofEventArgs & args);
+	void draw(ofEventArgs & args);
 
-	//draw some info, when the gui is drawn you can also click on the button to change / save presets
-	void draw();
-	void draw(int x, int y, int cellSize);
+	
+	//void update();
+	//void draw();
+	//void draw(int x, int y, int cellSize);
 
 	//clickeable box panel
 	void draw_CLICKER();
@@ -516,7 +526,7 @@ private:
 
 	//-
 
-	//control manager params
+	//control presetsManager params
 	//to selec presets, clone, save..
 	ofParameterGroup params;
 	ofParameter<bool> SHOW_menu;

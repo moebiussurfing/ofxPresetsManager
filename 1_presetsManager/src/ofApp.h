@@ -32,7 +32,7 @@ public:
 
     // PRESET MANAGER
 
-    ofxPresetsManager manager;
+    ofxPresetsManager presetsManager;
 
     //--
 

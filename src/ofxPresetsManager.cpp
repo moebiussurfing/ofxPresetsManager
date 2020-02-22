@@ -12,6 +12,11 @@
 //--------------------------------------------------------------
 ofxPresetsManager::ofxPresetsManager()
 {
+	ofAddListener(ofEvents().update, this, &ofxPresetsManager::update);
+	ofAddListener(ofEvents().draw, this, &ofxPresetsManager::draw);
+	
+	//-
+	
 	DISABLE_CALLBACKS = true;
 
 	//-
@@ -31,14 +36,14 @@ ofxPresetsManager::ofxPresetsManager()
 	//default settings paths
 
 	//top parent folder
-	path_GloabalFolder = "/";//default addon folder
-	//path_GloabalFolder = "ofxPresetsManager/";
+	path_GLOBAL_Folder = "globalFolder";//default addon folder
+	//path_GLOBAL_Folder = "ofxPresetsManager";
 
 	//default kit folder for live/favorites presets
 	path_KitFolder = "assets/groups/kit_1";
 
 	//app settings
-	path_Control = "assets/settings/PRESET_MANAGER_control.xml";
+	path_Control = "assets";
 
 	//big browser
 	path_PresetsFolder = "assets/groups/presets";//default presets folder
@@ -72,7 +77,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//-
 
 	////gui font
-	//myTTF = path_GloabalFolder + "assets/fonts/overpass-mono-bold.otf";
+	//myTTF = path_GLOBAL_Folder + "assets/fonts/overpass-mono-bold.otf";
 	////myTTF = "assets/fonts/PragmataProR_0822.ttf";
 	//sizeTTF = 8;
 	//myFont.load(myTTF, sizeTTF, true, true);
@@ -153,12 +158,12 @@ void ofxPresetsManager::setup()
 	//-
 
 	//ofSetLogLevel("ofxPresetsManager", OF_LOG_NOTICE);
-	ofLogNotice("ofxPresetsManager") << "> setup()";
+	ofLogNotice("ofxPresetsManager") << "setup()";
 
 	//-
 
 	//gui font
-	myTTF = path_GloabalFolder + "fonts/overpass-mono-bold.otf";
+	myTTF = path_GLOBAL_Folder + "/" + "fonts/overpass-mono-bold.otf";
 	sizeTTF = 8;
 	bool bLoaded = myFont.load(myTTF, sizeTTF, true, true);
 
@@ -173,7 +178,7 @@ void ofxPresetsManager::setup()
 
 	//ofxGui theme
 
-	string pathFont = path_GloabalFolder + "fonts/overpass-mono-bold.otf";
+	string pathFont = path_GLOBAL_Folder + "/" + "fonts/overpass-mono-bold.otf";
 	//must check this font file is detected
 	ofFile file(pathFont);
 	if (file.exists())
@@ -183,7 +188,7 @@ void ofxPresetsManager::setup()
 	else
 	{
 #ifdef INCLUDE_DEBUG_ERRORS
-		errorsDEBUG.addError(gui_name + "ofxPresetsManager", "setup() ofxGui", pathFont);
+		errorsDEBUG.addError(gui_name + " ofxPresetsManager", "setup() ofxGui", pathFont);
 #endif
 	}
 
@@ -240,7 +245,7 @@ void ofxPresetsManager::setup()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::update()
+void ofxPresetsManager::update(ofEventArgs & args)
 {
 	//plotters
 	//TS_START("load1");
@@ -286,7 +291,7 @@ void ofxPresetsManager::update()
 }
 
 //---------------------------------------------------------------------
-void ofxPresetsManager::draw()
+void ofxPresetsManager::draw(ofEventArgs & args)
 {
 	//-
 
@@ -510,6 +515,11 @@ ofxPresetsManager::~ofxPresetsManager()
 	{
 		save_AllKit_FromMemory();
 	}
+
+	//--
+
+	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
+	ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
 }
 
 //-
@@ -523,7 +533,7 @@ string ofxPresetsManager::presetName(string gName, int presetIndex)
 	string strFile;
 	string strPath;
 
-	strFolder = path_GloabalFolder + path_KitFolder + "/";
+	strFolder = path_GLOBAL_Folder + "/" + path_KitFolder + "/";
 	//strFile = gName + "_preset_" + ofToString(presetIndex) + ".xml";
 	strFile = groupName + "_preset_" + ofToString(presetIndex) + ".xml";
 	strPath = strFolder + strFile;
@@ -536,7 +546,7 @@ string ofxPresetsManager::presetName(string gName, int presetIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main adder
 {
-	ofLogNotice("ofxPresetsManager") << "> added group";
+	ofLogNotice("ofxPresetsManager") << "added group";
 
 	//add a gui/ofParameterGroup for preset saving
 
@@ -1094,7 +1104,7 @@ void ofxPresetsManager::preset_save(string name)//without xml extension
 	//ofSerialize(settings, groups[PRESET_selected - 1]);
 	ofSerialize(settings, groups[0]);
 
-	settings.save(path_PresetsFolder + "/" + name + ".xml");
+	settings.save(path_GLOBAL_Folder + "/" + path_PresetsFolder + "/" + name + ".xml");
 }
 
 //--------------------------------------------------------------
@@ -1103,7 +1113,7 @@ void ofxPresetsManager::preset_load(string name)//without xml extension
 	ofLogNotice("ofxPresetsManager") << "preset_load: " << name << ".xml";
 
 	ofXml settings;
-	settings.load(path_PresetsFolder + "/" + name + ".xml");
+	settings.load(path_GLOBAL_Folder + "/" + path_PresetsFolder + "/" + name + ".xml");
 
 	//TODO:
 	//using one gui only! 0
@@ -1121,7 +1131,7 @@ void ofxPresetsManager::preset_filesRefresh()
 	ofDirectory dataDirectory(ofToDataPath(path_PresetsFolder, true));
 	//ofDirectory dataDirectory(ofToDataPath("user_kits/presets", true));
 
-	ofLogNotice("ofxPresetsManager") << "preset_filesRefresh path:" << path_PresetsFolder;
+	ofLogNotice("ofxPresetsManager") << "preset_filesRefresh path:" << path_GLOBAL_Folder + "/" + path_PresetsFolder;
 
 	//clear files and filenames vectors
 	files.clear();
@@ -1178,8 +1188,8 @@ void ofxPresetsManager::loadPreset(int p)
 {
 	if (!DISABLE_CALLBACKS)
 	{
-		ofLogNotice("ofxPresetsManager") << "> API > LOAD PRESET " << ofToString(p);
-		ofLogNotice("ofxPresetsManager") << "> loadPreset()";
+		ofLogNotice("ofxPresetsManager") << "API > LOAD PRESET " << ofToString(p);
+		ofLogNotice("ofxPresetsManager") << "loadPreset()";
 		ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";
 
 		//TODO:
@@ -1426,7 +1436,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 void ofxPresetsManager::load_ControlSettings()
 {
 	ofXml settings;
-	string path = path_GloabalFolder + path_Control;
+	string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
 	bool bLoaded = settings.load(path);
 
 	if (!bLoaded)
@@ -1436,8 +1446,8 @@ void ofxPresetsManager::load_ControlSettings()
 #endif
 	}
 
-	ofLogNotice("ofxPresetsManager") << "> load_ControlSettings:\n" << path;
-	ofLogNotice("ofxPresetsManager") << "> load_ControlSettings: PRESET " << PRESET_selected;
+	ofLogNotice("ofxPresetsManager") << "load_ControlSettings:\n" << path;
+	ofLogNotice("ofxPresetsManager") << "load_ControlSettings: PRESET " << PRESET_selected;
 
 	if (bLoaded)
 	{
@@ -1460,9 +1470,9 @@ void ofxPresetsManager::save_ControlSettings()
 
 	ofXml settings;
 	ofSerialize(settings, params);
-	string path = path_GloabalFolder + path_Control;
+	string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
 	settings.save(path);
-	ofLogVerbose("ofxPresetsManager") << "> save_ControlSettings:\n" << path;
+	ofLogVerbose("ofxPresetsManager") << "save_ControlSettings:\n" << path;
 }
 
 //--------------------------------------------------------------
@@ -1480,7 +1490,7 @@ void ofxPresetsManager::set_Path_PresetsFolder(string folder)
 //--------------------------------------------------------------
 void ofxPresetsManager::set_Path_GlobalFolder(string folder)
 {
-	path_GloabalFolder = folder;
+	path_GLOBAL_Folder = folder;
 }
 
 
@@ -1560,7 +1570,7 @@ void ofxPresetsManager::set_Path_GlobalFolder(string folder)
 //			ImGui::Begin("About ofxPresetsManager", &SHOW_About,
 //				ImGuiWindowFlags_NoCollapse |
 //				ImGuiWindowFlags_AlwaysAutoResize);
-//			ImGui::Text("ofParameterGroup presets manager");
+//			ImGui::Text("ofParameterGroup presets presetsManager");
 //			ImGui::Separator();
 //			ImGui::Text("by MoebiusSurfing.");
 //			ImGui::End();
@@ -2033,7 +2043,7 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 		string strFile;
 		string strPath;
 
-		strFolder = path_GloabalFolder + path_KitFolder + "/";
+		strFolder = path_GLOBAL_Folder + "/" + path_KitFolder + "/";
 		strFile = groupName + "_preset_" + ofToString(i) + ".xml";
 		strPath = strFolder + strFile;
 
@@ -2054,7 +2064,7 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 //--------------------------------------------------------------
 void ofxPresetsManager::load_AllKit_ToMemory()
 {
-	ofLogNotice("ofxPresetsManager") << "> load_AllKit_ToMemory()";
+	ofLogNotice("ofxPresetsManager") << "load_AllKit_ToMemory()";
 
 	////TODO:
 	//groupName = groups[0].getName();
@@ -2079,7 +2089,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 		string strFile1;
 		string strPath1;
 
-		strFolder1 = path_GloabalFolder + path_KitFolder + "/";
+		strFolder1 = path_GLOBAL_Folder + "/" + path_KitFolder + "/";
 		strFile1 = groupName + "_preset_" + ofToString(i) + ".xml";
 		strPath1 = strFolder1 + strFile1;
 
