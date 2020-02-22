@@ -66,18 +66,18 @@
 class ofxPresetsManager : public ofBaseApp
 {
 
-public:
+private:
 
 #ifdef INCLUDE_DEBUG_ERRORS
 	ofxDEBUG_errors errorsDEBUG;
 #endif
-	
+
 	//-
 
 	//settings paths
 	std::string groupName;//get from ofParameterGroup name
 	//std::string groupName2;//get from ofParameterGroup name
-	
+
 	std::string path_GLOBAL_Folder;//top parent folder
 	std::string path_Control;//app state session settings
 	std::string path_KitFolder;//folder for kit of selected presets. live kit
@@ -86,9 +86,11 @@ public:
 
 	std::string PRESET_name;
 
-	std::string gui_name = "NO_NAME";//default gui panel name
+	std::string gui_LabelName = "NO_NAME";//default gui panel name
 
 	//-
+
+//public:
 
 	//app settings
 
@@ -116,16 +118,20 @@ public:
 
 #pragma mark - OF
 
+public:
+
+	void setPositionDEBUG(int x, int y);
+
 	ofxPresetsManager();
 	~ofxPresetsManager();
 
 	void setup();
 	void setup(std::string name);//to set gui panel name header label
-	
+
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
 
-	
+
 	//void update();
 	//void draw();
 	//void draw(int x, int y, int cellSize);
@@ -144,15 +150,21 @@ public:
 
 	//--
 
+private:
+
 #pragma mark - CALLBACKS
 
 	bool DISABLE_CALLBACKS = true;
-	
+
 	ofParameter<bool> DONE_load;
 	ofParameter<bool> DONE_save;
 
 	bool bIsDoneLoad = false;
-	bool isDoneLoad() {
+
+public:
+
+	bool isDoneLoad()
+	{
 		if (bIsDoneLoad)
 		{
 			bIsDoneLoad = false;
@@ -225,6 +237,8 @@ public:
 	//void getNumPresets();
 	//void getNumPresets();
 
+private:
+
 	//draws group name into clicker boxes panel
 	bool SHOW_GroupName = true;
 	void setShowGroupName(bool b)
@@ -233,7 +247,7 @@ public:
 	}
 
 	//--
-	
+
 	//used when preset has not changed but we like to retrig
 	bool bMustTrig = false;
 	bool mustTrig()
@@ -249,9 +263,21 @@ public:
 		}
 	}
 
+private:
+
+	//load presets from preset folder, not from favorites presets folders
+	void preset_load(string name);
+	void preset_save(string name);
+	void preset_filesRefresh();
+	//-
+
+#pragma mark - GUI
+
 	//-
 
 	//browser
+
+public:
 
 	//BUG: trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
 	void refresh()
@@ -267,20 +293,10 @@ public:
 		ofLogNotice("ofxPresetsManager") << "PRESET " << PRESET_selected;
 	}
 
-
-	//load presets from preset folder, not from favorites presets folders
-	void preset_load(string name);
-	void preset_save(string name);
-	void preset_filesRefresh();
-
 	void setHelpVisible(bool b)
 	{
 		debugClicker = b;
 	}
-
-	//-
-
-#pragma mark - GUI
 
 	void set_GUI_Position(int x, int y)
 	{
@@ -349,18 +365,18 @@ public:
 
 	//--
 
+private:
+
 	//from 1 to 8. (indexed vector vars starts from 0)
 	ofParameter<int> PRESET_selected;
 	int selected_PRE = -1;
 
 	//ofParameter<int> PRESET2_selected;
 	//int selected2_PRE = -1;
-	
+
 	//--
 
 #pragma mark - PRIVATE
-
-private:
 
 	//browse
 	bool isMouseOver_Changed()
@@ -395,10 +411,14 @@ private:
 
 	//-
 
+public:
+
 	//switch on or off the control with the keys
 	void toggleKeysControl(bool active);
 
 	//-
+
+private:
 
 	//engine
 
@@ -480,6 +500,7 @@ private:
 
 	void addKeysListeners();
 	void removeKeysListeners();
+
 	void keyPressed(ofKeyEventArgs &eventArgs);
 	void keyReleased(ofKeyEventArgs &eventArgs);
 
@@ -498,9 +519,9 @@ private:
 	//-
 
 	int num_presets;
-	
+
 	void doCloneRight(int pIndex);
-	
+
 	void doSave(int pIndex);
 	//void doSave2(int pIndex);
 
@@ -512,7 +533,7 @@ private:
 
 	//-
 
-	void groupDebug(ofParameterGroup &group);
+	//void groupDebug(ofParameterGroup &group);
 
 	//-
 
@@ -559,6 +580,8 @@ private:
 	//--
 
 	bool ENABLE_KeysArrowBrowse = true;//allow browse by arrows keys by default
+
+public:
 	void set_ENABLE_KeysArrowBrowse(bool b)
 	{
 		ENABLE_KeysArrowBrowse = b;

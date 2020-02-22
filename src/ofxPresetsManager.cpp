@@ -145,9 +145,15 @@ ofxPresetsManager::ofxPresetsManager()
 }
 
 //--------------------------------------------------------------
+void ofxPresetsManager::setPositionDEBUG(int x, int y)
+{
+	errorsDEBUG.setPosition(x, y);
+}
+
+//--------------------------------------------------------------
 void ofxPresetsManager::setup(std::string name)
 {
-	gui_name = name;
+	gui_LabelName = name;
 	setup();
 }
 
@@ -171,7 +177,7 @@ void ofxPresetsManager::setup()
 	if (!bLoaded)
 	{
 #ifdef INCLUDE_DEBUG_ERRORS
-		errorsDEBUG.addError(gui_name + " ofxPresetsManager", "setup() myFont", myTTF);
+		errorsDEBUG.addError(gui_LabelName + " ofxPresetsManager", "setup() myFont", myTTF);
 #endif
 	}
 
@@ -189,7 +195,7 @@ void ofxPresetsManager::setup()
 	else
 	{
 #ifdef INCLUDE_DEBUG_ERRORS
-		errorsDEBUG.addError(gui_name + " ofxPresetsManager", "setup() ofxGui", pathFont);
+		errorsDEBUG.addError(gui_LabelName + " ofxPresetsManager", "setup() ofxGui", pathFont);
 #endif
 	}
 
@@ -200,7 +206,7 @@ void ofxPresetsManager::setup()
 	ofxGuiSetHeaderColor(ofColor(24));
 
 	//control gui
-	guiControl.setup(gui_name);
+	guiControl.setup(gui_LabelName);
 	guiControl.add(params);
 	guiControl.setPosition(ofGetWidth() - 210, 10);//default
 
@@ -242,6 +248,14 @@ void ofxPresetsManager::setup()
 	//selected_PRE = -1;
 
 	//--------
+
+	////TODO
+	////moved from add
+	////TODO: bug on mixerBlend.. in load_AllKit_ToMemory...
+	////gui_LabelName = groups[0].getName();//TODO: one group only
+
+	////memory mode
+	//load_AllKit_ToMemory();
 
 }
 
@@ -293,7 +307,10 @@ void ofxPresetsManager::update(ofEventArgs & args)
 
 //---------------------------------------------------------------------
 void ofxPresetsManager::draw(ofEventArgs & args)
-{
+{	
+	//debug errors
+	errorsDEBUG.draw();
+
 	//-
 
 	//TODO
@@ -367,8 +384,6 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	}
 
 	//--
-
-	errorsDEBUG.draw();
 }
 
 
@@ -458,14 +473,17 @@ void ofxPresetsManager::draw_CLICKER()
 
 		//-
 
-		//kit name
+		//group kit name
 		if (SHOW_GroupName)
 		{
 			string info = groups[i].getName();
 
 			//double font to improve different background colors
 			int gap = 1;
-			int xG = clicker_cellSize * k + 15;
+			//int xG = clicker_cellSize * k + 15;
+
+			float strW = myFont.getStringBoundingBox(info,0,0).width;
+			int xG = - strW - 20;
 
 			ofSetColor(ofColor::black);
 			if (myFont.isLoaded())
@@ -586,11 +604,18 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 
 	//path folder file names
 	groupName = groups[0].getName();//TODO: one group only
+	
+
 	//groupName2 = groups[1].getName();//TODO: one group only
 
 	ofLogNotice("ofxPresetsManager") << "groupName: " << groupName;
 
 	//-
+	
+	//TODO
+	//TODO: bug on mixerBlend.. in load_AllKit_ToMemory...
+	//temporary name only to debug bc 
+	gui_LabelName = groups[0].getName();//TODO: one group only
 
 	//memory mode
 	load_AllKit_ToMemory();
@@ -1463,7 +1488,7 @@ void ofxPresetsManager::load_ControlSettings()
 	if (!bLoaded)
 	{
 #ifdef INCLUDE_DEBUG_ERRORS
-		errorsDEBUG.addError(gui_name + " ofxPresetsManager", "load_ControlSettings()", path);
+		errorsDEBUG.addError(gui_LabelName + " ofxPresetsManager", "load_ControlSettings()", path);
 #endif
 	}
 
@@ -2139,7 +2164,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 		else if (!bLoaded)
 		{
 #ifdef INCLUDE_DEBUG_ERRORS
-			errorsDEBUG.addError(gui_name + " ofxPresetsManager", "load_AllKit_ToMemory()", strPath1);
+			errorsDEBUG.addError(gui_LabelName + " ofxPresetsManager", "load_AllKit_ToMemory()", strPath1);
 #endif
 		}
 	}
