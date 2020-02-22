@@ -32,9 +32,8 @@ void ofApp::setup()
 	//customize path folders
 
 	//NOTE: take care with path folders, they must exist before we can write inside!
-	presetsManager.set_Path_GlobalFolder("ofxPresetsManager/");//TODO:
+	presetsManager.set_Path_GlobalFolder("ofxPresetsManager");//TODO:
 	presetsManager.set_Path_KitFolder("assets/groups/kit");
-	//presetsManager.set_Path_KitFolder(pathKit);
 
 	//-
 
@@ -93,13 +92,11 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-	//preset presetsManager
-	presetsManager.update();
-
+	//presetsManager
 	//simple callback when preset is loaded 
 	if (presetsManager.isDoneLoad())
 	{
-		ofLogNotice("ofApp") << "PRESET MANAGER DONE LOAD";
+		ofLogNotice("ofApp") << "PRESET LOADED";
 		ofLogNotice("ofApp") << endl;
 	}
 }
@@ -172,9 +169,6 @@ void ofApp::draw()
 
 	//local gui parameters
 	gui.draw();
-
-	//addon gui
-	presetsManager.draw();
 }
 
 //--------------------------------------------------------------
@@ -192,16 +186,6 @@ void ofApp::keyPressed(int key)
 	else if (key == OF_KEY_TAB)
 	{
 		presetsManager.set_ENABLE_Keys(!presetsManager.isKeysEnabled());
-	}
-
-	//browse
-	else if (key == OF_KEY_RIGHT)
-	{
-		presetsManager.load_Next();
-	}
-	else if (key == OF_KEY_LEFT)
-	{
-		presetsManager.load_Previous();
 	}
 }
 

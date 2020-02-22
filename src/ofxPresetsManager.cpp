@@ -14,9 +14,9 @@ ofxPresetsManager::ofxPresetsManager()
 {
 	ofAddListener(ofEvents().update, this, &ofxPresetsManager::update);
 	ofAddListener(ofEvents().draw, this, &ofxPresetsManager::draw);
-	
+
 	//-
-	
+
 	DISABLE_CALLBACKS = true;
 
 	//-
@@ -88,6 +88,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	PRESET_selected.set("PRESETS", 1, 1, num_presets);
 	//PRESET2_selected.set("PRESETS2", 1, 1, num_presets);
+
 	bSave.set("SAVE", false);
 	bSave.setSerializable(false);
 	MODE_MemoryLive.set("MODE MEMORY", false);
@@ -164,7 +165,7 @@ void ofxPresetsManager::setup()
 
 	//gui font
 	myTTF = path_GLOBAL_Folder + "/" + "fonts/overpass-mono-bold.otf";
-	sizeTTF = 8;
+	sizeTTF = 10;
 	bool bLoaded = myFont.load(myTTF, sizeTTF, true, true);
 
 	if (!bLoaded)
@@ -436,10 +437,11 @@ void ofxPresetsManager::draw_CLICKER()
 				ofDrawRectangle(clicker_cellSize * k + 4, clicker_cellSize * i + 4, clicker_cellSize - 8, clicker_cellSize - 8);
 		}
 
-		//3. save button ?
+		//3. save button
 		ofDrawRectangle(clicker_cellSize * k, clicker_cellSize * i, clicker_cellSize, clicker_cellSize);
 
 		//label
+		int ySave = clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF;
 		if (!myFont.isLoaded())//without ttf font
 		{
 			ofDrawBitmapString("SAVE",
@@ -450,7 +452,7 @@ void ofxPresetsManager::draw_CLICKER()
 		{
 			myFont.drawString("SAVE",
 				clicker_cellSize * k + 0.5 * clicker_cellSize - 1.8f * sizeTTF,
-				clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF);
+				ySave);
 		}
 		k++;
 
@@ -459,35 +461,54 @@ void ofxPresetsManager::draw_CLICKER()
 		//kit name
 		if (SHOW_GroupName)
 		{
-			ofDrawBitmapString(groups[i].getName(),
-				clicker_cellSize*k + 15,
-				clicker_cellSize*i + 22);
+			string info = groups[i].getName();
+
+			//double font to improve different background colors
+			int gap = 1;
+			int xG = clicker_cellSize * k + 15;
+
+			ofSetColor(ofColor::black);
+			if (myFont.isLoaded())
+				myFont.drawString(info, xG + gap, ySave + gap);
+			else
+				ofDrawBitmapString(info, xG + gap, ySave + gap);
+
+			ofSetColor(ofColor::white);
+			if (myFont.isLoaded())
+				myFont.drawString(info, xG, ySave);
+			else
+				ofDrawBitmapString(info, xG, ySave);
 		}
+
+		//-
+
+		//4. help info text
+		if (debugClicker && ENABLE_shortcuts)
+		{
+			string info = "";
+			info += "MOUSE-CLICK OR KEYS [1-8] TO LOAD PRESET\n";
+			info += "HOLD [CTRL] TO SAVE/COPY PRESET\n";
+
+			//double font to improve different background colors
+			int gap = 1;
+			int y = (clicker_cellSize + 15) * groups.size();
+
+			ofSetColor(ofColor::black);
+			if (myFont.isLoaded())
+				myFont.drawString(info, gap, y + gap);
+			else
+				ofDrawBitmapString(info, gap, y + gap);
+
+			ofSetColor(ofColor::white);
+			if (myFont.isLoaded())
+				myFont.drawString(info, 0, y);
+			else
+				ofDrawBitmapString(info, 0, y);
+		}
+
+		ofPopStyle();
+		ofPopMatrix();
 	}
-
-	//-
-
-	//4. help info text
-	if (debugClicker && ENABLE_shortcuts)
-	{
-		string info;
-		info = "MOUSE-CLICK OR KEYS [1-8] TO LOAD PRESET\n";
-		info += "HOLD [CTRL] TO SAVE/COPY PRESET\n";
-
-		//double font to improve different background colors
-		int gap = 1;
-		int y = (clicker_cellSize + 15) * groups.size();
-
-		ofSetColor(ofColor::black);
-		if (myFont.isLoaded())
-			myFont.drawString(info, gap, y + gap);
-		ofSetColor(ofColor::white);
-		if (myFont.isLoaded())
-			myFont.drawString(info, 0, y);
-	}
-
-	ofPopStyle();
-	ofPopMatrix();
 }
 
 //--------------------------------------------------------------
@@ -881,12 +902,12 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		if (key == modeKey)
 		{
 			bKeySave = true;
-			ofLogVerbose("ofxPresetsManager") << "-> modeKey TRUE" << endl;
+			ofLogVerbose("ofxPresetsManager") << "modeKey TRUE" << endl;
 			return;
 		}
 
 		//hide/show control gui
-		if (key == 'G' || key == 'g')
+		if (key == 'g')
 		{
 			SHOW_Gui = !SHOW_Gui;
 			//bool b = is_GUI_Visible();
@@ -918,7 +939,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				if (key == keys[i][k])
 				{
-					ofLogNotice("ofxPresetsManager") << "-> Key: " << (char)key;
+					ofLogNotice("ofxPresetsManager") << "Key: " << (char)key;
 
 					if (bKeySave)
 					{
@@ -989,7 +1010,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 	//-1 for out of boxes
 
 	if (xIndex != -1 && yIndex != -1)
-		ofLogNotice("ofxPresetsManager") << "-> mousePressed: (" << xIndex << "," << yIndex << ")";
+		ofLogNotice("ofxPresetsManager") << "mousePressed: (" << xIndex << "," << yIndex << ")";
 
 	//-
 
@@ -1024,9 +1045,9 @@ void ofxPresetsManager::mousePressed(int x, int y)
 		//2. last button (save button)
 		else if (xIndex == presets[yIndex])
 		{
-			ofLogNotice("ofxPresetsManager") << "-> saveButton: (" << yIndex << ")";
+			ofLogNotice("ofxPresetsManager") << "saveButton: (" << yIndex << ")";
 
-			//ofLogNotice("ofxPresetsManager") << "-> saveButton: ("
+			//ofLogNotice("ofxPresetsManager") << "saveButton: ("
 			//	<< lastIndices[yIndex]
 			//	<< ", " << yIndex << ")";
 

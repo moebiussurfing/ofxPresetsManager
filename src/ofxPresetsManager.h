@@ -226,7 +226,7 @@ public:
 	//void getNumPresets();
 
 	//draws group name into clicker boxes panel
-	bool SHOW_GroupName = false;
+	bool SHOW_GroupName = true;
 	void setShowGroupName(bool b)
 	{
 		SHOW_GroupName = b;
@@ -558,7 +558,7 @@ private:
 
 	//--
 
-	bool ENABLE_KeysArrowBrowse = false;
+	bool ENABLE_KeysArrowBrowse = true;//allow browse by arrows keys by default
 	void set_ENABLE_KeysArrowBrowse(bool b)
 	{
 		ENABLE_KeysArrowBrowse = b;
