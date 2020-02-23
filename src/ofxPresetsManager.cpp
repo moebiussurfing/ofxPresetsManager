@@ -49,6 +49,9 @@ ofxPresetsManager::ofxPresetsManager()
 	path_PresetsFolder = "assets/groups/presets";//default presets folder
 	PRESET_name = "_emptyPreset";//default preset
 
+	//to add to filenames
+	path_Prefix = "_preset_";
+
 	//--
 
 	modeKey = OF_KEY_CONTROL;
@@ -102,9 +105,9 @@ ofxPresetsManager::ofxPresetsManager()
 	bCloneRight.set("CLONE >", false);
 	bCloneRight.setSerializable(false);
 	SHOW_menu.set("SHOW MENU", false);
-	SHOW_Gui.set("SHOW CONTROL GUI ", false);
+	SHOW_Gui_Internal.set("SHOW CONTROL GUI ", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", false);
-	ENABLE_shortcuts.set("ENABLE KEYS", true);
+	ENABLE_Keys.set("ENABLE KEYS", true);
 	Gui_Position.set("GUI POSITION",
 		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
 		glm::vec2(0, 0),
@@ -125,10 +128,10 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Options.add(bAutosaveTimer);
 
 	params_Gui.setName("GUI");
-	params_Gui.add(SHOW_Gui);
+	params_Gui.add(SHOW_Gui_Internal);
 	params_Gui.add(SHOW_ClickPanel);
 	params_Gui.add(SHOW_menu);
-	params_Gui.add(ENABLE_shortcuts);
+	params_Gui.add(ENABLE_Keys);
 	params_Gui.add(Gui_Position);
 
 	params_Tools.setName("HELPER TOOLS");
@@ -307,7 +310,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 
 //---------------------------------------------------------------------
 void ofxPresetsManager::draw(ofEventArgs & args)
-{	
+{
 	//debug errors
 	errorsDEBUG.draw();
 
@@ -378,7 +381,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 
 	//-
 
-	if (SHOW_Gui)
+	if (SHOW_Gui_Internal)
 	{
 		guiControl.draw();
 	}
@@ -482,8 +485,8 @@ void ofxPresetsManager::draw_CLICKER()
 			int gap = 1;
 			//int xG = clicker_cellSize * k + 15;
 
-			float strW = myFont.getStringBoundingBox(info,0,0).width;
-			int xG = - strW - 20;
+			float strW = myFont.getStringBoundingBox(info, 0, 0).width;
+			int xG = -strW - 20;
 
 			ofSetColor(ofColor::black);
 			if (myFont.isLoaded())
@@ -501,7 +504,7 @@ void ofxPresetsManager::draw_CLICKER()
 		//-
 
 		//4. help info text
-		if (debugClicker && ENABLE_shortcuts)
+		if (debugClicker && ENABLE_Keys)
 		{
 			string info = "";
 			info += "MOUSE-CLICK OR KEYS [1-8] TO LOAD PRESET\n";
@@ -573,8 +576,8 @@ string ofxPresetsManager::presetName(string gName, int presetIndex)
 	string strPath;
 
 	strFolder = path_GLOBAL_Folder + "/" + path_KitFolder + "/";
-	//strFile = gName + "_preset_" + ofToString(presetIndex) + ".xml";
-	strFile = groupName + "_preset_" + ofToString(presetIndex) + ".xml";
+	//strFile = gName + path_Prefix + ofToString(presetIndex) + ".xml";
+	strFile = groupName + path_Prefix + ofToString(presetIndex) + ".xml";
 	strPath = strFolder + strFile;
 
 	return strPath;
@@ -587,9 +590,9 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 {
 	ofLogNotice("ofxPresetsManager") << "added group";
 
-	//add a gui/ofParameterGroup for preset saving
+	//adds a ofParameterGroup for preset management
 
-	groups.push_back(params);//each enqued group-param handles all 8 presets
+	groups.push_back(params);//each enqued group-param handles all (_num_presets) '8' presets
 
 	lastIndices.push_back(0);//?
 	newIndices.push_back(0);//?
@@ -597,25 +600,29 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 
 	//-
 
-	//update gui params
+	//update control gui panel params
 	num_presets = _num_presets;
 	PRESET_selected.setMax(num_presets);
+
+	//TODO:
 	//PRESET2_selected.setMax(num_presets);
 
-	//path folder file names
-	groupName = groups[0].getName();//TODO: one group only
-	
+	//-
 
+	//path folder and xml presets file names
+	groupName = groups[0].getName();//TODO: one group only
 	//groupName2 = groups[1].getName();//TODO: one group only
 
 	ofLogNotice("ofxPresetsManager") << "groupName: " << groupName;
 
 	//-
-	
-	//TODO
-	//TODO: bug on mixerBlend.. in load_AllKit_ToMemory...
-	//temporary name only to debug bc 
-	gui_LabelName = groups[0].getName();//TODO: one group only
+
+	//temporary name only to debug purposes
+	//final label name to gui display will be setted if setup("name") is called 
+	gui_LabelName = groups[0].getName();
+	//TODO: one group only
+
+	//-
 
 	//memory mode
 	load_AllKit_ToMemory();
@@ -919,7 +926,7 @@ void ofxPresetsManager::setModeKey(int key)
 //----------------------------------------------------------------
 void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 {
-	if (bKeys && ENABLE_shortcuts)
+	if (bKeys && ENABLE_Keys)
 	{
 		const int &key = eventArgs.key;
 
@@ -931,13 +938,18 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			return;
 		}
 
-		//hide/show control gui
-		if (key == 'g')
-		{
-			SHOW_Gui = !SHOW_Gui;
-			//bool b = is_GUI_Visible();
-			//set_GUI_Visible(!b);
-		}
+		//TODO: controlled from outside
+		////hide/show control gui
+		//if (key == 'G')
+		//{
+		//	SHOW_Gui_Internal = !SHOW_Gui_Internal;
+		//	//bool b = is_GUI_Visible();
+		//	//set_GUI_Internal_Visible(!b);
+		//}
+		//if (key == 'g')
+		//{
+		//	set_CLICKER_Visible(!is_CLICKER_Visible());
+		//}
 
 		//browse presets
 		else if (key == OF_KEY_RIGHT && ENABLE_KeysArrowBrowse)
@@ -998,7 +1010,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 //--------------------------------------------------------------
 void ofxPresetsManager::keyReleased(ofKeyEventArgs &eventArgs)
 {
-	if (eventArgs.key == modeKey && ENABLE_shortcuts)
+	if (eventArgs.key == modeKey && ENABLE_Keys)
 	{
 		bKeySave = false;
 		ofLogVerbose("ofxPresetsManager") << "modeKey FALSE" << endl;
@@ -1547,7 +1559,7 @@ void ofxPresetsManager::set_Path_GlobalFolder(string folder)
 //bool ofxPresetsManager::gui_draw()
 //{
 //	static bool SHOW_About = false;
-//	static bool SHOW_Gui = true;
+//	static bool SHOW_Gui_Internal = true;
 //
 //	auto mainSettings = ofxImGui::Settings();
 //	mainSettings.windowPos = guiPos;
@@ -1555,7 +1567,7 @@ void ofxPresetsManager::set_Path_GlobalFolder(string folder)
 //
 //	gui.begin();
 //	{
-//		if (SHOW_Gui)
+//		if (SHOW_Gui_Internal)
 //		{
 //			if (ofxImGui::BeginWindow("PRESET MANAGER", mainSettings, false))
 //				//if (ofxImGui::BeginWindow("PRESET MANAGER", mainSettings,
@@ -1564,7 +1576,7 @@ void ofxPresetsManager::set_Path_GlobalFolder(string folder)
 //			{
 //				ImGui::PushItemWidth(100);
 //
-//				ofxImGui::AddParameter(ENABLE_shortcuts);
+//				ofxImGui::AddParameter(ENABLE_Keys);
 //
 //				//1. files browser
 //				gui_imGui_PresetManager();
@@ -2090,7 +2102,7 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 		string strPath;
 
 		strFolder = path_GLOBAL_Folder + "/" + path_KitFolder + "/";
-		strFile = groupName + "_preset_" + ofToString(i) + ".xml";
+		strFile = groupName + path_Prefix + ofToString(i) + ".xml";
 		strPath = strFolder + strFile;
 
 		settingsArray[i].save(strPath);
@@ -2131,23 +2143,22 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 
 		//-
 
-		string strFolder1;
-		string strFile1;
-		string strPath1;
-
-		strFolder1 = path_GLOBAL_Folder + "/" + path_KitFolder + "/";
-		strFile1 = groupName + "_preset_" + ofToString(i) + ".xml";
-		strPath1 = strFolder1 + strFile1;
+		string pathFolder;
+		string pathFilename;
+		string pathComplete;
+		pathFolder = path_GLOBAL_Folder + "/" + path_KitFolder + "/";
+		pathFilename = groupName + path_Prefix + ofToString(i) + ".xml";
+		pathComplete = pathFolder + pathFilename;
 
 		//load xml file
 		ofXml settings;
-		bool bLoaded = settings.load(strPath1);
+		bool bLoaded = settings.load(pathComplete);
 
 		//debug
 		if (false)
 		{
 			ofLogNotice("ofxPresetsManager") << "[" << i << "]";
-			ofLogNotice("ofxPresetsManager") << "File: " << strPath1
+			ofLogNotice("ofxPresetsManager") << "File: " << pathComplete
 				<< "\n" << ofToString(settings.toString());
 		}
 
@@ -2164,13 +2175,14 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 		else if (!bLoaded)
 		{
 #ifdef INCLUDE_DEBUG_ERRORS
-			errorsDEBUG.addError(gui_LabelName + " ofxPresetsManager", "load_AllKit_ToMemory()", strPath1);
+			errorsDEBUG.addError("ofxPresetsManager " + gui_LabelName, "load_AllKit_ToMemory() - NOT FOUND OR EMPTY XML FILES:", pathComplete);
 #endif
+			//TODO:
+			//maybe we should create not found or empty xml presets with an empty preset..
 		}
 	}
 
 	ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";
-
 
 	//debug params
 	bool bDEBUG = false;
@@ -2181,6 +2193,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 			ofLogNotice("ofxPresetsManager") << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
 		}
 	}
+
 	////debug params
 	//for (int i = 0; i < NUM_OF_PRESETS; i++)
 	//{

@@ -78,11 +78,12 @@ private:
 	std::string groupName;//get from ofParameterGroup name
 	//std::string groupName2;//get from ofParameterGroup name
 
+	//all folder names must go without '/'
 	std::string path_GLOBAL_Folder;//top parent folder
 	std::string path_Control;//app state session settings
 	std::string path_KitFolder;//folder for kit of selected presets. live kit
 	std::string path_PresetsFolder;//for browse other presets. archive kit
-	//all folder names must go without '/'
+	std::string path_Prefix;//to add to file names
 
 	std::string PRESET_name;
 
@@ -109,7 +110,8 @@ private:
 
 	////TODO:
 	//ofParameterGroup group_TARGET;
-	//void addGroup_TARGET(ofParameterGroup &g);	//vector<ofParameterGroup> groupsMem;
+	//void addGroup_TARGET(ofParameterGroup &g);	
+	//vector<ofParameterGroup> groupsMem;
 
 	//data
 	ofXml settingsArray[NUM_OF_PRESETS];
@@ -202,12 +204,12 @@ public:
 	void set_ENABLE_Keys(bool active)
 	{
 		bKeys = active;
-		ENABLE_shortcuts = active;
+		ENABLE_Keys = active;
 	}
 
 	bool isKeysEnabled()
 	{
-		return ENABLE_shortcuts;
+		return ENABLE_Keys;
 	}
 
 	int getCurrentPreset()
@@ -313,14 +315,14 @@ public:
 		guiSize = ofVec2f(w, h);
 	}
 
-	void set_GUI_Visible(bool visible)
+	void set_GUI_Internal_Visible(bool visible)
 	{
-		SHOW_Gui = visible;
+		SHOW_Gui_Internal = visible;
 	}
 
 	bool is_GUI_Visible()
 	{
-		return SHOW_Gui;
+		return SHOW_Gui_Internal;
 	}
 
 	void set_CLICKER_Position(int x, int y, int _cellSize)
@@ -333,6 +335,10 @@ public:
 	void set_CLICKER_Visible(bool visible)
 	{
 		SHOW_ClickPanel = visible;
+	}
+	bool is_CLICKER_Visible()
+	{
+		return SHOW_ClickPanel;
 	}
 
 	//--
@@ -441,8 +447,8 @@ private:
 
 	//browser
 
-	//bool SHOW_Gui;
-	ofParameter<bool> SHOW_Gui;
+	//bool SHOW_Gui_Internal;
+	ofParameter<bool> SHOW_Gui_Internal;
 
 	//ofxImGui::Gui gui;
 	//ofxImGui::Settings mainSettings = ofxImGui::Settings();
@@ -556,7 +562,7 @@ private:
 	ofParameter<bool> autoSave;
 	ofParameter<bool> autoLoad;
 	ofParameter<bool> bCloneRight;
-	ofParameter<bool> ENABLE_shortcuts;
+	ofParameter<bool> ENABLE_Keys;
 
 	ofParameterGroup params_Favorites;
 	ofParameterGroup params_Gui;
