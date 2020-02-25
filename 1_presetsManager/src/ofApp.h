@@ -3,9 +3,9 @@
 #include "ofMain.h"
 
 #include "ofxPresetsManager.h"
-
 #include "ofxWindowApp.h"
 #include "ofxGui.h"
+
 //#include "ofxImGui.h"
 
 class ofApp : public ofBaseApp
@@ -30,8 +30,7 @@ public:
 
     //--
 
-    // PRESET MANAGER
-
+    //presetsManager
     ofxPresetsManager presetsManager;
 
     //--

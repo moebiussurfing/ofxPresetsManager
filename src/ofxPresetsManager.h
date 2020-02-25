@@ -81,7 +81,7 @@ private:
 	//all folder names must go without '/'
 	std::string path_GLOBAL_Folder;//top parent folder
 	std::string path_Control;//app state session settings
-	std::string path_KitFolder;//folder for kit of selected presets. live kit
+	std::string path_Kit_Folder;//folder for kit of selected presets. live kit
 	std::string path_PresetsFolder;//for browse other presets. archive kit
 	std::string path_Prefix;//to add to file names
 
@@ -127,7 +127,7 @@ public:
 	ofxPresetsManager();
 	~ofxPresetsManager();
 
-	void setup();
+	void setup();///must be called after adding params group
 	void setup(std::string name);//to set gui panel name header label
 
 	void update(ofEventArgs & args);
@@ -140,6 +140,11 @@ public:
 
 	//clickeable box panel
 	void draw_CLICKER();
+
+	float getPresetCLICKER_Width()
+	{
+		return clicker_cellSize * (keys[0].size() + 1);
+	}
 
 	//-
 
@@ -158,6 +163,7 @@ private:
 
 	bool DISABLE_CALLBACKS = true;
 
+public:
 	ofParameter<bool> DONE_load;
 	ofParameter<bool> DONE_save;
 
@@ -252,6 +258,8 @@ private:
 
 	//used when preset has not changed but we like to retrig
 	bool bMustTrig = false;
+
+	public:
 	bool mustTrig()
 	{
 		if (bMustTrig)
@@ -320,7 +328,7 @@ public:
 		SHOW_Gui_Internal = visible;
 	}
 
-	bool is_GUI_Visible()
+	bool is_GUI_Internal_Visible()
 	{
 		return SHOW_Gui_Internal;
 	}
@@ -371,10 +379,12 @@ public:
 
 	//--
 
-private:
-
+	public:
 	//from 1 to 8. (indexed vector vars starts from 0)
 	ofParameter<int> PRESET_selected;
+
+private:
+
 	int selected_PRE = -1;
 
 	//ofParameter<int> PRESET2_selected;

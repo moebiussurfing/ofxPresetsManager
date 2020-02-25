@@ -69,7 +69,7 @@ void ofApp::setup()
 	presetsManager.set_CLICKER_Position(400, ofGetHeight() - 200, 50);//position and boxes sizes
 
 	//ofxGui/imGui
-	presetsManager.set_GUI_Visible(true);
+	presetsManager.set_GUI_Internal_Visible(true);
 	presetsManager.set_GUI_Position(10, 30);
 	presetsManager.set_GUI_Size(250, 300);
 

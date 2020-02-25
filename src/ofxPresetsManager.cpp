@@ -36,20 +36,24 @@ ofxPresetsManager::ofxPresetsManager()
 	//default settings paths
 
 	//top parent folder
-	path_GLOBAL_Folder = "globalFolder";//default addon folder
-	//path_GLOBAL_Folder = "ofxPresetsManager";
+	path_GLOBAL_Folder = "ofxPresetsManager";
+	//default addon folder
 
 	//default kit folder for live/favorites presets
-	path_KitFolder = "assets/groups/kit_1";
-
-	//app settings
-	path_Control = "assets";
+	path_Kit_Folder = "presets";
 
 	//big browser
-	path_PresetsFolder = "assets/groups/presets";//default presets folder
-	PRESET_name = "_emptyPreset";//default preset
+	path_PresetsFolder = "archive";
+	//default archive presets folder to browse
 
-	//to add to filenames
+	//app settings
+	path_Control = "settings";
+
+
+	//default preset
+	PRESET_name = "NO_NAME_PRESET";
+
+	//to add to all presets filenames
 	path_Prefix = "_preset_";
 
 	//--
@@ -93,12 +97,9 @@ ofxPresetsManager::ofxPresetsManager()
 	//PRESET2_selected.set("PRESETS2", 1, 1, num_presets);
 
 	bSave.set("SAVE", false);
-	bSave.setSerializable(false);
 	MODE_MemoryLive.set("MODE MEMORY", false);
 	loadToMemory.set("LOAD TO MEMORY", false);
-	loadToMemory.setSerializable(false);
 	saveFromMemory.set("SAVE FROM MEMORY", false);
-	saveFromMemory.setSerializable(false);
 	autoLoad.set("AUTO LOAD", true);
 	autoSave.set("AUTO SAVE", true);
 	bAutosaveTimer.set("TIMER AUTO SAVE", false);
@@ -113,6 +114,18 @@ ofxPresetsManager::ofxPresetsManager()
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
+
+	//-
+
+	//exclude from xml settings
+	bSave.setSerializable(false);
+	loadToMemory.setSerializable(false);
+	saveFromMemory.setSerializable(false);
+	SHOW_Gui_Internal.setSerializable(false);
+
+	//-
+
+	//groups
 
 	params_Favorites.setName("USER");
 	params_Favorites.add(PRESET_selected);
@@ -137,7 +150,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Tools.setName("HELPER TOOLS");
 	params_Tools.add(bCloneRight);
 
-	//nested params for callbacks and storage settings
+	//all nested params for callbacks and storage settings
 	params.setName("ofxPresetsManager");
 	params.add(params_Favorites);
 	params.add(params_Options);
@@ -154,7 +167,7 @@ void ofxPresetsManager::setPositionDEBUG(int x, int y)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::setup(std::string name)
+void ofxPresetsManager::setup(std::string name)///must be called after adding params group
 {
 	gui_LabelName = name;
 	setup();
@@ -249,6 +262,8 @@ void ofxPresetsManager::setup()
 
 	//TODO:
 	//selected_PRE = -1;
+
+	set_GUI_Internal_Visible(false);
 
 	//--------
 
@@ -468,8 +483,10 @@ void ofxPresetsManager::draw_CLICKER()
 		}
 		else//custom font 
 		{
+			float wx = 0.5f * myFont.getStringBoundingBox("SAVE", 0, 0).width;
 			myFont.drawString("SAVE",
-				clicker_cellSize * k + 0.5 * clicker_cellSize - 1.8f * sizeTTF,
+				clicker_cellSize * k + 0.5 * clicker_cellSize - wx,
+				//clicker_cellSize * k + 0.5 * clicker_cellSize - 1.8f * sizeTTF,
 				ySave);
 		}
 		k++;
@@ -575,7 +592,7 @@ string ofxPresetsManager::presetName(string gName, int presetIndex)
 	string strFile;
 	string strPath;
 
-	strFolder = path_GLOBAL_Folder + "/" + path_KitFolder + "/";
+	strFolder = path_GLOBAL_Folder + "/" + path_Kit_Folder + "/";
 	//strFile = gName + path_Prefix + ofToString(presetIndex) + ".xml";
 	strFile = groupName + path_Prefix + ofToString(presetIndex) + ".xml";
 	strPath = strFolder + strFile;
@@ -943,7 +960,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//if (key == 'G')
 		//{
 		//	SHOW_Gui_Internal = !SHOW_Gui_Internal;
-		//	//bool b = is_GUI_Visible();
+		//	//bool b = is_GUI_Internal_Visible();
 		//	//set_GUI_Internal_Visible(!b);
 		//}
 		//if (key == 'g')
@@ -1046,14 +1063,20 @@ void ofxPresetsManager::mousePressed(int x, int y)
 	yIndex = (y > 0) ? yIndex : -1;
 	//-1 for out of boxes
 
-	if (xIndex != -1 && yIndex != -1)
-		ofLogNotice("ofxPresetsManager") << "mousePressed: (" << xIndex << "," << yIndex << ")";
+	//if (xIndex != -1 && yIndex != -1)
+	//	ofLogNotice("ofxPresetsManager") << "mousePressed: (" << xIndex << "," << yIndex << ")";
 
 	//-
 
 	//1. key presets buttons
 	if (yIndex >= 0 && yIndex < (int)groups.size())
 	{
+		//avoid outer panel logs. only into the group row levels
+		if (xIndex != -1 && yIndex != -1)
+			ofLogNotice("ofxPresetsManager") << "mousePressed: (" << xIndex << "," << yIndex << ")";
+
+		//-
+
 		if (xIndex >= 0 && xIndex < presets[yIndex])
 		{
 			//save
@@ -1536,7 +1559,7 @@ void ofxPresetsManager::save_ControlSettings()
 //--------------------------------------------------------------
 void ofxPresetsManager::set_Path_KitFolder(string folder)
 {
-	path_KitFolder = folder;
+	path_Kit_Folder = folder;
 }
 
 //--------------------------------------------------------------
@@ -2101,7 +2124,7 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 		string strFile;
 		string strPath;
 
-		strFolder = path_GLOBAL_Folder + "/" + path_KitFolder + "/";
+		strFolder = path_GLOBAL_Folder + "/" + path_Kit_Folder + "/";
 		strFile = groupName + path_Prefix + ofToString(i) + ".xml";
 		strPath = strFolder + strFile;
 
@@ -2146,7 +2169,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 		string pathFolder;
 		string pathFilename;
 		string pathComplete;
-		pathFolder = path_GLOBAL_Folder + "/" + path_KitFolder + "/";
+		pathFolder = path_GLOBAL_Folder + "/" + path_Kit_Folder + "/";
 		pathFilename = groupName + path_Prefix + ofToString(i) + ".xml";
 		pathComplete = pathFolder + pathFilename;
 
