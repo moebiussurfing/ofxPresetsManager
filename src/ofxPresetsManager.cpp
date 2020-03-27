@@ -505,13 +505,13 @@ void ofxPresetsManager::draw_CLICKER()
 			float strW = myFont.getStringBoundingBox(info, 0, 0).width;
 			int xG = -strW - 20;
 
-			ofSetColor(ofColor::black);
+			ofSetColor(ofColor::black);//shadow
 			if (myFont.isLoaded())
 				myFont.drawString(info, xG + gap, ySave + gap);
 			else
 				ofDrawBitmapString(info, xG + gap, ySave + gap);
 
-			ofSetColor(ofColor::white);
+			ofSetColor(ofColor::white);//white
 			if (myFont.isLoaded())
 				myFont.drawString(info, xG, ySave);
 			else
@@ -520,28 +520,53 @@ void ofxPresetsManager::draw_CLICKER()
 
 		//-
 
+		bool bLateralPosition = true;
+
 		//4. help info text
 		if (debugClicker && ENABLE_Keys)
 		{
 			string info = "";
-			info += "MOUSE-CLICK OR KEYS [1-8] TO LOAD PRESET\n";
-			info += "HOLD [CTRL] TO SAVE/COPY PRESET\n";
+			bool bSimpleInfo = true;
+			if (bSimpleInfo)
+			{
+				// keys[i][k]
+				info += "[" + ofToString((char)keys[0][0]) + "-";
+				info += ofToString((char)keys[0][keys[0].size() - 1]) + "]";
+			}
+			else
+			{
+				info += "MOUSE-CLICK OR KEYS [1-8] TO LOAD PRESET\n";
+				info += "HOLD [CTRL] TO SAVE/COPY PRESET\n";
+			}
+
+			int x;
+			int y;
+			int gap = 1;
+			int pad = 13;
+
+			if (!bLateralPosition)//vertical position below boxes
+			{
+				x = 0;
+				y = (clicker_cellSize + 15) * groups.size();
+			}
+			else//lateral position right to the boxes
+			{
+				x = clicker_cellSize * k + pad;
+				y = ySave - (bSimpleInfo ? -2 : sizeTTF);
+			}
 
 			//double font to improve different background colors
-			int gap = 1;
-			int y = (clicker_cellSize + 15) * groups.size();
-
-			ofSetColor(ofColor::black);
+			ofSetColor(ofColor::black);//shadow
 			if (myFont.isLoaded())
-				myFont.drawString(info, gap, y + gap);
+				myFont.drawString(info, x + gap, y + gap);
 			else
-				ofDrawBitmapString(info, gap, y + gap);
+				ofDrawBitmapString(info, x + gap, y + gap);
 
-			ofSetColor(ofColor::white);
+			ofSetColor(ofColor::white);//white
 			if (myFont.isLoaded())
-				myFont.drawString(info, 0, y);
+				myFont.drawString(info, x, y);
 			else
-				ofDrawBitmapString(info, 0, y);
+				ofDrawBitmapString(info, x, y);
 		}
 
 		ofPopStyle();
