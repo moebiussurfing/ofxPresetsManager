@@ -4,8 +4,8 @@
 void ofApp::setup()
 {
 	//WindowApp.setDEBUG_Position(0);//top position
-	//WindowApp.setSettingsFps(60);
-	//WindowApp.setSettingsVsync(true);
+	WindowApp.setSettingsFps(60);
+	WindowApp.setSettingsVsync(true);
 
 	//--
 
@@ -90,14 +90,14 @@ void ofApp::setup()
 	//guiApp.setup();
 	//guiVisible = true;
 
-	//----
+	//-------
 
 	//startup
 
 	//trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
 	presetsManager.refresh();
 
-	//----
+	//-------
 }
 
 //--------------------------------------------------------------

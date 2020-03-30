@@ -445,7 +445,7 @@ void ofxPresetsManager::draw_CLICKER()
 		size_t k = 0;
 		for (; k < keys[i].size(); ++k)
 		{
-			//1.1 outbox
+			//1.1 outbox bordser container
 			ofDrawRectangle(clicker_cellSize * k, clicker_cellSize * i, clicker_cellSize, clicker_cellSize);
 
 			//1.2 label boxes
@@ -464,7 +464,24 @@ void ofxPresetsManager::draw_CLICKER()
 
 			//2. inner box. double mark current selected preset
 			if (lastIndices[i] == k)
-				ofDrawRectangle(clicker_cellSize * k + 4, clicker_cellSize * i + 4, clicker_cellSize - 8, clicker_cellSize - 8);
+			{
+				//border only
+				//ofDrawRectangle(clicker_cellSize * k + 4, clicker_cellSize * i + 4, clicker_cellSize - 8, clicker_cellSize - 8);
+				
+				//filled
+				ofPushStyle();
+				ofFill();
+				ofSetColor(200, 32);
+				float r = 3.0f;
+				float pad = 3.0f;
+				ofDrawRectRounded(clicker_cellSize * k + pad, 
+					clicker_cellSize * i + pad, 
+					clicker_cellSize - 2*pad, 
+					clicker_cellSize - 2*pad,
+					r);
+				ofNoFill();
+				ofPopStyle();
+			}
 		}
 		for (; k < presets[i]; ++k)
 		{
@@ -1291,7 +1308,7 @@ void ofxPresetsManager::loadPreset(int p)
 {
 	if (!DISABLE_CALLBACKS)// && (PRESET_selected != PRESET_selected_PRE))
 	{
-		ofLogNotice("ofxPresetsManager") << "loadPreset(" << ofToString(p)<<")";
+		ofLogNotice("ofxPresetsManager") << "loadPreset(" << ofToString(p) << ")";
 		ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";
 
 		if (PRESET_selected > 0 && PRESET_selected <= num_presets)
