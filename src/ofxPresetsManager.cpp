@@ -696,7 +696,7 @@ void ofxPresetsManager::add(ofParameterGroup params, initializer_list<int> keysL
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, int guiIndex)
 {
-	ofLogNotice("ofxPresetsManager") << "save(" << presetIndex << "," << guiIndex << ")";
+	ofLogVerbose("ofxPresetsManager") << "save(" << presetIndex << "," << guiIndex << ")";
 
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
 		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
@@ -746,7 +746,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, string gName)
 {
-	ofLogNotice("ofxPresetsManager") << "save(" << presetIndex << "," << gName << ")";
+	ofLogVerbose("ofxPresetsManager") << "save(" << presetIndex << "," << gName << ")";
 
 	int guiIndex = getGuiIndex(gName);
 
@@ -799,7 +799,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, int guiIndex)
 {
-	ofLogNotice("ofxPresetsManager") << "load(" << presetIndex << "," << guiIndex << ")";
+	ofLogVerbose("ofxPresetsManager") << "load(" << presetIndex << "," << guiIndex << ")";
 
 	//TODO:
 	//guiIndex is not the preset position, it's for multiplye guis!
@@ -864,7 +864,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, string gName)
 {
-	ofLogNotice("ofxPresetsManager") << "load(" << presetIndex << "," << gName << ")";
+	ofLogVerbose("ofxPresetsManager") << "load(" << presetIndex << "," << gName << ")";
 
 	int guiIndex = getGuiIndex(gName);
 
@@ -1099,7 +1099,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 	{
 		//avoid outer panel logs. only into the group row levels
 		if (xIndex != -1 && yIndex != -1)
-			ofLogNotice("ofxPresetsManager") << "mousePressed: (" << xIndex << "," << yIndex << ")";
+			ofLogVerbose("ofxPresetsManager") << "mousePressed: (" << xIndex << "," << yIndex << ")";
 
 		//-
 
@@ -1297,13 +1297,15 @@ void ofxPresetsManager::loadPreset(int p)
 		if (PRESET_selected > 0 && PRESET_selected <= num_presets)
 		{
 			PRESET_selected = p;
-			ofLogNotice("ofxPresetsManager") << ".";
+			//ofLogNotice("ofxPresetsManager") << ".";
 
 			//PRESET_selected_PRE = PRESET_selected;//TODO:
 		}
 		else
 		{
 			ofLogNotice("ofxPresetsManager") << "IGNORE LOAD PRESET";
+			//workaround clamp
+			PRESET_selected = 1;//set to first as default presets when out of range
 		}
 	}
 }
@@ -1323,7 +1325,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 	{
 		string name = e.getName();
 
-		ofLogNotice("ofxPresetsManager") << "Changed_Params '" << name << "': " << e;
+		ofLogVerbose("ofxPresetsManager") << "Changed_Params '" << name << "': " << e;
 
 		//-
 
@@ -1388,8 +1390,8 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 
 		else if (name == "PRESETS" && (PRESET_selected == PRESET_selected_PRE))
 		{
-			ofLogNotice("ofxPresetsManager") << "[PRESET NOT Changed]: " << e;
-			ofLogNotice("ofxPresetsManager") << "RE TRIG PRESET";
+			//ofLogNotice("ofxPresetsManager") << "PRESET NOT Changed: " << e;
+			ofLogNotice("ofxPresetsManager") << "RE-TRIG PRESET " << e;
 
 			bMustTrig = true;
 
@@ -2103,7 +2105,7 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 	{
 		for (int i = 0; i < NUM_OF_PRESETS; i++)
 		{
-			ofLogNotice("ofxPresetsManager") << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
+			ofLogNotice("ofxPresetsManager") << "settingsArray[" << i << "] " << ofToString(settingsArray[i].toString());
 		}
 	}
 }

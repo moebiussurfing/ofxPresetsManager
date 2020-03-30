@@ -31,16 +31,18 @@ void ofApp::setup()
 
 	//customize path folders
 
-	//NOTE: take care with path folders, they must exist before we can write inside!
-	presetsManager.set_Path_GlobalFolder("ofxPresetsManager");//TODO:
-	presetsManager.set_Path_KitFolder("presets");
+	//NOTE: take care with path folders, 
+	//they must exist before we can write inside!
+	//or maybe file settings must be located there to avoid startup crashes!
+
+	presetsManager.set_Path_GlobalFolder("ofxPresetsManager");//main container folder
+	presetsManager.set_Path_KitFolder("presets");//kit presets
 
 	//-
 
 	//add target group. this is "the preset" container itself
-
+	//params group and trigger keys
 	presetsManager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
-	//presetsManager.add(params, { 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',' });
 
 	//-
 
@@ -57,9 +59,6 @@ void ofApp::setup()
 	//presetsManager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
 	//presetsManager.DONE_load.addListener(this, &ofApp::Changed_DONE_load);
 
-	//trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
-	presetsManager.refresh();
-
 	//--
 
 	//customize gui positions
@@ -68,7 +67,7 @@ void ofApp::setup()
 	presetsManager.set_CLICKER_Visible(true);
 	presetsManager.set_CLICKER_Position(400, ofGetHeight() - 200, 50);//position and boxes sizes
 
-	//ofxGui/imGui
+	//ofxGui
 	presetsManager.set_GUI_Internal_Visible(true);
 	presetsManager.set_GUI_Position(10, 30);
 	presetsManager.set_GUI_Size(250, 300);
@@ -78,15 +77,27 @@ void ofApp::setup()
 	//local gui (to debug params too)
 	gui.setup("ofApp");
 	gui.add(params);
+
+	//TODO:multiple params groups
 	//gui.add(params2);
 
 	gui.setPosition(20, 400);
 
 	//--
 
-	////Gui
+	//TODO:
+	////browser gui
 	//guiApp.setup();
 	//guiVisible = true;
+
+	//----
+
+	//startup
+
+	//trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
+	presetsManager.refresh();
+
+	//----
 }
 
 //--------------------------------------------------------------
@@ -96,7 +107,7 @@ void ofApp::update()
 	//simple callback when preset is loaded 
 	if (presetsManager.isDoneLoad())
 	{
-		ofLogNotice("ofApp") << "DONE PRESET LOADED";
+		//ofLogNotice("ofApp") << "DONE PRESET LOADED";
 		ofLogNotice("ofApp") << "--------------------------------------------------------------";
 	}
 }
@@ -174,10 +185,13 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-	//randomize selected preswet
+	//randomize selected preset
 	if (key == OF_KEY_RETURN)
 	{
-		int p = (int)ofRandom(9);
+		int pMax = presetsManager.getNumPresets();//get amount of presets on kit
+		int pMin = 1;
+		int p = (int)ofRandom(pMin, pMax + 1);//p goes from 1 to (max) 8
+		ofLogNotice("ofApp") << "random: " << ofToString(p);
 		presetsManager.loadPreset(p);
 	}
 
@@ -195,7 +209,6 @@ void ofApp::keyPressed(int key)
 		presetsManager.set_ENABLE_Keys(!presetsManager.isKeysEnabled());
 	}
 }
-
 
 //explorer browser
 ////--------------------------------------------------------------
