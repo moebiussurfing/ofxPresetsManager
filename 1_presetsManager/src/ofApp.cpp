@@ -191,7 +191,8 @@ void ofApp::keyPressed(int key)
 		int pMax = presetsManager.getNumPresets();//get amount of presets on kit
 		int pMin = 1;
 		int p = (int)ofRandom(pMin, pMax + 1);//p goes from 1 to (max) 8
-		ofLogNotice("ofApp") << "random: " << ofToString(p);
+
+		ofLogNotice("ofApp") << "select a random preset from the manager kit: " << ofToString(p);
 		presetsManager.loadPreset(p);
 	}
 

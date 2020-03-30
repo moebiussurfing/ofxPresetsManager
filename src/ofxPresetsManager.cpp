@@ -320,7 +320,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 
 		//auto save timer
 		timerLast_Autosave = ofGetElapsedTimeMillis();
-		ofLogNotice("ofxPresetsManager") << "\t\t\t\t\t\t[AUTOSAVE]";
+		ofLogNotice("ofxPresetsManager") << "\t\t\t\t\t\t\t\t\t\t\t\t[AUTOSAVE]";
 	}
 }
 
@@ -1347,7 +1347,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 		}
 		else if (name == "GUI POSITION")
 		{
-			ofLogNotice("ofxPresetsManager") << "GUI POSITION: " << e;
+			ofLogVerbose("ofxPresetsManager") << "GUI POSITION: " << e;
 			float x, y;
 			x = ofClamp(Gui_Position.get().x, 0, ofGetWidth() - 200);
 			y = ofClamp(Gui_Position.get().y, 0, ofGetHeight() - 20);
@@ -2084,7 +2084,7 @@ void ofxPresetsManager::set_Path_GlobalFolder(string folder)
 //--------------------------------------------------------------
 void ofxPresetsManager::save_AllKit_FromMemory()
 {
-	ofLogNotice("ofxPresetsManager") << "save_AllKit_FromMemory()";
+	ofLogVerbose("ofxPresetsManager") << "save_AllKit_FromMemory()";
 
 	for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{

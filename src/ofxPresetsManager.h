@@ -626,7 +626,7 @@ private:
 	//timer autosave
 	ofParameter<bool> bAutosaveTimer;
 	uint64_t timerLast_Autosave = 0;
-	int timeToAutosave = 5000;
+	int timeToAutosave = 9000;
 
 	//updating some params before save will trigs also the group callbacks
 	//so we disable this callbacks just in case params updatings are required
