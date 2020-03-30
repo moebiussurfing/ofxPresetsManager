@@ -147,13 +147,13 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Tools.add(bCloneRight);
 
 	//all nested params for callbacks and storage settings
-	params.setName("ofxPresetsManager");
-	params.add(params_Favorites);
-	params.add(params_Options);
-	params.add(params_Gui);
-	params.add(params_Tools);
+	params_Control.setName("ofxPresetsManager");
+	params_Control.add(params_Favorites);
+	params_Control.add(params_Options);
+	params_Control.add(params_Gui);
+	params_Control.add(params_Tools);
 
-	ofAddListener(params.parameterChangedE(), this, &ofxPresetsManager::Changed_Params);
+	ofAddListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 }
 
 //--------------------------------------------------------------
@@ -219,7 +219,7 @@ void ofxPresetsManager::setup()
 
 	//control gui
 	guiControl.setup(gui_LabelName);
-	guiControl.add(params);
+	guiControl.add(params_Control);
 	guiControl.setPosition(ofGetWidth() - 210, 10);//default
 
 	//collapse
@@ -313,7 +313,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//DISABLE_Callbacks = true;
 		////get gui position before save
 		//Gui_Position = glm::vec2(gui.getPosition());
-		//saveParams(params, path_GLOBAL + path_Params);
+		//saveParams(params_Control, path_GLOBAL + path_Params);
 		//DISABLE_Callbacks = false;
 
 		//-
@@ -426,14 +426,16 @@ void ofxPresetsManager::draw_CLICKER()
 
 	ofPushStyle();
 	ofPushMatrix();
+
 	ofTranslate(clicker_Pos);
 
 	//-
 
-	//0. box background
+	//0. box of all boxes background
 	ofFill();
 	ofSetColor(0, 128);
-	ofDrawRectangle(0, 0, clicker_cellSize * (keys[0].size() + 1), clicker_cellSize*groups.size());
+	ofDrawRectangle(0, 0,
+		clicker_cellSize * (keys[0].size() + 1), clicker_cellSize*groups.size());
 
 	//-
 
@@ -442,11 +444,14 @@ void ofxPresetsManager::draw_CLICKER()
 
 	for (size_t i = 0; i < keys.size(); ++i)//draw all guis/groups
 	{
+		//draw any preset box
 		size_t k = 0;
 		for (; k < keys[i].size(); ++k)
 		{
-			//1.1 outbox bordser container
+			//1.1 outbox border container
 			ofDrawRectangle(clicker_cellSize * k, clicker_cellSize * i, clicker_cellSize, clicker_cellSize);
+
+			//-
 
 			//1.2 label boxes
 			if (!myFont.isLoaded())//without ttf font
@@ -462,38 +467,62 @@ void ofxPresetsManager::draw_CLICKER()
 					clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF);
 			}
 
+			//-
+
 			//2. inner box. double mark current selected preset
 			if (lastIndices[i] == k)
 			{
-				//border only
-				//ofDrawRectangle(clicker_cellSize * k + 4, clicker_cellSize * i + 4, clicker_cellSize - 8, clicker_cellSize - 8);
-				
-				//filled
-				ofPushStyle();
-				ofFill();
-				ofSetColor(200, 32);
 				float r = 3.0f;
-				float pad = 3.0f;
-				ofDrawRectRounded(clicker_cellSize * k + pad, 
-					clicker_cellSize * i + pad, 
-					clicker_cellSize - 2*pad, 
-					clicker_cellSize - 2*pad,
+				float pd = 4.0f;
+				int color = 200;
+
+				ofPushStyle();
+				ofSetColor(color, 164);
+
+				//-
+
+				//border only
+				ofNoFill();
+				ofDrawRectRounded(clicker_cellSize * k + pd, clicker_cellSize * i + pd,
+					clicker_cellSize - 2 * pd, clicker_cellSize - 2 * pd,
+					r);
+
+				//-
+
+				//filled
+				ofFill();
+				ofSetColor(color, 64);
+				ofDrawRectRounded(clicker_cellSize * k + pd, clicker_cellSize * i + pd,
+					clicker_cellSize - 2 * pd, clicker_cellSize - 2 * pd,
 					r);
 				ofNoFill();
+
 				ofPopStyle();
 			}
 		}
-		for (; k < presets[i]; ++k)
-		{
-			ofDrawRectangle(clicker_cellSize * k, clicker_cellSize * i, clicker_cellSize, clicker_cellSize);
-			if (lastIndices[i] == k)
-				ofDrawRectangle(clicker_cellSize * k + 4, clicker_cellSize * i + 4, clicker_cellSize - 8, clicker_cellSize - 8);
-		}
+
+		//-
+
+		//?
+		//for (; k < presets[i]; ++k)
+		//{
+		//	ofDrawRectangle(clicker_cellSize * k, clicker_cellSize * i, 
+		//		clicker_cellSize, clicker_cellSize);
+
+		//	if (lastIndices[i] == k)
+		//		ofDrawRectangle(clicker_cellSize * k + 4, clicker_cellSize * i + 4, clicker_cellSize - 8, clicker_cellSize - 8);
+		//}
+
+		//-
 
 		//3. save button
+
+		//box
 		ofDrawRectangle(clicker_cellSize * k, clicker_cellSize * i, clicker_cellSize, clicker_cellSize);
 
-		//label
+		//-
+
+		//save label
 		int ySave = clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF;
 		if (!myFont.isLoaded())//without ttf font
 		{
@@ -509,7 +538,7 @@ void ofxPresetsManager::draw_CLICKER()
 				//clicker_cellSize * k + 0.5 * clicker_cellSize - 1.8f * sizeTTF,
 				ySave);
 		}
-		k++;
+		k++;//?
 
 		//-
 
@@ -524,6 +553,7 @@ void ofxPresetsManager::draw_CLICKER()
 
 			float strW = myFont.getStringBoundingBox(info, 0, 0).width;
 			int xG = -strW - 20;
+			ySave = ySave - 2;//little up
 
 			ofSetColor(ofColor::black);//shadow
 			if (myFont.isLoaded())
@@ -550,7 +580,7 @@ void ofxPresetsManager::draw_CLICKER()
 			if (bSimpleInfo)
 			{
 				// keys[i][k]
-				info += "[" + ofToString((char)keys[0][0]) + "-";
+				info += "[" + ofToString((char)keys[0][0]) + "|";
 				info += ofToString((char)keys[0][keys[0].size() - 1]) + "]";
 			}
 			else
@@ -597,6 +627,9 @@ void ofxPresetsManager::draw_CLICKER()
 //--------------------------------------------------------------
 ofxPresetsManager::~ofxPresetsManager()
 {
+	ofLogVerbose("ofxPresetsManager") << "~ofxPresetsManager";
+	DISABLE_CALLBACKS = true;//?
+
 	//autosave PRESET_selected preset on exit
 	if (autoSave)
 	{
@@ -604,16 +637,18 @@ ofxPresetsManager::~ofxPresetsManager()
 		//doSave2(PRESET2_selected - 1);
 	}
 
+	//TODO:
 	//app settings
-	save_ControlSettings();
+	save_ControlSettings();//crashes?
 
 	//destroy callbacks
 	removeKeysListeners();
 
-	ofRemoveListener(params.parameterChangedE(), this, &ofxPresetsManager::Changed_Params);
+	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 
 	//-
 
+	//TODO: move above
 	//MODE B: direct from memory
 	if (MODE_MemoryLive && autoSave)
 	{
@@ -1336,13 +1371,13 @@ void ofxPresetsManager::toggleKeysControl(bool active)
 #pragma mark - CALLBACKS
 
 //--------------------------------------------------------------
-void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
+void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 {
 	if (!DISABLE_CALLBACKS)
 	{
 		string name = e.getName();
 
-		ofLogVerbose("ofxPresetsManager") << "Changed_Params '" << name << "': " << e;
+		ofLogVerbose("ofxPresetsManager") << "Changed_Params_Control '" << name << "': " << e;
 
 		//-
 
@@ -1515,7 +1550,7 @@ void ofxPresetsManager::load_ControlSettings()
 
 	if (bLoaded)
 	{
-		ofDeserialize(settings, params);
+		ofDeserialize(settings, params_Control);
 	}
 	else
 	{
@@ -1526,17 +1561,30 @@ void ofxPresetsManager::load_ControlSettings()
 //--------------------------------------------------------------
 void ofxPresetsManager::save_ControlSettings()
 {
+	ofLogNotice("ofxPresetsManager") << "save_ControlSettings()";
+	DISABLE_CALLBACKS = true;//?
+
+	//TODO: crashes?
 	//get gui position to update param
 	float x, y;
 	x = guiControl.getPosition().x;
 	y = guiControl.getPosition().y;
 	Gui_Position = glm::vec2(x, y);
 
-	ofXml settings;
-	ofSerialize(settings, params);
+	ofXml settingsControl;
+
+	//TODO: crashes?
+	ofLogNotice("ofxPresetsManager") << params_Control.toString() << endl;
+	ofSerialize(settingsControl, params_Control);
+	ofLogNotice("ofxPresetsManager") << settingsControl << endl;
+	
 	string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
-	settings.save(path);
-	ofLogVerbose("ofxPresetsManager") << "save_ControlSettings:\n" << path;
+
+	ofLogNotice("ofxPresetsManager") << "path:" << path;
+	settingsControl.save(path);
+
+	ofLogNotice("ofxPresetsManager") << "save_ControlSettings:" << path;
+	DISABLE_CALLBACKS = false;//?
 }
 
 //--------------------------------------------------------------
@@ -1668,11 +1716,11 @@ void ofxPresetsManager::set_Path_GlobalFolder(string folder)
 //	}
 //	if (ImGui::MenuItem("Open", "l"))
 //	{
-//		//gui_loadFromFile("settings.xml", params);
+//		//gui_loadFromFile("settings.xml", params_Control);
 //	}
 //	if (ImGui::MenuItem("Save", "s"))
 //	{
-//		//gui_saveToFile("settings.xml", params);
+//		//gui_saveToFile("settings.xml", params_Control);
 //	}
 //	if (ImGui::MenuItem("Save As.."))
 //	{

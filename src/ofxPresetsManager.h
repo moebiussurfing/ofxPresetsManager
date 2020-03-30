@@ -597,14 +597,14 @@ private:
 
 	//control panel settings/states
 
-	void Changed_Params(ofAbstractParameter &e);
+	void Changed_Params_Control(ofAbstractParameter &e);
 
 	//-
 
 	//control presetsManager params
 	//to select presets, clone, save..
 	
-	ofParameterGroup params;
+	ofParameterGroup params_Control;
 	ofParameter<bool> SHOW_menu;
 	ofParameter<bool> SHOW_ClickPanel;
 	ofParameter<bool> bSave;
