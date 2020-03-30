@@ -33,7 +33,7 @@ void ofApp::setup()
 
 	//NOTE: take care with path folders, they must exist before we can write inside!
 	presetsManager.set_Path_GlobalFolder("ofxPresetsManager");//TODO:
-	presetsManager.set_Path_KitFolder("assets/groups/kit");
+	presetsManager.set_Path_KitFolder("presets");
 
 	//-
 
@@ -174,7 +174,14 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-	//randomize
+	//randomize selected preswet
+	if (key == OF_KEY_RETURN)
+	{
+		int p = (int)ofRandom(9);
+		presetsManager.loadPreset(p);
+	}
+
+	//randomize parameters
 	if (key == ' ')
 	{
 		numSquares = ofRandom(numSquares.getMin(), numSquares.getMax());
@@ -183,7 +190,7 @@ void ofApp::keyPressed(int key)
 	}
 
 	//switch keys control enabled
-	else if (key == OF_KEY_TAB)
+	if (key == OF_KEY_TAB)
 	{
 		presetsManager.set_ENABLE_Keys(!presetsManager.isKeysEnabled());
 	}

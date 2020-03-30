@@ -1,11 +1,4 @@
-
-//ofxPresetsManager.h
-//based into Nicola Pisanti code
-//at pisanti/ofxGuiPresetSelector, MIT License, 2016
-//changes by moebiussurfing
-
 #include "ofxPresetsManager.h"
-
 
 #pragma mark - OF
 
@@ -261,7 +254,7 @@ void ofxPresetsManager::setup()
 	load_ControlSettings();
 
 	//TODO:
-	//selected_PRE = -1;
+	//PRESET_selected_PRE = -1;
 
 	set_GUI_Internal_Visible(false);
 
@@ -618,7 +611,6 @@ string ofxPresetsManager::presetName(string gName, int presetIndex)
 	string strPath;
 
 	strFolder = path_GLOBAL_Folder + "/" + path_Kit_Folder + "/";
-	//strFile = gName + path_Prefix + ofToString(presetIndex) + ".xml";
 	strFile = groupName + path_Prefix + ofToString(presetIndex) + ".xml";
 	strPath = strFolder + strFile;
 
@@ -1292,17 +1284,18 @@ void ofxPresetsManager::preset_filesRefresh()
 //--------------------------------------------------------------
 void ofxPresetsManager::loadPreset(int p)
 {
-	if (!DISABLE_CALLBACKS)
+	if (!DISABLE_CALLBACKS)// && (PRESET_selected != PRESET_selected_PRE))
 	{
 		ofLogNotice("ofxPresetsManager") << "API > LOAD PRESET " << ofToString(p);
 		ofLogNotice("ofxPresetsManager") << "loadPreset()";
 		ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";
 
-		//TODO:
-		//Windows
 		if (PRESET_selected > 0 && PRESET_selected <= num_presets)
 		{
 			PRESET_selected = p;
+			ofLogNotice("ofxPresetsManager") << "LOADED";
+
+			//PRESET_selected_PRE = PRESET_selected;//TODO:
 		}
 		else
 		{
@@ -1310,7 +1303,7 @@ void ofxPresetsManager::loadPreset(int p)
 		}
 	}
 }
-//
+
 ////--------------------------------------------------------------
 //void ofxPresetsManager::setDelayedLoading(bool active)
 //{
@@ -1429,7 +1422,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 		//-
 
 		//TODO: should be nice to add toggle to auto retrig or not same pre loaded preset
-		else if (WIDGET == "PRESETS" && (PRESET_selected == selected_PRE))
+		else if (WIDGET == "PRESETS" && (PRESET_selected == PRESET_selected_PRE))
 		{
 			ofLogNotice("ofxPresetsManager") << "[PRESET NOT Changed]: " << e;
 			ofLogNotice("ofxPresetsManager") << "RE TRIG PRESET";
@@ -1440,7 +1433,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 			DONE_load = true;
 			bIsDoneLoad = true;
 		}
-		else if (WIDGET == "PRESETS" && (PRESET_selected != selected_PRE))
+		else if (WIDGET == "PRESETS" && (PRESET_selected != PRESET_selected_PRE))
 		{
 			ofLogNotice("ofxPresetsManager") << "PRESET:";
 			ofLogNotice("ofxPresetsManager") << e;
@@ -1474,7 +1467,7 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 
 			//TODO:
 			//Windows
-			//if (selected_PRE > 0 && PRESET_selected>=1)
+			//if (PRESET_selected_PRE > 0 && PRESET_selected>=1)
 			if (true)
 			{
 				if (autoSave)
@@ -1482,13 +1475,13 @@ void ofxPresetsManager::Changed_Params(ofAbstractParameter &e)
 					//TODO:2020
 					//DONE_save = true;//callback
 
-					save(selected_PRE - 1, 0);
+					save(PRESET_selected_PRE - 1, 0);
 				}
 
 				//-
 
 				//remember this PRE state to know if changed or not
-				selected_PRE = PRESET_selected;
+				PRESET_selected_PRE = PRESET_selected;
 
 				//-
 

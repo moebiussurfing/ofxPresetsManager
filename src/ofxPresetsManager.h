@@ -1,23 +1,26 @@
 
-//ofxPresetsManager.h
-//this addon based in the original ofxGuiPresetSelector addon 
-//by Nicola Pisanti, MIT License, 2016
-//https://github.com/npisanti/ofxGuiPresetSelector
-//modifications and new features by moebiussurfing
+///ofxPresetsManager.h
+///this addon is based in the original ofxGuiPresetSelector addon 
+///by Nicola Pisanti, MIT License, 2016
+///https://github.com/npisanti/ofxGuiPresetSelector
+///all modifications and new features by moebiussurfing
+///my idea is to allow use ofParameterGroup's as managed content instead of ofxPanel
 
-//TODO:
+///--
 
-//++ add key mod to swap presets like control is used now to save
+///TODO:
 
-//+ (if disabled at first), control gui must still hidden after back to live/active mode
-//browser
-//++ add ImGui browser list like from colorManager
-//+ each 8 presets can be a selection of best presets to trig handly and fast
+///++ add key mod to swap presets like control is used now to save
 
-//+++ add auto trig mode or not
-//++ improve callback system ?
-//+ use pointers bewween classes (ofxSequencer) to share the data struct
-//+ could make tween when changing params
+///+ (if disabled at first), control gui must still hidden after back to live/active mode
+///browser
+///++ add ImGui browser list like from colorManager
+///+ each 8 presets can be a selection of best presets to trig handly and fast
+
+///+++ add auto trig mode or not
+///++ improve callback system ?
+///+ use pointers bewween classes (ofxSequencer) to share the data struct
+///+ could make tween when changing params
 
 #pragma once
 
@@ -25,12 +28,16 @@
 
 //--
 
-//optional to debug
+//optional to debug not located files or others
 
 #define INCLUDE_DEBUG_ERRORS
 #ifdef INCLUDE_DEBUG_ERRORS
 #include "ofxDEBUG_errors.h"
 #endif
+
+//--
+
+//optional to debug performance or delay when loading files or presets on hd or memory modes
 
 //TIMEMEASUREMENTS
 //#define TIME_SAMPLE_MEASURES //comment this line to remove ofxTimeMeasurements dependency
@@ -49,7 +56,13 @@
 
 //--
 
+//TODO:
+//browser system
 //#include "ofxImGui.h"
+
+//--
+
+//internal control
 #include "ofxGui.h"
 
 //-------------------------------
@@ -59,7 +72,10 @@
 //-
 
 #define NUM_OF_PRESETS 8
-#define NUM_MAX_GUIS 1//only one it's implemented! can't add more than one group!
+
+//TODO:
+//only one it's implemented! can't add more than one group!
+#define NUM_MAX_GUIS 1
 
 //---
 
@@ -76,6 +92,7 @@ private:
 
 	//settings paths
 	std::string groupName;//get from ofParameterGroup name
+	//TODO:
 	//std::string groupName2;//get from ofParameterGroup name
 
 	//all folder names must go without '/'
@@ -91,7 +108,7 @@ private:
 
 	//-
 
-//public:
+private:
 
 	//app settings
 
@@ -115,36 +132,37 @@ private:
 
 	//data
 	ofXml settingsArray[NUM_OF_PRESETS];
-
+	
 	//--
 
 #pragma mark - OF
 
 public:
 
-	void setPositionDEBUG(int x, int y);
-
 	ofxPresetsManager();
 	~ofxPresetsManager();
 
-	void setup();///must be called after adding params group
+	//-
+
+#pragma mark - API
+
+public:
+
+	//--
+
+	///must be called after adding params group!
+	void setup();
 	void setup(std::string name);//to set gui panel name header label
 
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
-
-
+	
 	//void update();
 	//void draw();
 	//void draw(int x, int y, int cellSize);
 
 	//clickeable box panel
 	void draw_CLICKER();
-
-	float getPresetCLICKER_Width()
-	{
-		return clicker_cellSize * (keys[0].size() + 1);
-	}
 
 	//-
 
@@ -162,12 +180,12 @@ private:
 #pragma mark - CALLBACKS
 
 	bool DISABLE_CALLBACKS = true;
+	bool bIsDoneLoad = false;
 
 public:
+
 	ofParameter<bool> DONE_load;
 	ofParameter<bool> DONE_save;
-
-	bool bIsDoneLoad = false;
 
 public:
 
@@ -202,6 +220,15 @@ public:
 #pragma mark - API
 
 	//API
+
+	//-
+
+	void setPositionDEBUG(int x, int y);
+
+	float getPresetCLICKER_Width()
+	{
+		return clicker_cellSize * (keys[0].size() + 1);
+	}
 
 	//set the key you have to hold for saving, default is OF_KEY_CONTROL
 	void setModeKey(int key);
@@ -245,10 +272,6 @@ public:
 	//void getNumPresets();
 	//void getNumPresets();
 
-private:
-
-	//draws group name into clicker boxes panel
-	bool SHOW_GroupName = true;
 	void setShowGroupName(bool b)
 	{
 		SHOW_GroupName = b;
@@ -256,10 +279,18 @@ private:
 
 	//--
 
+private:
+
+	//draws group name into clicker boxes panel
+	bool SHOW_GroupName = true;
+
+	//--
+
 	//used when preset has not changed but we like to retrig
 	bool bMustTrig = false;
 
-	public:
+public:
+
 	bool mustTrig()
 	{
 		if (bMustTrig)
@@ -279,6 +310,7 @@ private:
 	void preset_load(string name);
 	void preset_save(string name);
 	void preset_filesRefresh();
+
 	//-
 
 #pragma mark - GUI
@@ -297,8 +329,8 @@ public:
 
 		//-
 
-		ofLogNotice("ofxPresetsManager") << "> refresh()";
-		selected_PRE = -1;
+		ofLogNotice("ofxPresetsManager") << "refresh()";
+		PRESET_selected_PRE = -1;
 		PRESET_selected = PRESET_selected;
 		ofLogNotice("ofxPresetsManager") << "PRESET " << PRESET_selected;
 	}
@@ -379,13 +411,14 @@ public:
 
 	//--
 
-	public:
+public:
+
 	//from 1 to 8. (indexed vector vars starts from 0)
 	ofParameter<int> PRESET_selected;
 
 private:
 
-	int selected_PRE = -1;
+	int PRESET_selected_PRE = -1;
 
 	//ofParameter<int> PRESET2_selected;
 	//int selected2_PRE = -1;
@@ -497,7 +530,7 @@ private:
 
 	void gui_imGui_PresetManager();
 
-	//-
+	//--
 
 	//data
 
@@ -507,12 +540,12 @@ private:
 	//when using only one ofParameterGroup, there's only one group element!
 	//ofParameterGroup params_gui;
 
-	//-
+	//--
 
 	std::vector<int> lastIndices;//?
 	std::vector<int> presets;//?
 
-	//-
+	//--
 
 	void addKeysListeners();
 	void removeKeysListeners();
@@ -539,6 +572,7 @@ private:
 	void doCloneRight(int pIndex);
 
 	void doSave(int pIndex);
+	//TODO:
 	//void doSave2(int pIndex);
 
 	//-
@@ -564,7 +598,8 @@ private:
 	//-
 
 	//control presetsManager params
-	//to selec presets, clone, save..
+	//to select presets, clone, save..
+	
 	ofParameterGroup params;
 	ofParameter<bool> SHOW_menu;
 	ofParameter<bool> SHOW_ClickPanel;
@@ -574,6 +609,7 @@ private:
 	ofParameter<bool> bCloneRight;
 	ofParameter<bool> ENABLE_Keys;
 
+	//internal groups
 	ofParameterGroup params_Favorites;
 	ofParameterGroup params_Gui;
 	ofParameterGroup params_Options;
@@ -598,6 +634,7 @@ private:
 	bool ENABLE_KeysArrowBrowse = true;//allow browse by arrows keys by default
 
 public:
+
 	void set_ENABLE_KeysArrowBrowse(bool b)
 	{
 		ENABLE_KeysArrowBrowse = b;
