@@ -150,18 +150,16 @@ public:
 
 	//--
 
-	///must be called after adding params group!
+	//must be called after params group has been added!
 	void setup();
 	void setup(std::string name);//to set gui panel name header label
 
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
 	
-	//void update();
-	//void draw();
-	//void draw(int x, int y, int cellSize);
+	//-
 
-	//clickeable box panel
+	//user clickeable box panel preset selector
 	void draw_CLICKER();
 
 	//-
@@ -269,8 +267,10 @@ public:
 	}
 
 	void loadPreset(int p);
-	//void getNumPresets();
-	//void getNumPresets();
+	int getNumPresets()
+	{
+		return num_presets;
+	}
 
 	void setShowGroupName(bool b)
 	{
@@ -567,7 +567,11 @@ private:
 
 	//-
 
-	int num_presets;
+	int num_presets;//amount of handled presets on current kit
+
+	//-
+
+	//helpers
 
 	void doCloneRight(int pIndex);
 

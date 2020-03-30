@@ -96,8 +96,8 @@ void ofApp::update()
 	//simple callback when preset is loaded 
 	if (presetsManager.isDoneLoad())
 	{
-		ofLogNotice("ofApp") << "PRESET LOADED";
-		ofLogNotice("ofApp") << endl;
+		ofLogNotice("ofApp") << "DONE PRESET LOADED";
+		ofLogNotice("ofApp") << "--------------------------------------------------------------";
 	}
 }
 
