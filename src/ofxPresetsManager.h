@@ -227,6 +227,14 @@ public:
 	{
 		return clicker_cellSize * (keys[0].size() + 1);
 	}
+	float getPresetCLICKER_BoxSize()
+	{
+		return clicker_cellSize;
+	}
+	float getPresetCLICKER_Height()
+	{
+		return clicker_cellSize;
+	}
 
 	//set the key you have to hold for saving, default is OF_KEY_CONTROL
 	void setModeKey(int key);
@@ -359,10 +367,13 @@ public:
 	{
 		SHOW_Gui_Internal = visible;
 	}
-
-	bool is_GUI_Internal_Visible()
+	bool get_GUI_Internal_Visible()
 	{
 		return SHOW_Gui_Internal;
+	}
+	void toggle_GUI_Internal_Visible()
+	{
+		SHOW_Gui_Internal = !SHOW_Gui_Internal;
 	}
 
 	void set_CLICKER_Position(int x, int y, int _cellSize)

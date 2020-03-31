@@ -147,8 +147,8 @@ void ofApp::draw()
 
 	//debug object linked to grouped parameters
 	string str;
-	int x = 20;
-	int y = 100;
+	int x = 10;
+	int y = 20;
 	int pad = 20;
 	int i = 0;
 	{

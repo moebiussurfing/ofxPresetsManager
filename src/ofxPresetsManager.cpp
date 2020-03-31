@@ -320,7 +320,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 
 		//auto save timer
 		timerLast_Autosave = ofGetElapsedTimeMillis();
-		ofLogNotice("ofxPresetsManager") << "\t\t\t\t\t\t\t\t\t\t\t\t[AUTOSAVE]";
+		ofLogNotice("ofxPresetsManager") << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t[AUTOSAVE]";
 	}
 }
 
@@ -1038,7 +1038,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//if (key == 'G')
 		//{
 		//	SHOW_Gui_Internal = !SHOW_Gui_Internal;
-		//	//bool b = is_GUI_Internal_Visible();
+		//	//bool b = get_GUI_Internal_Visible();
 		//	//set_GUI_Internal_Visible(!b);
 		//}
 		//if (key == 'g')
@@ -1574,16 +1574,16 @@ void ofxPresetsManager::save_ControlSettings()
 	ofXml settingsControl;
 
 	//TODO: crashes?
-	ofLogNotice("ofxPresetsManager") << params_Control.toString() << endl;
+	ofLogNotice("ofxPresetsManager") << endl << params_Control.toString() << endl;
 	ofSerialize(settingsControl, params_Control);
 	ofLogNotice("ofxPresetsManager") << settingsControl << endl;
 	
 	string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
 
-	ofLogNotice("ofxPresetsManager") << "path:" << path;
+	ofLogNotice("ofxPresetsManager") << "path: " << path;
 	settingsControl.save(path);
 
-	ofLogNotice("ofxPresetsManager") << "save_ControlSettings:" << path;
+	//ofLogNotice("ofxPresetsManager") << "save_ControlSettings:" << path;
 	DISABLE_CALLBACKS = false;//?
 }
 
