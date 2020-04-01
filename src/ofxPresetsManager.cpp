@@ -1561,30 +1561,32 @@ void ofxPresetsManager::load_ControlSettings()
 //--------------------------------------------------------------
 void ofxPresetsManager::save_ControlSettings()
 {
-	ofLogNotice("ofxPresetsManager") << "save_ControlSettings()";
-	DISABLE_CALLBACKS = true;//?
+	//TODO:
+	//
+	//ofLogNotice("ofxPresetsManager") << "save_ControlSettings()";
+	//DISABLE_CALLBACKS = true;//?
 
-	//TODO: crashes?
-	//get gui position to update param
-	float x, y;
-	x = guiControl.getPosition().x;
-	y = guiControl.getPosition().y;
-	Gui_Position = glm::vec2(x, y);
+	////TODO: crashes?
+	////get gui position to update param
+	//float x, y;
+	//x = guiControl.getPosition().x;
+	//y = guiControl.getPosition().y;
+	//Gui_Position = glm::vec2(x, y);
 
-	ofXml settingsControl;
+	//ofXml settingsControl;
 
-	//TODO: crashes?
-	ofLogNotice("ofxPresetsManager") << endl << params_Control.toString() << endl;
-	ofSerialize(settingsControl, params_Control);
-	ofLogNotice("ofxPresetsManager") << settingsControl << endl;
-	
-	string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
+	////TODO: crashes?
+	//ofLogNotice("ofxPresetsManager") << endl << params_Control.toString() << endl;
+	//ofSerialize(settingsControl, params_Control);
+	//ofLogNotice("ofxPresetsManager") << settingsControl << endl;
+	//
+	//string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
 
-	ofLogNotice("ofxPresetsManager") << "path: " << path;
-	settingsControl.save(path);
+	//ofLogNotice("ofxPresetsManager") << "path: " << path;
+	//settingsControl.save(path);
 
-	//ofLogNotice("ofxPresetsManager") << "save_ControlSettings:" << path;
-	DISABLE_CALLBACKS = false;//?
+	////ofLogNotice("ofxPresetsManager") << "save_ControlSettings:" << path;
+	//DISABLE_CALLBACKS = false;//?
 }
 
 //--------------------------------------------------------------
