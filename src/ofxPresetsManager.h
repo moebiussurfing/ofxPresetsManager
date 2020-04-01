@@ -114,8 +114,9 @@ private:
 
 	//this loads selected preset, autosave/autoload...gui states
 	void load_ControlSettings();
+public://TEST crash?
 	void save_ControlSettings();
-
+private:
 	//-
 
 	ofxPanel guiControl;
@@ -153,6 +154,8 @@ public:
 	//must be called after params group has been added!
 	void setup();
 	void setup(std::string name);//to set gui panel name header label
+
+	void exit();
 
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);

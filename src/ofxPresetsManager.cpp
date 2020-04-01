@@ -100,7 +100,6 @@ ofxPresetsManager::ofxPresetsManager()
 	autoSave.set("AUTO SAVE", true);
 	bAutosaveTimer.set("TIMER AUTO SAVE", false);
 	bCloneRight.set("CLONE >", false);
-	bCloneRight.setSerializable(false);
 	SHOW_menu.set("SHOW MENU", false);
 	SHOW_Gui_Internal.set("SHOW CONTROL GUI ", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", false);
@@ -114,11 +113,14 @@ ofxPresetsManager::ofxPresetsManager()
 	//-
 
 	//exclude from xml settings
+	//TODO:
+	//BUG: avoid make the group xml empty!
+	params_Tools.setSerializable(false);
+	bCloneRight.setSerializable(false);
 	bSave.setSerializable(false);
 	loadToMemory.setSerializable(false);
 	saveFromMemory.setSerializable(false);
 	SHOW_Gui_Internal.setSerializable(false);
-
 	//-
 
 	//groups
@@ -291,6 +293,8 @@ void ofxPresetsManager::update(ofEventArgs & args)
 	//autosave
 	if (autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
 	{
+		ofLogNotice("ofxPresetsManager") << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t[AUTOSAVE]";
+
 		//app settings
 		save_ControlSettings();
 
@@ -301,6 +305,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		if (!MODE_MemoryLive)
 		{
 			//MODE A: from hd file
+			//not required because the files are already there
 		}
 		else
 		{
@@ -320,7 +325,6 @@ void ofxPresetsManager::update(ofEventArgs & args)
 
 		//auto save timer
 		timerLast_Autosave = ofGetElapsedTimeMillis();
-		ofLogNotice("ofxPresetsManager") << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t[AUTOSAVE]";
 	}
 }
 
@@ -627,38 +631,38 @@ void ofxPresetsManager::draw_CLICKER()
 //--------------------------------------------------------------
 ofxPresetsManager::~ofxPresetsManager()
 {
-	ofLogVerbose("ofxPresetsManager") << "~ofxPresetsManager";
-	DISABLE_CALLBACKS = true;//?
+	//ofLogVerbose("ofxPresetsManager") << "~ofxPresetsManager";
+	//DISABLE_CALLBACKS = true;//?
 
-	//autosave PRESET_selected preset on exit
-	if (autoSave)
-	{
-		doSave(PRESET_selected - 1);
-		//doSave2(PRESET2_selected - 1);
-	}
+	////autosave PRESET_selected preset on exit
+	//if (autoSave)
+	//{
+	//	doSave(PRESET_selected - 1);
+	//	//doSave2(PRESET2_selected - 1);
+	//}
 
-	//TODO:
-	//app settings
-	save_ControlSettings();//crashes?
+	////TODO:
+	////app settings
+	//save_ControlSettings();//crashes?
 
-	//destroy callbacks
-	removeKeysListeners();
+	////destroy callbacks
+	//removeKeysListeners();
 
-	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
+	//ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 
-	//-
+	////-
 
-	//TODO: move above
-	//MODE B: direct from memory
-	if (MODE_MemoryLive && autoSave)
-	{
-		save_AllKit_FromMemory();
-	}
+	////TODO: move above
+	////MODE B: direct from memory
+	//if (MODE_MemoryLive && autoSave)
+	//{
+	//	save_AllKit_FromMemory();
+	//}
 
-	//--
+	////--
 
-	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
-	ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
+	//ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
+	//ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
 }
 
 //-
@@ -1562,31 +1566,83 @@ void ofxPresetsManager::load_ControlSettings()
 void ofxPresetsManager::save_ControlSettings()
 {
 	//TODO:
-	//
-	//ofLogNotice("ofxPresetsManager") << "save_ControlSettings()";
-	//DISABLE_CALLBACKS = true;//?
+	//crashes!
+	//it seems related to autoSave timer?
+
+	ofLogNotice("ofxPresetsManager") << "save_ControlSettings()";
+	DISABLE_CALLBACKS = true;//?
+
+	//-
 
 	////TODO: crashes?
 	////get gui position to update param
+	Gui_Position = glm::vec2(guiControl.getPosition());
 	//float x, y;
 	//x = guiControl.getPosition().x;
 	//y = guiControl.getPosition().y;
 	//Gui_Position = glm::vec2(x, y);
 
-	//ofXml settingsControl;
+	//---
 
 	////TODO: crashes?
-	//ofLogNotice("ofxPresetsManager") << endl << params_Control.toString() << endl;
-	//ofSerialize(settingsControl, params_Control);
-	//ofLogNotice("ofxPresetsManager") << settingsControl << endl;
-	//
-	//string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
 
-	//ofLogNotice("ofxPresetsManager") << "path: " << path;
-	//settingsControl.save(path);
+	//TODO:
+	//BUG?
+	//BUG: avoid make the HELPER group xml empty!
 
-	////ofLogNotice("ofxPresetsManager") << "save_ControlSettings:" << path;
-	//DISABLE_CALLBACKS = false;//?
+	//try
+	//{
+	//	throw 20;
+	//}
+	//catch (int e)
+	//{
+	//	cout << "An exception occurred. Exception Nr. " << e << '\n';
+	//}
+
+	//try {
+	//	// code here
+	//}
+	//catch (int param) { cout << "int exception"; }
+	//catch (char param) { cout << "char exception"; }
+	//catch (...) { cout << "default exception"; }
+
+	//try {
+	//	try {
+	//		// code here
+	//	}
+	//	catch (int n) {
+	//		throw;
+	//	}
+	//}
+	//catch (...) {
+	//	cout << "Exception occurred";
+	//}
+
+	try {
+		ofLogNotice("ofxPresetsManager") << endl << params_Control.toString() << endl;
+
+		ofXml settingsControl;
+
+		//TODO: crashes?
+		//ofSerialize(settingsControl, params_Control);
+
+		string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
+		ofLogNotice("ofxPresetsManager") << "path: " << path;
+
+		//TODO: crashes?
+		//settingsControl.save(path);
+
+		ofLogNotice("ofxPresetsManager") << settingsControl << endl;
+	}
+	catch (int n) {
+		ofLogNotice("ofxPresetsManager") << "CATCH ERROR" << endl;
+		throw;
+	}
+
+	//---
+
+	//ofLogNotice("ofxPresetsManager") << "save_ControlSettings:" << path;
+	DISABLE_CALLBACKS = false;//?
 }
 
 //--------------------------------------------------------------
@@ -2266,3 +2322,41 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 //
 //	group_TARGET = g;
 //}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::exit()
+{
+	ofLogVerbose("ofxPresetsManager") << "exit()";
+
+	DISABLE_CALLBACKS = true;//?
+
+	//autosave PRESET_selected preset on exit
+	if (autoSave)
+	{
+		doSave(PRESET_selected - 1);
+		//doSave2(PRESET2_selected - 1);
+	}
+
+	//TODO:
+	//app settings
+	save_ControlSettings();//crashes?
+
+	//destroy callbacks
+	removeKeysListeners();
+
+	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
+
+	//-
+
+	//TODO: move above
+	//MODE B: direct from memory
+	if (MODE_MemoryLive && autoSave)
+	{
+		save_AllKit_FromMemory();
+	}
+
+	//--
+
+	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
+	ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
+}
