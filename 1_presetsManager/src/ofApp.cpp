@@ -209,6 +209,17 @@ void ofApp::keyPressed(int key)
 	{
 		presetsManager.set_ENABLE_Keys(!presetsManager.isKeysEnabled());
 	}
+
+
+	//load preset by code
+	//if (key == 'a')
+	//{
+	//	presetsManager.loadPreset(1);
+	//}
+	//if (key == 's')
+	//{
+	//	presetsManager.loadPreset(2);
+	//}
 }
 
 //explorer browser
