@@ -28,6 +28,11 @@
 
 //--
 
+//internal control
+#include "ofxGui.h"
+
+//--
+
 //TODO:
 //browser system
 #define INCLUDE_FILE_BROWSER_IM_GUI
@@ -44,11 +49,11 @@
 #include "ofxDEBUG_errors.h"
 #endif
 
+//#define DEBUG_BLOCK_SAVE_SETTINGS//enable this bc sometimes there's crashes on exit
+
 //--
 
 //optional to debug performance or delay when loading files or presets on hd or memory modes
-
-//TIMEMEASUREMENTS
 //#define TIME_SAMPLE_MEASURES //comment this line to remove ofxTimeMeasurements dependency
 #ifdef TIME_SAMPLE_MEASURES
 #include "ofxTimeMeasurements.h"
@@ -64,9 +69,6 @@
 #endif
 
 //--
-
-//internal control
-#include "ofxGui.h"
 
 //-------------------------------
 
@@ -105,7 +107,7 @@ private:
 	std::string path_PresetsFolder;//for browse other presets. archive kit
 	std::string path_Prefix;//to add to file names
 
-	std::string PRESET_name;
+	std::string browser_PresetName;
 
 	std::string gui_LabelName = "NO_NAME";//default gui panel name
 
@@ -190,12 +192,12 @@ private:
 
 public:
 
-	ofParameter<bool> DONE_load;
-	ofParameter<bool> DONE_save;
+	ofParameter<bool> DONE_load;//not as controller. just an easy callback to ofApp integration 
+	ofParameter<bool> DONE_save;//not as controller. just an easy callback to ofApp integration
 
 public:
 
-	bool isDoneLoad()
+	bool isDoneLoad()//easy callback to ofApp integration 
 	{
 		if (bIsDoneLoad)
 		{
@@ -282,7 +284,7 @@ public:
 		}
 	}
 
-	void loadPreset(int p);
+	void browser_LoadPreset(int p);
 	int getNumPresets()
 	{
 		return num_presets;
@@ -323,9 +325,9 @@ public:
 private:
 
 	//load presets from preset folder, not from favorites presets folders
-	void preset_load(string name);
-	void preset_save(string name);
-	void preset_filesRefresh();
+	void browser_PresetLoad(string name);
+	void browser_PresetSave(string name);
+	void browser_FilesRefresh();
 
 	//-
 
@@ -345,7 +347,7 @@ public:
 		windowResized(ofGetWidth(), ofGetHeight());
 
 		////browser
-		//preset_filesRefresh();
+		//browser_FilesRefresh();
 
 		//-
 
@@ -452,25 +454,6 @@ private:
 
 	//--
 
-#ifdef INCLUDE_FILE_BROWSER_IM_GUI
-	//browse
-	bool isMouseOver_Changed()
-	{
-		if (bMouseOver_Changed)
-		{
-			//bMouseOver_Changed = false;//reset
-			return true;
-		}
-	}
-
-	bool getIsMouseOver()
-	{
-		return bImGui_mouseOver;
-	}
-
-	bool bMouseOver_Changed = false;
-	bool debugClicker = true;
-#endif
 
 	//--
 
@@ -513,61 +496,86 @@ private:
 	int getGuiIndex(string name) const;
 	string presetName(string guiName, int presetIndex);
 
-	//-
-
-	//browser
-
 	//bool SHOW_Gui_Internal;
 	ofParameter<bool> SHOW_Gui_Internal;
 
+	//-
+
+	//browser
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
+
+	public:
+	ofParameter<bool> bImGui_mouseOver;
+
+	private:
+	void setup_Browser();
+
+	ofxImGui::Gui gui_Browser;
 	
-	ofxImGui::Gui gui;
-	ofxImGui::Settings mainSettings = ofxImGui::Settings();
+	ofParameter<bool> MODE_Browser;
+
+	bool SHOW_ImGui;
+	//bool bImGui_mouseOver;
+	bool bImGui_mouseOver_PRE;
 
 	bool gui_draw_ImGui();
-	bool SHOW_ImGui;
-	bool bImGui_mouseOver;
-
+	void gui_draw_ImGui_Browser();
 	void gui_draw_ImGui_MenuBar();
 	void gui_draw_ImGui_MenuFile();
-	void gui_ImGui_theme();
 
 	void gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter);
 	void gui_loadFromFile(const std::string &filename, ofAbstractParameter &parameter);
 	void gui_SaveAsSettings();
 
 	//layout
+	void gui_ImGui_theme();
+	ofxImGui::Settings mainSettings;
 	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. must move by gui!  
 	ofParameter<glm::vec2> ImGui_Size;//not used yet
 
 	//TODO: 
 	//DEBUG:
 	void groupDebug(ofParameterGroup &group);
-#endif
 
 	//-
 
-	//layout
-	ofVec2f guiPos_Control = ofVec2f(500, 500);
-	int clicker_cellSize = 80;
-	ofVec2f clicker_Pos = ofVec2f(500, 500);
-	//ofVec2f clicker_Size = ofVec2f(100, 100);
+	bool isMouseOver_Changed()
+	{
+		if (bMouseOver_Changed)
+		{
+			//bMouseOver_Changed = false;//reset
+			return true;
+		}
+	}
+
+	bool getIsMouseOver()
+	{
+		return bImGui_mouseOver;
+	}
+
+	bool bMouseOver_Changed = false;
+	bool debugClicker = true;
 
 	//--
 
-	//presets
-
+	//browser presets
 	bool MODE_newPreset = false;
-	string textInput_New = "new preset";
+	string textInput_New = "new preset";//user input text
 
 	//files
 	std::vector<std::string> fileNames;
 	std::vector<ofFile> files;
 	int currentFile = 0;
 	string textInput_temp = "type name";
+	bool bFilesError = false;
+#endif
 
-	void gui_draw_ImGui_Browser();
+	//--
+
+	//layout
+	ofVec2f guiPos_Control = ofVec2f(500, 500);
+	int clicker_cellSize = 80;
+	ofVec2f clicker_Pos = ofVec2f(500, 500);
 
 	//--
 
@@ -614,6 +622,7 @@ private:
 
 	void doCloneRight(int pIndex);
 
+	void doLoad(int pIndex);
 	void doSave(int pIndex);
 	//TODO:
 	//void doSave2(int pIndex);
@@ -644,14 +653,19 @@ private:
 	//to select presets, clone, save..
 	
 	ofParameterGroup params_Control;
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	ofParameter<bool> SHOW_MenuTopBar;
 	ofParameter<bool> SHOW_Browser;
+#endif
 	ofParameter<bool> SHOW_ClickPanel;
+	ofParameter<bool> ENABLE_Keys;
+	
 	ofParameter<bool> bSave;
+	//ofParameter<bool> bLoad;//buggy
 	ofParameter<bool> autoSave;
 	ofParameter<bool> autoLoad;
+
 	ofParameter<bool> bCloneRight;
-	ofParameter<bool> ENABLE_Keys;
 
 	//internal groups
 	ofParameterGroup params_Favorites;

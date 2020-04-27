@@ -39,9 +39,10 @@ public:
 
 	//group1
     ofParameterGroup params;
-    ofParameter<int> numSquares;
-    ofParameter<int> separation;
-    ofParameter<int> squareSide;
+	ofParameter<int> shapeType;
+	ofParameter<int> numShapes;
+	ofParameter<int> separation;
+    ofParameter<int> shapeSide;
 
 	////group2
 	//ofParameterGroup params2;

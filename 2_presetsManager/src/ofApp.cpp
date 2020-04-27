@@ -20,9 +20,10 @@ void ofApp::setup()
 
 	//group1
 	params.setName("myGroupParameters");
-	params.add(numSquares.set("num squares", 1, 1, 24));
+	params.add(shapeType.set("shape", 1, 1, 2));
+	params.add(numShapes.set("num squares", 1, 1, 24));
 	params.add(separation.set("separation", 5, 1, 100));
-	params.add(squareSide.set("square side", 50, 5, 200));
+	params.add(shapeSide.set("square side", 50, 5, 200));
 
 	//-
 
@@ -44,6 +45,7 @@ void ofApp::setup()
 
 	presetsManager.set_Path_GlobalFolder("ofxPresetsManager");//main container folder
 	presetsManager.set_Path_KitFolder("presets");//kit presets
+	//presetsManager.set_Path_PresetsFolder("archive");
 
 	//-
 
@@ -88,7 +90,7 @@ void ofApp::setup()
 	//TODO:multiple params groups
 	//gui.add(params2);
 
-	gui.setPosition(20, 80);
+	gui.setPosition(20, 150);
 
 	//-------
 
@@ -122,7 +124,7 @@ void ofApp::windowResized(int w, int h)
 void ofApp::exit()
 {
 	//TODO:
-	presetsManager.exit();
+	//presetsManager.exit();
 
 	//presetsManager.DONE_save.removeListener(this, &ofApp::Changed_DONE_save);
 	//presetsManager.DONE_load.removeListener(this, &ofApp::Changed_DONE_load);
@@ -142,11 +144,13 @@ void ofApp::draw()
 	int pad = 20;
 	int i = 0;
 	{
-		str = "numSquares: " + ofToString(numSquares);
+		str = "shapeType: " + ofToString(shapeType);
+		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		str = "numShapes: " + ofToString(numShapes);
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 		str = "separation: " + ofToString(separation);
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "squareSide: " + ofToString(squareSide);
+		str = "shapeSide: " + ofToString(shapeSide);
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 	}
 
@@ -158,9 +162,12 @@ void ofApp::draw()
 	ofNoFill();
 	ofPushMatrix();
 	ofTranslate(300, 50);
-	for (int i = 0; i < numSquares; ++i)
+	for (int i = 0; i < numShapes; ++i)
 	{
-		ofDrawRectangle(0, 0, squareSide, squareSide);
+		if (shapeType == 1)
+			ofDrawRectangle(0, 0, shapeSide, shapeSide);
+		else if (shapeType == 2)
+			ofDrawCircle(0, 0, shapeSide);
 		ofTranslate(separation, separation);
 	}
 	ofPopMatrix();
@@ -175,40 +182,44 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-	//randomize selected preset
-	if (key == OF_KEY_RETURN)
+	if (!presetsManager.bImGui_mouseOver)//ignore keys when mouse is over ImGui window
 	{
-		int pMax = presetsManager.getNumPresets();//get amount of presets on kit
-		int pMin = 1;
-		int p = (int)ofRandom(pMin, pMax + 1);//p goes from 1 to (max) 8
+		//select one prese by random
+		if (key == OF_KEY_RETURN)
+		{
+			int pMax = presetsManager.getNumPresets();//get amount of presets on kit
+			int pMin = 1;
+			int p = (int)ofRandom(pMin, pMax + 1);//p goes from 1 to (max) 8
 
-		ofLogNotice("ofApp") << "select a random preset from the manager kit: " << ofToString(p);
-		presetsManager.loadPreset(p);
-	}
+			ofLogNotice("ofApp") << "select a random preset from the manager kit: " << ofToString(p);
+			presetsManager.browser_LoadPreset(p);
+		}
 
-	//randomize parameters
-	if (key == ' ')
-	{
-		numSquares = ofRandom(numSquares.getMin(), numSquares.getMax());
-		separation = ofRandom(separation.getMin(), separation.getMax());
-		squareSide = ofRandom(squareSide.getMin(), squareSide.getMax());
-	}
+		//randomize parameters of selected preset
+		if (key == ' ')
+		{
+			shapeType = ofRandom(shapeType.getMin(), shapeType.getMax() + 1);
+			numShapes = ofRandom(numShapes.getMin(), numShapes.getMax() + 1);
+			separation = ofRandom(separation.getMin(), separation.getMax() + 1);
+			shapeSide = ofRandom(shapeSide.getMin(), shapeSide.getMax() + 1);
+		}
 
-	//switch keys control enabled
-	if (key == OF_KEY_TAB)
-	{
-		presetsManager.set_ENABLE_Keys(!presetsManager.isKeysEnabled());
+		//switch keys control enabled
+		if (key == OF_KEY_TAB)
+		{
+			presetsManager.set_ENABLE_Keys(!presetsManager.isKeysEnabled());
+		}
+
+		//load preset by code
+		//if (key == 'a')
+		//{
+		//	presetsManager.browser_LoadPreset(1);
+		//}
+		//if (key == 's')
+		//{
+		//	presetsManager.browser_LoadPreset(2);
+		//}
 	}
-	
-	//load preset by code
-	//if (key == 'a')
-	//{
-	//	presetsManager.loadPreset(1);
-	//}
-	//if (key == 's')
-	//{
-	//	presetsManager.loadPreset(2);
-	//}
 }
 
 //-
