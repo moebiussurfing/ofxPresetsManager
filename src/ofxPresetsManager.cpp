@@ -107,7 +107,7 @@ ofxPresetsManager::ofxPresetsManager()
 	ENABLE_Keys.set("ENABLE KEYS", true);
 
 	//layout
-	Gui_Position.set("GUI POSITION",
+	Gui_Internal_Position.set("GUI POSITION",
 		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
@@ -115,12 +115,13 @@ ofxPresetsManager::ofxPresetsManager()
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	SHOW_Browser.set("SHOW BROWSER", false);
-	guiPos.set("GUI BROWSER POSITION",
+	ImGui_Position.set("GUI BROWSER POSITION",
 		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
-	guiSize.set("GUI BROWSER SIZE",
+
+	ImGui_Size.set("GUI BROWSER SIZE",
 		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
@@ -162,17 +163,17 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.setName("GUI");
 	params_Gui.add(SHOW_Gui_Internal);
 	params_Gui.add(SHOW_ClickPanel);
-	params_Gui.add(SHOW_MenuTopBar);
+	//params_Gui.add(SHOW_MenuTopBar);
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	params_Gui.add(SHOW_Browser);
 #endif
 	params_Gui.add(ENABLE_Keys);
 
 	//layout
-	params_Gui.add(Gui_Position);
+	params_Gui.add(Gui_Internal_Position);
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
-	params_Gui.add(guiPos);
-	params_Gui.add(guiSize);
+	params_Gui.add(ImGui_Position);
+	params_Gui.add(ImGui_Size);
 #endif
 
 	params_Tools.setName("HELPER TOOLS");
@@ -242,6 +243,7 @@ void ofxPresetsManager::setup()
 		errorsDEBUG.addError(gui_LabelName + " ofxPresetsManager", "setup() ofxGui", pathFont);
 	}
 #endif
+
 	//colors
 	ofxGuiSetDefaultHeight(20);
 	ofxGuiSetBorderColor(32);
@@ -250,17 +252,25 @@ void ofxPresetsManager::setup()
 	ofxGuiSetHeaderColor(ofColor(24));
 
 	//control gui
-	guiControl.setup(gui_LabelName);
-	guiControl.add(params_Control);
-	guiControl.setPosition(ofGetWidth() - 210, 10);//default
+	gui_InternalControl.setup(gui_LabelName);
+	gui_InternalControl.add(params_Control);
+	gui_InternalControl.setPosition(ofGetWidth() - 210, 10);//default
 
 	//collapse
-	//guiControl.getGroup("ofxPresetsManager").minimize();
-	auto &gPanel = guiControl.getGroup("ofxPresetsManager");
+	//gui_InternalControl.getGroup("ofxPresetsManager").minimize();
+	auto &gPanel = gui_InternalControl.getGroup("ofxPresetsManager");
 	auto &gGui = gPanel.getGroup("GUI");
 	gGui.minimize();
+
 	auto &gGuiPos = gGui.getGroup("GUI POSITION");
 	gGuiPos.minimize();
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+	auto &gGuiPos1 = gGui.getGroup("GUI BROWSER POSITION");
+	gGuiPos1.minimize();
+	auto &gGuiPos2 = gGui.getGroup("GUI BROWSER SIZE");
+	gGuiPos2.minimize();
+#endif
+
 	auto &gOptions = gPanel.getGroup("OPTIONS");
 	gOptions.minimize();
 	gPanel.getGroup("HELPER TOOLS").minimize();
@@ -292,6 +302,7 @@ void ofxPresetsManager::setup()
 
 	//app settings
 	DISABLE_CALLBACKS = false;
+
 	load_ControlSettings();
 
 	//TODO:
@@ -318,10 +329,11 @@ void ofxPresetsManager::windowResized(int w, int h)
 {
 	ofLogNotice("ofxPresetsManager") << "windowResized: " << w << "," << h;
 
-	//#ifdef INCLUDE_FILE_BROWSER_IM_GUI
-	//	guiSize = glm::vec2(250, 0);//width/height
-	//	guiPos = glm::vec2(w - guiSize.get().x - 10, 10);
-	//#endif
+	//use this bc save/load is not working
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+	ImGui_Size = glm::vec2(250, 0);//width/height
+	ImGui_Position = glm::vec2(w - ImGui_Size.get().x - 10, 10);
+#endif
 }
 
 //--------------------------------------------------------------
@@ -364,7 +376,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 
 		//DISABLE_Callbacks = true;
 		////get gui position before save
-		//Gui_Position = glm::vec2(gui.getPosition());
+		//Gui_Internal_Position = glm::vec2(gui.getPosition());
 		//saveParams(params_Control, path_GLOBAL + path_Params);
 		//DISABLE_Callbacks = false;
 
@@ -390,12 +402,13 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	//internal ofxGui panel
 	if (SHOW_Gui_Internal)
 	{
-		guiControl.draw();
+		gui_InternalControl.draw();
 	}
 
 	//--
 
-	//user clicker boxes preset selector (from live kit/favorites)
+	//user clicker boxes preset selector 
+	//(from live kit/favorites)
 	if (SHOW_ClickPanel)
 	{
 		draw_CLICKER();
@@ -412,36 +425,38 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	SHOW_ImGui = true;
 
 	//draw ImGui
-	if (SHOW_ImGui)
+	if (SHOW_ImGui && SHOW_Browser)
 	{
 		bImGui_mouseOver = gui_draw_ImGui();
-	}
 
-	//mouse over checker
-	if (bImGui_mouseOver)
-	{
-	}
-	else
-	{
-	}
+		//-
 
-	if (bImGui_mouseOver != bImGui_mouseOver_PRE)
-	{
-		bMouseOver_Changed = true;
-	}
+		//mouse over checker
+		if (bImGui_mouseOver)
+		{
+		}
+		else
+		{
+		}
 
-	//debug
-	if (bMouseOver_Changed)
-	{
-		ofLogVerbose("ofxPresetsManager") << "mouse over ImGui: " << (bImGui_mouseOver ? "IN" : "OUT");
-		//if (bImGui_mouseOver)
-		//{
-		//	ofLogVerbose("ofxPresetsManager") << "mouse over gui";
-		//}
-		//else
-		//{
-		//	ofLogVerbose("ofxPresetsManager") << "mouse out of gui";
-		//}
+		if (bImGui_mouseOver != bImGui_mouseOver_PRE)
+		{
+			bMouseOver_Changed = true;
+		}
+
+		//debug
+		if (bMouseOver_Changed)
+		{
+			ofLogVerbose("ofxPresetsManager") << "mouse over ImGui: " << (bImGui_mouseOver ? "IN" : "OUT");
+			//if (bImGui_mouseOver)
+			//{
+			//	ofLogVerbose("ofxPresetsManager") << "mouse over gui";
+			//}
+			//else
+			//{
+			//	ofLogVerbose("ofxPresetsManager") << "mouse out of gui";
+			//}
+		}
 	}
 #endif
 
@@ -1383,7 +1398,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 	{
 		string name = e.getName();
 
-		ofLogVerbose("ofxPresetsManager") << "Changed_Params_Control '" << name << "': " << e;
+		ofLogNotice("ofxPresetsManager") << "Changed_Params_Control '" << name << "': " << e;
 
 		//-
 
@@ -1393,25 +1408,39 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			bSave = false;
 			doSave(PRESET_selected - 1);
 		}
+
 		else if (name == "ENABLE KEYS")
 		{
-
 		}
+
 		else if (name == "CLONE >" && bCloneRight)
 		{
 			ofLogNotice("ofxPresetsManager") << "CLONE >: " << e;
 			bCloneRight = false;
 			doCloneRight(PRESET_selected - 1);
 		}
+
 		else if (name == "GUI POSITION")
 		{
 			ofLogVerbose("ofxPresetsManager") << "GUI POSITION: " << e;
+			//clamp inside window
 			float x, y;
-			x = ofClamp(Gui_Position.get().x, 0, ofGetWidth() - 200);
-			y = ofClamp(Gui_Position.get().y, 0, ofGetHeight() - 20);
-			guiControl.setPosition(x, y);
+			x = ofClamp(Gui_Internal_Position.get().x, 0, ofGetWidth() - 200);
+			y = ofClamp(Gui_Internal_Position.get().y, 0, ofGetHeight() - 20);
+			gui_InternalControl.setPosition(x, y);
 		}
 
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+		else if (name == "GUI BROWSER POSITION")
+		{
+			ofLogVerbose("ofxPresetsManager") << "GUI BROWSER POSITION: " << e;
+			////clamp inside window
+			//float x, y;
+			//x = ofClamp(ImGui_Position.get().x, 0, ofGetWidth() - 200);
+			//y = ofClamp(ImGui_Position.get().y, 0, ofGetHeight() - 20);
+			//ImGui_Position = glm::vec2(x, y);
+		}
+#endif
 		//-
 
 		else if (name == "LOAD TO MEMORY" && loadToMemory)
@@ -1420,12 +1449,14 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			loadToMemory = false;
 			load_AllKit_ToMemory();
 		}
+
 		else if (name == "SAVE FROM MEMORY" && saveFromMemory)
 		{
 			ofLogNotice("ofxPresetsManager") << "saveFromMemory:" << e;
 			saveFromMemory = false;
 			save_AllKit_FromMemory();
 		}
+
 		else if (name == "MODE MEMORY")
 		{
 			ofLogNotice("ofxPresetsManager") << "MODE MEMORY: " << e;
@@ -1461,17 +1492,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		else if (name == "PRESETS" && (PRESET_selected != PRESET_selected_PRE))
 		{
 			ofLogNotice("ofxPresetsManager") << "PRESET: " << e;
-			//ofLogNotice("ofxPresetsManager") << e;
-
-			/*
-			//   //byKey
-			//   //load( k, i );
-			//   //ofLogNotice("ofxPresetsManager") << "load( k, i ):" <<  k << ", " << i;
-			//
-			//   //byMousePressed
-			//   //load( xIndex, yIndex);
-			//   //ofLogNotice("ofxPresetsManager") << "load( xIndex, yIndex):" <<  xIndex << ", " << yIndex;
-			*/
 
 			//-
 
@@ -1567,32 +1587,67 @@ void ofxPresetsManager::load_ControlSettings()
 //--------------------------------------------------------------
 void ofxPresetsManager::save_ControlSettings()
 {
+	ofLogNotice("ofxPresetsManager") << "save_ControlSettings()";
+
 	//TODO:
 	//crashes!
 	//it seems related to autoSave timer?
 
-	ofLogNotice("ofxPresetsManager") << "save_ControlSettings()";
 	DISABLE_CALLBACKS = true;//?
 
 	//-
 
-	////TODO: crashes?
-	////get gui position to update param
-	Gui_Position = glm::vec2(guiControl.getPosition());
+	//TODO: 
+	//crashes sometimes?
+
+	//get gui position from panel to update the position param
+	Gui_Internal_Position = glm::vec2(gui_InternalControl.getPosition());
+
 	//float x, y;
-	//x = guiControl.getPosition().x;
-	//y = guiControl.getPosition().y;
-	//Gui_Position = glm::vec2(x, y);
+	//x = gui_InternalControl.getPosition().x;
+	//y = gui_InternalControl.getPosition().y;
+	//Gui_Internal_Position = glm::vec2(x, y);
 
 	//---
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
-	guiSize = glm::vec2(250, 0);//width/height
-	guiPos = glm::vec2(w - guiSize.get().x - 10, 10);
+	//gui.~Gui -> how to get panel position?
+	//ImGui_Size = glm::vec2(250, 0);//width/height
+	//ImGui_Position = glm::vec2(w - ImGui_Size.get().x - 10, 10);
 #endif
 
-	////TODO: crashes?
+	//---
 
+	//TODO: 
+	//crashes?
+
+	try
+	{
+		ofLogNotice("ofxPresetsManager") << endl << params_Control.toString() << endl;
+
+		ofXml settingsControl;
+
+		//TODO: 
+		//crashes here!
+		ofSerialize(settingsControl, params_Control);
+
+		string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
+		ofLogNotice("ofxPresetsManager") << "path: " << path;
+
+		//TODO: 
+		//crashes here!
+		settingsControl.save(path);
+
+		ofLogNotice("ofxPresetsManager") << settingsControl << endl;
+	}
+	catch (int n)
+	{
+		ofLogNotice("ofxPresetsManager") << "CATCH ERROR" << endl;
+		throw;
+	}
+
+	//---
+	/*
 	//TODO:
 	//BUG?
 	//BUG: avoid make the HELPER group xml empty!
@@ -1624,32 +1679,10 @@ void ofxPresetsManager::save_ControlSettings()
 	//catch (...) {
 	//	cout << "Exception occurred";
 	//}
-
-	try {
-		ofLogNotice("ofxPresetsManager") << endl << params_Control.toString() << endl;
-
-		ofXml settingsControl;
-
-		//TODO: crashes?
-		//ofSerialize(settingsControl, params_Control);
-
-		string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
-		ofLogNotice("ofxPresetsManager") << "path: " << path;
-
-		//TODO: crashes?
-		//settingsControl.save(path);
-
-		ofLogNotice("ofxPresetsManager") << settingsControl << endl;
-	}
-	catch (int n) {
-		ofLogNotice("ofxPresetsManager") << "CATCH ERROR" << endl;
-		throw;
-	}
-
+	*/
 	//---
 
-	//ofLogNotice("ofxPresetsManager") << "save_ControlSettings:" << path;
-	DISABLE_CALLBACKS = false;//?
+	DISABLE_CALLBACKS = false;
 }
 
 //--------------------------------------------------------------
@@ -1847,8 +1880,12 @@ bool ofxPresetsManager::gui_draw_ImGui()
 	static bool SHOW_Gui_Internal = true;
 
 	auto mainSettings = ofxImGui::Settings();
-	mainSettings.windowPos = guiPos;
-	mainSettings.windowSize = guiSize;
+	ofVec2f pos, size;
+	pos = ofVec2f(ImGui_Position.get().x, ImGui_Position.get().y);
+	size = ofVec2f(ImGui_Size.get().x, ImGui_Size.get().y);
+
+	mainSettings.windowPos = pos;
+	mainSettings.windowSize = size;
 
 	gui.begin();
 	{

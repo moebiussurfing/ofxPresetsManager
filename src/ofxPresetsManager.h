@@ -122,7 +122,7 @@ public://TEST crash?
 private:
 	//-
 
-	ofxPanel guiControl;
+	ofxPanel gui_InternalControl;
 	ofParameter<bool> MODE_MemoryLive;
 	ofParameter<bool> loadToMemory;
 	ofParameter<bool> saveFromMemory;
@@ -337,7 +337,9 @@ private:
 
 public:
 
-	//BUG: workflow to solve auto load fail because the sorting of xml autoSave after preset selector tag
+	//BUG: 
+	//workflow 
+	//to solve auto load fail because the sorting of xml autoSave after preset selector tag
 	void refresh()
 	{
 		windowResized(ofGetWidth(), ofGetHeight());
@@ -360,17 +362,17 @@ public:
 
 	void set_GUI_Position(int x, int y)
 	{
-		guiPos = ofVec2f(x, y);
+		ImGui_Position = ofVec2f(x, y);
 	}
 	void set_GUI_ControlPosition(int x, int y)
 	{
 		guiPos_Control = ofVec2f(x, y);
-		guiControl.setPosition(guiPos_Control.x, guiPos_Control.y);
+		gui_InternalControl.setPosition(guiPos_Control.x, guiPos_Control.y);
 	}
 
 	void set_GUI_Size(int w, int h)
 	{
-		guiSize = ofVec2f(w, h);
+		ImGui_Size = ofVec2f(w, h);
 	}
 
 	void set_GUI_Internal_Visible(bool visible)
@@ -448,6 +450,9 @@ private:
 
 #pragma mark - PRIVATE
 
+	//--
+
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	//browse
 	bool isMouseOver_Changed()
 	{
@@ -465,6 +470,7 @@ private:
 
 	bool bMouseOver_Changed = false;
 	bool debugClicker = true;
+#endif
 
 	//--
 
@@ -532,8 +538,8 @@ private:
 	void gui_SaveAsSettings();
 
 	//layout
-	ofParameter<glm::vec2> guiPos; 
-	ofParameter<glm::vec2> guiSize;
+	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. must move by gui!  
+	ofParameter<glm::vec2> ImGui_Size;//not used yet
 
 	//TODO: 
 	//DEBUG:
@@ -653,7 +659,7 @@ private:
 	ofParameterGroup params_Options;
 	ofParameterGroup params_Tools;
 
-	ofParameter<glm::vec2> Gui_Position;
+	ofParameter<glm::vec2> Gui_Internal_Position;
 
 	//--
 

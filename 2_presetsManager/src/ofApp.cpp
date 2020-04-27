@@ -88,7 +88,7 @@ void ofApp::setup()
 	//TODO:multiple params groups
 	//gui.add(params2);
 
-	gui.setPosition(20, 400);
+	gui.setPosition(20, 80);
 
 	//-------
 
@@ -121,6 +121,9 @@ void ofApp::windowResized(int w, int h)
 //--------------------------------------------------------------
 void ofApp::exit()
 {
+	//TODO:
+	presetsManager.exit();
+
 	//presetsManager.DONE_save.removeListener(this, &ofApp::Changed_DONE_save);
 	//presetsManager.DONE_load.removeListener(this, &ofApp::Changed_DONE_load);
 }
