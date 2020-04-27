@@ -519,7 +519,7 @@ private:
 	bool bImGui_mouseOver_PRE;
 
 	bool gui_draw_ImGui();
-	void gui_draw_ImGui_Browser();
+	bool gui_draw_ImGui_Browser();
 	void gui_draw_ImGui_MenuBar();
 	void gui_draw_ImGui_MenuFile();
 
@@ -529,7 +529,7 @@ private:
 
 	//layout
 	void gui_ImGui_theme();
-	ofxImGui::Settings mainSettings;
+	//ofxImGui::Settings mainSettings;
 	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. must move by gui!  
 	ofParameter<glm::vec2> ImGui_Size;//not used yet
 
