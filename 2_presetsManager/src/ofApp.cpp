@@ -3,9 +3,16 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-	//WindowApp.setDEBUG_Position(0);//top position
+	//-
+
+#ifdef USE_WindowApp
 	WindowApp.setSettingsFps(60);
 	WindowApp.setSettingsVsync(true);
+	//WindowApp.setDEBUG_Position(0);//top position
+#else
+	ofSetFrameRate(60);
+	ofSetVerticalSync(true);
+#endif
 
 	//--
 
@@ -83,13 +90,6 @@ void ofApp::setup()
 
 	gui.setPosition(20, 400);
 
-	//--
-
-	//TODO:
-	////browser gui
-	//guiApp.setup();
-	//guiVisible = true;
-
 	//-------
 
 	//startup
@@ -113,6 +113,12 @@ void ofApp::update()
 }
 
 //--------------------------------------------------------------
+void ofApp::windowResized(int w, int h)
+{
+	presetsManager.windowResized(w, h);
+}
+
+//--------------------------------------------------------------
 void ofApp::exit()
 {
 	//presetsManager.DONE_save.removeListener(this, &ofApp::Changed_DONE_save);
@@ -123,25 +129,6 @@ void ofApp::exit()
 void ofApp::draw()
 {
 	ofBackground(ofColor::darkBlue);
-
-	//-
-
-	//explorer browser
-
-	//Gui
-	//mouseOverGui = false;
-	//if (guiVisible)
-	//{
-	//   mouseOverGui = imGui();
-	//}
-	//if (mouseOverGui)
-	//{
-	//
-	//}
-	//else
-	//{
-	//
-	//}
 
 	//-
 
@@ -209,8 +196,7 @@ void ofApp::keyPressed(int key)
 	{
 		presetsManager.set_ENABLE_Keys(!presetsManager.isKeysEnabled());
 	}
-
-
+	
 	//load preset by code
 	//if (key == 'a')
 	//{
@@ -222,54 +208,7 @@ void ofApp::keyPressed(int key)
 	//}
 }
 
-//explorer browser
-////--------------------------------------------------------------
-//bool ofApp::imGui()
-//{
-//   static bool Show_Preset_settings = true;
-//   auto mainSettings = ofxImGui::Settings();
-//   int x, y, w, h, pad;
-//   pad = 5;
-//   w = 200;
-//   h = 400;
-//   x = ofGetWidth() - 2 * w - pad;
-//   y = 30;
-//   mainSettings.windowPos = ofVec2f(x, y);
-//   mainSettings.windowSize = ofVec2f(w, h);
-//
-//   this->guiApp.begin();
-//   {
-//       if (Show_Preset_settings)
-//       {
-//           if (ofxImGui::BeginWindow("Preset", mainSettings, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
-//           {
-//               ofxImGui::AddGroup(this->paramsFull, mainSettings);
-//
-//               //-
-//
-//               //NOT REQUIRED...
-//               //               //NESTED GROUPS
-//               ////WORKING
-//               //               for (auto parameter : paramsFull)
-//               //               {
-//               //                   //Group.
-//               //                   auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
-//               //                   if (parameterGroup)
-//               //                   {
-//               //                       //Recurse through contents.
-//               //                       ofxImGui::AddGroup(*parameterGroup, mainSettings);
-//               //                       continue;
-//               //                   }
-//               //               }
-//
-//               ofxImGui::EndWindow(mainSettings);
-//           }
-//       }
-//   }
-//
-//   this->guiApp.end();
-//   return mainSettings.mouseOverGui;
-//}
+//-
 
 ////callback
 ////TODO: improve adding isChanged method

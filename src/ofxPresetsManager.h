@@ -28,6 +28,15 @@
 
 //--
 
+//TODO:
+//browser system
+#define INCLUDE_FILE_BROWSER_IM_GUI
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+#include "ofxImGui.h"
+#endif
+
+//--
+
 //optional to debug not located files or others
 
 #define INCLUDE_DEBUG_ERRORS
@@ -56,18 +65,12 @@
 
 //--
 
-//TODO:
-//browser system
-//#include "ofxImGui.h"
-
-//--
-
 //internal control
 #include "ofxGui.h"
 
 //-------------------------------
 
-#pragma mark - DEFINE DATA TYPES
+#pragma mark - DEFINE_DATA_TYPES
 
 //-
 
@@ -159,7 +162,9 @@ public:
 
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
-	
+
+	void windowResized(int w, int h);
+
 	//-
 
 	//user clickeable box panel preset selector
@@ -180,7 +185,7 @@ private:
 
 #pragma mark - CALLBACKS
 
-	bool DISABLE_CALLBACKS = true;
+	bool DISABLE_CALLBACKS = true;//to avoid startup crashes and objects are not initialized properly
 	bool bIsDoneLoad = false;
 
 public:
@@ -332,9 +337,11 @@ private:
 
 public:
 
-	//BUG: trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
+	//BUG: workflow to solve auto load fail because the sorting of xml autoSave after preset selector tag
 	void refresh()
 	{
+		windowResized(ofGetWidth(), ofGetHeight());
+
 		////browser
 		//preset_filesRefresh();
 
@@ -453,7 +460,7 @@ private:
 
 	bool getIsMouseOver()
 	{
-		return gui_MouseOver;
+		return bImGui_mouseOver;
 	}
 
 	bool bMouseOver_Changed = false;
@@ -507,24 +514,36 @@ private:
 	//bool SHOW_Gui_Internal;
 	ofParameter<bool> SHOW_Gui_Internal;
 
-	//ofxImGui::Gui gui;
-	//ofxImGui::Settings mainSettings = ofxImGui::Settings();
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+	
+	ofxImGui::Gui gui;
+	ofxImGui::Settings mainSettings = ofxImGui::Settings();
 
-	//bool gui_draw();
-	//bool gui_Visible;
-	bool gui_MouseOver;
+	bool gui_draw_ImGui();
+	bool SHOW_ImGui;
+	bool bImGui_mouseOver;
 
-	//void gui_draw_MenuBar();
-	//void gui_draw_MenuFile();
-	//void gui_imGui_theme();
+	void gui_draw_ImGui_MenuBar();
+	void gui_draw_ImGui_MenuFile();
+	void gui_ImGui_theme();
 
-	//void gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter);
-	//void gui_loadFromFile(const std::string &filename, ofAbstractParameter &parameter);
-	//void gui_SaveAsSettings();
+	void gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter);
+	void gui_loadFromFile(const std::string &filename, ofAbstractParameter &parameter);
+	void gui_SaveAsSettings();
 
-	ofVec2f guiPos = ofVec2f(500, 500);
+	//layout
+	ofParameter<glm::vec2> guiPos; 
+	ofParameter<glm::vec2> guiSize;
+
+	//TODO: 
+	//DEBUG:
+	void groupDebug(ofParameterGroup &group);
+#endif
+
+	//-
+
+	//layout
 	ofVec2f guiPos_Control = ofVec2f(500, 500);
-	ofVec2f guiSize = ofVec2f(100, 100);
 	int clicker_cellSize = 80;
 	ofVec2f clicker_Pos = ofVec2f(500, 500);
 	//ofVec2f clicker_Size = ofVec2f(100, 100);
@@ -542,7 +561,7 @@ private:
 	int currentFile = 0;
 	string textInput_temp = "type name";
 
-	void gui_imGui_PresetManager();
+	void gui_draw_ImGui_Browser();
 
 	//--
 
@@ -619,7 +638,8 @@ private:
 	//to select presets, clone, save..
 	
 	ofParameterGroup params_Control;
-	ofParameter<bool> SHOW_menu;
+	ofParameter<bool> SHOW_MenuTopBar;
+	ofParameter<bool> SHOW_Browser;
 	ofParameter<bool> SHOW_ClickPanel;
 	ofParameter<bool> bSave;
 	ofParameter<bool> autoSave;

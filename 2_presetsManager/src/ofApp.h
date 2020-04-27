@@ -3,31 +3,30 @@
 #include "ofMain.h"
 
 #include "ofxPresetsManager.h"
-#include "ofxWindowApp.h"
 #include "ofxGui.h"
 
-//browser
-//#include "ofxImGui.h"
+#define USE_WindowApp
+#ifdef USE_WindowApp
+#include "ofxWindowApp.h"
+#endif
 
 class ofApp : public ofBaseApp
 {
 
 public:
 
+#ifdef USE_WindowApp
 	ofxWindowApp WindowApp;
-	
-	ofxPanel gui;
+#endif
 
-    //ofxImGui::Gui guiApp;
-    //bool imGui();
-    //bool guiVisible;
-    //bool mouseOverGui;
+	ofxPanel gui;
 
     void setup();
     void update();
     void draw();
     void exit();
     void keyPressed(int key);
+	void windowResized(int w, int h);
 
     //--
 

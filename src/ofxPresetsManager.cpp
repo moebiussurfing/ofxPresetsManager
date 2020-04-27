@@ -15,6 +15,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//-
 
+	//mainly to measure performance when using hd files vs faster memory vectors
 #ifdef TIME_SAMPLE_MEASURES
 	//specify a target framerate
 	//TIME_SAMPLE_SET_FRAMERATE(fps);
@@ -100,30 +101,50 @@ ofxPresetsManager::ofxPresetsManager()
 	autoSave.set("AUTO SAVE", true);
 	bAutosaveTimer.set("TIMER AUTO SAVE", false);
 	bCloneRight.set("CLONE >", false);
-	SHOW_menu.set("SHOW MENU", false);
+	SHOW_MenuTopBar.set("SHOW MENU", false);
 	SHOW_Gui_Internal.set("SHOW CONTROL GUI ", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", false);
 	ENABLE_Keys.set("ENABLE KEYS", true);
+
+	//layout
 	Gui_Position.set("GUI POSITION",
 		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
 
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+	SHOW_Browser.set("SHOW BROWSER", false);
+	guiPos.set("GUI BROWSER POSITION",
+		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
+		glm::vec2(0, 0),
+		glm::vec2(ofGetWidth(), ofGetHeight())
+	);
+	guiSize.set("GUI BROWSER SIZE",
+		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
+		glm::vec2(0, 0),
+		glm::vec2(ofGetWidth(), ofGetHeight())
+	);
+#endif
+
 	//-
 
 	//exclude from xml settings
+
 	//TODO:
-	//BUG: avoid make the group xml empty!
+	//BUG: 
+	//avoid make the group xml empty (when all inside params are excluded!)
+
 	params_Tools.setSerializable(false);
 	bCloneRight.setSerializable(false);
 	bSave.setSerializable(false);
 	loadToMemory.setSerializable(false);
 	saveFromMemory.setSerializable(false);
 	SHOW_Gui_Internal.setSerializable(false);
+
 	//-
 
-	//groups
+	//params groups
 
 	params_Favorites.setName("USER");
 	params_Favorites.add(PRESET_selected);
@@ -141,9 +162,18 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.setName("GUI");
 	params_Gui.add(SHOW_Gui_Internal);
 	params_Gui.add(SHOW_ClickPanel);
-	params_Gui.add(SHOW_menu);
+	params_Gui.add(SHOW_MenuTopBar);
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+	params_Gui.add(SHOW_Browser);
+#endif
 	params_Gui.add(ENABLE_Keys);
+
+	//layout
 	params_Gui.add(Gui_Position);
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+	params_Gui.add(guiPos);
+	params_Gui.add(guiSize);
+#endif
 
 	params_Tools.setName("HELPER TOOLS");
 	params_Tools.add(bCloneRight);
@@ -238,9 +268,11 @@ void ofxPresetsManager::setup()
 	//--
 
 	//browser
-	//gui_Visible = true;
-	//gui.setup();
-	//gui_imGui_theme();
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+	SHOW_ImGui = true;
+	gui.setup();
+	gui_ImGui_theme();
+#endif
 
 	//--
 
@@ -251,6 +283,8 @@ void ofxPresetsManager::setup()
 
 	////memory mode
 	//load_AllKit_ToMemory();
+
+
 
 	//-------
 
@@ -267,6 +301,8 @@ void ofxPresetsManager::setup()
 
 	//--------
 
+
+
 	////TODO
 	////moved from add
 	////TODO: bug on mixerBlend.. in load_AllKit_ToMemory...
@@ -275,6 +311,17 @@ void ofxPresetsManager::setup()
 	////memory mode
 	//load_AllKit_ToMemory();
 
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::windowResized(int w, int h)
+{
+	ofLogNotice("ofxPresetsManager") << "windowResized: " << w << "," << h;
+
+	//#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+	//	guiSize = glm::vec2(250, 0);//width/height
+	//	guiPos = glm::vec2(w - guiSize.get().x - 10, 10);
+	//#endif
 }
 
 //--------------------------------------------------------------
@@ -331,65 +378,74 @@ void ofxPresetsManager::update(ofEventArgs & args)
 //---------------------------------------------------------------------
 void ofxPresetsManager::draw(ofEventArgs & args)
 {
+	//--
 
 #ifdef INCLUDE_DEBUG_ERRORS
 	//debug errors
 	errorsDEBUG.draw();
 #endif
 
-	//-
+	//--
 
-	//TODO
+	//internal ofxGui panel
+	if (SHOW_Gui_Internal)
+	{
+		guiControl.draw();
+	}
 
-	////Gui
-	//bMouseOver_Changed = false;
-	//bool gui_MouseOver_PRE = gui_MouseOver;
-	//gui_MouseOver = false;
-	//
-	////TODO
-	//gui_Visible = true;
-	//
-	//if (gui_Visible)
-	//{
-	//   gui_MouseOver = gui_draw();
-	//   //ofLogNotice("ofxPresetsManager") << "gui_MouseOver:" << (gui_MouseOver?"IN":"OUT");
-	//}
-	//if (gui_MouseOver)
-	//{
-	//
-	//}
-	//else
-	//{
-	//
-	//}
-	//
-	////TODO
-	//if (gui_MouseOver != gui_MouseOver_PRE)
-	//{
-	//   bMouseOver_Changed = true;
-	//}
+	//--
 
-	////debug
-	//if (bMouseOver_Changed)
-	//{
-	//   if (gui_MouseOver)
-	//   {
-	//       ofLogNotice("ofxPresetsManager") << "MOUSE OVER GUI";
-	//   }
-	//   else
-	//   {
-	//       ofLogNotice("ofxPresetsManager") << "MOUSE OUT OF GUI";
-	//   }
-	//}
-
-	//-
-
+	//user clicker boxes preset selector (from live kit/favorites)
 	if (SHOW_ClickPanel)
 	{
 		draw_CLICKER();
 	}
 
-	//-
+	//----
+
+	//browser
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+
+	bMouseOver_Changed = false;
+	bool bImGui_mouseOver_PRE = bImGui_mouseOver;
+	bImGui_mouseOver = false;
+	SHOW_ImGui = true;
+
+	//draw ImGui
+	if (SHOW_ImGui)
+	{
+		bImGui_mouseOver = gui_draw_ImGui();
+	}
+
+	//mouse over checker
+	if (bImGui_mouseOver)
+	{
+	}
+	else
+	{
+	}
+
+	if (bImGui_mouseOver != bImGui_mouseOver_PRE)
+	{
+		bMouseOver_Changed = true;
+	}
+
+	//debug
+	if (bMouseOver_Changed)
+	{
+		ofLogVerbose("ofxPresetsManager") << "mouse over ImGui: " << (bImGui_mouseOver ? "IN" : "OUT");
+		//if (bImGui_mouseOver)
+		//{
+		//	ofLogVerbose("ofxPresetsManager") << "mouse over gui";
+		//}
+		//else
+		//{
+		//	ofLogVerbose("ofxPresetsManager") << "mouse out of gui";
+		//}
+	}
+#endif
+
+	//--
 
 	//TODO
 	////groupDebug
@@ -401,15 +457,6 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	//       groupDebug(g);
 	//   }
 	//}
-
-	//-
-
-	if (SHOW_Gui_Internal)
-	{
-		guiControl.draw();
-	}
-
-	//--
 }
 
 
@@ -1038,13 +1085,14 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		}
 
 		//TODO: controlled from outside
-		////hide/show control gui
-		//if (key == 'G')
-		//{
-		//	SHOW_Gui_Internal = !SHOW_Gui_Internal;
-		//	//bool b = get_GUI_Internal_Visible();
-		//	//set_GUI_Internal_Visible(!b);
-		//}
+		//hide/show control gui
+		if (key == 'g')
+		{
+			SHOW_Gui_Internal = !SHOW_Gui_Internal;
+			//bool b = get_GUI_Internal_Visible();
+			//set_GUI_Internal_Visible(!b);
+		}
+
 		//if (key == 'g')
 		//{
 		//	set_CLICKER_Visible(!is_CLICKER_Visible());
@@ -1087,17 +1135,6 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 							<< k << "][" << i << "]";
 
 						PRESET_selected = 1 + k;
-
-						//if (bDelayedLoading)
-						//{
-						//   //newIndices[i] = k;
-						//   //ofLogNotice("ofxPresetsManager") << "newIndices[i] = k;" <<  k << ", " << i;
-						//   //PRESET_selected = 1 + k;
-						//}
-						//else
-						//{
-						//PRESET_selected = 1 + k;//first row/gui only
-						//}*/
 					}
 					return;
 				}
@@ -1219,41 +1256,6 @@ void ofxPresetsManager::doSave(int pIndex)
 	//only 1 row (gui) / data content
 }
 
-////--------------------------------------------------------------
-//void ofxPresetsManager::gui_loadFromFile(const std::string &filename, ofAbstractParameter &parameter)
-//{
-//   ofXml xml;
-//   xml.load(filename);
-//   ofDeserialize(xml, parameter);
-//}
-//
-////--------------------------------------------------------------
-//void ofxPresetsManager::gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter)
-//{
-//   ofXml xml;
-//   ofSerialize(xml, parameter);
-//   xml.save(filename);
-//}
-//
-////--------------------------------------------------------------
-//void ofxPresetsManager::gui_SaveAsSettings()
-//{
-//
-//}
-//
-////--------------------------------------------------------------
-//static void ShowHelpMarker(const char *desc)
-//{
-//	ImGui::TextDisabled("(?)");
-//	if (ImGui::IsItemHovered())
-//	{
-//		ImGui::BeginTooltip();
-//		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-//		ImGui::TextUnformatted(desc);
-//		ImGui::PopTextWrapPos();
-//		ImGui::EndTooltip();
-//	}
-//}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::preset_save(string name)//without xml extension
@@ -1584,6 +1586,11 @@ void ofxPresetsManager::save_ControlSettings()
 
 	//---
 
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+	guiSize = glm::vec2(250, 0);//width/height
+	guiPos = glm::vec2(w - guiSize.get().x - 10, 10);
+#endif
+
 	////TODO: crashes?
 
 	//TODO:
@@ -1662,543 +1669,6 @@ void ofxPresetsManager::set_Path_GlobalFolder(string folder)
 {
 	path_GLOBAL_Folder = folder;
 }
-
-//--
-
-#pragma mark - BROWSER_GUI
-
-////* browser
-////--------------------------------------------------------------
-//bool ofxPresetsManager::gui_draw()
-//{
-//	static bool SHOW_About = false;
-//	static bool SHOW_Gui_Internal = true;
-//
-//	auto mainSettings = ofxImGui::Settings();
-//	mainSettings.windowPos = guiPos;
-//	mainSettings.windowSize = guiSize;
-//
-//	gui.begin();
-//	{
-//		if (SHOW_Gui_Internal)
-//		{
-//			if (ofxImGui::BeginWindow("PRESET MANAGER", mainSettings, false))
-//				//if (ofxImGui::BeginWindow("PRESET MANAGER", mainSettings,
-//				//   ImGuiWindowFlags_NoCollapse |
-//				//   ImGuiWindowFlags_AlwaysAutoResize))
-//			{
-//				ImGui::PushItemWidth(100);
-//
-//				ofxImGui::AddParameter(ENABLE_Keys);
-//
-//				//1. files browser
-//				gui_imGui_PresetManager();
-//
-//				ImGui::Separator();
-//
-//				//-
-//
-//				//2.1 live presets
-//				ofxImGui::AddGroup(this->params_Favorites, mainSettings);
-//
-//				//2.2 advanced
-//				if (ImGui::CollapsingHeader("ADVANCED"))
-//				{
-//					ofxImGui::AddGroup(this->params_Options, mainSettings);
-//					ofxImGui::AddGroup(this->params_Gui, mainSettings);
-//					ofxImGui::AddGroup(this->params_Tools, mainSettings);
-//				}
-//
-//				ImGui::Separator();
-//
-//				ImGui::PopItemWidth();
-//				ofxImGui::EndWindow(mainSettings);
-//			}
-//		}
-//
-//		//-
-//
-//		if (SHOW_menu)
-//		{
-//			if (ImGui::BeginMainMenuBar())
-//			{
-//				if (ImGui::BeginMenu("File"))
-//				{
-//					gui_draw_MenuFile();
-//					ImGui::EndMenu();
-//				}
-//				if (ImGui::BeginMenu("Help"))
-//				{
-//					ImGui::MenuItem("About ofxPresetsManager", NULL, &SHOW_About);
-//					ImGui::EndMenu();
-//				}
-//				ImGui::EndMainMenuBar();
-//			}
-//		}
-//
-//		if (SHOW_About)
-//		{
-//			ImGui::Begin("About ofxPresetsManager", &SHOW_About,
-//				ImGuiWindowFlags_NoCollapse |
-//				ImGuiWindowFlags_AlwaysAutoResize);
-//			ImGui::Text("ofParameterGroup presets presetsManager");
-//			ImGui::Separator();
-//			ImGui::Text("by MoebiusSurfing.");
-//			ImGui::End();
-//		}
-//	}
-//
-//	gui.end();
-//	return mainSettings.mouseOverGui;
-//}
-//
-////--------------------------------------------------------------
-//void ofxPresetsManager::gui_draw_MenuBar()
-//{
-//	if (ImGui::BeginMainMenuBar())
-//	{
-//		if (ImGui::BeginMenu("File"))
-//		{
-//			gui_draw_MenuFile();
-//			ImGui::EndMenu();
-//		}
-//		ImGui::EndMainMenuBar();
-//	}
-//}
-//
-////--------------------------------------------------------------
-//void ofxPresetsManager::gui_draw_MenuFile()
-//{
-//	if (ImGui::MenuItem("New"))
-//	{
-//	}
-//	if (ImGui::MenuItem("Open", "l"))
-//	{
-//		//gui_loadFromFile("settings.xml", params_Control);
-//	}
-//	if (ImGui::MenuItem("Save", "s"))
-//	{
-//		//gui_saveToFile("settings.xml", params_Control);
-//	}
-//	if (ImGui::MenuItem("Save As.."))
-//	{
-//		//gui_SaveAsSettings();
-//	}
-//	ImGui::Separator();
-//	ImGui::Separator();
-//	if (ImGui::MenuItem("Quit", "ESQ"))
-//	{
-//	}
-//}
-
-////TODO: debug
-////--------------------------------------------------------------
-//void ofxPresetsManager::groupDebug(ofParameterGroup &group)
-//{
-//	string str;
-//	int x = 200;
-//	int y = 100;
-//	int pad = 20;
-//	int i = 0;
-//	int ig = 0;
-//
-//	for (auto parameter : group)
-//	{
-//		//Group.
-//		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
-//		if (parameterGroup)
-//		{
-//			//Recurse through contents.
-//			//ofxImGui::AddGroup(*parameterGroup, settings);
-//			groupDebug(*parameterGroup);
-//
-//			ig++;
-//			str = "group : [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x + ig * 300, y + pad * i++);
-//			continue;
-//		}
-//
-//		//Parameter, try everything we know how to handle.
-//#if OF_VERSION_MINOR >= 10
-//		auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
-//		if (parameterVec2f)
-//		{
-//			//ofxImGui::AddParameter(*parameterVec2f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
-//		if (parameterVec3f)
-//		{
-//			//ofxImGui::AddParameter(*parameterVec3f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
-//		if (parameterVec4f)
-//		{
-//			//ofxImGui::AddParameter(*parameterVec4f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//#endif
-//		auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
-//		if (parameterOfVec2f)
-//		{
-//			//ofxImGui::AddParameter(*parameterOfVec2f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
-//		if (parameterOfVec3f)
-//		{
-//			//ofxImGui::AddParameter(*parameterOfVec3f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
-//		if (parameterOfVec4f)
-//		{
-//			//ofxImGui::AddParameter(*parameterOfVec4f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
-//		if (parameterFloatColor)
-//		{
-//			//ofxImGui::AddParameter(*parameterFloatColor);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
-//		if (parameterFloat)
-//		{
-//			//ofxImGui::AddParameter(*parameterFloat);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
-//		if (parameterInt)
-//		{
-//			//ofxImGui::AddParameter(*parameterInt);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
-//		if (parameterBool)
-//		{
-//			//ofxImGui::AddParameter(*parameterBool);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//
-//		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
-//	}
-//}
-//
-////--------------------------------------------------------------
-//void ofxPresetsManager::gui_imGui_PresetManager()
-//{
-//	auto mainSettings = ofxImGui::Settings();
-//
-//	//if (ofxImGui::BeginWindow("PRESET MANAGER", mainSettings, false))
-//	//{
-//	if (ofxImGui::BeginTree("BROWSER", mainSettings))
-//	{
-//		//-
-//
-//		ImGui::Text("NAME:");
-//		string textInput_temp = PRESET_name;
-//
-//		//loaded string into char array
-//		char tab2[32];
-//		strncpy(tab2, textInput_temp.c_str(), sizeof(tab2));
-//		tab2[sizeof(tab2) - 1] = 0;
-//
-//		if (ImGui::InputText("", tab2, IM_ARRAYSIZE(tab2)))
-//		{
-//			ofLogNotice("ofxPresetsManager") << "InputText:" << ofToString(tab2) << endl;
-//
-//			textInput_temp = ofToString(tab2);
-//			ofLogNotice("ofxPresetsManager") << "textInput_temp:" << textInput_temp << endl;
-//
-//			if (MODE_newPreset)
-//				MODE_newPreset = false;
-//		}
-//
-//		//--
-//
-//		//arrow buttons
-//		static int counter = currentFile;
-//		float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
-//
-//		ImGui::PushButtonRepeat(true);
-//
-//		//prev
-//		if (ImGui::ArrowButton("##left", ImGuiDir_Left))
-//		{
-//			if (counter > 0)
-//			{
-//				counter--;
-//				currentFile = counter;
-//				if (currentFile < files.size())
-//				{
-//					PRESET_name = fileNames[currentFile];
-//					ofLogNotice() << "ARROW: PRESET_name: [" + ofToString(currentFile) + "] " << PRESET_name;
-//					preset_load(PRESET_name);
-//				}
-//
-//				if (MODE_newPreset)
-//					MODE_newPreset = false;
-//			}
-//		}
-//
-//		//next
-//		ImGui::SameLine(0.0f, spacing);
-//		if (ImGui::ArrowButton("##right", ImGuiDir_Right))
-//		{
-//			if (counter < files.size() - 1)
-//			{
-//				counter++;
-//				currentFile = counter;
-//				if (currentFile < files.size())
-//				{
-//					PRESET_name = fileNames[currentFile];
-//					ofLogNotice() << "ARROW: PRESET_name: [" + ofToString(currentFile) + "] " << PRESET_name;
-//					preset_load(PRESET_name);
-//				}
-//			}
-//
-//			if (MODE_newPreset)
-//				MODE_newPreset = false;
-//		}
-//
-//		ImGui::PopButtonRepeat();
-//
-//		//preview current preset number to total
-//		int numPalettes = fileNames.size() - 1;
-//		ImGui::SameLine();
-//		ImGui::Text("%d/%d", currentFile, numPalettes);
-//
-//		//-
-//
-//		//scrollable list
-//		if (!fileNames.empty())
-//		{
-//			int currentFileIndex = currentFile;
-//			if (ofxImGui::VectorCombo(" ", &currentFileIndex, fileNames))
-//			{
-//				ofLog() << "currentFileIndex: " << ofToString(currentFileIndex);
-//				if (currentFileIndex < fileNames.size())
-//				{
-//					currentFile = currentFileIndex;
-//					PRESET_name = fileNames[currentFile];
-//					ofLog() << "PRESET_name: " << PRESET_name;
-//					preset_load(PRESET_name);
-//				}
-//
-//				if (MODE_newPreset)
-//					MODE_newPreset = false;
-//			}
-//		}
-//
-//		//-
-//
-//		//2. presets
-//
-//		ImGui::Text("PRESETS");
-//
-//		if (ImGui::Button("SAVE"))
-//		{
-//			ofLogNotice("ofxPresetsManager") << "SAVE" << endl;
-//
-//			//TODO
-//			//should re load by same name and get what position on vector
-//			//is to reload current preset number
-//			//           textInput_temp = ofToString(tab2);
-//			//           ofLogNotice("ofxPresetsManager") << "textInput_temp:" << textInput_temp << endl;
-//
-//			PRESET_name = textInput_temp;
-//			ofLogNotice("ofxPresetsManager") << "PRESET_name: " << PRESET_name << endl;
-//
-//			preset_save(PRESET_name);
-//			preset_filesRefresh();
-//		}
-//
-//		ImGui::SameLine();
-//		if (ImGui::Button("UPDATE"))
-//		{
-//			ofLogNotice("ofxPresetsManager") << "UPDATE" << endl;
-//
-//			PRESET_name = textInput_temp;
-//			ofLogNotice("ofxPresetsManager") << "PRESET_name: " << PRESET_name << endl;
-//
-//			//delete old file
-//			files[currentFile].remove();
-//			//preset_filesRefresh();
-//
-//			//save new one
-//			preset_save(PRESET_name);
-//			preset_filesRefresh();
-//		}
-//
-//		ImGui::SameLine();
-//		if (ImGui::Button("LOAD"))//not required..
-//		{
-//			ofLogNotice("ofxPresetsManager") << "LOAD" << endl;
-//			ofLogNotice("ofxPresetsManager") << "PRESET_name: " << PRESET_name << endl;
-//			preset_load(PRESET_name);
-//		}
-//
-//		ImGui::SameLine();
-//		if (ImGui::Button("DELETE"))//current preset
-//		{
-//			ofLogNotice("ofxPresetsManager") << "DELETE" << endl;
-//
-//			files[currentFile].remove();
-//			preset_filesRefresh();
-//
-//			//string str = fileNames[currentFile];
-//			//ofLogNotice("ofxPresetsManager") << "DELETE:"<<str<<endl;
-//			//dir.listDir("user_kits/presets");
-//			//dir.allowExt("jpg");
-//			//dir.allowExt("png");
-//			//dir.sort();
-//		}
-//
-//		//ImGui::SameLine();
-//		//if (ImGui::Button("REFRESH"))//current preset
-//		//{
-//		//   ofLogNotice("ofxPresetsManager") << "REFRESH" << endl;
-//		//   preset_filesRefresh();
-//		//}
-//
-//		//-
-//
-//		//TODO
-//		MODE_newPreset = true;
-//		if (MODE_newPreset)
-//		{
-//			ImGui::Separator();
-//			ImGui::Text("NEW PRESET!");
-//
-//			//loaded string into char array
-//			char tab[32];
-//			strncpy(tab, textInput_New.c_str(), sizeof(tab));
-//			tab[sizeof(tab) - 1] = 0;
-//
-//			if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
-//			{
-//				ofLogNotice("ofxPresetsManager") << "InputText [tab]:" << ofToString(tab) << endl;
-//				textInput_New = ofToString(tab);
-//				ofLogNotice("ofxPresetsManager") << "textInput_New:" << textInput_New << endl;
-//			}
-//
-//			//WORKFLOW: when it's editing a new preset..
-//
-//			ImGui::PushID(1);
-//			int n = 30;
-//			float a = ofMap(ofGetFrameNum() % n, 0, n, 0.0f, 1.0f);
-//			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
-//
-//			if (ImGui::Button("SAVE NEW"))
-//			{
-//				MODE_newPreset = false;
-//				ofLogNotice("ofxPresetsManager") << "textInput_New: " << textInput_New << endl;
-//				preset_save(textInput_New);
-//				preset_filesRefresh();
-//			}
-//
-//			ImGui::PopStyleColor(1);
-//			ImGui::PopID();
-//		}
-//
-//		//-
-//
-//		ofxImGui::EndTree(mainSettings);
-//	}
-//	//ofxImGui::EndWindow(mainSettings);
-//}
-//
-////--------------------------------------------------------------
-//void ofxPresetsManager::gui_imGui_theme()
-//{
-//	//must be done after setup the gui
-//
-//	ImGuiStyle *style = &ImGui::GetStyle();
-//
-//	//my dark theme
-//	//   ImVec4* colors = ImGui::GetStyle().Colors;
-//	style->Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-//	style->Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-//	style->Colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
-//	style->Colors[ImGuiCol_ChildBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.00f);
-//	style->Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
-//	style->Colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.50f);
-//	style->Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-//	style->Colors[ImGuiCol_FrameBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.54f);
-//	style->Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.26f, 0.26f, 0.26f, 0.68f);
-//	style->Colors[ImGuiCol_FrameBgActive] = ImVec4(0.25f, 0.25f, 0.25f, 0.67f);
-//	style->Colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
-//	style->Colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-//	style->Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
-//	style->Colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-//	style->Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
-//	style->Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.11f, 0.11f, 1.00f);
-//	style->Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
-//	style->Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
-//	style->Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-//	style->Colors[ImGuiCol_SliderGrab] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
-//	style->Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.74f, 0.75f, 0.77f, 0.79f);
-//	style->Colors[ImGuiCol_Button] = ImVec4(0.28f, 0.28f, 0.28f, 1.00f);
-//	style->Colors[ImGuiCol_ButtonHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.79f);
-//	style->Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.00f, 0.00f, 0.70f);
-//	style->Colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.31f);
-//	style->Colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-//	style->Colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.26f, 0.26f, 1.00f);
-//	style->Colors[ImGuiCol_Separator] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
-//	style->Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.29f, 0.29f, 0.29f, 0.78f);
-//	style->Colors[ImGuiCol_SeparatorActive] = ImVec4(0.37f, 0.37f, 0.37f, 1.00f);
-//	style->Colors[ImGuiCol_ResizeGrip] = ImVec4(0.44f, 0.44f, 0.44f, 0.25f);
-//	style->Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.68f, 0.68f, 0.68f, 0.67f);
-//	style->Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.68f, 0.68f, 0.68f, 0.95f);
-//	style->Colors[ImGuiCol_PlotLines] = ImVec4(0.81f, 0.79f, 0.79f, 1.00f);
-//	style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.58f, 0.58f, 0.58f, 1.00f);
-//	style->Colors[ImGuiCol_PlotHistogram] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-//	style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-//	style->Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.35f);
-//	style->Colors[ImGuiCol_DragDropTarget] = ImVec4(0.50f, 0.50f, 0.50f, 0.90f);
-//	style->Colors[ImGuiCol_NavHighlight] = ImVec4(0.79f, 0.79f, 0.79f, 1.00f);
-//	style->Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
-//	style->Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-//	style->Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
-//
-//	//   //2. defaut dark theme exported
-//	//   style->WindowMinSize = ImVec2(160, 65);
-//	//   style->FramePadding = ImVec2(4, 2);
-//	//   style->ItemSpacing = ImVec2(6, 2);
-//	//   style->ItemInnerSpacing = ImVec2(6, 4);
-//	//   style->Alpha = 1.0f;
-//	//   style->WindowRounding = 0.0f;
-//	//   style->FrameRounding = 0.0f;
-//	//   style->IndentSpacing = 6.0f;
-//	//   style->ItemInnerSpacing = ImVec2(2, 4);
-//	//   style->ColumnsMinSpacing = 50.0f;
-//	//   style->GrabMinSize = 14.0f;
-//	//   style->GrabRounding = 0.0f;
-//	//   style->ScrollbarSize = 12.0f;
-//	//   style->ScrollbarRounding = 0.0f;
-//}
 
 //--
 
@@ -2360,3 +1830,609 @@ void ofxPresetsManager::exit()
 	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
 	ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
 }
+
+
+
+//--
+
+#pragma mark - BROWSER_GUI
+
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+
+//* browser
+//--------------------------------------------------------------
+bool ofxPresetsManager::gui_draw_ImGui()
+{
+	static bool SHOW_About = false;
+	static bool SHOW_Gui_Internal = true;
+
+	auto mainSettings = ofxImGui::Settings();
+	mainSettings.windowPos = guiPos;
+	mainSettings.windowSize = guiSize;
+
+	gui.begin();
+	{
+		if (SHOW_Gui_Internal)
+		{
+			if (ofxImGui::BeginWindow("PRESET MANAGER", mainSettings, false))
+				//if (ofxImGui::BeginWindow("PRESET MANAGER", mainSettings,
+				//   ImGuiWindowFlags_NoCollapse |
+				//   ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				ImGui::PushItemWidth(100);
+				{
+					//ofxImGui::AddParameter(ENABLE_Keys);
+
+					//1. files browser
+					gui_draw_ImGui_Browser();
+
+					//-
+
+					//ImGui::Separator();
+
+					//-
+
+					////this params are already into ofxGui panel
+					////(duplicated if both guis are enabled)
+
+					////2.1 live presets (aka favorites)
+					//ofxImGui::AddGroup(this->params_Favorites, mainSettings);
+
+					////2.2 advanced
+					//if (ImGui::CollapsingHeader("ADVANCED"))
+					//{
+					//	ofxImGui::AddGroup(this->params_Options, mainSettings);
+					//	ofxImGui::AddGroup(this->params_Gui, mainSettings);
+					//	ofxImGui::AddGroup(this->params_Tools, mainSettings);
+					//}
+
+					//-
+
+					//ImGui::Separator();
+				}
+				ImGui::PopItemWidth();
+				ofxImGui::EndWindow(mainSettings);
+			}
+		}
+
+		//-
+
+		////top menu
+		//if (SHOW_MenuTopBar)
+		//{
+		//	if (ImGui::BeginMainMenuBar())
+		//	{
+		//		if (ImGui::BeginMenu("File"))
+		//		{
+		//			gui_draw_ImGui_MenuFile();
+		//			ImGui::EndMenu();
+		//		}
+		//		if (ImGui::BeginMenu("Help"))
+		//		{
+		//			ImGui::MenuItem("About ofxPresetsManager", NULL, &SHOW_About);
+		//			ImGui::EndMenu();
+		//		}
+		//		ImGui::EndMainMenuBar();
+		//	}
+		//}
+
+		//-
+
+		////about window
+		//if (SHOW_About)
+		//{
+		//	ImGui::Begin("About ofxPresetsManager", &SHOW_About,
+		//		ImGuiWindowFlags_NoCollapse |
+		//		ImGuiWindowFlags_AlwaysAutoResize);
+		//	ImGui::Text("ofParameterGroup presets presetsManager");
+		//	ImGui::Separator();
+		//	ImGui::Text("by MoebiusSurfing.");
+		//	ImGui::End();
+		//}
+	}
+
+	gui.end();
+	return mainSettings.mouseOverGui;
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::gui_draw_ImGui_MenuBar()
+{
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			gui_draw_ImGui_MenuFile();
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::gui_draw_ImGui_MenuFile()
+{
+	if (ImGui::MenuItem("New"))
+	{
+	}
+	if (ImGui::MenuItem("Open", "l"))
+	{
+		//gui_loadFromFile("settings.xml", params_Control);
+	}
+	if (ImGui::MenuItem("Save", "s"))
+	{
+		//gui_saveToFile("settings.xml", params_Control);
+	}
+	if (ImGui::MenuItem("Save As.."))
+	{
+		//gui_SaveAsSettings();
+	}
+	ImGui::Separator();
+	ImGui::Separator();
+	if (ImGui::MenuItem("Quit", "ESQ"))
+	{
+	}
+}
+
+//TODO: 
+//DEBUG:
+//--------------------------------------------------------------
+void ofxPresetsManager::groupDebug(ofParameterGroup &group)
+{
+	string str;
+	int x = 200;
+	int y = 100;
+	int pad = 20;
+	int i = 0;
+	int ig = 0;
+
+	for (auto parameter : group)
+	{
+		//Group.
+		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
+		if (parameterGroup)
+		{
+			//Recurse through contents.
+			//ofxImGui::AddGroup(*parameterGroup, settings);
+			groupDebug(*parameterGroup);
+
+			ig++;
+			str = "group : [" + ofToString(i) + "] " + ofToString(parameter->getName());
+			ofDrawBitmapStringHighlight(str, x + ig * 300, y + pad * i++);
+			continue;
+		}
+
+		//Parameter, try everything we know how to handle.
+#if OF_VERSION_MINOR >= 10
+		auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
+		if (parameterVec2f)
+		{
+			//ofxImGui::AddParameter(*parameterVec2f);
+			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+			continue;
+		}
+		auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
+		if (parameterVec3f)
+		{
+			//ofxImGui::AddParameter(*parameterVec3f);
+			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+			continue;
+		}
+		auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
+		if (parameterVec4f)
+		{
+			//ofxImGui::AddParameter(*parameterVec4f);
+			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+			continue;
+		}
+#endif
+		auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
+		if (parameterOfVec2f)
+		{
+			//ofxImGui::AddParameter(*parameterOfVec2f);
+			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+			continue;
+		}
+		auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
+		if (parameterOfVec3f)
+		{
+			//ofxImGui::AddParameter(*parameterOfVec3f);
+			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+			continue;
+		}
+		auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
+		if (parameterOfVec4f)
+		{
+			//ofxImGui::AddParameter(*parameterOfVec4f);
+			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+			continue;
+		}
+		auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
+		if (parameterFloatColor)
+		{
+			//ofxImGui::AddParameter(*parameterFloatColor);
+			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+			continue;
+		}
+		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
+		if (parameterFloat)
+		{
+			//ofxImGui::AddParameter(*parameterFloat);
+			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+			continue;
+		}
+		auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
+		if (parameterInt)
+		{
+			//ofxImGui::AddParameter(*parameterInt);
+			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+			continue;
+		}
+		auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
+		if (parameterBool)
+		{
+			//ofxImGui::AddParameter(*parameterBool);
+			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+			continue;
+		}
+
+		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
+	}
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::gui_draw_ImGui_Browser()
+{
+	auto mainSettings = ofxImGui::Settings();
+
+	//if (ofxImGui::BeginWindow("PRESET MANAGER", mainSettings, false))
+	//{
+	if (ofxImGui::BeginTree("BROWSER", mainSettings))
+	{
+		//-
+
+		ImGui::Text("NAME:");
+		string textInput_temp = PRESET_name;
+
+		//loaded string into char array
+		char tab2[32];
+		strncpy(tab2, textInput_temp.c_str(), sizeof(tab2));
+		tab2[sizeof(tab2) - 1] = 0;
+
+		if (ImGui::InputText("", tab2, IM_ARRAYSIZE(tab2)))
+		{
+			ofLogNotice("ofxPresetsManager") << "InputText:" << ofToString(tab2) << endl;
+
+			textInput_temp = ofToString(tab2);
+			ofLogNotice("ofxPresetsManager") << "textInput_temp:" << textInput_temp << endl;
+
+			if (MODE_newPreset)
+				MODE_newPreset = false;
+		}
+
+		//--
+
+		//arrow buttons
+		static int counter = currentFile;
+		float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+
+		ImGui::PushButtonRepeat(true);
+
+		//prev
+		if (ImGui::ArrowButton("##left", ImGuiDir_Left))
+		{
+			if (counter > 0)
+			{
+				counter--;
+				currentFile = counter;
+				if (currentFile < files.size())
+				{
+					PRESET_name = fileNames[currentFile];
+					ofLogNotice() << "ARROW: PRESET_name: [" + ofToString(currentFile) + "] " << PRESET_name;
+					preset_load(PRESET_name);
+				}
+
+				if (MODE_newPreset)
+					MODE_newPreset = false;
+			}
+		}
+
+		//next
+		ImGui::SameLine(0.0f, spacing);
+		if (ImGui::ArrowButton("##right", ImGuiDir_Right))
+		{
+			if (counter < files.size() - 1)
+			{
+				counter++;
+				currentFile = counter;
+				if (currentFile < files.size())
+				{
+					PRESET_name = fileNames[currentFile];
+					ofLogNotice() << "ARROW: PRESET_name: [" + ofToString(currentFile) + "] " << PRESET_name;
+					preset_load(PRESET_name);
+				}
+			}
+
+			if (MODE_newPreset)
+				MODE_newPreset = false;
+		}
+
+		ImGui::PopButtonRepeat();
+
+		//preview current preset number to total
+		int numPalettes = fileNames.size() - 1;
+		ImGui::SameLine();
+		ImGui::Text("%d/%d", currentFile, numPalettes);
+
+		//-
+
+		//scrollable list
+		if (!fileNames.empty())
+		{
+			int currentFileIndex = currentFile;
+			if (ofxImGui::VectorCombo(" ", &currentFileIndex, fileNames))
+			{
+				ofLog() << "currentFileIndex: " << ofToString(currentFileIndex);
+				if (currentFileIndex < fileNames.size())
+				{
+					currentFile = currentFileIndex;
+					PRESET_name = fileNames[currentFile];
+					ofLog() << "PRESET_name: " << PRESET_name;
+					preset_load(PRESET_name);
+				}
+
+				if (MODE_newPreset)
+					MODE_newPreset = false;
+			}
+		}
+
+		//-
+
+		//2. presets
+
+		ImGui::Text("PRESETS");
+
+		if (ImGui::Button("SAVE"))
+		{
+			ofLogNotice("ofxPresetsManager") << "SAVE" << endl;
+
+			//TODO
+			//should re load by same name and get what position on vector
+			//is to reload current preset number
+			//           textInput_temp = ofToString(tab2);
+			//           ofLogNotice("ofxPresetsManager") << "textInput_temp:" << textInput_temp << endl;
+
+			PRESET_name = textInput_temp;
+			ofLogNotice("ofxPresetsManager") << "PRESET_name: " << PRESET_name << endl;
+
+			preset_save(PRESET_name);
+			preset_filesRefresh();
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("UPDATE"))
+		{
+			ofLogNotice("ofxPresetsManager") << "UPDATE" << endl;
+
+			PRESET_name = textInput_temp;
+			ofLogNotice("ofxPresetsManager") << "PRESET_name: " << PRESET_name << endl;
+
+			//delete old file
+			files[currentFile].remove();
+			//preset_filesRefresh();
+
+			//save new one
+			preset_save(PRESET_name);
+			preset_filesRefresh();
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("LOAD"))//not required..
+		{
+			ofLogNotice("ofxPresetsManager") << "LOAD" << endl;
+			ofLogNotice("ofxPresetsManager") << "PRESET_name: " << PRESET_name << endl;
+			preset_load(PRESET_name);
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("DELETE"))//current preset
+		{
+			ofLogNotice("ofxPresetsManager") << "DELETE" << endl;
+
+			files[currentFile].remove();
+			preset_filesRefresh();
+
+			//string str = fileNames[currentFile];
+			//ofLogNotice("ofxPresetsManager") << "DELETE:"<<str<<endl;
+			//dir.listDir("user_kits/presets");
+			//dir.allowExt("jpg");
+			//dir.allowExt("png");
+			//dir.sort();
+		}
+
+		//ImGui::SameLine();
+		//if (ImGui::Button("REFRESH"))//current preset
+		//{
+		//   ofLogNotice("ofxPresetsManager") << "REFRESH" << endl;
+		//   preset_filesRefresh();
+		//}
+
+		//-
+
+		//TODO
+		MODE_newPreset = true;
+		if (MODE_newPreset)
+		{
+			ImGui::Separator();
+			ImGui::Text("NEW PRESET!");
+
+			//loaded string into char array
+			char tab[32];
+			strncpy(tab, textInput_New.c_str(), sizeof(tab));
+			tab[sizeof(tab) - 1] = 0;
+
+			if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
+			{
+				ofLogNotice("ofxPresetsManager") << "InputText [tab]:" << ofToString(tab) << endl;
+				textInput_New = ofToString(tab);
+				ofLogNotice("ofxPresetsManager") << "textInput_New:" << textInput_New << endl;
+			}
+
+			//WORKFLOW: when it's editing a new preset..
+
+			ImGui::PushID(1);
+			int n = 30;
+			float a = ofMap(ofGetFrameNum() % n, 0, n, 0.0f, 1.0f);
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+
+			if (ImGui::Button("SAVE NEW"))
+			{
+				MODE_newPreset = false;
+				ofLogNotice("ofxPresetsManager") << "textInput_New: " << textInput_New << endl;
+				preset_save(textInput_New);
+				preset_filesRefresh();
+			}
+
+			ImGui::PopStyleColor(1);
+			ImGui::PopID();
+		}
+
+		//-
+
+		ofxImGui::EndTree(mainSettings);
+	}
+	//ofxImGui::EndWindow(mainSettings);
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::gui_ImGui_theme()
+{
+	//must be done after setup the gui
+
+	ImGuiStyle *style = &ImGui::GetStyle();
+
+	//my dark theme
+	//   ImVec4* colors = ImGui::GetStyle().Colors;
+	style->Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+	style->Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+	style->Colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
+	style->Colors[ImGuiCol_ChildBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.00f);
+	style->Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
+	style->Colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.50f);
+	style->Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+	style->Colors[ImGuiCol_FrameBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.54f);
+	style->Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.26f, 0.26f, 0.26f, 0.68f);
+	style->Colors[ImGuiCol_FrameBgActive] = ImVec4(0.25f, 0.25f, 0.25f, 0.67f);
+	style->Colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
+	style->Colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+	style->Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
+	style->Colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
+	style->Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
+	style->Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.11f, 0.11f, 1.00f);
+	style->Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
+	style->Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
+	style->Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+	style->Colors[ImGuiCol_SliderGrab] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+	style->Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.74f, 0.75f, 0.77f, 0.79f);
+	style->Colors[ImGuiCol_Button] = ImVec4(0.28f, 0.28f, 0.28f, 1.00f);
+	style->Colors[ImGuiCol_ButtonHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.79f);
+	style->Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.00f, 0.00f, 0.70f);
+	style->Colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.31f);
+	style->Colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+	style->Colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.26f, 0.26f, 1.00f);
+	style->Colors[ImGuiCol_Separator] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
+	style->Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.29f, 0.29f, 0.29f, 0.78f);
+	style->Colors[ImGuiCol_SeparatorActive] = ImVec4(0.37f, 0.37f, 0.37f, 1.00f);
+	style->Colors[ImGuiCol_ResizeGrip] = ImVec4(0.44f, 0.44f, 0.44f, 0.25f);
+	style->Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.68f, 0.68f, 0.68f, 0.67f);
+	style->Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.68f, 0.68f, 0.68f, 0.95f);
+	style->Colors[ImGuiCol_PlotLines] = ImVec4(0.81f, 0.79f, 0.79f, 1.00f);
+	style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.58f, 0.58f, 0.58f, 1.00f);
+	style->Colors[ImGuiCol_PlotHistogram] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+	style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+	style->Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.35f);
+	style->Colors[ImGuiCol_DragDropTarget] = ImVec4(0.50f, 0.50f, 0.50f, 0.90f);
+	style->Colors[ImGuiCol_NavHighlight] = ImVec4(0.79f, 0.79f, 0.79f, 1.00f);
+	style->Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+	style->Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+	style->Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+
+	//   //2. defaut dark theme exported
+	//   style->WindowMinSize = ImVec2(160, 65);
+	//   style->FramePadding = ImVec2(4, 2);
+	//   style->ItemSpacing = ImVec2(6, 2);
+	//   style->ItemInnerSpacing = ImVec2(6, 4);
+	//   style->Alpha = 1.0f;
+	//   style->WindowRounding = 0.0f;
+	//   style->FrameRounding = 0.0f;
+	//   style->IndentSpacing = 6.0f;
+	//   style->ItemInnerSpacing = ImVec2(2, 4);
+	//   style->ColumnsMinSpacing = 50.0f;
+	//   style->GrabMinSize = 14.0f;
+	//   style->GrabRounding = 0.0f;
+	//   style->ScrollbarSize = 12.0f;
+	//   style->ScrollbarRounding = 0.0f;
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::gui_loadFromFile(const std::string &filename, ofAbstractParameter &parameter)
+{
+	ofXml xml;
+	xml.load(filename);
+	ofDeserialize(xml, parameter);
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter)
+{
+	ofXml xml;
+	ofSerialize(xml, parameter);
+	xml.save(filename);
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::gui_SaveAsSettings()
+{
+
+}
+
+//--------------------------------------------------------------
+static void ShowHelpMarker(const char *desc)
+{
+	ImGui::TextDisabled("(?)");
+	if (ImGui::IsItemHovered())
+	{
+		ImGui::BeginTooltip();
+		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+		ImGui::TextUnformatted(desc);
+		ImGui::PopTextWrapPos();
+		ImGui::EndTooltip();
+	}
+}
+
+#endif
+
+
+//GIST:
+////NESTED GROUPS
+//for (auto parameter : paramsFull)
+//{
+//    //Group.
+//    auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
+//    if (parameterGroup)
+//    {
+//        //Recurse through contents.
+//        ofxImGui::AddGroup(*parameterGroup, mainSettings);
+//        continue;
+//    }
+//}
