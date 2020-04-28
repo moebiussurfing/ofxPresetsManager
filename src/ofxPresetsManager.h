@@ -491,7 +491,7 @@ public:
 	ofParameter<bool> bImGui_mouseOver;
 
 private:
-	void setup_Browser();
+	void browser_Setup();
 
 	ofxImGui::Gui gui_Browser;
 
@@ -501,28 +501,34 @@ private:
 	//bool bImGui_mouseOver;
 	bool bImGui_mouseOver_PRE;
 
-	bool gui_draw_ImGui();
-	bool gui_draw_ImGui_Browser();
-	void gui_draw_ImGui_MenuBar();
-	void gui_draw_ImGui_MenuFile();
+	bool browser_draw_ImGui();
+	bool browser_draw_ImGui_Browser();
+	void browser_draw_ImGui_MenuBar();
+	void browser_draw_ImGui_MenuFile();
 
-	void gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter);
-	void gui_loadFromFile(const std::string &filename, ofAbstractParameter &parameter);
-	void gui_SaveAsSettings();
+	//TODO:
+	//void gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter);
+	//void gui_loadFromFile(const std::string &filename, ofAbstractParameter &parameter);
+	//void gui_SaveAsSettings();
 
 	//layout
-	void gui_ImGui_theme();
+	void browser_ImGui_theme();
 	//ofxImGui::Settings mainSettings;
 	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. must move by gui!  
 	ofParameter<glm::vec2> ImGui_Size;//not used yet
 
-	//TODO: 
-	//DEBUG:
-	void groupDebug(ofParameterGroup &group);
+	////TODO: 
+	////DEBUG:
+	//void groupDebug(ofParameterGroup &group);
 
 	//-
 
 public:
+	bool getIsMouseOver()
+	{
+		return bImGui_mouseOver;
+	}
+
 	//bool isMouseOver_Changed()
 	//{
 	//	if (bMouseOver_Changed)
@@ -531,11 +537,6 @@ public:
 	//		return true;
 	//	}
 	//}
-
-	bool getIsMouseOver()
-	{
-		return bImGui_mouseOver;
-	}
 
 private:
 	bool bMouseOver_Changed = false;
