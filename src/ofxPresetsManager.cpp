@@ -50,13 +50,15 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//--
 
-	modeKey = OF_KEY_CONTROL;
 	bKeys = false;
 	keysNotActivated = true;
+	lastMouseButtonState = false;
+
+	modeKeySave = OF_KEY_CONTROL;
 	bKeySave = false;
 
-	lastMouseButtonState = false;
-	//bDelayedLoading = false;
+	modKeySwap = OF_KEY_ALT;
+	bKeySwap = false;
 
 	//--
 
@@ -142,7 +144,7 @@ ofxPresetsManager::ofxPresetsManager()
 	bCloneAll.setSerializable(false);
 	loadToMemory.setSerializable(false);
 	saveFromMemory.setSerializable(false);
-	SHOW_Gui_Internal.setSerializable(false);
+	//SHOW_Gui_Internal.setSerializable(false);
 
 	params_Tools.setSerializable(false);
 
@@ -337,11 +339,11 @@ void ofxPresetsManager::windowResized(int w, int h)
 {
 	ofLogNotice("ofxPresetsManager") << "windowResized: " << w << "," << h;
 
-	//use this bc save/load is not working
-#ifdef INCLUDE_FILE_BROWSER_IM_GUI
-	ImGui_Size = glm::vec2(250, 0);//width/height
-	ImGui_Position = glm::vec2(w - ImGui_Size.get().x - 10, 10);
-#endif
+	//	//use this bc save/load is not working
+	//#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+	//	ImGui_Size = glm::vec2(250, 0);//width/height
+	//	ImGui_Position = glm::vec2(w - ImGui_Size.get().x - 10, 10);
+	//#endif
 }
 
 //--------------------------------------------------------------
@@ -804,6 +806,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 {
 	ofLogVerbose("ofxPresetsManager") << "save(" << presetIndex << "," << guiIndex << ")";
 
+	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
 		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
@@ -814,9 +817,10 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 		//-
 
+		//MODE A: from hd file
+
 		if (!MODE_MemoryLive)
 		{
-			//MODE A: from hd file
 
 			TS_START("saveFile1");
 
@@ -827,9 +831,13 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 			TS_STOP("saveFile1");
 		}
+
+		//-
+
+		//MODE B: direct from memory
+
 		else
 		{
-			//MODE B: direct from memory
 
 			TS_START("saveMem1");
 
@@ -839,9 +847,6 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 			TS_STOP("saveMem1");
 		}
-
-		////it's important if this line is before or after ofSerialize
-		//DONE_save = true;
 	}
 	else
 	{
@@ -866,10 +871,10 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 
 		//-
 
+		//MODE A: from hd file
+
 		if (!MODE_MemoryLive)
 		{
-			//MODE A: from hd file
-
 			TS_START("saveFile2");//for TimeMeasurements only
 
 			std::string strPath = getPresetName(gName, presetIndex);
@@ -882,10 +887,13 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 
 			TS_STOP("saveFile2");//for TimeMeasurements only
 		}
+
+		//-
+
+		//MODE B: direct from memory
+
 		else
 		{
-			//MODE B: direct from memory
-
 			TS_START("saveMem2");//for TimeMeasurements only
 
 			//ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
@@ -911,6 +919,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	//guiIndex is not the preset position, it's for multiplye guis!
 	//its the target group, there's only one for all the 8 presets (in only-one-gui-mode)
 
+	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
 		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
@@ -1064,11 +1073,16 @@ int ofxPresetsManager::getGuiIndex(string name) const
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::setModeKey(int key)
+void ofxPresetsManager::setModeKeySave(int key)
 {
-	modeKey = key;
+	modeKeySave = key;
 }
 
+//--------------------------------------------------------------
+void ofxPresetsManager::setModeKeySwap(int key)
+{
+	modKeySwap = key;
+}
 
 #pragma mark - OF_LISTENERS
 
@@ -1083,17 +1097,31 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 	{
 		const int &key = eventArgs.key;
 
+		//-
+
 		//mode key for saving with mouse or trigger keys
-		if (key == modeKey)
+		if (key == modeKeySave)
 		{
 			bKeySave = true;
-			ofLogVerbose("ofxPresetsManager") << "modeKey TRUE" << endl;
+			ofLogVerbose("ofxPresetsManager") << "modeKeySave TRUE" << endl;
 			return;
 		}
 
-		//TODO: controlled from outside
+		//mode key for swap with mouse or trigger keys
+		else if (key == modKeySwap)
+		{
+			bKeySwap = true;
+			ofLogVerbose("ofxPresetsManager") << "modKeySwap TRUE" << endl;
+			return;
+		}
+
+
+		//-
+
+		//TODO: 
+		//controlled from outside
 		//hide/show control gui
-		if (key == 'g')
+		else if (key == 'g')
 		{
 			SHOW_Gui_Internal = !SHOW_Gui_Internal;
 			//bool b = get_GUI_Internal_Visible();
@@ -1105,6 +1133,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//	set_CLICKER_Visible(!is_CLICKER_Visible());
 		//}
 
+		//-
 
 		//navigate kit/favorites presets
 		if (key == OF_KEY_RIGHT && ENABLE_KeysArrowBrowse)
@@ -1197,10 +1226,16 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 //--------------------------------------------------------------
 void ofxPresetsManager::keyReleased(ofKeyEventArgs &eventArgs)
 {
-	if (eventArgs.key == modeKey && ENABLE_Keys)
+	//mod keys
+	if (eventArgs.key == modeKeySave && ENABLE_Keys)
 	{
 		bKeySave = false;
-		ofLogVerbose("ofxPresetsManager") << "modeKey FALSE" << endl;
+		ofLogVerbose("ofxPresetsManager") << "modeKeySave FALSE" << endl;
+	}
+	else if (eventArgs.key == modKeySwap && ENABLE_Keys)
+	{
+		bKeySwap = false;
+		ofLogVerbose("ofxPresetsManager") << "modKeySwap FALSE" << endl;
 	}
 }
 
@@ -1228,13 +1263,15 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 	int xIndex = x / clicker_cellSize;
 	int yIndex = y / clicker_cellSize;
+	//yIndex is for when we add more groups feature! (just one group for now)
 
+	//Index -1 for out of boxes
 	xIndex = (x > 0) ? xIndex : -1;
 	yIndex = (y > 0) ? yIndex : -1;
-	//-1 for out of boxes
 
-	//if (xIndex != -1 && yIndex != -1)
-	//	ofLogNotice("ofxPresetsManager") << "mousePressed: (" << xIndex << "," << yIndex << ")";
+	//debug mouse out
+	if (false && xIndex != -1 && yIndex != -1)
+		ofLogNotice("ofxPresetsManager") << "mousePressed: (" << xIndex << "," << yIndex << ")";
 
 	//-
 
@@ -1247,28 +1284,69 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 		//-
 
-		if (xIndex >= 0 && xIndex < presets[yIndex])
+		if (xIndex >= 0 && xIndex < presets[yIndex])//?
 		{
-			//save
+			//1. mod controlled by save modeKeySave
 			if (bKeySave)
 			{
+				//save "memory" to the clicked Index
 				doSave(xIndex);
-				//auto load
+
+				//will auto load
 				PRESET_selected = 1 + xIndex;
 			}
 
-			//load
+			//-
+
+			//2. mod controlled by modKeySwap
+			else if (bKeySwap)
+			{
+				int IndexSource = PRESET_selected - 1;
+				int IndexDest = xIndex;
+				string srcName = getPresetName(groups[0].getName(), IndexSource);
+				string dstName = getPresetName(groups[0].getName(), IndexDest);
+
+				//cout << "Source: " << IndexSource + 1 << endl;
+				//cout << "Dest  : " << xIndex + 1 << endl;
+				//cout << "Source: " << srcName << endl;
+				//cout << "Dest  : " << dstName << endl << endl;
+
+				//1. save source preset (from memory) to temp file
+				string _pathSrc = "tempSrc.xml";
+				ofXml settingsSrc;
+				ofSerialize(settingsSrc, groups[0]);
+				settingsSrc.save(_pathSrc);
+
+				//2. load destination "from kit" to memory
+				std::string _path2 = getPresetName(groups[0].getName(), IndexDest);
+				ofXml settings2;
+				settings2.load(_path2);
+				ofDeserialize(settings2, groups[0]);
+
+				//3. save destination preset (from memory) to temp file
+				ofXml settingsDst;
+				ofSerialize(settingsDst, groups[0]);
+
+				//4. using files
+				//save source (from dest)
+				settingsDst.save(srcName);
+				settingsSrc.save(dstName);
+
+				//5. delete temp file
+				ofFile _file;
+				_file.removeFile(_pathSrc);
+
+				//6. auto load source (the same preset was selected befor swap clicked!)
+				PRESET_selected = 1 + xIndex;
+			}
+
+			//-
+
+			//normal load (not any key modifier pressed)
 			else
 			{
-				//if (bDelayedLoading)
-				//{
-				//   //newIndices[yIndex] = xIndex;
-				//}
-				//else
-				//{
+				//will trig autoload callback on change, calling load(p, 0);
 				PRESET_selected = 1 + xIndex;
-				//   //load( xIndex, yIndex);
-				//}
 			}
 		}
 
@@ -1277,12 +1355,8 @@ void ofxPresetsManager::mousePressed(int x, int y)
 		{
 			ofLogNotice("ofxPresetsManager") << "saveButton: (" << yIndex << ")";
 
-			//ofLogNotice("ofxPresetsManager") << "saveButton: ("
-			//	<< lastIndices[yIndex]
-			//	<< ", " << yIndex << ")";
-
-			//save( lastIndices[yIndex], yIndex );
 			doSave(lastIndices[yIndex]);
+			//save( lastIndices[yIndex], yIndex );
 		}
 	}
 }
@@ -1514,10 +1588,10 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				}
 			}
 		}
-		else
-		{
-			ofLogError("ofxPresetsManager") << "IGNORED PRESETS CHANGE";
-		}
+		//else
+		//{
+		//	ofLogError("ofxPresetsManager") << "IGNORED PRESETS CHANGE";
+		//}
 	}
 }
 
@@ -1578,9 +1652,16 @@ void ofxPresetsManager::save_ControlSettings()
 	//---
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
-	//gui_Browser.~Gui -> how to get panel position?
-	//ImGui_Size = glm::vec2(250, 0);//width/height
-	//ImGui_Position = glm::vec2(w - ImGui_Size.get().x - 10, 10);
+////BUG: can't get gui settings...
+//	//gui_Browser.~Gui.get
+//	auto settings = ofxImGui::Settings();
+//	auto p = settings.windowPos;
+//	auto w = settings.windowSize;
+//	ImGui_Position = glm::vec2(p.x, p.y);
+////
+//	//cout << "pos:" << ofToString(p) << endl;
+//	//cout << "size:" << ofToString(w) << endl;
+//	//cout << "ImGui_Position:" << ofToString(ImGui_Position.get()) << endl;
 #endif
 
 	//---
@@ -1609,11 +1690,12 @@ void ofxPresetsManager::save_ControlSettings()
 	}
 	catch (int n)
 	{
-		ofLogNotice("ofxPresetsManager") << "CATCH ERROR" << endl;
+		ofLogError("ofxPresetsManager") << "CATCH ERROR" << endl;
 		throw;
 	}
 
 	//---
+	//NOTES:
 	/*
 	//TODO:
 	//BUG?
@@ -1846,20 +1928,23 @@ void ofxPresetsManager::exit()
 //--------------------------------------------------------------
 bool ofxPresetsManager::browser_draw_ImGui()
 {
-	SHOW_ImGui = true;//not useful..
+	//SHOW_ImGui = true;//not useful..
 	//SHOW_Browser = true;
 	//SHOW_MenuTopBar = false;
 	//bool SHOW_About = false;
 
 	//-
 
-	ofVec2f pos, size;
-	pos = ofVec2f(ImGui_Position.get().x, ImGui_Position.get().y);
-	size = ofVec2f(ImGui_Size.get().x, ImGui_Size.get().y);
+	//ofVec2f pos, size;
+	//pos = ofVec2f(ImGui_Position.get().x, ImGui_Position.get().y);
+	//size = ofVec2f(ImGui_Size.get().x, ImGui_Size.get().y);
 
 	auto mainSettings = ofxImGui::Settings();
-	mainSettings.windowPos = pos;
-	mainSettings.windowSize = size;
+	//mainSettings.windowPos = pos;
+	//mainSettings.windowSize = size;
+
+	//cout << "pos:" << ofToString(pos) << endl;
+	//cout << "size:" << ofToString(size) << endl;
 
 	//-
 
@@ -2223,6 +2308,7 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 	auto mainSettings = ofxImGui::Settings();
 	mainSettings.windowPos = pos;
 	mainSettings.windowSize = size;
+	//cout << "browser_draw_ImGui_Browser pos: " << pos << endl;
 
 	//-
 
@@ -2698,6 +2784,21 @@ void ofxPresetsManager::browser_ImGui_theme()
 	//must be done after setup the gui
 
 	ImGuiStyle *style = &ImGui::GetStyle();
+
+	style->WindowMinSize = ImVec2(160, 65);
+	style->FramePadding = ImVec2(4, 2);
+	style->ItemSpacing = ImVec2(6, 2);
+	style->ItemInnerSpacing = ImVec2(6, 4);
+	style->Alpha = 1.0f;
+	style->WindowRounding = 0.0f;
+	style->FrameRounding = 0.0f;
+	style->IndentSpacing = 6.0f;
+	style->ItemInnerSpacing = ImVec2(2, 4);
+	style->ColumnsMinSpacing = 50.0f;
+	style->GrabMinSize = 14.0f;
+	style->GrabRounding = 0.0f;
+	style->ScrollbarSize = 12.0f;
+	style->ScrollbarRounding = 0.0f;
 
 	//my dark theme
 

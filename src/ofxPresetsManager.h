@@ -247,8 +247,8 @@ public:
 
 	//-
 
-	//set the key you have to hold for saving, default is OF_KEY_CONTROL
-	void setModeKey(int key);
+	void setModeKeySave(int key);//set the key you have to hold for saving, default is OF_KEY_CONTROL
+	void setModeKeySwap(int key);//set the key you have to hold for swap, default is OF_KEY_ALT
 
 	//set keys active
 	void set_ENABLE_Keys(bool active)
@@ -375,20 +375,21 @@ public:
 		debugClicker = b;
 	}
 
-	void set_GUI_Position(int x, int y)
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+	void set_GUI_PositionBrowser(int x, int y)
 	{
 		ImGui_Position = ofVec2f(x, y);
 	}
-
-	void set_GUI_ControlPosition(int x, int y)
-	{
-		guiPos_Control = ofVec2f(x, y);
-		gui_InternalControl.setPosition(guiPos_Control.x, guiPos_Control.y);
-	}
-
-	void set_GUI_Size(int w, int h)
+	void set_GUI_SizeBrowser(int w, int h)
 	{
 		ImGui_Size = ofVec2f(w, h);
+	}
+#endif
+
+	void set_GUI_PositionInternalControl(int x, int y)
+	{
+		guiPos_InternalControl = ofVec2f(x, y);
+		gui_InternalControl.setPosition(guiPos_InternalControl.x, guiPos_InternalControl.y);
 	}
 
 	void set_GUI_Internal_Visible(bool visible)
@@ -573,7 +574,7 @@ private:
 	//--
 
 	//layout
-	ofVec2f guiPos_Control = ofVec2f(500, 500);
+	ofVec2f guiPos_InternalControl = ofVec2f(500, 500);
 	int clicker_cellSize = 80;
 	ofVec2f clicker_Pos = ofVec2f(500, 500);
 
@@ -601,11 +602,18 @@ private:
 	void keyPressed(ofKeyEventArgs &eventArgs);
 	void keyReleased(ofKeyEventArgs &eventArgs);
 
-	bool bKeys;
-	vector<vector<int>> keys;
+	bool bKeys;//enabled keys
+	vector<vector<int>> keys;//trigger keys for all presets
 	bool keysNotActivated;
-	int modeKey;
-	bool bKeySave;
+
+	//save
+	int modeKeySave;//save mod key
+	bool bKeySave;//save mod key state
+
+	//TODO:
+	//swap selected preset swith the clicked (i.e: 4 -> 7  &  4 <- 7)
+	int modKeySwap;//swap mod key 
+	bool bKeySwap;//swap mod key state
 
 	bool lastMouseButtonState;
 	void mousePressed(int x, int y);

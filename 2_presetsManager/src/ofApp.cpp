@@ -81,11 +81,14 @@ void ofApp::setup()
 	presetsManager.set_CLICKER_Visible(true);
 	presetsManager.set_CLICKER_Position(400, ofGetHeight() - 200, 50);//position and boxes sizes
 
-	//ofxGui internal gui
+	//ofxGui show/hide internal control gui
 	//this panel have mainly all the addon controls. not all are important to the user.
-	presetsManager.set_GUI_Internal_Visible(true);
-	presetsManager.set_GUI_Position(10, 30);
-	presetsManager.set_GUI_Size(250, 300);
+	//presetsManager.set_GUI_Internal_Visible(true);
+
+	//TODO:
+	//browser
+	//presetsManager.set_GUI_PositionBrowser(10, 30);
+	//presetsManager.set_GUI_SizeBrowser(250, 300);
 
 	//--
 
@@ -125,7 +128,7 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h)
 {
-	presetsManager.windowResized(w, h);
+	//presetsManager.windowResized(w, h);
 }
 
 //--------------------------------------------------------------
