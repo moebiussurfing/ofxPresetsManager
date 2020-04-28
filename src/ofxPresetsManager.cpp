@@ -2366,11 +2366,18 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 			strncpy(tab, textInput_New.c_str(), sizeof(tab));
 			tab[sizeof(tab) - 1] = 0;
 
+			//TODO:
+			bool bBlink;
+			//bBlink = false;
+			bBlink = true;
+
 			if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
 			{
 				ofLogNotice("ofxPresetsManager") << "InputText [tab]:" << ofToString(tab) << endl;
 				textInput_New = ofToString(tab);
 				ofLogNotice("ofxPresetsManager") << "textInput_New:" << textInput_New << endl;
+
+				bBlink = true;//not workind. we like to blink when mouse_on_text_input
 			}
 
 			//--
@@ -2378,12 +2385,17 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 			//5.3 save new
 
 			//workflow
+
 			//blink when it's editing a new preset..
 
-			ImGui::PushID(1);
-			int n = 30;
-			float a = ofMap(ofGetFrameNum() % n, 0, n, 0.0f, 1.0f);
-			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+
+			if (bBlink)
+			{
+				ImGui::PushID(1);
+				int n = 30;
+				float a = ofMap(ofGetFrameNum() % n, 0, n, 0.2f, 0.5f);
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+			}
 
 			if (ImGui::Button("CREATE NEW"))
 			{
@@ -2418,8 +2430,11 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 				browser_PresetLoad(textInput_New);
 			}
 
-			ImGui::PopStyleColor(1);
-			ImGui::PopID();
+			if (bBlink)
+			{
+				ImGui::PopStyleColor(1);
+				ImGui::PopID();
+			}
 		}
 
 		//-
@@ -2470,6 +2485,15 @@ void ofxPresetsManager::browser_PresetLoad(string name)//without xml extension n
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_Setup()
 {
+	//font customize 
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	string _name = "overpass-mono-bold.otf";
+	string _path = path_GLOBAL_Folder + "/fonts/" + _name;
+	io.Fonts->AddFontFromFileTTF(&ofToDataPath(_path)[0], 13.0f);
+
+	//-
+
 	gui_Browser.setup();
 	browser_ImGui_theme();
 	SHOW_ImGui = true;//not useful
@@ -2491,8 +2515,6 @@ void ofxPresetsManager::browser_Setup()
 		}
 	}
 
-	//TODO:
-	//gui_Browser.font customize 
 }
 
 //--------------------------------------------------------------
