@@ -10,17 +10,7 @@
 
 ///TODO:
 
-///++ add key mod to swap presets like control is used now to save
-
-///+ (if disabled at first), control gui must still hidden after back to live/active mode
-///browser
-///++ add ImGui browser list like from colorManager
-///+ each 8 presets can be a selection of best presets to trig handly and fast
-
-///+++ add auto trig mode or not
-///++ improve callback system ?
-///+ use pointers bewween classes (ofxSequencer) to share the data struct
-///+ could make tween when changing params
+///+ could make tween when changing params (?)
 
 #pragma once
 
