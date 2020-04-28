@@ -52,7 +52,8 @@ public:
 
 	//-
 
-    //// TODO: easy listener temp solution..
+    //// TODO: 
+	//alternative listener to be trigged when preset loading/saving is done
     //void Changed_DONE_load(bool &DONE_load);
     //void Changed_DONE_save(bool &DONE_save);
 };

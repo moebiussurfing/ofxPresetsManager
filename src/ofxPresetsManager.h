@@ -117,7 +117,7 @@ private:
 
 	//this loads selected preset, autosave/autoload...gui states
 	void load_ControlSettings();
-//public://TEST crash?
+	//public://TEST crash?
 	void save_ControlSettings();
 
 	//-
@@ -168,13 +168,13 @@ public:
 	void windowResized(int w, int h);
 
 	//-
-	
+
 	void draw_CLICKER();//user clickeable box panel preset selector
 
 	//-
 
 #pragma mark - DIFFERENT DATA TYPES METHODS
-	
+
 	void add(ofParameterGroup params, int numPresets = 8);//add a param group for preset saving
 	void add(ofParameterGroup params, initializer_list<int> keysList);//adds and activate keys to switch
 
@@ -245,6 +245,8 @@ public:
 		return clicker_cellSize;
 	}
 
+	//-
+
 	//set the key you have to hold for saving, default is OF_KEY_CONTROL
 	void setModeKey(int key);
 
@@ -255,15 +257,18 @@ public:
 		ENABLE_Keys = active;
 	}
 
+	void toggle_ENABLE_Keys()
+	{
+		ENABLE_Keys = !ENABLE_Keys;
+		bKeys = ENABLE_Keys;
+	}
+
 	bool isKeysEnabled()
 	{
 		return ENABLE_Keys;
 	}
 
-	int getCurrentPreset()
-	{
-		return PRESET_selected;
-	}
+	//-
 
 	void load_Next()
 	{
@@ -288,6 +293,13 @@ public:
 	{
 		return num_presets;
 	}
+
+	int getCurrentPreset()//get index of selected preset
+	{
+		return PRESET_selected;
+	}
+
+	//-
 
 	void setShowGroupName(bool b)//disabler for minimal design
 	{
@@ -321,9 +333,10 @@ public:
 		}
 	}
 
-private:
+	//-
 
 	//browser
+private:
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	//load presets from preset folder, not from favorites presets folders
 	void browser_PresetLoad(string name);
@@ -478,7 +491,7 @@ private:
 	int getPresetIndex(string guiName) const;
 
 	int getGuiIndex(string name) const;
-	string presetName(string guiName, int presetIndex);
+	string getPresetName(string guiName, int presetIndex);
 
 	ofParameter<bool> SHOW_Gui_Internal;
 
@@ -505,6 +518,7 @@ private:
 	bool browser_draw_ImGui_Browser();
 	void browser_draw_ImGui_MenuBar();
 	void browser_draw_ImGui_MenuFile();
+	void browser_draw_ImGui_User(ofxImGui::Settings &settings);
 
 	//TODO:
 	//void gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter);
@@ -540,7 +554,7 @@ public:
 
 private:
 	bool bMouseOver_Changed = false;
-	bool debugClicker = true;
+	bool debugClicker = true;//?
 
 	//--
 
@@ -574,6 +588,9 @@ private:
 	//--
 
 	std::vector<int> lastIndices;//?
+	//TODO:
+	//lastIndices it's the gui box clicked only, not important.. ?
+	
 	std::vector<int> presets;//?
 
 	//--
@@ -601,11 +618,12 @@ private:
 
 	//helpers
 
-	void doCloneRight(int pIndex);
+	void doCloneRight(int pIndex);//clone from selected preset to all others to the right
+	void doCloneAll();//clone all presets from the current selected
 
-	void doLoad(int pIndex);//not used? bc bug on bLoad trigger..
+	void doLoad(int pIndex);//engine loader. not used? bc bug on bLoad trigger..
+	void doSave(int pIndex);//engine saver starting at 0
 
-	void doSave(int pIndex);
 	//TODO:
 	//for multiple groups new feature..
 	//void doSave2(int pIndex);
@@ -650,6 +668,7 @@ private:
 	ofParameter<bool> autoLoad;
 
 	ofParameter<bool> bCloneRight;
+	ofParameter<bool> bCloneAll;
 
 	//internal groups
 	ofParameterGroup params_Favorites;

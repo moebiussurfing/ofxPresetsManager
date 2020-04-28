@@ -39,18 +39,20 @@ void ofApp::setup()
 
 	//customize path folders
 
-	//NOTE: take care with path folders, 
-	//they must exist before we can write inside!
-	//or maybe file settings must be located there to avoid startup crashes!
+	//NOTE: 
+	//take care with your /data path folders, 
+	//they must be created before we can write inside!
+	//also file settings must (maybe) be located there to avoid startup crashes!
 
 	presetsManager.set_Path_GlobalFolder("ofxPresetsManager");//main container folder
-	presetsManager.set_Path_KitFolder("presets");//kit presets
-	//presetsManager.set_Path_PresetsFolder("archive");
+	presetsManager.set_Path_KitFolder("presets");//from kit/livePanel presets
+	presetsManager.set_Path_PresetsFolder("archive");//for browser file presets
 
 	//-
 
-	//add target group. this is "the preset" container itself
-	//params group and trigger keys
+	//add (target) parameters group: 
+	//this is "the preset" container itself
+	//params group and trigger keys associated too.
 	presetsManager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
 
 	//-
@@ -64,7 +66,10 @@ void ofApp::setup()
 	//apply setup
 	presetsManager.setup();
 
-	////callbacks to trig when save/load is done
+	//--
+
+	////setup callbacks if required
+	////alternative callbacks to trig when save/load is done
 	//presetsManager.DONE_save.addListener(this, &ofApp::Changed_DONE_save);
 	//presetsManager.DONE_load.addListener(this, &ofApp::Changed_DONE_load);
 
@@ -76,18 +81,21 @@ void ofApp::setup()
 	presetsManager.set_CLICKER_Visible(true);
 	presetsManager.set_CLICKER_Position(400, ofGetHeight() - 200, 50);//position and boxes sizes
 
-	//ofxGui
+	//ofxGui internal gui
+	//this panel have mainly all the addon controls. not all are important to the user.
 	presetsManager.set_GUI_Internal_Visible(true);
 	presetsManager.set_GUI_Position(10, 30);
 	presetsManager.set_GUI_Size(250, 300);
 
 	//--
 
-	//local gui (to debug params too)
+	//local ofApp gui 
+	//show how we receive presets into the target params group:
 	gui.setup("ofApp");
 	gui.add(params);
 
-	//TODO:multiple params groups
+	//TODO:
+	//multiple params groups
 	//gui.add(params2);
 
 	gui.setPosition(20, 150);
@@ -96,7 +104,9 @@ void ofApp::setup()
 
 	//startup
 
-	//trick to solve auto load fail because the sorting of xml autoSave after preset selector tag
+	//workaround
+	//to solve some auto load fails... 
+	//because the sorting of xml autoSave after preset selector tag(?)
 	presetsManager.refresh();
 
 	//-------
@@ -105,12 +115,10 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-	//presetsManager
-	//simple callback when preset is loaded 
-	if (presetsManager.isDoneLoad())
+	//easy simple callback
+	if (presetsManager.isDoneLoad())//just loaded preset it's done
 	{
-		//ofLogNotice("ofApp") << "DONE PRESET LOADED";
-		ofLogNotice("ofApp") << "--------------------------------------------------------------";
+		ofLogNotice("ofApp") << "--------------------------------------------------------------[isDoneLoad]";
 	}
 }
 
@@ -182,9 +190,11 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-	if (!presetsManager.getIsMouseOver())//ignore keys when mouse is over ImGui window
+	if (!presetsManager.getIsMouseOver())//ignore local ofApp keys when mouse is over ImGui window
 	{
-		//select one prese by random
+		//-
+
+		//select one preset by random (1 to 8)
 		if (key == OF_KEY_RETURN)
 		{
 			int pMax = presetsManager.getNumPresets();//get amount of presets on kit
@@ -195,19 +205,13 @@ void ofApp::keyPressed(int key)
 			presetsManager.loadPreset(p);
 		}
 
-		//randomize parameters of selected preset
-		if (key == ' ')
-		{
-			shapeType = ofRandom(shapeType.getMin(), shapeType.getMax() + 1);
-			numShapes = ofRandom(numShapes.getMin(), numShapes.getMax() + 1);
-			separation = ofRandom(separation.getMin(), separation.getMax() + 1);
-			shapeSide = ofRandom(shapeSide.getMin(), shapeSide.getMax() + 1);
-		}
+		//-
 
 		//switch keys control enabled
 		if (key == OF_KEY_TAB)
 		{
-			presetsManager.set_ENABLE_Keys(!presetsManager.isKeysEnabled());
+			presetsManager.toggle_ENABLE_Keys();
+			//presetsManager.set_ENABLE_Keys(!presetsManager.isKeysEnabled());
 		}
 
 		//load preset by code
@@ -219,18 +223,29 @@ void ofApp::keyPressed(int key)
 		//{
 		//	presetsManager.loadPreset(2);
 		//}
+
+		//----
+
+		//randomize parameters of local params (selected preset too if autoSave is enabled)
+		if (key == ' ')
+		{
+			shapeType = ofRandom(shapeType.getMin(), shapeType.getMax() + 1);
+			numShapes = ofRandom(numShapes.getMin(), numShapes.getMax() + 1);
+			separation = ofRandom(separation.getMin(), separation.getMax() + 1);
+			shapeSide = ofRandom(shapeSide.getMin(), shapeSide.getMax() + 1);
+		}
+
 	}
 }
 
 //-
 
-////callback
-////TODO: improve adding isChanged method
+////alternative callback
 ////--------------------------------------------------------------
 //void ofApp::Changed_DONE_save(bool &DONE_save)
 //{
 //	ofLogNotice("ofApp") << "Changed_DONE_save: " << ofToString(DONE_save ? "TRUE" : "FALSE");
-//	ofLogNotice("ofApp") << "";
+//	ofLogNotice("ofApp") << "--------------------------------------------------------------[DONE_save]";
 //
 //	//extra stuff when finish loading/saving
 //	if (presetsManager.DONE_save)
@@ -243,7 +258,7 @@ void ofApp::keyPressed(int key)
 //void ofApp::Changed_DONE_load(bool &DONE_load)
 //{
 //	ofLogNotice("ofApp") << "Changed_DONE_load: " << ofToString(DONE_load ? "TRUE" : "FALSE");
-//	ofLogNotice("ofApp") << "";
+//	ofLogNotice("ofApp") << "--------------------------------------------------------------[DONE_load]";
 //
 //	//extra stuff when finish loading/saving
 //	if (presetsManager.DONE_load)
