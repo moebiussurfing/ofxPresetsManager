@@ -182,7 +182,7 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-	if (!presetsManager.bImGui_mouseOver)//ignore keys when mouse is over ImGui window
+	if (!presetsManager.getIsMouseOver())//ignore keys when mouse is over ImGui window
 	{
 		//select one prese by random
 		if (key == OF_KEY_RETURN)
@@ -192,7 +192,7 @@ void ofApp::keyPressed(int key)
 			int p = (int)ofRandom(pMin, pMax + 1);//p goes from 1 to (max) 8
 
 			ofLogNotice("ofApp") << "select a random preset from the manager kit: " << ofToString(p);
-			presetsManager.browser_LoadPreset(p);
+			presetsManager.loadPreset(p);
 		}
 
 		//randomize parameters of selected preset
@@ -213,11 +213,11 @@ void ofApp::keyPressed(int key)
 		//load preset by code
 		//if (key == 'a')
 		//{
-		//	presetsManager.browser_LoadPreset(1);
+		//	presetsManager.loadPreset(1);
 		//}
 		//if (key == 's')
 		//{
-		//	presetsManager.browser_LoadPreset(2);
+		//	presetsManager.loadPreset(2);
 		//}
 	}
 }

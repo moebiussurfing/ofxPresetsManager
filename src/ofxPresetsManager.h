@@ -33,7 +33,6 @@
 
 //--
 
-//TODO:
 //browser system
 #define INCLUDE_FILE_BROWSER_IM_GUI
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
@@ -78,8 +77,7 @@
 
 #define NUM_OF_PRESETS 8
 
-//TODO:
-//only one it's implemented! can't add more than one group!
+//only one it's implemented! can't add more than one parameter group!
 #define NUM_MAX_GUIS 1
 
 //---
@@ -119,10 +117,12 @@ private:
 
 	//this loads selected preset, autosave/autoload...gui states
 	void load_ControlSettings();
-public://TEST crash?
+//public://TEST crash?
 	void save_ControlSettings();
-private:
+
 	//-
+
+private:
 
 	ofxPanel gui_InternalControl;
 	ofParameter<bool> MODE_MemoryLive;
@@ -138,7 +138,7 @@ private:
 
 	//data
 	ofXml settingsArray[NUM_OF_PRESETS];
-	
+
 	//--
 
 #pragma mark - OF
@@ -168,18 +168,15 @@ public:
 	void windowResized(int w, int h);
 
 	//-
-
-	//user clickeable box panel preset selector
-	void draw_CLICKER();
+	
+	void draw_CLICKER();//user clickeable box panel preset selector
 
 	//-
 
 #pragma mark - DIFFERENT DATA TYPES METHODS
-
-	//add a gui for preset saving
-	void add(ofParameterGroup params, int numPresets = 8);
-	//adds and activate key switch
-	void add(ofParameterGroup params, initializer_list<int> keysList);
+	
+	void add(ofParameterGroup params, int numPresets = 8);//add a param group for preset saving
+	void add(ofParameterGroup params, initializer_list<int> keysList);//adds and activate keys to switch
 
 	//--
 
@@ -192,8 +189,8 @@ private:
 
 public:
 
-	ofParameter<bool> DONE_load;//not as controller. just an easy callback to ofApp integration 
-	ofParameter<bool> DONE_save;//not as controller. just an easy callback to ofApp integration
+	ofParameter<bool> DONE_load;//easy callback to know (in ofApp) that preset LOAD is done 
+	ofParameter<bool> DONE_save;//easy callback to know (in ofApp) that preset SAVE is done
 
 public:
 
@@ -226,6 +223,8 @@ public:
 	//--
 
 #pragma mark - API
+
+public:
 
 	//API
 
@@ -284,13 +283,13 @@ public:
 		}
 	}
 
-	void browser_LoadPreset(int p);
+	void loadPreset(int p);//load preset by code from ofApp
 	int getNumPresets()
 	{
 		return num_presets;
 	}
 
-	void setShowGroupName(bool b)
+	void setShowGroupName(bool b)//disabler for minimal design
 	{
 		SHOW_GroupName = b;
 	}
@@ -309,7 +308,7 @@ private:
 
 public:
 
-	bool mustTrig()
+	bool mustTrig()//trig on select preset or not
 	{
 		if (bMustTrig)
 		{
@@ -324,18 +323,19 @@ public:
 
 private:
 
+	//browser
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	//load presets from preset folder, not from favorites presets folders
 	void browser_PresetLoad(string name);
 	void browser_PresetSave(string name);
-	void browser_FilesRefresh();
+	bool browser_FilesRefresh();
+#endif
 
 	//-
 
 #pragma mark - GUI
 
 	//-
-
-	//browser
 
 public:
 
@@ -351,10 +351,10 @@ public:
 
 		//-
 
-		ofLogNotice("ofxPresetsManager") << "refresh()";
+		ofLogNotice("ofxPresetsManager") << "Refresh()";
 		PRESET_selected_PRE = -1;
 		PRESET_selected = PRESET_selected;
-		ofLogNotice("ofxPresetsManager") << "PRESET " << PRESET_selected;
+		ofLogNotice("ofxPresetsManager") << "Preset " << PRESET_selected;
 	}
 
 	void setHelpVisible(bool b)
@@ -366,6 +366,7 @@ public:
 	{
 		ImGui_Position = ofVec2f(x, y);
 	}
+
 	void set_GUI_ControlPosition(int x, int y)
 	{
 		guiPos_Control = ofVec2f(x, y);
@@ -381,10 +382,12 @@ public:
 	{
 		SHOW_Gui_Internal = visible;
 	}
+
 	bool get_GUI_Internal_Visible()
 	{
 		return SHOW_Gui_Internal;
 	}
+
 	void toggle_GUI_Internal_Visible()
 	{
 		SHOW_Gui_Internal = !SHOW_Gui_Internal;
@@ -401,6 +404,7 @@ public:
 	{
 		SHOW_ClickPanel = visible;
 	}
+
 	bool is_CLICKER_Visible()
 	{
 		return SHOW_ClickPanel;
@@ -410,14 +414,14 @@ public:
 
 #pragma mark - SETTINGS
 
-	void set_Path_ControlSettings(string str)
+	void set_Path_ControlSettings(string str)//main addon settings
 	{
 		path_Control = str;
 	}
 
-	void set_Path_KitFolder(string folder);
-	void set_Path_PresetsFolder(string folder);
-	void set_Path_GlobalFolder(string folder);
+	void set_Path_KitFolder(string folder);//path folder for favorite/live presets
+	void set_Path_PresetsFolder(string folder);//path folder for kit for the browser
+	void set_Path_GlobalFolder(string folder);//path for root container folder
 
 	void setAutoLoad(bool b)
 	{
@@ -450,26 +454,6 @@ private:
 
 	//--
 
-#pragma mark - PRIVATE
-
-	//--
-
-
-	//--
-
-	//TODO: what is this for ?
-	//delayed loading
-
-	////if you set it to true the preset will be loaded only when you call (false is the default behavior)
-	//void setDelayedLoading(bool active);
-	////make preset change effective when setDelayedLoading() is set to true
-	//void delayedUpdate();
-	////if setDelayedLoading() is set to true stages a load action
-	//void delayedLoad(int presetIndex, int guiIndex = 0);
-	//void delayedLoad(int presetIndex, string guiName);
-
-	//-
-
 public:
 
 	//switch on or off the control with the keys
@@ -496,7 +480,6 @@ private:
 	int getGuiIndex(string name) const;
 	string presetName(string guiName, int presetIndex);
 
-	//bool SHOW_Gui_Internal;
 	ofParameter<bool> SHOW_Gui_Internal;
 
 	//-
@@ -504,15 +487,15 @@ private:
 	//browser
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 
-	public:
+public:
 	ofParameter<bool> bImGui_mouseOver;
 
-	private:
+private:
 	void setup_Browser();
 
 	ofxImGui::Gui gui_Browser;
-	
-	ofParameter<bool> MODE_Browser;
+
+	ofParameter<bool> MODE_Browser_NewPreset;
 
 	bool SHOW_ImGui;
 	//bool bImGui_mouseOver;
@@ -539,34 +522,36 @@ private:
 
 	//-
 
-	bool isMouseOver_Changed()
-	{
-		if (bMouseOver_Changed)
-		{
-			//bMouseOver_Changed = false;//reset
-			return true;
-		}
-	}
+public:
+	//bool isMouseOver_Changed()
+	//{
+	//	if (bMouseOver_Changed)
+	//	{
+	//		//bMouseOver_Changed = false;//reset
+	//		return true;
+	//	}
+	//}
 
 	bool getIsMouseOver()
 	{
 		return bImGui_mouseOver;
 	}
 
+private:
 	bool bMouseOver_Changed = false;
 	bool debugClicker = true;
 
 	//--
 
 	//browser presets
-	bool MODE_newPreset = false;
-	string textInput_New = "new preset";//user input text
+	//bool MODE_newPreset = false;
+	string textInput_New = "";//user input text
 
 	//files
 	std::vector<std::string> fileNames;
 	std::vector<ofFile> files;
 	int currentFile = 0;
-	string textInput_temp = "type name";
+	string textInput_temp = "";
 	bool bFilesError = false;
 #endif
 
@@ -578,8 +563,6 @@ private:
 	ofVec2f clicker_Pos = ofVec2f(500, 500);
 
 	//--
-
-	//data
 
 	//A. ofParameterGroup
 	std::vector<ofParameterGroup> groups;
@@ -609,26 +592,26 @@ private:
 	bool lastMouseButtonState;
 	void mousePressed(int x, int y);
 
-	//bool bDelayedLoading;
 	std::vector<int> newIndices;
-
-	//-
 
 	int num_presets;//amount of handled presets on current kit
 
-	//-
+	//---
 
 	//helpers
 
 	void doCloneRight(int pIndex);
 
-	void doLoad(int pIndex);
+	void doLoad(int pIndex);//not used? bc bug on bLoad trigger..
+
 	void doSave(int pIndex);
 	//TODO:
+	//for multiple groups new feature..
 	//void doSave2(int pIndex);
 
 	//-
 
+	//font to label clicker boxes
 	ofTrueTypeFont myFont;
 	string myTTF;//gui font for all gui theme
 	int sizeTTF;
@@ -639,7 +622,7 @@ private:
 
 	//-
 
-	//GUI
+	//parameters
 
 	//-
 
@@ -651,17 +634,17 @@ private:
 
 	//control presetsManager params
 	//to select presets, clone, save..
-	
+
 	ofParameterGroup params_Control;
+	ofParameter<bool> SHOW_ClickPanel;
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	ofParameter<bool> SHOW_MenuTopBar;
 	ofParameter<bool> SHOW_Browser;
 #endif
-	ofParameter<bool> SHOW_ClickPanel;
-	ofParameter<bool> ENABLE_Keys;
-	
+
 	ofParameter<bool> bSave;
 	//ofParameter<bool> bLoad;//buggy
+
 	ofParameter<bool> autoSave;
 	ofParameter<bool> autoLoad;
 
@@ -674,6 +657,7 @@ private:
 	ofParameterGroup params_Tools;
 
 	ofParameter<glm::vec2> Gui_Internal_Position;
+	ofParameter<bool> ENABLE_Keys;
 
 	//--
 
@@ -682,10 +666,10 @@ private:
 	uint64_t timerLast_Autosave = 0;
 	int timeToAutosave = 9000;
 
+	//bool DISABLE_Callbacks = false;
 	//updating some params before save will trigs also the group callbacks
 	//so we disable this callbacks just in case params updatings are required
 	//in this case we will need to update gui position param
-	//bool DISABLE_Callbacks = false;
 
 	//--
 
