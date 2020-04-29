@@ -89,11 +89,17 @@ private:
 	//std::string groupName2;//get from ofParameterGroup name
 
 	//all folder names must go without '/'
-	std::string path_GLOBAL_Folder;//top parent folder
-	std::string path_Control;//app state session settings
-	std::string path_Kit_Folder;//folder for kit of selected presets. live kit
-	std::string path_PresetsFolder;//for browse other presets. archive kit
+	std::string path_GLOBAL_Folder;//top parent folder for all other subfolders
+	std::string path_Control;//path for app state session settings
+	std::string path_Kit_Folder;//path for kit of favorite presets. live kit
+	std::string path_PresetsFolder;//path for browse other presets. archive kit
 	std::string path_Prefix;//to add to file names
+
+	//TODO:
+	//must store settings
+	//customize browser path-free (out of global path)
+	bool bCustomBrowserPath = false;
+	std::string path_BrowserPathFree = "";
 
 	std::string browser_PresetName;
 

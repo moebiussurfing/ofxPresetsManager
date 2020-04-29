@@ -2387,7 +2387,10 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 
 			int numPresets = fileNames.size();
 			ImGui::SameLine();
-			ImGui::Text("%d/%d", currentFile + 1, numPresets);
+			if (numPresets > 0)
+				ImGui::Text("%d/%d", currentFile + 1, numPresets);
+			else
+				ImGui::Text("%d/%d", 0, numPresets);
 
 			//--
 
@@ -2503,6 +2506,44 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 				}
 			}
 
+			//-
+
+			//TODO:
+			//OF listDir don't founds the dir...(maybe bc data/absolute/boost problems)
+			//// 5. customize directory
+			//ImGui::SameLine();
+			//if (ImGui::Button("SET DIR"))//set folder to read presets from
+			//{
+			//	//Open the Open File Dialog
+			//	ofFileDialogResult openFileResult = ofSystemLoadDialog("Select a file from the desired folder");
+
+			//	//Check if the user opened a file
+			//	if (openFileResult.bSuccess)
+			//	{
+			//		ofLogNotice("ofxPresetsManager") << "User selected a file";
+
+			//		//We have a file, check it and process it
+
+			//		string _path = openFileResult.getPath();
+			//		//ofLogNotice("ofxPresetsManager") << "Filename: " + openFileResult.getName();
+			//		//ofLogNotice("ofxPresetsManager") << "Browser Path: " + _path;
+
+			//		boost::filesystem::path p1(_path);
+			//		ofLogNotice("ofxPresetsManager") << "Filename: " << p1.filename();
+			//		ofLogNotice("ofxPresetsManager") << "Browser Path: " << p1.parent_path();
+
+			//		//enable free folder system
+			//		bCustomBrowserPath = true;
+			//		path_BrowserPathFree = ofToString(p1.parent_path());
+
+			//		//refresh files
+			//		browser_FilesRefresh();
+			//	}
+			//	else
+			//	{
+			//		ofLogVerbose("User hit cancel");
+			//	}
+			//}
 
 			//----
 
@@ -2687,9 +2728,31 @@ bool ofxPresetsManager::browser_FilesRefresh()
 {
 	ofLogNotice("ofxPresetsManager") << "browser_FilesRefresh()";
 
-	string _path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
-	ofLogNotice("ofxPresetsManager") << "Path: " << _path;
+	string _path;
+	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+
+	//TODO:
+	//if (!bCustomBrowserPath)
+	//	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+	//else
+	//	_path = path_BrowserPathFree;
+	//ofLogNotice("ofxPresetsManager") << "Path: " << _path;
+
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
+
+	//ofDirectory dataDirectory;
+	//if (!bCustomBrowserPath)
+	//	dataDirectory = ofDirectory(ofToDataPath(_path, true));
+	//else
+	//{
+	//	ofDisableDataPath();
+	//	dataDirectory = ofDirectory(path_BrowserPathFree);
+	//	ofEnableDataPath();
+	//	//[error] ofDirectory: listDir:() source directory does not exist : ""&"F:\openFrameworks\addons\ofxPresetsManager\2_presetsManager\bin\data\ofxPresetsManager\presets&"\""
+	//	
+	//	//"F:\openFrameworks\addons\ofxPresetsManager\2_presetsManager\bin\data\ofxPresetsManager\presets"
+	//	//dataDirectory = ofDirectory("F:\openFrameworks\addons\ofxPresetsManager\2_presetsManager\bin\data\ofxPresetsManager\presets");
+	//}
 
 	//clear files and filenames vectors
 	files.clear();
@@ -2732,8 +2795,14 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	else
 	{
 		ofLogError("ofxPresetsManager") << "BROWSER FILES NOT FOUND!";
-		ofLogError("ofxPresetsManager") << "------------------------";
 		bFilesError = true;
+
+		//TODO:
+		//disable custom path bc error
+		ofLogError("ofxPresetsManager") << "Disable custom path: " << path_BrowserPathFree;
+		bCustomBrowserPath = false;
+
+		ofLogError("ofxPresetsManager") << "------------------------";
 	}
 
 	//workflow
