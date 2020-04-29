@@ -23,7 +23,7 @@
 //DEFINES
 
 //browser system
-//#define INCLUDE_FILE_BROWSER_IM_GUI
+#define INCLUDE_FILE_BROWSER_IM_GUI
 //BUG: seems to make exceptions when multiple ImGui/ofxPresetsManager instances...
 
 //debug errors

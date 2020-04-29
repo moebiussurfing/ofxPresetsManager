@@ -2346,6 +2346,21 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 	mainSettings.windowSize = size;
 	//cout << "browser_draw_ImGui_Browser pos: " << pos << endl;
 
+	//const ImVec2 size(300, 200);
+	//bool open = true;
+	//float alpha = 0.90f;
+	//ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_ShowBorders;
+	//std::string textBtn = "(" + std::to_string(click_count) + ") Clicks";
+
+	//ImGui::Begin("Primera ventana", &open, size, alpha, windowFlags);
+	//ImGui::Text("Muestra un texto en la ventana.");
+	//if (ImGui::Button(textBtn.c_str())) click_count++;
+	//ImGui::End();
+
+	//{
+	//	ImGui::SetNextWindowPos(ImVec2(pos.x, pos.y));// , ImGuiSetCond_FirstUseEver);
+	//}
+
 	//-
 
 	//NOTE:
