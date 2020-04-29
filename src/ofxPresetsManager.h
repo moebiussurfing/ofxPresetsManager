@@ -1,6 +1,7 @@
 
 /// ofxPresetsManager.h 
 ///
+/// ofxPresetsManager 
 /// by moebiussurfing, 2020.
 ///
 /// this addon is based in the original ofxGuiPresetSelector addon 
@@ -12,7 +13,6 @@
 ///--
 
 ///TODO:
-
 ///+ could make tween when changing params (?)
 
 #pragma once

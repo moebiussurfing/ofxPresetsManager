@@ -193,7 +193,8 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-	if (!presetsManager.getIsMouseOver())//ignore local ofApp keys when mouse is over ImGui window
+	//ignore local ofApp keys when mouse is over ImGui window (to textInput)
+	if (!presetsManager.getIsMouseOver())
 	{
 		//-
 

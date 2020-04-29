@@ -73,7 +73,7 @@ ofxPresetsManager::ofxPresetsManager()
 	DONE_load.set("DONE LOAD", false);//easy callback to know (in ofApp) that preset LOAD is done
 	DONE_save.set("DONE SAVE", false);//easy callback to know (in ofApp) that preset SAVE is done
 
-	//we can use too the easy isDoneLoad() to check in update() as callback
+	//we can use too the easy isDoneLoad() to check in ofApp update() as kind of callback.
 
 	//-
 
@@ -2379,8 +2379,12 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 
 		browser_draw_ImGui_User(mainSettings);
 
-		//--
+		//gui_Browser.widget(ImGui::widIMGUI_WIDGET_VERTICAL_SPACING);
+		//gui_Browser.widget(IMGUI_WIDGET_VERTICAL_SPACING);
+		//ImGui::Push
 
+		//-- 
+		   
 		//if (ImGui::TreeNode("BROWSER"))
 		//if (ofxImGui::BeginTree("BROWSER", mainSettings))//BUG: disables text input?
 		{
