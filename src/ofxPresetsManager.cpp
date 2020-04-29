@@ -85,6 +85,7 @@ ofxPresetsManager::ofxPresetsManager()
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	MODE_Browser_NewPreset.set("CREATE NEW PRESET", false);
 	SHOW_Browser.set("SHOW BROWSER", false);
+	SHOW_MenuTopBar.set("SHOW MENU", false);
 
 	browser_PresetName = "NO_NAME_PRESET";//browser loaded preset name
 #endif
@@ -99,7 +100,6 @@ ofxPresetsManager::ofxPresetsManager()
 	autoSave.set("AUTO SAVE", true);
 	bAutosaveTimer.set("TIMER AUTO SAVE", false);
 
-	SHOW_MenuTopBar.set("SHOW MENU", false);
 	SHOW_Gui_Internal.set("SHOW CONTROL GUI ", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", false);
 
@@ -1027,6 +1027,30 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 	}
 }
 
+//--------------------------------------------------------------
+void ofxPresetsManager::loadPreset(int p)
+{
+	if (!DISABLE_CALLBACKS)// && (PRESET_selected != PRESET_selected_PRE))
+	{
+		ofLogNotice("ofxPresetsManager") << "loadPreset(" << ofToString(p) << ")";
+		ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";
+
+		if (PRESET_selected > 0 && PRESET_selected <= numPresets_OfFavorites)
+		{
+			PRESET_selected = p;
+			//ofLogNotice("ofxPresetsManager") << ".";
+
+			//PRESET_selected_PRE = PRESET_selected;//TODO:
+		}
+		else
+		{
+			ofLogNotice("ofxPresetsManager") << "IGNORE LOAD PRESET";
+			//workaround clamp
+			PRESET_selected = 1;//set to first as default presets when out of range
+		}
+	}
+}
+
 //--
 
 //engine helpers
@@ -1628,6 +1652,7 @@ void ofxPresetsManager::load_ControlSettings()
 void ofxPresetsManager::save_ControlSettings()
 {
 #ifndef DEBUG_BLOCK_SAVE_SETTINGS
+
 	ofLogNotice("ofxPresetsManager") << "save_ControlSettings()";
 
 	//TODO:
@@ -1651,18 +1676,18 @@ void ofxPresetsManager::save_ControlSettings()
 
 	//---
 
-#ifdef INCLUDE_FILE_BROWSER_IM_GUI
-////BUG: can't get gui settings...
-//	//gui_Browser.~Gui.get
-//	auto settings = ofxImGui::Settings();
-//	auto p = settings.windowPos;
-//	auto w = settings.windowSize;
-//	ImGui_Position = glm::vec2(p.x, p.y);
-////
-//	//cout << "pos:" << ofToString(p) << endl;
-//	//cout << "size:" << ofToString(w) << endl;
-//	//cout << "ImGui_Position:" << ofToString(ImGui_Position.get()) << endl;
-#endif
+//#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+//////BUG: can't get gui settings...
+////	//gui_Browser.~Gui.get
+////	auto settings = ofxImGui::Settings();
+////	auto p = settings.windowPos;
+////	auto w = settings.windowSize;
+////	ImGui_Position = glm::vec2(p.x, p.y);
+//////
+////	//cout << "pos:" << ofToString(p) << endl;
+////	//cout << "size:" << ofToString(w) << endl;
+////	//cout << "ImGui_Position:" << ofToString(ImGui_Position.get()) << endl;
+//#endif
 
 	//---
 
@@ -2325,9 +2350,16 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 
 	//NOTE:
 	//seems that window (not tree) is required to allow text input stills inside box...
+	
+	string _name;
+	//_name = "PRESET MANAGER";
+	//_name = "PRESET MANAGER  [" + groups[0].getName() + "]";
+	_name = groups[0].getName();
 
-	if (ofxImGui::BeginWindow("PRESET MANAGER", mainSettings, false))
+	if (ofxImGui::BeginWindow(_name, mainSettings, false))
 	{
+		ImGui::Text("PRESET MANAGER");
+
 		//--
 
 		browser_draw_ImGui_User(mainSettings);
@@ -2337,11 +2369,11 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 		//if (ImGui::TreeNode("BROWSER"))
 		//if (ofxImGui::BeginTree("BROWSER", mainSettings))//BUG: disables text input?
 		{
-			int numPresets = fileNames.size();
+			int numFilePresets = fileNames.size();
 
 			//0. error when no files detected
 
-			if (numPresets == 0)
+			if (numFilePresets == 0)
 			{
 				int n = 30;
 				float a = ofMap(ofGetFrameNum() % n, 0, n, 0.f, 1.f);
@@ -2355,7 +2387,7 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 				//ImGui::PopID();
 			}
 
-			else if (numPresets > 0)
+			else if (numFilePresets > 0)
 			{
 				//1. arrow buttons
 
@@ -2417,10 +2449,10 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 				//1.3 text preview current preset number to total. (1/4)
 
 				ImGui::SameLine();
-				//if (numPresets > 0)
+				//if (numFilePresets > 0)
 				{
-					ImGui::Text("%d/%d", currentFile + 1, numPresets);
-					//ImGui::Text("%d/%d", 0, numPresets);
+					ImGui::Text("%d/%d", currentFile + 1, numFilePresets);
+					//ImGui::Text("%d/%d", 0, numFilePresets);
 				}
 			}
 
@@ -2854,30 +2886,6 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	//}
 
 	return !bFilesError;//true if ok
-}
-
-//--------------------------------------------------------------
-void ofxPresetsManager::loadPreset(int p)
-{
-	if (!DISABLE_CALLBACKS)// && (PRESET_selected != PRESET_selected_PRE))
-	{
-		ofLogNotice("ofxPresetsManager") << "loadPreset(" << ofToString(p) << ")";
-		ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";
-
-		if (PRESET_selected > 0 && PRESET_selected <= numPresets_OfFavorites)
-		{
-			PRESET_selected = p;
-			//ofLogNotice("ofxPresetsManager") << ".";
-
-			//PRESET_selected_PRE = PRESET_selected;//TODO:
-		}
-		else
-		{
-			ofLogNotice("ofxPresetsManager") << "IGNORE LOAD PRESET";
-			//workaround clamp
-			PRESET_selected = 1;//set to first as default presets when out of range
-		}
-	}
 }
 
 //--------------------------------------------------------------

@@ -1,10 +1,13 @@
 
-///ofxPresetsManager.h
-///this addon is based in the original ofxGuiPresetSelector addon 
-///by Nicola Pisanti, MIT License, 2016
-///https://github.com/npisanti/ofxGuiPresetSelector
-///all modifications and new features by moebiussurfing
-///my idea is to allow use ofParameterGroup's as managed content instead of ofxPanel
+/// ofxPresetsManager.h 
+///
+/// by moebiussurfing, 2020.
+///
+/// this addon is based in the original ofxGuiPresetSelector addon 
+/// by Nicola Pisanti, MIT License, 2016
+/// https://github.com/npisanti/ofxGuiPresetSelector
+/// all modifications and new features by moebiussurfing
+/// my idea is to allow use ofParameterGroup's as managed content instead of ofxPanel
 
 ///--
 
@@ -13,6 +16,27 @@
 ///+ could make tween when changing params (?)
 
 #pragma once
+
+
+///----------------------------------------------
+
+//DEFINES
+
+//browser system
+//#define INCLUDE_FILE_BROWSER_IM_GUI
+//BUG: seems to make exceptions when multiple ImGui/ofxPresetsManager instances...
+
+//debug errors
+#define INCLUDE_DEBUG_ERRORS
+
+//disable save settings
+//#define DEBUG_BLOCK_SAVE_SETTINGS//enable this bc sometimes there's crashes on exit
+
+//measure performance ofxTimeMeasurements
+//#define TIME_SAMPLE_MEASURES 
+
+///----------------------------------------------
+
 
 #include "ofMain.h"
 
@@ -24,7 +48,6 @@
 //--
 
 //browser system
-#define INCLUDE_FILE_BROWSER_IM_GUI
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 #include "ofxImGui.h"
 #endif
@@ -32,18 +55,13 @@
 //--
 
 //optional to debug not located files or others
-
-#define INCLUDE_DEBUG_ERRORS
 #ifdef INCLUDE_DEBUG_ERRORS
 #include "ofxDEBUG_errors.h"
 #endif
 
-//#define DEBUG_BLOCK_SAVE_SETTINGS//enable this bc sometimes there's crashes on exit
-
 //--
 
 //optional to debug performance or delay when loading files or presets on hd or memory modes
-//#define TIME_SAMPLE_MEASURES //comment this line to remove ofxTimeMeasurements dependency
 #ifdef TIME_SAMPLE_MEASURES
 #include "ofxTimeMeasurements.h"
 #else
@@ -492,7 +510,11 @@ private:
 	int getGuiIndex(string name) const;
 	string getPresetName(string guiName, int presetIndex);
 
+	//--
+
 	ofParameter<bool> SHOW_Gui_Internal;
+
+	bool debugClicker = true;//?
 
 	//-
 
@@ -553,7 +575,6 @@ public:
 
 private:
 	bool bMouseOver_Changed = false;
-	bool debugClicker = true;//?
 
 	//--
 
@@ -581,11 +602,11 @@ public:
 		browser_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
 
 		//browser number of files
-		
+
 		//iterate all presets
 		for (int i = 0; i < numPresets_OfFavorites; i++)
 		{
-			std::string pathSrc; 
+			std::string pathSrc;
 			std::string pathDst;
 
 			pathSrc = getPresetName(groups[0].getName(), i);
@@ -601,11 +622,12 @@ public:
 			ofFile file;
 			file.copyFromTo(pathSrc, pathDst, true, true);//relative, overwrite
 
-			//--
-
-			//refresh files
-			browser_FilesRefresh();
 		}
+
+		//--
+
+		//refresh files
+		browser_FilesRefresh();
 	}
 
 #endif//end browser
