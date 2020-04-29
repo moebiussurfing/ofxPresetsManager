@@ -269,9 +269,9 @@ public:
 	void load_Next()
 	{
 		PRESET_selected++;
-		if (PRESET_selected > num_presets)
+		if (PRESET_selected > numPresets_OfFavorites)
 		{
-			PRESET_selected = num_presets;
+			PRESET_selected = numPresets_OfFavorites;
 		}
 	}
 
@@ -287,7 +287,7 @@ public:
 	void loadPreset(int p);//load preset by code from ofApp
 	int getNumPresets()
 	{
-		return num_presets;
+		return numPresets_OfFavorites;
 	}
 
 	int getCurrentPreset()//get index of selected preset
@@ -347,6 +347,8 @@ private:
 	//-
 
 public:
+
+	//API
 
 	//BUG: 
 	//workflow 
@@ -565,9 +567,51 @@ private:
 	int currentFile = 0;
 	string textInput_temp = "";
 	bool bFilesError = false;
-#endif
 
 	//--
+
+	//helpers
+public:
+	void doGetFavsFromBrowser()
+	{
+		ofLogNotice("ofxPresetsManager") << "doGetFavsFromBrowser()";
+
+		//browser path
+		string browser_path;
+		browser_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+
+		//browser number of files
+		
+		//iterate all presets
+		for (int i = 0; i < numPresets_OfFavorites; i++)
+		{
+			std::string pathSrc; 
+			std::string pathDst;
+
+			pathSrc = getPresetName(groups[0].getName(), i);
+			boost::filesystem::path bPath(pathSrc);
+
+			//string pathFolder = ofToString(bPath.parent_path());
+			string fileName = ofToString(bPath.filename().generic_string());
+			pathDst = browser_path + "/" + fileName;
+
+			ofLogNotice("ofxPresetsManager") << "pathSrc: " << pathSrc;
+			ofLogNotice("ofxPresetsManager") << "pathDst: " << pathDst;
+
+			ofFile file;
+			file.copyFromTo(pathSrc, pathDst, true, true);//relative, overwrite
+
+			//--
+
+			//refresh files
+			browser_FilesRefresh();
+		}
+	}
+
+#endif//end browser
+
+	//----
+
 
 	//layout
 	ofVec2f guiPos_InternalControl = ofVec2f(500, 500);
@@ -584,11 +628,11 @@ private:
 
 	//--
 
-	std::vector<int> lastIndices;//?
+	std::vector<int> lastIndices;//? this seems to be the last selected of any group(?)
 	//TODO:
 	//lastIndices it's the gui box clicked only, not important.. ?
-	
-	std::vector<int> presets;//?
+
+	std::vector<int> presets;//? this seems to be the number of presets each group(?)
 
 	//--
 
@@ -614,9 +658,9 @@ private:
 	bool lastMouseButtonState;
 	void mousePressed(int x, int y);
 
-	std::vector<int> newIndices;
+	std::vector<int> newIndices;//? this seems to be the number of the groups(? )
 
-	int num_presets;//amount of handled presets on current kit
+	int numPresets_OfFavorites;//amount of box-clickable handled presets on current favorites/kit [8]
 
 	//---
 

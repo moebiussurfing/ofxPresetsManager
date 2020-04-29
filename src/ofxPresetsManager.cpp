@@ -79,8 +79,8 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//control parameters
 
-	PRESET_selected.set("PRESETS", 1, 1, num_presets);
-	//PRESET2_selected.set("PRESETS2", 1, 1, num_presets);//this multidimension is for multiple gui/groups (feature not implemented!)
+	PRESET_selected.set("PRESETS", 1, 1, numPresets_OfFavorites);
+	//PRESET2_selected.set("PRESETS2", 1, 1, numPresets_OfFavorites);//this multidimension is for multiple gui/groups (feature not implemented!)
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	MODE_Browser_NewPreset.set("CREATE NEW PRESET", false);
@@ -116,7 +116,6 @@ ofxPresetsManager::ofxPresetsManager()
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
-
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	ImGui_Position.set("GUI BROWSER POSITION",
 		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
@@ -753,11 +752,11 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 	//-
 
 	//update control gui panel params
-	num_presets = _num_presets;
-	PRESET_selected.setMax(num_presets);
+	numPresets_OfFavorites = _num_presets;
+	PRESET_selected.setMax(numPresets_OfFavorites);
 
 	//TODO:
-	//PRESET2_selected.setMax(num_presets);
+	//PRESET2_selected.setMax(numPresets_OfFavorites);
 
 	//-
 
@@ -1269,7 +1268,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 	xIndex = (x > 0) ? xIndex : -1;
 	yIndex = (y > 0) ? yIndex : -1;
 
-	//debug mouse out
+	//debug mouse out of click cells
 	if (false && xIndex != -1 && yIndex != -1)
 		ofLogNotice("ofxPresetsManager") << "mousePressed: (" << xIndex << "," << yIndex << ")";
 
@@ -1284,7 +1283,8 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 		//-
 
-		if (xIndex >= 0 && xIndex < presets[yIndex])//?
+		if (xIndex >= 0 && xIndex < presets[yIndex])//? presets[0] its's the same than numPresets_OfFavorites!
+		//if (xIndex >= 0 && xIndex < numPresets_OfFavorites)
 		{
 			//1. mod controlled by save modeKeySave
 			if (bKeySave)
@@ -1369,7 +1369,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 void ofxPresetsManager::doCloneRight(int pIndex)
 {
 	ofLogNotice("ofxPresetsManager") << "doCloneRight: pIndex: " << pIndex;
-	for (int i = pIndex + 1; i < num_presets; i++)
+	for (int i = pIndex + 1; i < numPresets_OfFavorites; i++)
 	{
 		save(i, 0);//0 is bc it's the only 1st params group implemented
 	}
@@ -1379,7 +1379,7 @@ void ofxPresetsManager::doCloneRight(int pIndex)
 void ofxPresetsManager::doCloneAll()
 {
 	ofLogNotice("ofxPresetsManager") << "doCloneAll";// << pIndex;
-	for (int i = 0; i < num_presets; i++)
+	for (int i = 0; i < numPresets_OfFavorites; i++)
 	{
 		save(i, 0);//0 is bc it's the only 1st params group implemented
 	}
@@ -2086,7 +2086,7 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 		//-
 
-		// save browsed preset to favorites
+		// send/save browsed preset to favorites
 
 		if (ImGui::Button("TO LIVE"))
 		{
@@ -2097,6 +2097,17 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 			{
 				save(PRESET_selected - 1, 0);
 			}
+		}
+
+		//-
+
+		//get/copy all [8] presets from favs and send/save to browser folder ("archive")
+
+		ImGui::SameLine();
+		if (ImGui::Button("FROM FAVS"))
+		{
+			ofLogNotice("ofxPresetsManager") << "FROM FAVS";
+			doGetFavsFromBrowser();
 		}
 
 		//-
@@ -2326,71 +2337,93 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 		//if (ImGui::TreeNode("BROWSER"))
 		//if (ofxImGui::BeginTree("BROWSER", mainSettings))//BUG: disables text input?
 		{
-			//1. arrow buttons
-
-			static int counter = currentFile;
-			float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
-
-			ImGui::PushButtonRepeat(true);
-
-			//--
-
-			//1.1 prev
-
-			if (ImGui::ArrowButton("##left", ImGuiDir_Left))
-			{
-				if (counter > 0)
-				{
-					counter--;
-					currentFile = counter;
-					if (currentFile < files.size())
-					{
-						browser_PresetName = fileNames[currentFile];
-						ofLogNotice("ofxPresetsManager") << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
-
-						//if (MODE_Browser_NewPreset)
-						ofLogNotice("ofxPresetsManager") << "LOAD" << endl;
-						ofLogNotice("ofxPresetsManager") << "Preset Name: " << browser_PresetName;
-						browser_PresetLoad(browser_PresetName);
-					}
-				}
-			}
-
-			//--
-
-			//1.2 next
-
-			ImGui::SameLine(0.0f, spacing);
-			if (ImGui::ArrowButton("##right", ImGuiDir_Right))
-			{
-				if (counter < files.size() - 1)
-				{
-					counter++;
-					currentFile = counter;
-					if (currentFile < files.size())
-					{
-						browser_PresetName = fileNames[currentFile];
-						ofLogNotice("ofxPresetsManager") << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
-
-						//if (MODE_Browser_NewPreset)
-						ofLogNotice("ofxPresetsManager") << "LOAD Preset Name: " << browser_PresetName;
-						browser_PresetLoad(browser_PresetName);
-					}
-				}
-			}
-
-			ImGui::PopButtonRepeat();
-
-			//--
-
-			//1.3 text preview current preset number to total. (1/4)
-
 			int numPresets = fileNames.size();
-			ImGui::SameLine();
-			if (numPresets > 0)
-				ImGui::Text("%d/%d", currentFile + 1, numPresets);
-			else
-				ImGui::Text("%d/%d", 0, numPresets);
+
+			//0. error when no files detected
+
+			if (numPresets == 0)
+			{
+				int n = 30;
+				float a = ofMap(ofGetFrameNum() % n, 0, n, 0.f, 1.f);
+
+				//ImGui::PushID(1);
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+
+				ImGui::Text("DIR NOT FOUND!");
+
+				ImGui::PopStyleColor(1);
+				//ImGui::PopID();
+			}
+
+			else if (numPresets > 0)
+			{
+				//1. arrow buttons
+
+				static int counter = currentFile;
+				float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+
+				ImGui::PushButtonRepeat(true);
+
+				//--
+
+				//1.1 prev
+
+				if (ImGui::ArrowButton("##left", ImGuiDir_Left))
+				{
+					if (counter > 0)
+					{
+						counter--;
+						currentFile = counter;
+						if (currentFile < files.size())
+						{
+							browser_PresetName = fileNames[currentFile];
+							ofLogNotice("ofxPresetsManager") << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
+
+							//if (MODE_Browser_NewPreset)
+							ofLogNotice("ofxPresetsManager") << "LOAD" << endl;
+							ofLogNotice("ofxPresetsManager") << "Preset Name: " << browser_PresetName;
+							browser_PresetLoad(browser_PresetName);
+						}
+					}
+				}
+
+				//--
+
+				//1.2 next
+
+				ImGui::SameLine(0.0f, spacing);
+				if (ImGui::ArrowButton("##right", ImGuiDir_Right))
+				{
+					if (counter < files.size() - 1)
+					{
+						counter++;
+						currentFile = counter;
+						if (currentFile < files.size())
+						{
+							browser_PresetName = fileNames[currentFile];
+							ofLogNotice("ofxPresetsManager") << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
+
+							//if (MODE_Browser_NewPreset)
+							ofLogNotice("ofxPresetsManager") << "LOAD Preset Name: " << browser_PresetName;
+							browser_PresetLoad(browser_PresetName);
+						}
+					}
+				}
+
+				ImGui::PopButtonRepeat();
+
+				//--
+
+				//1.3 text preview current preset number to total. (1/4)
+
+				ImGui::SameLine();
+				//if (numPresets > 0)
+				{
+					ImGui::Text("%d/%d", currentFile + 1, numPresets);
+					//ImGui::Text("%d/%d", 0, numPresets);
+				}
+			}
+
 
 			//--
 
@@ -2831,7 +2864,7 @@ void ofxPresetsManager::loadPreset(int p)
 		ofLogNotice("ofxPresetsManager") << "loadPreset(" << ofToString(p) << ")";
 		ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";
 
-		if (PRESET_selected > 0 && PRESET_selected <= num_presets)
+		if (PRESET_selected > 0 && PRESET_selected <= numPresets_OfFavorites)
 		{
 			PRESET_selected = p;
 			//ofLogNotice("ofxPresetsManager") << ".";
@@ -2856,7 +2889,8 @@ void ofxPresetsManager::browser_ImGui_theme()
 
 	style->WindowMinSize = ImVec2(160, 65);
 	style->FramePadding = ImVec2(4, 2);
-	style->ItemSpacing = ImVec2(6, 2);
+	//style->ItemSpacing = ImVec2(6, 2);
+	style->ItemSpacing = ImVec2(6, 4);
 	style->ItemInnerSpacing = ImVec2(6, 4);
 	style->Alpha = 1.0f;
 	style->WindowRounding = 0.0f;
