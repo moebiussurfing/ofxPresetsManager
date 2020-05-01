@@ -1750,16 +1750,16 @@ void ofxPresetsManager::save_ControlSettings()
 	//---
 
 //#ifdef INCLUDE_FILE_BROWSER_IM_GUI
-//////BUG: can't get gui settings...
-////	//gui_Browser.~Gui.get
-////	auto settings = ofxImGui::Settings();
-////	auto p = settings.windowPos;
-////	auto w = settings.windowSize;
-////	ImGui_Position = glm::vec2(p.x, p.y);
-//////
-////	//cout << "pos:" << ofToString(p) << endl;
-////	//cout << "size:" << ofToString(w) << endl;
-////	//cout << "ImGui_Position:" << ofToString(ImGui_Position.get()) << endl;
+//	//BUG: can't get gui settings...
+//	//gui_Browser.~Gui.get
+//	auto settings = ofxImGui::Settings();
+//	auto p = settings.windowPos;
+//	auto w = settings.windowSize;
+//	ImGui_Position = glm::vec2(p.x, p.y);
+//
+//	//cout << "pos:" << ofToString(p) << endl;
+//	//cout << "size:" << ofToString(w) << endl;
+//	//cout << "ImGui_Position:" << ofToString(ImGui_Position.get()) << endl;
 //#endif
 
 	//---
