@@ -88,6 +88,13 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_MenuTopBar.set("SHOW MENU", false);
 
 	browser_PresetName = "NO_NAME_PRESET";//browser loaded preset name
+
+	//radomizer
+	//select a random preset (from 1 to 8)
+	//params_Randomizer.setName("Randomizer");
+	bRandomize.set("RANDOMIZE", false);
+	ENABLE_RandomizeTimer.set("MODE TIMER", false);
+	randomizeSpeedF.set("SPEED", 0.8f, 0.f, 1.f);
 #endif
 
 	bSave.set("SAVE", false);
@@ -189,6 +196,12 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Tools.add(bCloneRight);
 	params_Tools.add(bCloneAll);
 
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+	params_Tools.add(bRandomize);
+	params_Tools.add(ENABLE_RandomizeTimer);
+	params_Tools.add(randomizeSpeedF);
+#endif
+
 	//all nested params for callbacks and storage settings
 	params_Control.setName("ofxPresetsManager");
 	params_Control.add(params_Favorites);
@@ -200,7 +213,7 @@ ofxPresetsManager::ofxPresetsManager()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::setPositionDEBUG(int x, int y)
+void ofxPresetsManager::setPosition_DEBUG(int x, int y)
 {
 	errorsDEBUG.setPosition(x, y);
 }
@@ -318,7 +331,7 @@ void ofxPresetsManager::setup()
 	//TODO:
 	//PRESET_selected_PRE = -1;
 
-	set_GUI_Internal_Visible(false);
+	setVisible_GUI_Internal(false);
 
 	//--------
 
@@ -348,6 +361,21 @@ void ofxPresetsManager::windowResized(int w, int h)
 //--------------------------------------------------------------
 void ofxPresetsManager::update(ofEventArgs & args)
 {
+	//-
+
+	//randomize timer
+	if (ENABLE_RandomizeTimer)
+	{
+		uint32_t _time = ofGetElapsedTimeMillis();
+
+		if (_time - randomizerTimer > (randomize_MAX_DURATION*(1.f - randomizeSpeedF)))
+		{
+			bRandomize = true;
+		}
+	}
+
+	//-
+
 	//plotters
 	//TS_START("load1");
 	//TS_STOP("load1");
@@ -425,7 +453,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	//(from live kit/favorites)
 	if (SHOW_ClickPanel)
 	{
-		draw_CLICKER();
+		drawPresetClicker();
 	}
 
 	//----
@@ -459,7 +487,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 
 
 //--------------------------------------------------------------
-void ofxPresetsManager::draw_CLICKER()
+void ofxPresetsManager::drawPresetClicker()
 {
 	//user trigger boxes clickable selector and save button
 	//draws some minimalistic graphics to monitor the active preset
@@ -1147,14 +1175,22 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		else if (key == 'g')
 		{
 			SHOW_Gui_Internal = !SHOW_Gui_Internal;
-			//bool b = get_GUI_Internal_Visible();
-			//set_GUI_Internal_Visible(!b);
+			//bool b = isVisible_GUI_Internal();
+			//setVisible_GUI_Internal(!b);
 		}
 
 		//if (key == 'g')
 		//{
-		//	set_CLICKER_Visible(!is_CLICKER_Visible());
+		//	setVisible_PresetClicker(!isVisible_PresetClicker());
 		//}
+
+		//-
+
+		//timer to randomize and choice a random preset from the kit
+		if (key == 'R')
+		{
+			setToggleRandomizerPreset();
+		}
 
 		//-
 
@@ -1424,7 +1460,7 @@ void ofxPresetsManager::doSave(int pIndex)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::toggleKeysControl(bool active)
+void ofxPresetsManager::setToggleKeysControl(bool active)
 {
 	bKeys = active;
 }
@@ -1471,6 +1507,43 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			bCloneAll = false;
 			doCloneAll();
 		}
+
+		//--
+
+		//randomizer
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+		else if (name == "RANDOMIZE" && bRandomize)
+		{
+			ofLogNotice("ofxPresetsManager") << "RANDOMIZE: " << e;
+			bRandomize = false;
+
+			//avoid random is the same previuous preset (TODO:improve)
+			
+			int _r = PRESET_selected;
+			while (_r == PRESET_selected)
+			{
+				_r = (int)ofRandom(1, 9);
+			}
+			loadPreset(_r);
+
+			//-
+
+			//start timer again
+			if (ENABLE_RandomizeTimer)
+			{
+				randomizerTimer = ofGetElapsedTimeMillis();
+			}
+		}
+		else if (name == "MODE TIMER")
+		{
+			ofLogNotice("ofxPresetsManager") << "MODE TIMER: " << e;
+		}
+		else if (name == "SPEED")
+		{
+			ofLogNotice("ofxPresetsManager") << "SPEED: " << e;
+			//randomizeSpeedF;
+		}
+#endif
 
 		//--
 
@@ -1763,19 +1836,19 @@ void ofxPresetsManager::save_ControlSettings()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::set_Path_KitFolder(string folder)
+void ofxPresetsManager::setPath_KitFolder(string folder)
 {
 	path_Kit_Folder = folder;
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::set_Path_PresetsFolder(string folder)
+void ofxPresetsManager::setPath_PresetsFolder(string folder)
 {
 	path_PresetsFolder = folder;
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::set_Path_GlobalFolder(string folder)
+void ofxPresetsManager::setPath_GlobalFolder(string folder)
 {
 	path_GLOBAL_Folder = folder;
 }
@@ -1987,7 +2060,12 @@ bool ofxPresetsManager::browser_draw_ImGui()
 			bMouseOver_Changed = false;
 			bImGui_mouseOver = false;
 
+			//-
+
+			//gui
 			bImGui_mouseOver = browser_draw_ImGui_Browser();
+
+			//-
 
 			if (bImGui_mouseOver != bImGui_mouseOver_PRE)
 			{
@@ -2168,8 +2246,26 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 		//-
 
-		ofxImGui::AddParameter(this->SHOW_Gui_Internal);
+		//randomizer
+		if (ImGui::TreeNode("RANDOMIZER"))
+		{
 
+			if (ImGui::Button("RANDOMIZE"))
+			{
+				bRandomize = true;
+			}
+			//ofxImGui::AddParameter(this->bRandomize);
+			ofxImGui::AddParameter(this->ENABLE_RandomizeTimer);
+
+			//ImGui::SetNextItemWidth(100);
+			ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.5f);
+			ofxImGui::AddParameter(this->randomizeSpeedF);
+			ImGui::TreePop();
+		}
+
+		//-
+
+		ofxImGui::AddParameter(this->SHOW_Gui_Internal);
 
 		//--
 		////ofxImGui::EndTree(settings);
@@ -2346,6 +2442,8 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 	mainSettings.windowSize = size;
 	//cout << "browser_draw_ImGui_Browser pos: " << pos << endl;
 
+	ImGui::SetNextWindowSize(ofVec2f(pos.x, pos.y), ImGuiCond_Always);
+
 	//const ImVec2 size(300, 200);
 	//bool open = true;
 	//float alpha = 0.90f;
@@ -2365,7 +2463,7 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 
 	//NOTE:
 	//seems that window (not tree) is required to allow text input stills inside box...
-	
+
 	string _name;
 	//_name = "PRESET MANAGER";
 	//_name = "PRESET MANAGER  [" + groups[0].getName() + "]";
@@ -2384,7 +2482,7 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 		//ImGui::Push
 
 		//-- 
-		   
+
 		//if (ImGui::TreeNode("BROWSER"))
 		//if (ofxImGui::BeginTree("BROWSER", mainSettings))//BUG: disables text input?
 		{
@@ -2483,6 +2581,7 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 			if (!fileNames.empty())
 			{
 				int currentFileIndex = currentFile;
+				ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.9f);
 				if (ofxImGui::VectorCombo(" ", &currentFileIndex, fileNames))
 				{
 					ofLogNotice("ofxPresetsManager") << "Preset Index: " << ofToString(currentFileIndex);

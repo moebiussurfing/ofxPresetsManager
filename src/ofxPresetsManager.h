@@ -145,6 +145,15 @@ private:
 	void load_AllKit_ToMemory();
 	void save_AllKit_FromMemory();
 
+	//randomizer
+	//ofParameterGroup params_Randomizer;
+	ofParameter<bool> bRandomize;
+	ofParameter<bool> ENABLE_RandomizeTimer;
+	ofParameter<float> randomizeSpeedF;
+	int randomizeSpeed;//real time dureation
+	uint32_t randomizerTimer;
+	int randomize_MAX_DURATION = 5000;
+
 	////TODO:
 	//ofParameterGroup group_TARGET;
 	//void addGroup_TARGET(ofParameterGroup &g);	
@@ -183,11 +192,11 @@ public:
 
 	//-
 
-	void draw_CLICKER();//user clickeable box panel preset selector
+	void drawPresetClicker();//user clickeable box panel preset selector
 
 	//-
 
-#pragma mark - DIFFERENT DATA TYPES METHODS
+#pragma mark - DIFFERENT_DATA_TYPES_METHODS
 
 	void add(ofParameterGroup params, int numPresets = 8);//add a param group for preset saving
 	void add(ofParameterGroup params, initializer_list<int> keysList);//adds and activate keys to switch
@@ -244,17 +253,17 @@ public:
 
 	//-
 
-	void setPositionDEBUG(int x, int y);
+	void setPosition_DEBUG(int x, int y);
 
-	float getPresetCLICKER_Width()
+	float getPresetClicker_Width()
 	{
 		return clicker_cellSize * (keys[0].size() + 1);
 	}
-	float getPresetCLICKER_BoxSize()
+	float getPresetClicker_BoxSize()
 	{
 		return clicker_cellSize;
 	}
-	float getPresetCLICKER_Height()
+	float getPresetClicker_Height()
 	{
 		return clicker_cellSize;
 	}
@@ -265,13 +274,13 @@ public:
 	void setModeKeySwap(int key);//set the key you have to hold for swap, default is OF_KEY_ALT
 
 	//set keys active
-	void set_ENABLE_Keys(bool active)
+	void setEnableKeys(bool active)
 	{
 		bKeys = active;
 		ENABLE_Keys = active;
 	}
 
-	void toggle_ENABLE_Keys()
+	void setToggleEnableKeys()
 	{
 		ENABLE_Keys = !ENABLE_Keys;
 		bKeys = ENABLE_Keys;
@@ -315,9 +324,22 @@ public:
 
 	//-
 
-	void setShowGroupName(bool b)//disabler for minimal design
+	void setVisible_GroupName(bool b)//disabler for minimal design
 	{
 		SHOW_GroupName = b;
+	}
+
+	//--
+
+	//randomizer
+public:
+	void setModeRandomizerPreset(bool b)
+	{
+		ENABLE_RandomizeTimer = b;
+	}
+	void setToggleRandomizerPreset()
+	{
+		ENABLE_RandomizeTimer = !ENABLE_RandomizeTimer;
 	}
 
 	//--
@@ -334,7 +356,7 @@ private:
 
 public:
 
-	bool mustTrig()//trig on select preset or not
+	bool isMustTrig()//trig on select preset or not
 	{
 		if (bMustTrig)
 		{
@@ -386,56 +408,60 @@ public:
 		ofLogNotice("ofxPresetsManager") << "Preset " << PRESET_selected;
 	}
 
-	void setHelpVisible(bool b)
+	void setVisible_Help(bool b)
 	{
 		debugClicker = b;
 	}
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
-	void set_GUI_PositionBrowser(int x, int y)
+	void setPosition_GUI_Browser(int x, int y)
 	{
 		ImGui_Position = ofVec2f(x, y);
 	}
-	void set_GUI_SizeBrowser(int w, int h)
+	void setSize_GUI_Browser(int w, int h)
 	{
 		ImGui_Size = ofVec2f(w, h);
 	}
+	void setVisible_GUI_Browser(bool b)
+	{
+		SHOW_Browser = b;
+	}
 #endif
 
-	void set_GUI_PositionInternalControl(int x, int y)
+	void setPosition_GUI_InternalControl(int x, int y)
 	{
 		guiPos_InternalControl = ofVec2f(x, y);
 		gui_InternalControl.setPosition(guiPos_InternalControl.x, guiPos_InternalControl.y);
 	}
 
-	void set_GUI_Internal_Visible(bool visible)
+	void setVisible_GUI_Internal(bool visible)
 	{
 		SHOW_Gui_Internal = visible;
 	}
 
-	bool get_GUI_Internal_Visible()
+	bool isVisible_GUI_Internal()
 	{
 		return SHOW_Gui_Internal;
 	}
 
-	void toggle_GUI_Internal_Visible()
+	void setToggleVisible_GUI_Internal()
 	{
 		SHOW_Gui_Internal = !SHOW_Gui_Internal;
 	}
 
-	void set_CLICKER_Position(int x, int y, int _cellSize)
+	void setPosition_PresetClicker(int x, int y, int _cellSize)
 	{
 		clicker_Pos.x = x;
 		clicker_Pos.y = y;
 		clicker_cellSize = _cellSize;
 	}
 
-	void set_CLICKER_Visible(bool visible)
+	void setVisible_PresetClicker(bool visible)
 	{
 		SHOW_ClickPanel = visible;
 	}
 
-	bool is_CLICKER_Visible()
+	bool isVisible_PresetClicker()
 	{
 		return SHOW_ClickPanel;
 	}
@@ -444,14 +470,14 @@ public:
 
 #pragma mark - SETTINGS
 
-	void set_Path_ControlSettings(string str)//main addon settings
+	void setPath_ControlSettings(string str)//main addon settings
 	{
 		path_Control = str;
 	}
 
-	void set_Path_KitFolder(string folder);//path folder for favorite/live presets
-	void set_Path_PresetsFolder(string folder);//path folder for kit for the browser
-	void set_Path_GlobalFolder(string folder);//path for root container folder
+	void setPath_KitFolder(string folder);//path folder for favorite/live presets
+	void setPath_PresetsFolder(string folder);//path folder for kit for the browser
+	void setPath_GlobalFolder(string folder);//path for root container folder
 
 	void setAutoLoad(bool b)
 	{
@@ -487,7 +513,7 @@ private:
 public:
 
 	//switch on or off the control with the keys
-	void toggleKeysControl(bool active);
+	void setToggleKeysControl(bool active);
 
 	//-
 
@@ -559,7 +585,7 @@ private:
 	//-
 
 public:
-	bool getIsMouseOver()
+	bool isMouseOver()
 	{
 		return bImGui_mouseOver;
 	}
@@ -767,7 +793,7 @@ public:
 
 public:
 
-	void set_ENABLE_KeysArrowBrowse(bool b)
+	void setEnableKeysArrowBrowse(bool b)
 	{
 		ENABLE_KeysArrowBrowse = b;
 	}
