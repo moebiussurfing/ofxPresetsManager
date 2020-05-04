@@ -83,9 +83,9 @@ ofxPresetsManager::ofxPresetsManager()
 	//PRESET2_selected.set("PRESETS2", 1, 1, numPresets_OfFavorites);//this multidimension is for multiple gui/groups (feature not implemented!)
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
-	MODE_Browser_NewPreset.set("CREATE NEW PRESET", false);
+	MODE_Browser_NewPreset.set("NEW!", false);
 	SHOW_Browser.set("SHOW BROWSER", false);
-	SHOW_MenuTopBar.set("SHOW MENU", false);
+	//SHOW_MenuTopBar.set("SHOW MENU", false);
 
 	browser_PresetName = "NO_NAME_PRESET";//browser loaded preset name
 
@@ -130,7 +130,7 @@ ofxPresetsManager::ofxPresetsManager()
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
 	ImGui_Size.set("GUI BROWSER SIZE",
-		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
+		glm::vec2(100, 0),
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
@@ -197,9 +197,9 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Tools.add(bCloneAll);
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
-	params_Tools.add(bRandomize);
 	params_Tools.add(ENABLE_RandomizeTimer);
 	params_Tools.add(randomizeSpeedF);
+	params_Tools.add(bRandomize);
 #endif
 
 	//all nested params for callbacks and storage settings
@@ -1172,7 +1172,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//TODO: 
 		//controlled from outside
 		//hide/show control gui
-		else if (key == 'g')
+		else if (key == 'G')
 		{
 			SHOW_Gui_Internal = !SHOW_Gui_Internal;
 			//bool b = isVisible_GUI_Internal();
@@ -1518,7 +1518,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			bRandomize = false;
 
 			//avoid random is the same previuous preset (TODO:improve)
-			
+
 			int _r = PRESET_selected;
 			while (_r == PRESET_selected)
 			{
@@ -2184,8 +2184,16 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 	{
 		//TODO:
 		// toggle
+
+		ImGui::SetNextItemWidth(100);
 		ofxImGui::AddParameter(this->MODE_Browser_NewPreset);
 		//ofxImGui::AddParameter(this->SHOW_Browser);//this
+
+		//-
+
+		ofxImGui::AddParameter(this->SHOW_Gui_Internal);
+		ofxImGui::AddParameter(this->SHOW_ClickPanel);
+		ofxImGui::AddParameter(this->SHOW_Browser);
 
 		//-
 
@@ -2235,7 +2243,9 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 		//-
 
 		//ofxImGui::AddGroup(this->params_Favorites, previewSettings);
-		//ofxImGui::AddParameter(this->PRESET_selected);//TODO: customize width to make stretch
+
+		ImGui::SetNextItemWidth(100);
+		ofxImGui::AddParameter(this->PRESET_selected);//TODO: customize width to make stretch
 		//ofxImGui::AddParameter(this->bSave);
 
 		//-
@@ -2249,23 +2259,20 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 		//randomizer
 		if (ImGui::TreeNode("RANDOMIZER"))
 		{
+			ofxImGui::AddParameter(this->ENABLE_RandomizeTimer);
 
 			if (ImGui::Button("RANDOMIZE"))
 			{
 				bRandomize = true;
 			}
 			//ofxImGui::AddParameter(this->bRandomize);
-			ofxImGui::AddParameter(this->ENABLE_RandomizeTimer);
 
-			//ImGui::SetNextItemWidth(100);
-			ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.5f);
+			ImGui::SetNextItemWidth(100);
+			//ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.5f);
 			ofxImGui::AddParameter(this->randomizeSpeedF);
+
 			ImGui::TreePop();
 		}
-
-		//-
-
-		ofxImGui::AddParameter(this->SHOW_Gui_Internal);
 
 		//--
 		////ofxImGui::EndTree(settings);
@@ -2273,44 +2280,44 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 	}
 }
 
-//--------------------------------------------------------------
-void ofxPresetsManager::browser_draw_ImGui_MenuBar()
-{
-	if (ImGui::BeginMainMenuBar())
-	{
-		if (ImGui::BeginMenu("File"))
-		{
-			browser_draw_ImGui_MenuFile();
-			ImGui::EndMenu();
-		}
-		ImGui::EndMainMenuBar();
-	}
-}
-
-//--------------------------------------------------------------
-void ofxPresetsManager::browser_draw_ImGui_MenuFile()
-{
-	if (ImGui::MenuItem("New"))
-	{
-	}
-	if (ImGui::MenuItem("Open", "l"))
-	{
-		//gui_loadFromFile("settings.xml", params_Control);
-	}
-	if (ImGui::MenuItem("Save", "s"))
-	{
-		//gui_saveToFile("settings.xml", params_Control);
-	}
-	if (ImGui::MenuItem("Save As.."))
-	{
-		//gui_SaveAsSettings();
-	}
-	ImGui::Separator();
-	ImGui::Separator();
-	if (ImGui::MenuItem("Quit", "ESQ"))
-	{
-	}
-}
+////--------------------------------------------------------------
+//void ofxPresetsManager::browser_draw_ImGui_MenuBar()
+//{
+//	if (ImGui::BeginMainMenuBar())
+//	{
+//		if (ImGui::BeginMenu("File"))
+//		{
+//			browser_draw_ImGui_MenuFile();
+//			ImGui::EndMenu();
+//		}
+//		ImGui::EndMainMenuBar();
+//	}
+//}
+//
+////--------------------------------------------------------------
+//void ofxPresetsManager::browser_draw_ImGui_MenuFile()
+//{
+//	if (ImGui::MenuItem("New"))
+//	{
+//	}
+//	if (ImGui::MenuItem("Open", "l"))
+//	{
+//		//gui_loadFromFile("settings.xml", params_Control);
+//	}
+//	if (ImGui::MenuItem("Save", "s"))
+//	{
+//		//gui_saveToFile("settings.xml", params_Control);
+//	}
+//	if (ImGui::MenuItem("Save As.."))
+//	{
+//		//gui_SaveAsSettings();
+//	}
+//	ImGui::Separator();
+//	ImGui::Separator();
+//	if (ImGui::MenuItem("Quit", "ESQ"))
+//	{
+//	}
+//}
 
 ////TODO: 
 ////DEBUG:
@@ -2442,7 +2449,8 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 	mainSettings.windowSize = size;
 	//cout << "browser_draw_ImGui_Browser pos: " << pos << endl;
 
-	ImGui::SetNextWindowSize(ofVec2f(pos.x, pos.y), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), ImGuiCond_Always);
 
 	//const ImVec2 size(300, 200);
 	//bool open = true;
@@ -2465,9 +2473,9 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 	//seems that window (not tree) is required to allow text input stills inside box...
 
 	string _name;
+	_name = groups[0].getName();
 	//_name = "PRESET MANAGER";
 	//_name = "PRESET MANAGER  [" + groups[0].getName() + "]";
-	_name = groups[0].getName();
 
 	if (ofxImGui::BeginWindow(_name, mainSettings, false))
 	{
@@ -2581,7 +2589,8 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 			if (!fileNames.empty())
 			{
 				int currentFileIndex = currentFile;
-				ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.9f);
+				//ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.9f);
+				ImGui::SetNextItemWidth(170);
 				if (ofxImGui::VectorCombo(" ", &currentFileIndex, fileNames))
 				{
 					ofLogNotice("ofxPresetsManager") << "Preset Index: " << ofToString(currentFileIndex);
@@ -2754,11 +2763,6 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 				strncpy(tab, textInput_New.c_str(), sizeof(tab));
 				tab[sizeof(tab) - 1] = 0;
 
-				////TODO:
-				//bool bBlink;
-				////bBlink = false;
-				//bBlink = true;
-
 				if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
 				{
 					ofLogNotice("ofxPresetsManager") << "InputText [tab]:" << ofToString(tab) << endl;
@@ -2775,14 +2779,16 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 				//workflow
 
 				//blink when it's editing a new preset..
-
-				//if (bBlink)
-				//{
-				//	ImGui::PushID(1);
-				//	int n = 30;
-				//	float a = ofMap(ofGetFrameNum() % n, 0, n, 0.2f, 0.5f);
-				//	ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
-				//}
+				//TODO:
+				bool bBlink;
+				bBlink = true;
+				if (bBlink)
+				{
+					//ImGui::PushID(1);
+					int n = 30;
+					float a = ofMap(ofGetFrameNum() % n, 0, n, 0.2f, 0.5f);
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+				}
 
 				if (ImGui::Button("SAVE"))
 				{
@@ -2817,11 +2823,10 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 					browser_PresetLoad(textInput_New);
 				}
 
-				//if (bBlink)
-				//{
-				//	ImGui::PopStyleColor(1);
-				//	ImGui::PopID();
-				//}
+				if (bBlink)
+				{
+					ImGui::PopStyleColor(1);
+				}
 			}
 
 
@@ -2914,6 +2919,8 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	string _path;
 	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
 
+	//-
+
 	//TODO:
 	//if (!bCustomBrowserPath)
 	//	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
@@ -2922,6 +2929,24 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	//ofLogNotice("ofxPresetsManager") << "Path: " << _path;
 
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
+
+	//-
+
+	//TODO:
+	//make above code to function
+	//create folder if do not exist!
+	if (!dataDirectory.isDirectory())
+	{
+		ofLogError("ofxPresetsManager") << "FOLDER DOES NOT EXIST!";
+		bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
+		if (b)
+			ofLogNotice("ofxPresetsManager") << "CREATED FOLDER: " << _path;
+		else
+			ofLogError("ofxPresetsManager") << "UNABLE TO CREATE FOLDER: " << _path;
+
+	}
+
+	//-
 
 	//ofDirectory dataDirectory;
 	//if (!bCustomBrowserPath)
@@ -2977,7 +3002,7 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	}
 	else
 	{
-		ofLogError("ofxPresetsManager") << "BROWSER FILES NOT FOUND!";
+		ofLogError("ofxPresetsManager") << "BROWSER: FILES NOT FOUND ON FOLDER!";
 		bFilesError = true;
 
 		//TODO:
