@@ -2,5 +2,4 @@ ofxDEBUG_errors
 ofxGui
 ofxImGui
 ofxPresetsManager
-ofxSerializer
 ofxWindowApp

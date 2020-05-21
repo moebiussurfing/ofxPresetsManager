@@ -19,22 +19,22 @@
 
 
 ///----------------------------------------------
-
-//DEFINES
-
-//browser system
+///
+///	DEFINES
+///
+///browser system
 #define INCLUDE_FILE_BROWSER_IM_GUI
-//BUG: seems to make exceptions when multiple ImGui/ofxPresetsManager instances...
-
-//debug errors
+///BUG: seems to make exceptions when multiple ImGui/ofxPresetsManager instances...
+///
+///debug errors
 #define INCLUDE_DEBUG_ERRORS
-
-//disable save settings
-//#define DEBUG_BLOCK_SAVE_SETTINGS//enable this bc sometimes there's crashes on exit
-
-//measure performance ofxTimeMeasurements
-//#define TIME_SAMPLE_MEASURES 
-
+///
+///disable save settings
+///#define DEBUG_BLOCK_SAVE_SETTINGS//enable this bc sometimes there's crashes on exit
+///
+///measure performance ofxTimeMeasurements
+///#define TIME_SAMPLE_MEASURES 
+///
 ///----------------------------------------------
 
 
@@ -587,7 +587,10 @@ private:
 public:
 	bool isMouseOver()
 	{
-		return bImGui_mouseOver;
+		bool b;
+		if (!SHOW_Browser) b = false;
+		else b = bImGui_mouseOver;
+		return b;
 	}
 
 	//bool isMouseOver_Changed()

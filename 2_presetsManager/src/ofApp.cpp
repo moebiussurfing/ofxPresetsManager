@@ -44,9 +44,9 @@ void ofApp::setup()
 	//they must be created before we can write inside!
 	//also file settings must (maybe) be located there to avoid startup crashes!
 
-	presetsManager.set_Path_GlobalFolder("ofxPresetsManager");//main container folder
-	presetsManager.set_Path_KitFolder("presets");//from kit/livePanel presets
-	presetsManager.set_Path_PresetsFolder("archive");//for browser file presets
+	presetsManager.setPath_GlobalFolder("ofxPresetsManager");//main container folder
+	presetsManager.setPath_KitFolder("presets");//from kit/livePanel presets
+	presetsManager.setPath_PresetsFolder("archive");//for browser file presets
 
 	//-
 
@@ -78,8 +78,8 @@ void ofApp::setup()
 	//customize gui positions
 
 	//user clicker
-	presetsManager.set_CLICKER_Visible(true);
-	presetsManager.set_CLICKER_Position(400, ofGetHeight() - 200, 50);//position and boxes sizes
+	presetsManager.setVisible_PresetClicker(true);
+	presetsManager.setPosition_PresetClicker(400, ofGetHeight() - 200, 50);//position and boxes sizes
 
 	//ofxGui show/hide internal control gui
 	//this panel have mainly all the addon controls. not all are important to the user.
@@ -214,10 +214,11 @@ void ofApp::keyPressed(int key)
 		//switch keys control enabled
 		if (key == OF_KEY_TAB)
 		{
-			presetsManager.toggle_ENABLE_Keys();
+			presetsManager.setToggleEnableKeys();
 			//presetsManager.set_ENABLE_Keys(!presetsManager.isKeysEnabled());
 		}
 
+		//TODO:
 		//load preset by code
 		//if (key == 'a')
 		//{

@@ -123,6 +123,7 @@ ofxPresetsManager::ofxPresetsManager()
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
+
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	ImGui_Position.set("GUI BROWSER POSITION",
 		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
@@ -152,7 +153,7 @@ ofxPresetsManager::ofxPresetsManager()
 	saveFromMemory.setSerializable(false);
 	//SHOW_Gui_Internal.setSerializable(false);
 
-	params_Tools.setSerializable(false);
+	//params_Tools.setSerializable(false);
 
 	//-
 
@@ -351,7 +352,7 @@ void ofxPresetsManager::windowResized(int w, int h)
 {
 	ofLogNotice("ofxPresetsManager") << "windowResized: " << w << "," << h;
 
-	//	//use this bc save/load is not working
+	////use this bc save/load is not working
 	//#ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	//	ImGui_Size = glm::vec2(250, 0);//width/height
 	//	ImGui_Position = glm::vec2(w - ImGui_Size.get().x - 10, 10);
@@ -377,12 +378,14 @@ void ofxPresetsManager::update(ofEventArgs & args)
 	//-
 
 	//plotters
-	//TS_START("load1");
-	//TS_STOP("load1");
-	//TS_START("load2");
-	//TS_STOP("load2");
-	//TS_START("loadMem");
-	//TS_STOP("loadMem");
+#ifdef TIME_SAMPLE_MEASURES 
+	TS_START("load1");
+	TS_STOP("load1");
+	TS_START("load2");
+	TS_STOP("load2");
+	TS_START("loadMem");
+	TS_STOP("loadMem");
+#endif
 
 	//--
 
@@ -413,14 +416,6 @@ void ofxPresetsManager::update(ofEventArgs & args)
 			//MODE B: direct from memory
 			save_AllKit_FromMemory();
 		}
-
-		//-
-
-		//DISABLE_Callbacks = true;
-		////get gui position before save
-		//Gui_Internal_Position = glm::vec2(gui.getPosition());
-		//saveParams(params_Control, path_GLOBAL + path_Params);
-		//DISABLE_Callbacks = false;
 
 		//-
 
@@ -470,19 +465,6 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 		//bImGui_mouseOver = browser_draw_ImGui();
 	}
 #endif
-
-	//--
-
-	//TODO
-	////groupDebug
-	//{
-	//   ofParameterGroup g;
-	//   if (groups.size() > 0)
-	//   {
-	//       g = groups[0];
-	//       groupDebug(g);
-	//   }
-	//}
 }
 
 
@@ -1119,8 +1101,8 @@ int ofxPresetsManager::getGuiIndex(string name) const
 		{
 			return i;
 		}
-		return -1;
 	}
+	return -1;
 }
 
 //--------------------------------------------------------------
@@ -1175,8 +1157,9 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		else if (key == 'G')
 		{
 			SHOW_Gui_Internal = !SHOW_Gui_Internal;
-			//bool b = isVisible_GUI_Internal();
-			//setVisible_GUI_Internal(!b);
+			setVisible_GUI_Internal(SHOW_Gui_Internal);
+			setVisible_GUI_Browser(SHOW_Gui_Internal);
+			setVisible_PresetClicker(SHOW_Gui_Internal);
 		}
 
 		//if (key == 'g')
@@ -1567,6 +1550,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		else if (name == "GUI BROWSER POSITION")
 		{
 			ofLogVerbose("ofxPresetsManager") << "GUI BROWSER POSITION: " << e;
+
 			////clamp inside window
 			//float x, y;
 			//x = ofClamp(ImGui_Position.get().x, 0, ofGetWidth() - 200);
@@ -2050,9 +2034,6 @@ bool ofxPresetsManager::browser_draw_ImGui()
 
 	if (SHOW_ImGui)//not useful..
 	{
-		//if (ofxImGui::BeginWindow("PRESET MANAGER", mainSettings, false))
-		//{
-		//	ImGui::PushItemWidth(100);
 		{
 			//--
 
@@ -2111,11 +2092,6 @@ bool ofxPresetsManager::browser_draw_ImGui()
 			//ImGui::Separator();
 			*/
 		}
-		/*
-		//	ImGui::PopItemWidth();
-
-		//	ofxImGui::EndWindow(mainSettings);
-		//}
 
 		//-
 
@@ -2151,7 +2127,6 @@ bool ofxPresetsManager::browser_draw_ImGui()
 		//	ImGui::Text("by MoebiusSurfing.");
 		//	ImGui::End();
 		//}
-		*/
 	}
 
 	this->gui_Browser.end();
@@ -2280,160 +2255,6 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 	}
 }
 
-////--------------------------------------------------------------
-//void ofxPresetsManager::browser_draw_ImGui_MenuBar()
-//{
-//	if (ImGui::BeginMainMenuBar())
-//	{
-//		if (ImGui::BeginMenu("File"))
-//		{
-//			browser_draw_ImGui_MenuFile();
-//			ImGui::EndMenu();
-//		}
-//		ImGui::EndMainMenuBar();
-//	}
-//}
-//
-////--------------------------------------------------------------
-//void ofxPresetsManager::browser_draw_ImGui_MenuFile()
-//{
-//	if (ImGui::MenuItem("New"))
-//	{
-//	}
-//	if (ImGui::MenuItem("Open", "l"))
-//	{
-//		//gui_loadFromFile("settings.xml", params_Control);
-//	}
-//	if (ImGui::MenuItem("Save", "s"))
-//	{
-//		//gui_saveToFile("settings.xml", params_Control);
-//	}
-//	if (ImGui::MenuItem("Save As.."))
-//	{
-//		//gui_SaveAsSettings();
-//	}
-//	ImGui::Separator();
-//	ImGui::Separator();
-//	if (ImGui::MenuItem("Quit", "ESQ"))
-//	{
-//	}
-//}
-
-////TODO: 
-////DEBUG:
-////--------------------------------------------------------------
-//void ofxPresetsManager::groupDebug(ofParameterGroup &group)
-//{
-//	string str;
-//	int x = 200;
-//	int y = 100;
-//	int pad = 20;
-//	int i = 0;
-//	int ig = 0;
-//
-//	for (auto parameter : group)
-//	{
-//		//Group.
-//		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
-//		if (parameterGroup)
-//		{
-//			//Recurse through contents.
-//			//ofxImGui::AddGroup(*parameterGroup, settings);
-//			groupDebug(*parameterGroup);
-//
-//			ig++;
-//			str = "group : [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x + ig * 300, y + pad * i++);
-//			continue;
-//		}
-//
-//		//Parameter, try everything we know how to handle.
-//#if OF_VERSION_MINOR >= 10
-//		auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
-//		if (parameterVec2f)
-//		{
-//			//ofxImGui::AddParameter(*parameterVec2f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
-//		if (parameterVec3f)
-//		{
-//			//ofxImGui::AddParameter(*parameterVec3f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
-//		if (parameterVec4f)
-//		{
-//			//ofxImGui::AddParameter(*parameterVec4f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//#endif
-//		auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
-//		if (parameterOfVec2f)
-//		{
-//			//ofxImGui::AddParameter(*parameterOfVec2f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
-//		if (parameterOfVec3f)
-//		{
-//			//ofxImGui::AddParameter(*parameterOfVec3f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
-//		if (parameterOfVec4f)
-//		{
-//			//ofxImGui::AddParameter(*parameterOfVec4f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
-//		if (parameterFloatColor)
-//		{
-//			//ofxImGui::AddParameter(*parameterFloatColor);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
-//		if (parameterFloat)
-//		{
-//			//ofxImGui::AddParameter(*parameterFloat);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
-//		if (parameterInt)
-//		{
-//			//ofxImGui::AddParameter(*parameterInt);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
-//		if (parameterBool)
-//		{
-//			//ofxImGui::AddParameter(*parameterBool);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//
-//		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
-//	}
-//}
 
 //--------------------------------------------------------------
 bool ofxPresetsManager::browser_draw_ImGui_Browser()
@@ -2446,26 +2267,10 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 
 	auto mainSettings = ofxImGui::Settings();
 	mainSettings.windowPos = pos;
-	mainSettings.windowSize = size;
-	//cout << "browser_draw_ImGui_Browser pos: " << pos << endl;
+	//mainSettings.windowSize = size;
 
 	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), ImGuiCond_Always);
-
-	//const ImVec2 size(300, 200);
-	//bool open = true;
-	//float alpha = 0.90f;
-	//ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_ShowBorders;
-	//std::string textBtn = "(" + std::to_string(click_count) + ") Clicks";
-
-	//ImGui::Begin("Primera ventana", &open, size, alpha, windowFlags);
-	//ImGui::Text("Muestra un texto en la ventana.");
-	//if (ImGui::Button(textBtn.c_str())) click_count++;
-	//ImGui::End();
-
-	//{
-	//	ImGui::SetNextWindowPos(ImVec2(pos.x, pos.y));// , ImGuiSetCond_FirstUseEver);
-	//}
+	//ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), ImGuiCond_FirstUseEver);
 
 	//-
 
@@ -2477,7 +2282,8 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 	//_name = "PRESET MANAGER";
 	//_name = "PRESET MANAGER  [" + groups[0].getName() + "]";
 
-	if (ofxImGui::BeginWindow(_name, mainSettings, false))
+	bool _collapse = false;
+	if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
 	{
 		ImGui::Text("PRESET MANAGER");
 
@@ -2485,14 +2291,8 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 
 		browser_draw_ImGui_User(mainSettings);
 
-		//gui_Browser.widget(ImGui::widIMGUI_WIDGET_VERTICAL_SPACING);
-		//gui_Browser.widget(IMGUI_WIDGET_VERTICAL_SPACING);
-		//ImGui::Push
-
 		//-- 
 
-		//if (ImGui::TreeNode("BROWSER"))
-		//if (ofxImGui::BeginTree("BROWSER", mainSettings))//BUG: disables text input?
 		{
 			int numFilePresets = fileNames.size();
 
@@ -2698,60 +2498,14 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 				}
 			}
 
-			//-
-
-			//TODO:
-			//OF listDir don't founds the dir...(maybe bc data/absolute/boost problems)
-			//// 5. customize directory
-			//ImGui::SameLine();
-			//if (ImGui::Button("SET DIR"))//set folder to read presets from
-			//{
-			//	//Open the Open File Dialog
-			//	ofFileDialogResult openFileResult = ofSystemLoadDialog("Select a file from the desired folder");
-
-			//	//Check if the user opened a file
-			//	if (openFileResult.bSuccess)
-			//	{
-			//		ofLogNotice("ofxPresetsManager") << "User selected a file";
-
-			//		//We have a file, check it and process it
-
-			//		string _path = openFileResult.getPath();
-			//		//ofLogNotice("ofxPresetsManager") << "Filename: " + openFileResult.getName();
-			//		//ofLogNotice("ofxPresetsManager") << "Browser Path: " + _path;
-
-			//		boost::filesystem::path p1(_path);
-			//		ofLogNotice("ofxPresetsManager") << "Filename: " << p1.filename();
-			//		ofLogNotice("ofxPresetsManager") << "Browser Path: " << p1.parent_path();
-
-			//		//enable free folder system
-			//		bCustomBrowserPath = true;
-			//		path_BrowserPathFree = ofToString(p1.parent_path());
-
-			//		//refresh files
-			//		browser_FilesRefresh();
-			//	}
-			//	else
-			//	{
-			//		ofLogVerbose("User hit cancel");
-			//	}
-			//}
-
 			//----
-
 
 			//5. second panel (new preset)
 
 			if (MODE_Browser_NewPreset)
 			{
-				//TODO: make space..
-				//ImGui::Separator();
-				//ImGui::Spacing();
-
-				//-
-
-				////5.1 new preset name
-
+				//5.1 new preset name
+				
 				//ImGui::Text("NEW PRESET:");
 
 				//-
@@ -2828,11 +2582,6 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 					ImGui::PopStyleColor(1);
 				}
 			}
-
-
-			//---
-			//ImGui::TreePop();
-			//ofxImGui::EndTree(mainSettings);
 		}
 	}
 	ofxImGui::EndWindow(mainSettings);
@@ -3038,8 +2787,8 @@ void ofxPresetsManager::browser_ImGui_theme()
 
 	ImGuiStyle *style = &ImGui::GetStyle();
 
-	style->WindowMinSize = ImVec2(160, 65);
 	style->FramePadding = ImVec2(4, 2);
+	//style->WindowMinSize = ImVec2(160, 65);
 	//style->ItemSpacing = ImVec2(6, 2);
 	style->ItemSpacing = ImVec2(6, 4);
 	style->ItemInnerSpacing = ImVec2(6, 4);
@@ -3141,19 +2890,19 @@ void ofxPresetsManager::browser_ImGui_theme()
 //
 //}
 
-//--------------------------------------------------------------
-static void ShowHelpMarker(const char *desc)
-{
-	ImGui::TextDisabled("(?)");
-	if (ImGui::IsItemHovered())
-	{
-		ImGui::BeginTooltip();
-		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-		ImGui::TextUnformatted(desc);
-		ImGui::PopTextWrapPos();
-		ImGui::EndTooltip();
-	}
-}
+////--------------------------------------------------------------
+//static void ShowHelpMarker(const char *desc)
+//{
+//	ImGui::TextDisabled("(?)");
+//	if (ImGui::IsItemHovered())
+//	{
+//		ImGui::BeginTooltip();
+//		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+//		ImGui::TextUnformatted(desc);
+//		ImGui::PopTextWrapPos();
+//		ImGui::EndTooltip();
+//	}
+//}
 
 #endif
 
@@ -3170,4 +2919,160 @@ static void ShowHelpMarker(const char *desc)
 //        ofxImGui::AddGroup(*parameterGroup, mainSettings);
 //        continue;
 //    }
+//}
+
+
+////--------------------------------------------------------------
+//void ofxPresetsManager::browser_draw_ImGui_MenuBar()
+//{
+//	if (ImGui::BeginMainMenuBar())
+//	{
+//		if (ImGui::BeginMenu("File"))
+//		{
+//			browser_draw_ImGui_MenuFile();
+//			ImGui::EndMenu();
+//		}
+//		ImGui::EndMainMenuBar();
+//	}
+//}
+//
+////--------------------------------------------------------------
+//void ofxPresetsManager::browser_draw_ImGui_MenuFile()
+//{
+//	if (ImGui::MenuItem("New"))
+//	{
+//	}
+//	if (ImGui::MenuItem("Open", "l"))
+//	{
+//		//gui_loadFromFile("settings.xml", params_Control);
+//	}
+//	if (ImGui::MenuItem("Save", "s"))
+//	{
+//		//gui_saveToFile("settings.xml", params_Control);
+//	}
+//	if (ImGui::MenuItem("Save As.."))
+//	{
+//		//gui_SaveAsSettings();
+//	}
+//	ImGui::Separator();
+//	ImGui::Separator();
+//	if (ImGui::MenuItem("Quit", "ESQ"))
+//	{
+//	}
+//}
+
+////TODO: 
+////DEBUG:
+////--------------------------------------------------------------
+//void ofxPresetsManager::groupDebug(ofParameterGroup &group)
+//{
+//	string str;
+//	int x = 200;
+//	int y = 100;
+//	int pad = 20;
+//	int i = 0;
+//	int ig = 0;
+//
+//	for (auto parameter : group)
+//	{
+//		//Group.
+//		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
+//		if (parameterGroup)
+//		{
+//			//Recurse through contents.
+//			//ofxImGui::AddGroup(*parameterGroup, settings);
+//			groupDebug(*parameterGroup);
+//
+//			ig++;
+//			str = "group : [" + ofToString(i) + "] " + ofToString(parameter->getName());
+//			ofDrawBitmapStringHighlight(str, x + ig * 300, y + pad * i++);
+//			continue;
+//		}
+//
+//		//Parameter, try everything we know how to handle.
+//#if OF_VERSION_MINOR >= 10
+//		auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
+//		if (parameterVec2f)
+//		{
+//			//ofxImGui::AddParameter(*parameterVec2f);
+//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+//			continue;
+//		}
+//		auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
+//		if (parameterVec3f)
+//		{
+//			//ofxImGui::AddParameter(*parameterVec3f);
+//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+//			continue;
+//		}
+//		auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
+//		if (parameterVec4f)
+//		{
+//			//ofxImGui::AddParameter(*parameterVec4f);
+//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+//			continue;
+//		}
+//#endif
+//		auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
+//		if (parameterOfVec2f)
+//		{
+//			//ofxImGui::AddParameter(*parameterOfVec2f);
+//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+//			continue;
+//		}
+//		auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
+//		if (parameterOfVec3f)
+//		{
+//			//ofxImGui::AddParameter(*parameterOfVec3f);
+//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+//			continue;
+//		}
+//		auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
+//		if (parameterOfVec4f)
+//		{
+//			//ofxImGui::AddParameter(*parameterOfVec4f);
+//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+//			continue;
+//		}
+//		auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
+//		if (parameterFloatColor)
+//		{
+//			//ofxImGui::AddParameter(*parameterFloatColor);
+//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+//			continue;
+//		}
+//		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
+//		if (parameterFloat)
+//		{
+//			//ofxImGui::AddParameter(*parameterFloat);
+//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+//			continue;
+//		}
+//		auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
+//		if (parameterInt)
+//		{
+//			//ofxImGui::AddParameter(*parameterInt);
+//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+//			continue;
+//		}
+//		auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
+//		if (parameterBool)
+//		{
+//			//ofxImGui::AddParameter(*parameterBool);
+//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
+//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+//			continue;
+//		}
+//
+//		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
+//	}
 //}
