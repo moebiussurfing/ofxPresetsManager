@@ -686,44 +686,7 @@ void ofxPresetsManager::drawPresetClicker()
 //--------------------------------------------------------------
 ofxPresetsManager::~ofxPresetsManager()
 {
-	exit();
-
-	//--
-
-	/*
-	//ofLogVerbose("ofxPresetsManager") << "~ofxPresetsManager";
-	//DISABLE_CALLBACKS = true;//?
-
-	////autosave PRESET_selected preset on exit
-	//if (autoSave)
-	//{
-	//	doSave(PRESET_selected - 1);
-	//	//doSave2(PRESET2_selected - 1);
-	//}
-
-	////TODO:
-	////app settings
-	//save_ControlSettings();//crashes?
-
-	////destroy callbacks
-	//removeKeysListeners();
-
-	//ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
-
-	////-
-
-	////TODO: move above
-	////MODE B: direct from memory
-	//if (MODE_MemoryLive && autoSave)
-	//{
-	//	save_AllKit_FromMemory();
-	//}
-
-	////--
-
-	//ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
-	//ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
-	*/
+	//exit();
 }
 
 //-

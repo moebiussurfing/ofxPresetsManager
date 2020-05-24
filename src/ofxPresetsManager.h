@@ -13,8 +13,8 @@
 ///--
 
 ///TODO:
-///+ could make tween when changing params (?)
-
+///	+	could make tween when changing params (?)
+///	+	check if if destructor is calling exit makes the app crash. for now, exit() must be called by manually
 #pragma once
 
 
@@ -340,6 +340,10 @@ public:
 	void setToggleRandomizerPreset()
 	{
 		ENABLE_RandomizeTimer = !ENABLE_RandomizeTimer;
+	}
+	void randomizeBang()
+	{
+		bRandomize = true;
 	}
 
 	//--

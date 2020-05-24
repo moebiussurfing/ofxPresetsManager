@@ -6,8 +6,8 @@ void ofApp::setup()
 	//-
 
 #ifdef USE_WindowApp
-	WindowApp.setSettingsFps(60);
-	WindowApp.setSettingsVsync(true);
+	WindowApp.setFrameRate(60);
+	WindowApp.setSetVerticalSync(true);
 	//WindowApp.setDEBUG_Position(0);//top position
 #else
 	ofSetFrameRate(60);
@@ -79,7 +79,6 @@ void ofApp::setup()
 
 	//user clicker
 	presetsManager.setVisible_PresetClicker(true);
-	presetsManager.setPosition_PresetClicker(400, ofGetHeight() - 200, 50);//position and boxes sizes
 
 	//ofxGui show/hide internal control gui
 	//this panel have mainly all the addon controls. not all are important to the user.
@@ -128,14 +127,15 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h)
 {
+	int cellw = 50;
+	presetsManager.setPosition_PresetClicker(0.5* ofGetWidth() - (9*cellw*0.5f), ofGetHeight() - 200, cellw);//position and boxes sizes
 	//presetsManager.windowResized(w, h);
 }
 
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-	//TODO:
-	//presetsManager.exit();
+	presetsManager.exit();
 
 	//presetsManager.DONE_save.removeListener(this, &ofApp::Changed_DONE_save);
 	//presetsManager.DONE_load.removeListener(this, &ofApp::Changed_DONE_load);
