@@ -3,12 +3,12 @@
 #include "ofMain.h"
 
 #include "ofxPresetsManager.h"
-#include "ofxGui.h"
 
 #define USE_WindowApp
 #ifdef USE_WindowApp
 #include "ofxWindowApp.h"
 #endif
+#include "ofxGui.h"
 
 class ofApp : public ofBaseApp
 {
@@ -19,14 +19,14 @@ public:
 	ofxWindowApp WindowApp;
 #endif
 
-	ofxPanel gui;
-
     void setup();
     void update();
     void draw();
     void exit();
     void keyPressed(int key);
 	void windowResized(int w, int h);
+
+	ofxPanel gui;
 
     //--
 

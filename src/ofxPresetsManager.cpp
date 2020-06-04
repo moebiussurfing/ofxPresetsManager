@@ -1017,7 +1017,7 @@ void ofxPresetsManager::loadPreset(int p)
 		}
 		else
 		{
-			ofLogNotice("ofxPresetsManager") << "IGNORE LOAD PRESET";
+			ofLogError("ofxPresetsManager") << "IGNORE LOAD PRESET";
 			//workaround clamp
 			PRESET_selected = 1;//set to first as default presets when out of range
 		}
@@ -1460,17 +1460,21 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 		else if (name == "RANDOMIZE" && bRandomize)
 		{
-			ofLogNotice("ofxPresetsManager") << "RANDOMIZE: " << e;
+			ofLogNotice("ofxPresetsManager") << "RANDOMIZE !";
 			bRandomize = false;
 
 			//avoid random is the same previuous preset (TODO:improve)
-
 			int _r = PRESET_selected;
 			while (_r == PRESET_selected)
 			{
 				_r = (int)ofRandom(1, 9);
 			}
+			ofLogNotice("ofxPresetsManager") << "\t > " << ofToString(_r);
 			loadPreset(_r);
+
+			//int __r = (int)ofRandom(1.0f, 9.0f);
+			//ofLogNotice("ofxPresetsManager") << "\t > " << ofToString(__r);
+			//loadPreset(__r);
 
 			//-
 

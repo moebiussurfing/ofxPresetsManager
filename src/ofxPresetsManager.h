@@ -430,6 +430,14 @@ public:
 	{
 		SHOW_Browser = b;
 	}
+	void toggleVisible_GUI_Browser()
+	{
+		SHOW_Browser = !SHOW_Browser;
+	}
+	bool getVisible_GUI_Browser()
+	{
+		return SHOW_Browser;
+	}
 #endif
 
 	void setPosition_GUI_InternalControl(int x, int y)
@@ -463,6 +471,14 @@ public:
 	void setVisible_PresetClicker(bool visible)
 	{
 		SHOW_ClickPanel = visible;
+	}
+	void toggleVisible_PresetClicker()
+	{
+		SHOW_ClickPanel = !SHOW_ClickPanel;
+	}
+	bool getVisible_PresetClicker()
+	{
+		return SHOW_ClickPanel;
 	}
 
 	bool isVisible_PresetClicker()
