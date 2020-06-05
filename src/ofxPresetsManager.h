@@ -382,6 +382,7 @@ private:
 	void browser_PresetLoad(string name);
 	void browser_PresetSave(string name);
 	bool browser_FilesRefresh();
+	float _w;
 #endif
 
 	//-

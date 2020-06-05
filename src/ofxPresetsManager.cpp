@@ -93,7 +93,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//select a random preset (from 1 to 8)
 	//params_Randomizer.setName("Randomizer");
 	bRandomize.set("RANDOMIZE", false);
-	ENABLE_RandomizeTimer.set("MODE TIMER", false);
+	ENABLE_RandomizeTimer.set("MODE TIMER RANDOMIZE", false);
 	randomizeSpeedF.set("SPEED", 0.8f, 0.f, 1.f);
 #endif
 
@@ -1385,6 +1385,15 @@ void ofxPresetsManager::doCloneRight(int pIndex)
 void ofxPresetsManager::doCloneAll()
 {
 	ofLogNotice("ofxPresetsManager") << "doCloneAll";// << pIndex;
+
+	if (autoSave)
+	{
+		ofLogNotice("ofxPresetsManager") << "autosave current preset";
+		//save current preset
+		doSave(PRESET_selected - 1);
+	}
+
+	//clone all
 	for (int i = 0; i < numPresets_OfFavorites; i++)
 	{
 		save(i, 0);//0 is bc it's the only 1st params group implemented
@@ -1484,7 +1493,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				randomizerTimer = ofGetElapsedTimeMillis();
 			}
 		}
-		else if (name == "MODE TIMER")
+		else if (name == "MODE TIMER RANDOMIZE")
 		{
 			ofLogNotice("ofxPresetsManager") << "MODE TIMER: " << e;
 		}
@@ -1977,7 +1986,7 @@ void ofxPresetsManager::exit()
 //--------------------------------------------------------------
 bool ofxPresetsManager::browser_draw_ImGui()
 {
-	auto mainSettings = ofxImGui::Settings();//?
+	auto mainSettings = ofxImGui::Settings();
 
 	this->gui_Browser.begin();
 
@@ -2021,10 +2030,10 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 	//-
 
 	//other usefull params from hidden internal panel
-	ofxImGui::AddParameter(this->SHOW_Gui_Internal);
 	ofxImGui::AddParameter(this->SHOW_ClickPanel);
-	ofxImGui::AddParameter(this->SHOW_Browser);
-	ofxImGui::AddParameter(this->autoSave);
+	//ofxImGui::AddParameter(this->SHOW_Browser);
+	ofxImGui::AddParameter(this->SHOW_Gui_Internal);
+
 	//ofxImGui::AddGroup(this->params_Options, settings);//grouped
 	//ofxImGui::AddParameter(this->MODE_MemoryLive);
 	//ofxImGui::AddParameter(this->PRESET_selected);
@@ -2071,8 +2080,9 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 	//-
 
-	ImGui::SetNextItemWidth(100);
+	ImGui::SetNextItemWidth(_w);
 	ofxImGui::AddParameter(this->PRESET_selected);//TODO: customize width to make stretch
+	ofxImGui::AddParameter(this->autoSave);
 
 	//-
 
@@ -2085,8 +2095,7 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 			bRandomize = true;
 		}
 
-		ImGui::SetNextItemWidth(100);
-		//ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.5f);
+		ImGui::SetNextItemWidth(_w);
 		ofxImGui::AddParameter(this->randomizeSpeedF);
 
 		ImGui::TreePop();
@@ -2104,7 +2113,6 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 
 	auto mainSettings = ofxImGui::Settings();
 	mainSettings.windowPos = pos;
-	//mainSettings.windowSize = size;
 
 	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), ImGuiCond_Always);
 
@@ -2115,20 +2123,20 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 
 	string _name;
 	_name = groups[0].getName();
-	//_name = "PRESET MANAGER";
-	//_name = "PRESET MANAGER  [" + groups[0].getName() + "]";
 
-	bool _collapse = false;
+	bool _collapse = true;
 	if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
 	{
 		ImGui::Text("PRESET MANAGER");
 
 		//--
 
+		//1. user params
 		browser_draw_ImGui_User(mainSettings);
 
 		//-- 
 
+		//2. browser params
 		{
 			int numFilePresets = fileNames.size();
 
@@ -2217,16 +2225,16 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 				}
 			}
 
-
 			//--
 
 			//3. scrollable list
 
 			if (!fileNames.empty())
 			{
+				//ImGui::SetNextItemWidth(_w);
+				ImGui::SetNextItemWidth(140);
+
 				int currentFileIndex = currentFile;
-				//ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.9f);
-				ImGui::SetNextItemWidth(170);
 				if (ofxImGui::VectorCombo(" ", &currentFileIndex, fileNames))
 				{
 					ofLogNotice("ofxPresetsManager") << "Preset Index: " << ofToString(currentFileIndex);
@@ -2470,6 +2478,10 @@ void ofxPresetsManager::browser_Setup()
 	string _name = "overpass-mono-bold.otf";
 	string _path = path_GLOBAL_Folder + "/fonts/" + _name;
 	io.Fonts->AddFontFromFileTTF(&ofToDataPath(_path)[0], 13.0f);
+
+	//widgets width
+	_w = 100;
+	//_w = ImGui::GetWindowWidth() * 0.5f;
 
 	//-
 
