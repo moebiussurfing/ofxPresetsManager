@@ -24,6 +24,9 @@
 ///
 ///browser system
 #define INCLUDE_FILE_BROWSER_IM_GUI
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+#define INCLUDE_RANDOMIZER
+#endif
 ///also includes ofxGui inside ImGui
 ///BUG: seems to make exceptions when multiple ImGui/ofxPresetsManager instances...
 ///
@@ -143,6 +146,9 @@ private:
 #ifndef INCLUDE_FILE_BROWSER_IM_GUI
 	ofxPanel gui_InternalControl;
 #endif
+
+private:
+#ifdef INCLUDE_RANDOMIZER
 	ofParameter<bool> MODE_MemoryLive;
 	ofParameter<bool> loadToMemory;
 	ofParameter<bool> saveFromMemory;
@@ -153,10 +159,20 @@ private:
 	//ofParameterGroup params_Randomizer;
 	ofParameter<bool> bRandomize;
 	ofParameter<bool> ENABLE_RandomizeTimer;
+	ofParameter<bool> MODE_Standby;
+	ofParameter<int> _randomDice;//to test
 	ofParameter<float> randomizeSpeedF;
+	ofParameter<int> randomizeDuration;
 	int randomizeSpeed;//real time dureation
 	uint32_t randomizerTimer;
 	int randomize_MAX_DURATION = 5000;
+	vector<ofParameter<int>> presetsRandomFactor;
+	vector<int> randomFactorsDices;
+	void setupRandomizer();
+	void doRandomizer();
+	int numDices;
+	bool DEBUG_randomTest = false;
+#endif
 
 	////TODO:
 	//ofParameterGroup group_TARGET;

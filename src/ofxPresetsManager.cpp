@@ -2,6 +2,153 @@
 
 #pragma mark - OF
 
+#ifdef INCLUDE_RANDOMIZER
+//--------------------------------------------------------------
+void ofxPresetsManager::doRandomizer()
+{
+	cout << endl << "doRandomizer" << endl;
+
+	//avoid random is the same previuous preset (TODO:improve)
+	int _r = PRESET_selected;
+	int _numPresets = 8;
+
+	if (MODE_Standby) {
+		//sum total dices/all probs
+		numDices = 0;
+		for (auto &p : presetsRandomFactor) {
+			numDices += p.get();
+		}
+
+		//randomize
+		if (!DEBUG_randomTest) {
+			_randomDice = ofRandom(0, numDices);
+			cout << "numDices:" << numDices << endl;
+		}
+
+		_randomDice.setMax(numDices);
+		cout << "random: " << _randomDice.get() << "/" << numDices << endl;
+
+		//presets dices limits
+		//randomFactorsDices[0] = 0;
+		for (int i = 0; i < presetsRandomFactor.size(); i++) {
+			randomFactorsDices[i] = 0;
+
+			for (int f = 0; f < i; f++) {
+				randomFactorsDices[i] += presetsRandomFactor[f];
+			}
+		}
+
+		int _rr = 0;
+		for (int i = 0; i < presetsRandomFactor.size(); i++) {
+			int start;
+			int end;
+
+			if (i == 0)
+				start = 0;
+			else
+				start = randomFactorsDices[i - 1];
+
+			//TODO:
+			//bug on last preset..
+
+			//if (i == presetsRandomFactor.size() - 1)
+			//	end = presetsRandomFactor.size()-1;
+			//else
+			//	end = randomFactorsDices[i];
+
+			if (i != presetsRandomFactor.size() - 1)
+				end = randomFactorsDices[i];
+			else
+				end = numDices;
+
+			cout << "start:" << start << endl;
+			cout << "end:" << end << endl;
+			if (_randomDice >= start && _randomDice < end)
+			{
+				_rr = i - 1;
+			}
+		}
+		cout << "preset: " << _rr + 1 << endl;
+		_r = _rr + 1;
+
+		//debug
+		for (int i = 0; i < presetsRandomFactor.size(); i++) {
+			cout << "randomFactorsDices: " << i << " " << randomFactorsDices[i] << endl;// << "-" << randomFactorsDices[i + 1] << endl;
+		}
+
+		//for (int f = 1; f < presetsRandomFactor.size(); f++) {
+		//	start = presetsRandomFactor[i - 1].get();
+		//}
+		//
+		//if (_randomDice >= presetsRandomFactor[i - 1].get() && _randomDice < presetsRandomFactor[i].get()) {
+		//}
+		//}
+
+		//for (auto &p : presetsRandomFactor) {
+		//	numDices += p.get();
+		//}
+	}
+	else {
+		//avoid jump to same current preset
+		while (_r == PRESET_selected)
+		{
+			_r = (int)ofRandom(1, _numPresets + 1);
+		}
+	}
+
+	//--
+
+	ofLogNotice("ofxPresetsManager") << "\t > " << ofToString(_r);
+	loadPreset(_r);
+
+	//int __r = (int)ofRandom(1.0f, 9.0f);
+	//ofLogNotice("ofxPresetsManager") << "\t > " << ofToString(__r);
+	//loadPreset(__r);
+
+	//--
+
+	//start timer again
+	if (ENABLE_RandomizeTimer)
+	{
+		randomizerTimer = ofGetElapsedTimeMillis();
+	}
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::setupRandomizer()
+{
+	//select a random preset (from 1 to 8)
+	//params_Randomizer.setName("Randomizer");
+	bRandomize.set("RANDOMIZE", false);
+	ENABLE_RandomizeTimer.set("MODE TIMER RANDOMIZE", false);
+	MODE_Standby.set("MODE STANDBY", true);
+	randomizeDuration.set("DURATION", 500, 10, randomize_MAX_DURATION);
+	_randomDice.set("DICE", 0, 0, 6);
+	randomizeSpeedF.set("SPEED", 0.8f, 0.f, 1.f);
+
+	bRandomize.setSerializable(false);
+	randomizeDuration.setSerializable(false);
+
+	presetsRandomFactor.resize(8);
+	randomFactorsDices.resize(8);
+	int i = 1;
+	ofParameterGroup _g{ "Presets Odds" };
+	for (auto &p : presetsRandomFactor) {
+		string n = "prob " + ofToString(i++);
+		p.set(n, 5, 0, 10);
+		_g.add(p);
+	}
+	params_Randomizer.setName("RANDOMIZER");
+	params_Randomizer.add(ENABLE_RandomizeTimer);
+	params_Randomizer.add(MODE_Standby);
+	params_Randomizer.add(bRandomize);
+	params_Randomizer.add(_randomDice);
+	params_Randomizer.add(randomizeSpeedF);
+	params_Randomizer.add(randomizeDuration);
+	params_Randomizer.add(_g);
+}
+#endif
+
 //--------------------------------------------------------------
 ofxPresetsManager::ofxPresetsManager()
 {
@@ -91,11 +238,7 @@ ofxPresetsManager::ofxPresetsManager()
 	browser_PresetName = "NO_NAME_PRESET";//browser loaded preset name
 
 	//radomizer
-	//select a random preset (from 1 to 8)
-	//params_Randomizer.setName("Randomizer");
-	bRandomize.set("RANDOMIZE", false);
-	ENABLE_RandomizeTimer.set("MODE TIMER RANDOMIZE", false);
-	randomizeSpeedF.set("SPEED", 0.8f, 0.f, 1.f);
+	setupRandomizer();
 #endif
 
 	bSave.set("SAVE", false);
@@ -198,21 +341,17 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Tools.add(bCloneRight);
 	params_Tools.add(bCloneAll);
 
-#ifdef INCLUDE_FILE_BROWSER_IM_GUI
-	params_Randomizer.setName("RANDOMIZER");
-	params_Randomizer.add(ENABLE_RandomizeTimer);
-	params_Randomizer.add(randomizeSpeedF);
-	params_Randomizer.add(bRandomize);
+#ifdef INCLUDE_RANDOMIZER
 	params_Tools.add(params_Randomizer);
 #endif
-	
+
 	//all nested params for callbacks and storage settings
 	params_Control.setName("ofxPresetsManager");
 	params_Control.add(params_Favorites);
 	params_Control.add(params_Options);
 	params_Control.add(params_Gui);
 	params_Control.add(params_Tools);
-	
+
 	////custom path
 	//params_Custom.setName("CUSTOM PATH");
 	//params_Custom.add(bUseCustomPath);
@@ -380,7 +519,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 	{
 		uint32_t _time = ofGetElapsedTimeMillis();
 
-		if (_time - randomizerTimer > (randomize_MAX_DURATION*(1.f - randomizeSpeedF)))
+		if (_time - randomizerTimer > (randomizeDuration))
 		{
 			bRandomize = true;
 		}
@@ -1145,16 +1284,22 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 
 		//-
 
+#ifdef INCLUDE_RANDOMIZER
 		//timer to randomize and choice a random preset from the kit
-		if (key == 'R')
+		else if (key == 'R')
 		{
 			setToggleRandomizerPreset();
 		}
+		else if (key == 'r')
+		{
+			doRandomizer();
+		}
+#endif
 
 		//-
 
 		//navigate kit/favorites presets
-		if (key == OF_KEY_RIGHT && ENABLE_KeysArrowBrowse)
+		else if (key == OF_KEY_RIGHT && ENABLE_KeysArrowBrowse)
 		{
 
 			//browse presets
@@ -1485,26 +1630,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			ofLogNotice("ofxPresetsManager") << "RANDOMIZE !";
 			bRandomize = false;
 
-			//avoid random is the same previuous preset (TODO:improve)
-			int _r = PRESET_selected;
-			while (_r == PRESET_selected)
-			{
-				_r = (int)ofRandom(1, 9);
-			}
-			ofLogNotice("ofxPresetsManager") << "\t > " << ofToString(_r);
-			loadPreset(_r);
-
-			//int __r = (int)ofRandom(1.0f, 9.0f);
-			//ofLogNotice("ofxPresetsManager") << "\t > " << ofToString(__r);
-			//loadPreset(__r);
-
-			//-
-
-			//start timer again
-			if (ENABLE_RandomizeTimer)
-			{
-				randomizerTimer = ofGetElapsedTimeMillis();
-			}
+			doRandomizer();
 		}
 		else if (name == "MODE TIMER RANDOMIZE")
 		{
@@ -1513,7 +1639,17 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		else if (name == "SPEED")
 		{
 			ofLogNotice("ofxPresetsManager") << "SPEED: " << e;
-			//randomizeSpeedF;
+			randomizeDuration = randomize_MAX_DURATION * (1.f - randomizeSpeedF);
+		}
+		else if (name == "DURATION")
+		{
+			ofLogNotice("ofxPresetsManager") << "DURATION: " << e;
+			randomizeSpeedF = 1 + (randomizeDuration / randomize_MAX_DURATION);
+		}
+		else if (name == "DICE" && DEBUG_randomTest)//set dice by user
+		{
+			ofLogNotice("ofxPresetsManager") << "DICE: " << e;
+			doRandomizer();
 		}
 #endif
 
@@ -2114,6 +2250,11 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 	//	ImGui::TreePop();
 	//}
+
+	//TODO:
+	//collapse
+	//auto gsettings = ofxImGui::Settings();
+	//gsettings.
 	ofxImGui::AddGroup(params_Randomizer, settings);
 }
 

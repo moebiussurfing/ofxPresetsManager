@@ -137,6 +137,8 @@ void ofApp::exit()
 {
 	presetsManager.exit();
 
+	WindowApp.exit();
+
 	//presetsManager.DONE_save.removeListener(this, &ofApp::Changed_DONE_save);
 	//presetsManager.DONE_load.removeListener(this, &ofApp::Changed_DONE_load);
 }
