@@ -41,6 +41,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//big browser
 	path_PresetsFolder = "archive";
 	//default archive presets folder to browse
+	path_PresetsFolder_Custom = "F:\openFrameworks\addons\ofxPresetsManager\2_presetsManager\bin\data\ofxPresetsManager\archive";
 
 	//app settings
 	path_Control = "settings";
@@ -107,7 +108,7 @@ ofxPresetsManager::ofxPresetsManager()
 	autoSave.set("AUTO SAVE", true);
 	bAutosaveTimer.set("TIMER AUTO SAVE", false);
 
-	SHOW_Gui_Internal.set("SHOW CONTROL GUI ", false);
+	SHOW_Gui_AdvancedControl.set("SHOW ADVANCED", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", false);
 
 	bCloneRight.set("CLONE >", false);
@@ -151,7 +152,7 @@ ofxPresetsManager::ofxPresetsManager()
 	bCloneAll.setSerializable(false);
 	loadToMemory.setSerializable(false);
 	saveFromMemory.setSerializable(false);
-	//SHOW_Gui_Internal.setSerializable(false);
+	//SHOW_Gui_AdvancedControl.setSerializable(false);
 
 	//params_Tools.setSerializable(false);
 
@@ -178,7 +179,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Options.add(bAutosaveTimer);
 
 	params_Gui.setName("GUI");
-	params_Gui.add(SHOW_Gui_Internal);
+	params_Gui.add(SHOW_Gui_AdvancedControl);
 	params_Gui.add(SHOW_ClickPanel);
 	//params_Gui.add(SHOW_MenuTopBar);
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
@@ -198,17 +199,25 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Tools.add(bCloneAll);
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
-	params_Tools.add(ENABLE_RandomizeTimer);
-	params_Tools.add(randomizeSpeedF);
-	params_Tools.add(bRandomize);
+	params_Randomizer.setName("RANDOMIZER");
+	params_Randomizer.add(ENABLE_RandomizeTimer);
+	params_Randomizer.add(randomizeSpeedF);
+	params_Randomizer.add(bRandomize);
+	params_Tools.add(params_Randomizer);
 #endif
-
+	
 	//all nested params for callbacks and storage settings
 	params_Control.setName("ofxPresetsManager");
 	params_Control.add(params_Favorites);
 	params_Control.add(params_Options);
 	params_Control.add(params_Gui);
 	params_Control.add(params_Tools);
+	
+	////custom path
+	//params_Custom.setName("CUSTOM PATH");
+	//params_Custom.add(bUseCustomPath);
+	//params_Custom.add(path_PresetsFolder_Custom);
+	//params_Control.add(params_Control);
 
 	ofAddListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 }
@@ -271,6 +280,7 @@ void ofxPresetsManager::setup()
 	//-
 
 	//colors
+#ifndef INCLUDE_FILE_BROWSER_IM_GUI
 	ofxGuiSetDefaultHeight(20);
 	ofxGuiSetBorderColor(32);
 	ofxGuiSetFillColor(ofColor(48));
@@ -301,6 +311,7 @@ void ofxPresetsManager::setup()
 	//gOptions.minimize();
 	//gOptions.maximize();
 	gPanel.getGroup("HELPER TOOLS").minimize();
+#endif
 
 	//--
 
@@ -436,11 +447,13 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 
 	//--
 
-	//internal ofxGui panel
-	if (SHOW_Gui_Internal)
+#ifndef INCLUDE_FILE_BROWSER_IM_GUI
+//internal ofxGui panel
+	if (SHOW_Gui_AdvancedControl)
 	{
 		gui_InternalControl.draw();
 	}
+#endif
 
 	//--
 
@@ -1119,10 +1132,10 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//hide/show control gui
 		else if (key == 'G')
 		{
-			SHOW_Gui_Internal = !SHOW_Gui_Internal;
-			setVisible_GUI_Internal(SHOW_Gui_Internal);
-			setVisible_GUI_Browser(SHOW_Gui_Internal);
-			setVisible_PresetClicker(SHOW_Gui_Internal);
+			SHOW_Gui_AdvancedControl = !SHOW_Gui_AdvancedControl;
+			setVisible_GUI_Internal(SHOW_Gui_AdvancedControl);
+			setVisible_GUI_Browser(SHOW_Gui_AdvancedControl);
+			setVisible_PresetClicker(SHOW_Gui_AdvancedControl);
 		}
 
 		//if (key == 'g')
@@ -1511,7 +1524,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		}
 
 		//--
-
+#ifndef INCLUDE_FILE_BROWSER_IM_GUI
 		else if (name == "GUI POSITION")
 		{
 			ofLogVerbose("ofxPresetsManager") << "GUI POSITION: " << e;
@@ -1521,6 +1534,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			y = ofClamp(Gui_Internal_Position.get().y, 0, ofGetHeight() - 20);
 			gui_InternalControl.setPosition(x, y);
 		}
+#endif
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 		else if (name == "GUI BROWSER POSITION")
@@ -1692,20 +1706,21 @@ void ofxPresetsManager::save_ControlSettings()
 	//crashes!
 	//it seems related to autoSave timer?
 
-	DISABLE_CALLBACKS = true;//?
+	DISABLE_CALLBACKS = true;
 
 	//-
 
 	//TODO: 
 	//crashes sometimes?
-
-	//get gui position from panel to update the position param
+#ifndef INCLUDE_FILE_BROWSER_IM_GUI
+//get gui position from panel to update the position param
 	Gui_Internal_Position = glm::vec2(gui_InternalControl.getPosition());
 
 	//float x, y;
 	//x = gui_InternalControl.getPosition().x;
 	//y = gui_InternalControl.getPosition().y;
 	//Gui_Internal_Position = glm::vec2(x, y);
+#endif
 
 	//---
 
@@ -1941,23 +1956,25 @@ void ofxPresetsManager::exit()
 {
 	ofLogVerbose("ofxPresetsManager") << "exit()";
 
-	DISABLE_CALLBACKS = true;//?
+	DISABLE_CALLBACKS = true;
+
+	//destroy callbacks
+	removeKeysListeners();
+	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
+	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
+	ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
 
 	//autosave PRESET_selected preset on exit
 	if (autoSave)// && autoLoad)
 	{
 		doSave(PRESET_selected - 1);
+
 		//doSave2(PRESET2_selected - 1);
 	}
 
 	//TODO:
 	//app settings
 	save_ControlSettings();//crashes?
-
-	//destroy callbacks
-	removeKeysListeners();
-
-	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 
 	//-
 
@@ -1969,9 +1986,6 @@ void ofxPresetsManager::exit()
 	}
 
 	//--
-
-	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
-	ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
 }
 
 
@@ -2032,7 +2046,7 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 	//other usefull params from hidden internal panel
 	ofxImGui::AddParameter(this->SHOW_ClickPanel);
 	//ofxImGui::AddParameter(this->SHOW_Browser);
-	ofxImGui::AddParameter(this->SHOW_Gui_Internal);
+	//ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
 
 	//ofxImGui::AddGroup(this->params_Options, settings);//grouped
 	//ofxImGui::AddParameter(this->MODE_MemoryLive);
@@ -2087,19 +2101,20 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 	//-
 
 	//randomizer
-	ofxImGui::AddParameter(this->ENABLE_RandomizeTimer);
-	if (ImGui::TreeNode("RANDOMIZER"))
-	{
-		if (ImGui::Button("RANDOMIZE"))
-		{
-			bRandomize = true;
-		}
+	//ofxImGui::AddParameter(this->ENABLE_RandomizeTimer);
+	//if (ImGui::TreeNode("RANDOMIZER"))
+	//{
+	//	if (ImGui::Button("RANDOMIZE"))
+	//	{
+	//		bRandomize = true;
+	//	}
 
-		ImGui::SetNextItemWidth(_w);
-		ofxImGui::AddParameter(this->randomizeSpeedF);
+	//	ImGui::SetNextItemWidth(_w);
+	//	ofxImGui::AddParameter(this->randomizeSpeedF);
 
-		ImGui::TreePop();
-	}
+	//	ImGui::TreePop();
+	//}
+	ofxImGui::AddGroup(params_Randomizer, settings);
 }
 
 //--------------------------------------------------------------
@@ -2344,7 +2359,9 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 
 			//----
 
-			//5. second panel (new preset)
+			//mode new preset enabled
+
+			//5. second panel
 
 			if (MODE_Browser_NewPreset)
 			{
@@ -2425,6 +2442,35 @@ bool ofxPresetsManager::browser_draw_ImGui_Browser()
 				{
 					ImGui::PopStyleColor(1);
 				}
+
+			}
+
+
+			//---
+
+			ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
+
+			if (SHOW_Gui_AdvancedControl) {
+				bool b = true;
+				//if (ofxImGui::BeginTree(b, mainSettings))
+				{
+					//ofxImGui::AddParameter(MODE_MemoryLive);
+					ofxImGui::AddGroup(params_Control, mainSettings);
+
+					//ofxImGui::EndTree(mainSettings);
+				}
+				if (ImGui::Button("Set folder..."))
+				{
+					auto dialogResult = ofSystemLoadDialog("Set presets folder", true, ofToDataPath(""));
+					if (dialogResult.bSuccess)
+					{
+						path_PresetsFolder_Custom = dialogResult.filePath;
+						bUseCustomPath = true;
+						ofLogNotice("ofxPresetsManager") << "path custom: " << path_PresetsFolder_Custom;
+
+					}
+				}
+
 			}
 		}
 	}
@@ -2440,8 +2486,15 @@ void ofxPresetsManager::browser_PresetSave(string name)//without xml extension n
 
 	ofXml settings;
 	ofSerialize(settings, groups[0]);
+	string _path;
 
-	string _path = path_GLOBAL_Folder + "/" + path_PresetsFolder + "/" + name + ".xml";
+	if (bUseCustomPath) {
+		_path = path_PresetsFolder_Custom.get() + "/" + name + ".xml";
+	}
+	else {
+		_path = path_GLOBAL_Folder + "/" + path_PresetsFolder + "/" + name + ".xml";
+	}
+
 	settings.save(_path);
 	ofLogNotice("ofxPresetsManager") << "File: " << _path;
 
@@ -2457,7 +2510,15 @@ void ofxPresetsManager::browser_PresetLoad(string name)//without xml extension n
 	ofLogNotice("ofxPresetsManager") << "browser_PresetLoad: \t\t\t\t" << name << ".xml";
 
 	ofXml settings;
-	string _path = path_GLOBAL_Folder + "/" + path_PresetsFolder + "/" + name + ".xml";
+	string _path;
+
+	if (bUseCustomPath) {
+		_path = path_PresetsFolder_Custom.get() + "/" + name + ".xml";
+	}
+	else {
+		_path = path_GLOBAL_Folder + "/" + path_PresetsFolder + "/" + name + ".xml";
+	}
+
 	settings.load(_path);
 	ofLogNotice("ofxPresetsManager") << "File: " << _path;
 
@@ -2514,7 +2575,14 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	ofLogNotice("ofxPresetsManager") << "browser_FilesRefresh()";
 
 	string _path;
-	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+
+	if (bUseCustomPath) {
+		_path = path_PresetsFolder_Custom.get();
+	}
+	else {
+		_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+	}
+
 
 	//-
 
@@ -2523,7 +2591,7 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	//	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
 	//else
 	//	_path = path_BrowserPathFree;
-	//ofLogNotice("ofxPresetsManager") << "Path: " << _path;
+	ofLogNotice("ofxPresetsManager") << "Path: " << _path;
 
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
 

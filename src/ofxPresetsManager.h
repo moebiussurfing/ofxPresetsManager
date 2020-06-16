@@ -24,6 +24,7 @@
 ///
 ///browser system
 #define INCLUDE_FILE_BROWSER_IM_GUI
+///also includes ofxGui inside ImGui
 ///BUG: seems to make exceptions when multiple ImGui/ofxPresetsManager instances...
 ///
 ///debug errors
@@ -111,6 +112,8 @@ private:
 	std::string path_Control;//path for app state session settings
 	std::string path_Kit_Folder;//path for kit of favorite presets. live kit
 	std::string path_PresetsFolder;//path for browse other presets. archive kit
+	ofParameter<std::string> path_PresetsFolder_Custom;//path for browse other presets. archive kit
+	ofParameter<bool> bUseCustomPath{ "bUseCustomPath", false };
 	std::string path_Prefix;//to add to file names
 
 	//TODO:
@@ -137,8 +140,9 @@ private:
 	//-
 
 private:
-
+#ifndef INCLUDE_FILE_BROWSER_IM_GUI
 	ofxPanel gui_InternalControl;
+#endif
 	ofParameter<bool> MODE_MemoryLive;
 	ofParameter<bool> loadToMemory;
 	ofParameter<bool> saveFromMemory;
@@ -440,26 +444,27 @@ public:
 		return SHOW_Browser;
 	}
 #endif
-
+#ifndef INCLUDE_FILE_BROWSER_IM_GUI
 	void setPosition_GUI_InternalControl(int x, int y)
 	{
 		guiPos_InternalControl = ofVec2f(x, y);
 		gui_InternalControl.setPosition(guiPos_InternalControl.x, guiPos_InternalControl.y);
 	}
+#endif
 
 	void setVisible_GUI_Internal(bool visible)
 	{
-		SHOW_Gui_Internal = visible;
+		SHOW_Gui_AdvancedControl = visible;
 	}
 
 	bool isVisible_GUI_Internal()
 	{
-		return SHOW_Gui_Internal;
+		return SHOW_Gui_AdvancedControl;
 	}
 
 	void setToggleVisible_GUI_Internal()
 	{
-		SHOW_Gui_Internal = !SHOW_Gui_Internal;
+		SHOW_Gui_AdvancedControl = !SHOW_Gui_AdvancedControl;
 	}
 
 	void setPosition_PresetClicker(int x, int y, int _cellSize)
@@ -559,7 +564,7 @@ private:
 
 	//--
 
-	ofParameter<bool> SHOW_Gui_Internal;
+	ofParameter<bool> SHOW_Gui_AdvancedControl;
 
 	bool debugClicker = true;//?
 
@@ -584,9 +589,9 @@ private:
 
 	bool browser_draw_ImGui();
 	bool browser_draw_ImGui_Browser();
-	void browser_draw_ImGui_MenuBar();
-	void browser_draw_ImGui_MenuFile();
 	void browser_draw_ImGui_User(ofxImGui::Settings &settings);
+	//void browser_draw_ImGui_MenuBar();
+	//void browser_draw_ImGui_MenuFile();
 
 	//TODO:
 	//void gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter);
@@ -795,6 +800,8 @@ public:
 	ofParameterGroup params_Gui;
 	ofParameterGroup params_Options;
 	ofParameterGroup params_Tools;
+	ofParameterGroup params_Randomizer;
+	ofParameterGroup params_Custom;
 
 	ofParameter<glm::vec2> Gui_Internal_Position;
 	ofParameter<bool> ENABLE_Keys;
