@@ -159,7 +159,8 @@ private:
 	//ofParameterGroup params_Randomizer;
 	ofParameter<bool> bRandomize;
 	ofParameter<bool> ENABLE_RandomizeTimer;
-	ofParameter<bool> MODE_Standby;
+	ofParameter<bool> MODE_DicesProbs;
+	ofParameter<bool> bResetDices;
 	ofParameter<int> _randomDice;//to test
 	ofParameter<float> randomizeSpeedF;
 	ofParameter<int> randomizeDuration;
@@ -170,6 +171,7 @@ private:
 	vector<int> randomFactorsDices;
 	void setupRandomizer();
 	void doRandomizer();
+	void doResetDices();
 	int numDices;
 	bool DEBUG_randomTest = false;
 #endif

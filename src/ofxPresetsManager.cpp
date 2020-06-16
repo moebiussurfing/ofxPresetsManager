@@ -12,7 +12,7 @@ void ofxPresetsManager::doRandomizer()
 	int _r = PRESET_selected;
 	int _numPresets = 8;
 
-	if (MODE_Standby) {
+	if (MODE_DicesProbs) {
 		//sum total dices/all probs
 		numDices = 0;
 		for (auto &p : presetsRandomFactor) {
@@ -115,37 +115,48 @@ void ofxPresetsManager::doRandomizer()
 }
 
 //--------------------------------------------------------------
+void ofxPresetsManager::doResetDices()
+{
+	for (auto &p : presetsRandomFactor) {
+		p = 0;
+	}
+}
+
+//--------------------------------------------------------------
 void ofxPresetsManager::setupRandomizer()
 {
 	//select a random preset (from 1 to 8)
 	//params_Randomizer.setName("Randomizer");
 	bRandomize.set("RANDOMIZE", false);
 	ENABLE_RandomizeTimer.set("MODE TIMER RANDOMIZE", false);
-	MODE_Standby.set("MODE STANDBY", true);
+	MODE_DicesProbs.set("MODE DICES", true);
 	randomizeDuration.set("DURATION", 500, 10, randomize_MAX_DURATION);
-	_randomDice.set("DICE", 0, 0, 6);
+	_randomDice.set("DICE", 0, 0, 8);
 	randomizeSpeedF.set("SPEED", 0.8f, 0.f, 1.f);
 
 	bRandomize.setSerializable(false);
-	randomizeDuration.setSerializable(false);
+	//randomizeDuration.setSerializable(false);
 
 	presetsRandomFactor.resize(8);
 	randomFactorsDices.resize(8);
 	int i = 1;
-	ofParameterGroup _g{ "Presets Odds" };
+	ofParameterGroup _g{ "PRESETS ODDS" };
 	for (auto &p : presetsRandomFactor) {
-		string n = "prob " + ofToString(i++);
+		string n = "PROB " + ofToString(i++);
 		p.set(n, 5, 0, 10);
 		_g.add(p);
 	}
+	bResetDices.set("RESET DICES", false);
+
 	params_Randomizer.setName("RANDOMIZER");
-	params_Randomizer.add(ENABLE_RandomizeTimer);
-	params_Randomizer.add(MODE_Standby);
 	params_Randomizer.add(bRandomize);
-	params_Randomizer.add(_randomDice);
+	params_Randomizer.add(ENABLE_RandomizeTimer);
+	params_Randomizer.add(MODE_DicesProbs);
 	params_Randomizer.add(randomizeSpeedF);
 	params_Randomizer.add(randomizeDuration);
 	params_Randomizer.add(_g);
+	params_Randomizer.add(bResetDices);
+	params_Randomizer.add(_randomDice);
 }
 #endif
 
@@ -1644,12 +1655,21 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		else if (name == "DURATION")
 		{
 			ofLogNotice("ofxPresetsManager") << "DURATION: " << e;
-			randomizeSpeedF = 1 + (randomizeDuration / randomize_MAX_DURATION);
+
+			//randomizeSpeedF = 1 + (randomizeDuration / (float)randomize_MAX_DURATION);
+			randomizeSpeedF = - ((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
 		}
+		//TODO:
 		else if (name == "DICE" && DEBUG_randomTest)//set dice by user
 		{
 			ofLogNotice("ofxPresetsManager") << "DICE: " << e;
 			doRandomizer();
+		}
+		else if (name == "RESET DICES" && bResetDices)
+		{
+			ofLogNotice("ofxPresetsManager") << "RESET DICES: " << e;
+			doResetDices();
+			bResetDices = false;
 		}
 #endif
 
