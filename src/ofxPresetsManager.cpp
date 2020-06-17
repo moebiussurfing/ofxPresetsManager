@@ -128,7 +128,7 @@ void ofxPresetsManager::setupRandomizer()
 	//select a random preset (from 1 to 8)
 	//params_Randomizer.setName("Randomizer");
 	bRandomize.set("RANDOMIZE", false);
-	ENABLE_RandomizeTimer.set("MODE TIMER RANDOMIZE", false);
+	ENABLE_RandomizeTimer.set("ENABLE TIMER RANDOMIZER", false);
 	MODE_DicesProbs.set("MODE DICES", true);
 	randomizeDuration.set("DURATION", 500, 10, randomize_MAX_DURATION);
 	_randomDice.set("DICE", 0, 0, 8);
@@ -529,8 +529,8 @@ void ofxPresetsManager::update(ofEventArgs & args)
 	if (ENABLE_RandomizeTimer)
 	{
 		uint32_t _time = ofGetElapsedTimeMillis();
-
-		if (_time - randomizerTimer > (randomizeDuration))
+		timerRandomizer = _time - randomizerTimer;
+		if (timerRandomizer > randomizeDuration)
 		{
 			bRandomize = true;
 		}
@@ -1643,13 +1643,14 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 			doRandomizer();
 		}
-		else if (name == "MODE TIMER RANDOMIZE")
+		else if (name == "ENABLE TIMER RANDOMIZER")
 		{
 			ofLogNotice("ofxPresetsManager") << "MODE TIMER: " << e;
 		}
 		else if (name == "SPEED")
 		{
 			ofLogNotice("ofxPresetsManager") << "SPEED: " << e;
+
 			randomizeDuration = randomize_MAX_DURATION * (1.f - randomizeSpeedF);
 		}
 		else if (name == "DURATION")
@@ -2276,6 +2277,9 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 	//auto gsettings = ofxImGui::Settings();
 	//gsettings.
 	ofxImGui::AddGroup(params_Randomizer, settings);
+
+	ImGui::ProgressBar(timerRandomizer / (float)randomizeDuration);
+
 }
 
 //--------------------------------------------------------------

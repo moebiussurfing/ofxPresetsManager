@@ -174,6 +174,7 @@ private:
 	void doResetDices();
 	int numDices;
 	bool DEBUG_randomTest = false;
+	int timerRandomizer;
 #endif
 
 	////TODO:
@@ -846,4 +847,7 @@ public:
 	{
 		ENABLE_KeysArrowBrowse = b;
 	}
+
+
+
 };
