@@ -7,7 +7,7 @@ void ofApp::setup()
 
 #ifdef USE_WindowApp
 	WindowApp.setFrameRate(60);
-	WindowApp.setSetVerticalSync(true);
+	WindowApp.setVerticalSync(true);
 	//WindowApp.setDEBUG_Position(0);//top position
 #else
 	ofSetFrameRate(60);

@@ -156,18 +156,22 @@ private:
 	void save_AllKit_FromMemory();
 
 	//randomizer
+public:
+	ofParameter<bool> ENABLE_RandomizeTimer;
+private:
 	//ofParameterGroup params_Randomizer;
 	ofParameter<bool> bRandomize;
-	ofParameter<bool> ENABLE_RandomizeTimer;
 	ofParameter<bool> MODE_DicesProbs;
 	ofParameter<bool> bResetDices;
 	ofParameter<int> _randomDice;//to test
 	ofParameter<float> randomizeSpeedF;
 	ofParameter<int> randomizeDuration;
+	ofParameter<int> randomizeDurationShort;
 	int randomizeSpeed;//real time dureation
 	uint32_t randomizerTimer;
 	int randomize_MAX_DURATION = 5000;
-	vector<ofParameter<int>> presetsRandomFactor;
+	vector<ofParameter<int>> presetsRandomFactor;//probability of every preset
+	vector<ofParameter<bool>> presetsRandomModeShort;//mode short for ebvery preset
 	vector<int> randomFactorsDices;
 	void setupRandomizer();
 	void doRandomizer();
@@ -319,9 +323,9 @@ public:
 	void load_Next()
 	{
 		PRESET_selected++;
-		if (PRESET_selected > numPresets_OfFavorites)
+		if (PRESET_selected > numPresetsFavorites)
 		{
-			PRESET_selected = numPresets_OfFavorites;
+			PRESET_selected = numPresetsFavorites;
 		}
 	}
 
@@ -337,7 +341,7 @@ public:
 	void loadPreset(int p);//load preset by code from ofApp
 	int getNumPresets()
 	{
-		return numPresets_OfFavorites;
+		return numPresetsFavorites;
 	}
 
 	int getCurrentPreset()//get index of selected preset
@@ -606,8 +610,8 @@ private:
 	//bool bImGui_mouseOver;
 	bool bImGui_mouseOver_PRE;
 
+	bool browser_draw_ImGuiWindow();
 	bool browser_draw_ImGui();
-	bool browser_draw_ImGui_Browser();
 	void browser_draw_ImGui_User(ofxImGui::Settings &settings);
 	//void browser_draw_ImGui_MenuBar();
 	//void browser_draw_ImGui_MenuFile();
@@ -678,7 +682,7 @@ public:
 		//browser number of files
 
 		//iterate all presets
-		for (int i = 0; i < numPresets_OfFavorites; i++)
+		for (int i = 0; i < numPresetsFavorites; i++)
 		{
 			std::string pathSrc;
 			std::string pathDst;
@@ -756,7 +760,7 @@ public:
 
 	std::vector<int> newIndices;//? this seems to be the number of the groups(? )
 
-	int numPresets_OfFavorites;//amount of box-clickable handled presets on current favorites/kit [8]
+	int numPresetsFavorites;//amount of box-clickable handled presets on current favorites/kit [8]
 
 	//---
 
