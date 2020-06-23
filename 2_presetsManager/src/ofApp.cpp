@@ -20,6 +20,9 @@ void ofApp::setup()
 
 	//group1
 	params.setName("myGroupParameters");
+	params.add(fill.set("fill", false));
+	params.add(color.set("color", ofColor(1), ofColor(0, 0), ofColor(1, 1)));
+	params.add(lineWidth.set("lineWidth", 1, 0.1, 10));
 	params.add(shapeType.set("shape", 1, 1, 2));
 	params.add(numShapes.set("num squares", 1, 1, 24));
 	params.add(separation.set("separation", 5, 1, 100));
@@ -128,7 +131,7 @@ void ofApp::update()
 void ofApp::windowResized(int w, int h)
 {
 	int cellw = 50;
-	presetsManager.setPosition_PresetClicker(0.5* ofGetWidth() - (9*cellw*0.5f), ofGetHeight() - 200, cellw);//position and boxes sizes
+	presetsManager.setPosition_PresetClicker(0.5* ofGetWidth() - (9 * cellw*0.5f), ofGetHeight() - 200, cellw);//position and boxes sizes
 	//presetsManager.windowResized(w, h);
 }
 
@@ -171,10 +174,13 @@ void ofApp::draw()
 
 	//scene draw object linked to grouped parameters
 	ofPushStyle();
-	ofSetColor(ofColor::white);
-	ofNoFill();
+	ofSetColor(color.get());
+	ofSetLineWidth(lineWidth);
+	if (fill) ofFill();
+	else ofNoFill();
 	ofPushMatrix();
 	ofTranslate(300, 50);
+
 	for (int i = 0; i < numShapes; ++i)
 	{
 		if (shapeType == 1)
@@ -183,6 +189,7 @@ void ofApp::draw()
 			ofDrawCircle(0, 0, shapeSide);
 		ofTranslate(separation, separation);
 	}
+
 	ofPopMatrix();
 	ofPopStyle();
 
@@ -241,14 +248,14 @@ void ofApp::keyPressed(int key)
 
 		//----
 
-		//randomize parameters of local params (selected preset too if autoSave is enabled)
-		if (key == ' ')
-		{
-			shapeType = ofRandom(shapeType.getMin(), shapeType.getMax() + 1);
-			numShapes = ofRandom(numShapes.getMin(), numShapes.getMax() + 1);
-			separation = ofRandom(separation.getMin(), separation.getMax() + 1);
-			shapeSide = ofRandom(shapeSide.getMin(), shapeSide.getMax() + 1);
-		}
+		////randomize parameters of local params (selected preset too if autoSave is enabled)
+		//if (key == ' ')
+		//{
+		//	shapeType = ofRandom(shapeType.getMin(), shapeType.getMax() + 1);
+		//	numShapes = ofRandom(numShapes.getMin(), numShapes.getMax() + 1);
+		//	separation = ofRandom(separation.getMin(), separation.getMax() + 1);
+		//	shapeSide = ofRandom(shapeSide.getMin(), shapeSide.getMax() + 1);
+		//}
 
 	}
 }

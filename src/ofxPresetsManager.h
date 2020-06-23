@@ -10,13 +10,24 @@
 /// all modifications and new features by moebiussurfing
 /// my idea is to allow use ofParameterGroup's as managed content instead of ofxPanel
 
-///--
-
-///TODO:
+///---
+///
+///	TODO:
+///
+///	++	add clone using editor toggles to avoid clone disabled toggle params
+///	++	add mode state to allow overwrite only enabled toggle params
+///	++	randomize editor preset
+///			add other types
+///			test recursive nested groups
+///	++	add ofxUndo to randomizers
+///	+	improve ImGui trees collapse
+///	+	add define to disable all randomize stuff to make addon minimal expression 
 ///	+	could make tween when changing params (?)
-///	+	check if if destructor is calling exit makes the app crash. for now, exit() must be called by manually
-#pragma once
+///
+///---
 
+
+#pragma once
 
 ///----------------------------------------------
 ///
@@ -192,6 +203,7 @@ private:
 	ofParameter<bool> editorRandomize;
 	void Changed_Params_Editor(ofAbstractParameter &e);
 	void doRandomizeEditor();
+	void doRandomizeEditorGroup(ofParameterGroup& group);
 public:
 	void randomizePreset() {
 		doRandomizeEditor();
@@ -748,7 +760,7 @@ public:
 	//TODO:
 	//lastIndices it's the gui box clicked only, not important.. ?
 
-	std::vector<int> presets;//?? this seems to be the number of presets of each added group(?)
+	std::vector<int> presetsOnGroup;//?? this seems to be the number of presets of each added group(?)
 
 	//--
 

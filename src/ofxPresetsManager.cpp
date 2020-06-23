@@ -128,7 +128,7 @@ void ofxPresetsManager::doResetDices()
 
 //--------------------------------------------------------------
 void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
-	editorPresets.clear();//?
+	//editorPresets.clear();//?
 
 	for (auto parameter : group)
 	{
@@ -183,12 +183,14 @@ void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 		//	ofxImGui::AddParameter(*parameterOfVec4f);
 		//	continue;
 		//}
-		//auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
-		//if (parameterFloatColor)
-		//{
-		//	ofxImGui::AddParameter(*parameterFloatColor);
-		//	continue;
-		//}
+		auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
+		if (parameterFloatColor)
+		{
+			ofParameter<bool> b{ parameterFloatColor->getName(), false };
+			editorPresets.push_back(b); 
+			//ofxImGui::AddParameter(*parameterFloatColor);
+			continue;
+		}
 		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
 		if (parameterFloat)
 		{
@@ -205,12 +207,14 @@ void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 			//ofxImGui::AddParameter(*parameterInt);
 			continue;
 		}
-		//auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
-		//if (parameterBool)
-		//{
-		//	ofxImGui::AddParameter(*parameterBool);
-		//	continue;
-		//}
+		auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
+		if (parameterBool)
+		{
+			ofParameter<bool> b{ parameterBool->getName(), false };
+			editorPresets.push_back(b);
+			//ofxImGui::AddParameter(*parameterBool);
+			continue;
+		}
 
 		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
 	}
@@ -218,72 +222,116 @@ void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 
 //TODO:
 //randomize enable toggle params of the preset
+
 //--------------------------------------------------------------
-void ofxPresetsManager::doRandomizeEditor()
-{
+void ofxPresetsManager::doRandomizeEditor() {
 	ofLogNotice(__FUNCTION__);
 
-	ofParameterGroup group = groups[0];
+	ofParameterGroup _group = groups[0];
+	doRandomizeEditorGroup(_group);
+}
 
+//--------------------------------------------------------------
+void ofxPresetsManager::doRandomizeEditorGroup(ofParameterGroup& group) {
 	//auto ghn = group.getGroupHierarchyNames();
 	//cout << "ghn: " << ofToString(ghn) << endl;
 
-	//auto _g = group.get("myGroupParameters");
-	//auto _ghn = _g.getGroupHierarchyNames();
-	//cout << "_ghn: " << ofToString(_ghn) << endl;
-
 	for (auto parameter : group)
 	{
-		////TODO:
-		////recursive..
-		//auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
-		//if (parameterGroup)
-		//{
-		//	cout << "parameterGroup: " << ofToString(parameter->getName()) << endl;
-
-		//}
-
+		//recursive..
+		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
+		if (parameterGroup)
+		{
+			cout << "parameterGroup: " << ofToString(parameterGroup->getName()) << endl;
+			doRandomizeEditorGroup(*parameterGroup);
+			continue;
+		}
 
 		auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
 		if (parameterInt)
 		{
 			string name = parameterInt->getName();
-
-			//std::stringstream str;
-			//str << "parameterInt: " << ofToString(parameterInt->getName());
-			//str << " ";
-			//str << parameterInt->get() << ", ";
-			//str << parameterInt->getMin() << ", ";
-			//str << parameterInt->getMax() << ", ";
-			//str << endl;
-			//cout << endl;
-
-			string str;
-			str += "parameterInt: " + ofToString(name);
-			str += " : ";
-			str += ofToString(parameterInt->get()) + " (";
-			str += ofToString(parameterInt->getMin()) + ", ";
-			str += ofToString(parameterInt->getMax()) + ")";
-			cout << str << endl;
-
-			//params_Editor_Toggles.getBool
+			//string str;
+			//str += "parameterInt: " + ofToString(name);
+			//str += " : ";
+			//str += ofToString(parameterInt->get()) + " (";
+			//str += ofToString(parameterInt->getMin()) + ", ";
+			//str += ofToString(parameterInt->getMax()) + ")";
+			//cout << str << endl;
 
 			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
-			//auto p = params_Editor_Toggles.get(name);
 
-			//ofParameter<int> prop = group.getInt(name);
-			//ofParameter<int> prop = parameterInt->cast<int>();
-
-			//if (prop.getName() == name && prop.get()) 
 			if (b.get())
 			{
-				int iRandom = ofRandom(parameterInt->getMin(), parameterInt->getMax() + 1);
-				parameterInt->set(iRandom);
+				int random = ofRandom(parameterInt->getMin(), parameterInt->getMax() + 1);
+				parameterInt->set(random);
 			}
-
 
 			continue;
 		}
+
+		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
+		if (parameterFloat)
+		{
+			string name = parameterFloat->getName();
+			//string str;
+			//str += "parameterFloat: " + ofToString(name);
+			//str += " : ";
+			//str += ofToString(parameterFloat->get()) + " (";
+			//str += ofToString(parameterFloat->getMin()) + ", ";
+			//str += ofToString(parameterFloat->getMax()) + ")";
+			//cout << str << endl;
+
+			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+
+			if (b.get())
+			{
+				float random = ofRandom(parameterFloat->getMin(), parameterFloat->getMax());
+				parameterFloat->set(random);
+			}
+
+			continue;
+		}
+
+		auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
+		if (parameterBool)
+		{
+			string name = parameterBool->getName();
+			//string str;
+			//str += "parameterBool: " + ofToString(name);
+			//str += " : ";
+			//str += ofToString(parameterBool->get()) + " (";
+			//str += ofToString(parameterBool->getMin()) + ", ";
+			//str += ofToString(parameterBool->getMax()) + ")";
+			//cout << str << endl;
+
+			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+
+			if (b.get())
+			{
+				bool random = (ofRandom(0, 2) >= 1);
+				parameterBool->set(random);
+			}
+
+			continue;
+		}
+
+		auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
+		if (parameterFloatColor)
+		{
+			string name = parameterFloatColor->getName();
+			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+
+			if (b.get())
+			{
+				ofFloatColor random;
+				random = ofColor(ofRandom(0, 255), ofRandom(0, 255), ofRandom(0, 255));
+				parameterFloatColor->set(random);
+			}
+
+			continue;
+		}
+
 	}
 
 	//	for (auto parameter : group)
@@ -370,15 +418,13 @@ void ofxPresetsManager::doRandomizeEditor()
 	//
 	//		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
 	//	}
-
-		//for (auto &p : editorPresets) {
-		//	p.getName();
-		//}
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::setupEditor()
 {
+	editorPresets.clear();//?
+	
 	//int num = groups[0].getGroupHierarchyNames().size();
 	ofParameterGroup group = groups[0];
 	addGroupToEditor(groups[0]);
@@ -644,6 +690,11 @@ ofxPresetsManager::ofxPresetsManager()
 
 #ifdef INCLUDE_RANDOMIZER
 	params_Tools.add(params_Randomizer);
+
+	//TODO:
+	//there's a problem here bc is dependent of the group params content..
+	params_Tools.add(params_Editor_Toggles);
+
 #endif
 
 	//all nested params for callbacks and storage settings
@@ -895,7 +946,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//auto save timer
 		timerLast_Autosave = ofGetElapsedTimeMillis();
 	}
-	}
+}
 
 //---------------------------------------------------------------------
 void ofxPresetsManager::draw(ofEventArgs & args)
@@ -1256,7 +1307,7 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 
 	lastIndices.push_back(0);//?
 	newIndices.push_back(0);//?
-	presets.push_back(_num_presets);//?
+	presetsOnGroup.push_back(_num_presets);//?
 
 	//-
 
@@ -1830,7 +1881,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 		//-
 
-		if (xIndex >= 0 && xIndex < presets[yIndex])//? presets[0] its's the same than numPresetsFavorites!
+		if (xIndex >= 0 && xIndex < presetsOnGroup[yIndex])//? presets[0] its's the same than numPresetsFavorites!
 		//if (xIndex >= 0 && xIndex < numPresetsFavorites)
 		{
 			//1. mod controlled by save modeKeySave
@@ -1898,7 +1949,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 		}
 
 		//2. last button (save button)
-		else if (xIndex == presets[yIndex])
+		else if (xIndex == presetsOnGroup[yIndex])
 		{
 			ofLogNotice(__FUNCTION__) << "saveButton: (" << yIndex << ")";
 
@@ -1908,9 +1959,11 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 	}
 
+	//-
+
 	//TODO:
 	//3. toggle gui
-	if (yIndex == 0 && xIndex == presets[yIndex] + 1)
+	if (yIndex == 0 && xIndex == presetsOnGroup[yIndex] + 1)
 	{
 		ofLogNotice(__FUNCTION__) << "toggle SHOW_Browser : " << SHOW_Browser;
 		SHOW_Browser = !SHOW_Browser;
@@ -2165,7 +2218,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 #endif
 
 			bMustTrig = true;
-		}
+				}
 
 		//-
 
@@ -2246,7 +2299,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//{
 		//	ofLogError("ofxPresetsManager") << "IGNORED PRESETS CHANGE";
 		//}
-		}
+			}
 		}
 
 #pragma mark - SETTINGS
@@ -2391,7 +2444,7 @@ void ofxPresetsManager::save_ControlSettings()
 #else
 	ofLogNotice(__FUNCTION__) << "[DEBUG] BLOCKED save_ControlSettings()";
 #endif
-}
+		}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::setPath_KitFolder(string folder)

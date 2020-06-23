@@ -39,6 +39,9 @@ public:
 
 	//group1
     ofParameterGroup params;
+	ofParameter<bool> fill;
+	ofParameter<float> lineWidth;
+	ofParameter<ofFloatColor> color;
 	ofParameter<int> shapeType;
 	ofParameter<int> numShapes;
 	ofParameter<int> separation;
