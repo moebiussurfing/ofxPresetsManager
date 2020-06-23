@@ -164,6 +164,7 @@ private:
 	ofParameter<bool> MODE_DicesProbs;
 	ofParameter<bool> bResetDices;
 	ofParameter<int> _randomDice;//to test
+	//ofParameter<string> _totalDicesStr;
 	ofParameter<float> randomizeSpeedF;
 	ofParameter<int> randomizeDuration;
 	ofParameter<int> randomizeDurationShort;
@@ -174,19 +175,34 @@ private:
 	vector<ofParameter<bool>> presetsRandomModeShort;//mode short for ebvery preset
 	vector<int> randomFactorsDices;
 	void setupRandomizer();
-	void doRandomizer();
+	void doRandomizePresetCurr();
 	void doResetDices();
 	int numDices;
 	bool DEBUG_randomTest = false;
 	int timerRandomizer;
 #endif
 
+	//TODO:
+	//system to select what params to clone, randomize etc
+	void setupEditor();
+	vector<ofParameter<bool>> editorPresets;
+	ofParameterGroup params_Editor;
+	ofParameterGroup params_Editor_Toggles;
+	void addGroupToEditor(ofParameterGroup& group);
+	ofParameter<bool> editorRandomize;
+	void Changed_Params_Editor(ofAbstractParameter &e);
+	void doRandomizeEditor();
+public:
+	void randomizePreset() {
+		doRandomizeEditor();
+	}
 	////TODO:
 	//ofParameterGroup group_TARGET;
 	//void addGroup_TARGET(ofParameterGroup &g);	
 	//vector<ofParameterGroup> groupsMem;
 
 	//data
+private:
 	ofXml settingsArray[NUM_OF_PRESETS];
 
 	//--
@@ -284,7 +300,7 @@ public:
 
 	float getPresetClicker_Width()
 	{
-		return clicker_cellSize * (keys[0].size() + 1);
+		return clicker_cellSize * (keys[0].size() + 2);
 	}
 	float getPresetClicker_BoxSize()
 	{
@@ -472,7 +488,7 @@ public:
 	{
 		guiPos_InternalControl = ofVec2f(x, y);
 		gui_InternalControl.setPosition(guiPos_InternalControl.x, guiPos_InternalControl.y);
-	}
+}
 #endif
 
 	void setVisible_GUI_Internal(bool visible)
@@ -732,7 +748,7 @@ public:
 	//TODO:
 	//lastIndices it's the gui box clicked only, not important.. ?
 
-	std::vector<int> presets;//? this seems to be the number of presets each group(?)
+	std::vector<int> presets;//?? this seems to be the number of presets of each added group(?)
 
 	//--
 
@@ -851,7 +867,5 @@ public:
 	{
 		ENABLE_KeysArrowBrowse = b;
 	}
-
-
 
 };

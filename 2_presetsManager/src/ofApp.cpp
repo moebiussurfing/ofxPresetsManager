@@ -220,6 +220,14 @@ void ofApp::keyPressed(int key)
 			//presetsManager.set_ENABLE_Keys(!presetsManager.isKeysEnabled());
 		}
 
+		//-
+
+		//randomize (toggle) enabled parameters of current preset 
+		if (key == OF_KEY_BACKSPACE)
+		{
+			presetsManager.randomizePreset();
+		}
+
 		//TODO:
 		//load preset by code
 		//if (key == 'a')

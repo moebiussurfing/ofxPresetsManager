@@ -4,30 +4,32 @@
 
 #ifdef INCLUDE_RANDOMIZER
 //--------------------------------------------------------------
-void ofxPresetsManager::doRandomizer()
+void ofxPresetsManager::doRandomizePresetCurr()
 {
-	cout << endl << "doRandomizer" << endl;
+	ofLogNotice(__FUNCTION__);
+
+	//-
 
 	//avoid random is the same previuous preset (TODO:improve)
 	int _r = PRESET_selected;
 	int _numPresets = 8;
 
 	if (MODE_DicesProbs) {
-		//sum total dices/all probs
-		numDices = 0;
-		for (auto &p : presetsRandomFactor) {
-			numDices += p.get();
-		}
+		////sum total dices/all probs
+		//numDices = 0;
+		//for (auto &p : presetsRandomFactor) {
+		//	numDices += p.get();
+		//}
+		//
+		//_randomDice.setMax(numDices);
 
 		//randomize
 		if (!DEBUG_randomTest) {
 			_randomDice = ofRandom(0, numDices);
-			cout << "numDices:" << numDices << endl;
+
+			ofLogVerbose(__FUNCTION__) << "random: " << _randomDice.get() << "/" << numDices;
+			//ofLogVerbose(__FUNCTION__) << "numDices:" << numDices;
 		}
-
-		_randomDice.setMax(numDices);
-		cout << "random: " << _randomDice.get() << "/" << numDices << endl;
-
 		//presets dices limits
 		//randomFactorsDices[0] = 0;
 		for (int i = 0; i < presetsRandomFactor.size(); i++) {
@@ -61,19 +63,19 @@ void ofxPresetsManager::doRandomizer()
 			else
 				end = numDices;
 
-			cout << "start:" << start << endl;
-			cout << "end:" << end << endl;
+			ofLogVerbose(__FUNCTION__) << "start:" << start;
+			ofLogVerbose(__FUNCTION__) << "end:" << end;
 			if (_randomDice >= start && _randomDice < end)
 			{
 				_rr = i - 1;
 			}
 		}
-		cout << "preset: " << _rr + 1 << endl;
+		ofLogVerbose(__FUNCTION__) << "preset: " << _rr + 1;
 		_r = _rr + 1;
 
 		//debug
 		for (int i = 0; i < presetsRandomFactor.size(); i++) {
-			cout << "randomFactorsDices: " << i << " " << randomFactorsDices[i] << endl;// << "-" << randomFactorsDices[i + 1] << endl;
+			ofLogVerbose(__FUNCTION__) << "randomFactorsDices: " << i << " " << randomFactorsDices[i] << endl;// << "-" << randomFactorsDices[i + 1] << endl;
 		}
 
 		//for (int f = 1; f < presetsRandomFactor.size(); f++) {
@@ -98,11 +100,11 @@ void ofxPresetsManager::doRandomizer()
 
 	//--
 
-	ofLogNotice("ofxPresetsManager") << "\t > " << ofToString(_r);
+	ofLogNotice(__FUNCTION__) << "\t > " << ofToString(_r);
 	loadPreset(_r);
 
 	//int __r = (int)ofRandom(1.0f, 9.0f);
-	//ofLogNotice("ofxPresetsManager") << "\t > " << ofToString(__r);
+	//ofLogNotice(__FUNCTION__) << "\t > " << ofToString(__r);
 	//loadPreset(__r);
 
 	//--
@@ -120,6 +122,279 @@ void ofxPresetsManager::doResetDices()
 	for (auto &p : presetsRandomFactor) {
 		p = 0;
 	}
+	numDices = 0;
+	_randomDice.setMax(numDices);
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
+	editorPresets.clear();//?
+
+	for (auto parameter : group)
+	{
+		// Group.
+		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
+		if (parameterGroup)
+		{
+			//// Recurse through contents.
+			//ofxImGui::AddGroup(*parameterGroup, settings);
+			addGroupToEditor(*parameterGroup);
+			continue;
+		}
+
+		// Parameter, try everything we know how to handle.
+#if OF_VERSION_MINOR >= 10
+		auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
+		if (parameterVec2f)
+		{
+			ofParameter<bool> b{ parameterVec2f->getName(), false };
+			editorPresets.push_back(b);
+			//ofxImGui::AddParameter(*parameterVec2f);
+			continue;
+		}
+		//auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
+		//if (parameterVec3f)
+		//{
+		//	ofxImGui::AddParameter(*parameterVec3f);
+		//	continue;
+		//}
+		//auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
+		//if (parameterVec4f)
+		//{
+		//	ofxImGui::AddParameter(*parameterVec4f);
+		//	continue;
+		//}
+#endif
+		//auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
+		//if (parameterOfVec2f)
+		//{
+		//	ofxImGui::AddParameter(*parameterOfVec2f);
+		//	continue;
+		//}
+		//auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
+		//if (parameterOfVec3f)
+		//{
+		//	ofxImGui::AddParameter(*parameterOfVec3f);
+		//	continue;
+		//}
+		//auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
+		//if (parameterOfVec4f)
+		//{
+		//	ofxImGui::AddParameter(*parameterOfVec4f);
+		//	continue;
+		//}
+		//auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
+		//if (parameterFloatColor)
+		//{
+		//	ofxImGui::AddParameter(*parameterFloatColor);
+		//	continue;
+		//}
+		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
+		if (parameterFloat)
+		{
+			ofParameter<bool> b{ parameterFloat->getName(), false };
+			editorPresets.push_back(b);
+			//ofxImGui::AddParameter(*parameterFloat);
+			continue;
+		}
+		auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
+		if (parameterInt)
+		{
+			ofParameter<bool> b{ parameterInt->getName(), false };
+			editorPresets.push_back(b);
+			//ofxImGui::AddParameter(*parameterInt);
+			continue;
+		}
+		//auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
+		//if (parameterBool)
+		//{
+		//	ofxImGui::AddParameter(*parameterBool);
+		//	continue;
+		//}
+
+		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
+	}
+}
+
+//TODO:
+//randomize enable toggle params of the preset
+//--------------------------------------------------------------
+void ofxPresetsManager::doRandomizeEditor()
+{
+	ofLogNotice(__FUNCTION__);
+
+	ofParameterGroup group = groups[0];
+
+	//auto ghn = group.getGroupHierarchyNames();
+	//cout << "ghn: " << ofToString(ghn) << endl;
+
+	//auto _g = group.get("myGroupParameters");
+	//auto _ghn = _g.getGroupHierarchyNames();
+	//cout << "_ghn: " << ofToString(_ghn) << endl;
+
+	for (auto parameter : group)
+	{
+		////TODO:
+		////recursive..
+		//auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
+		//if (parameterGroup)
+		//{
+		//	cout << "parameterGroup: " << ofToString(parameter->getName()) << endl;
+
+		//}
+
+
+		auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
+		if (parameterInt)
+		{
+			string name = parameterInt->getName();
+
+			//std::stringstream str;
+			//str << "parameterInt: " << ofToString(parameterInt->getName());
+			//str << " ";
+			//str << parameterInt->get() << ", ";
+			//str << parameterInt->getMin() << ", ";
+			//str << parameterInt->getMax() << ", ";
+			//str << endl;
+			//cout << endl;
+
+			string str;
+			str += "parameterInt: " + ofToString(name);
+			str += " : ";
+			str += ofToString(parameterInt->get()) + " (";
+			str += ofToString(parameterInt->getMin()) + ", ";
+			str += ofToString(parameterInt->getMax()) + ")";
+			cout << str << endl;
+
+			//params_Editor_Toggles.getBool
+
+			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+			//auto p = params_Editor_Toggles.get(name);
+
+			//ofParameter<int> prop = group.getInt(name);
+			//ofParameter<int> prop = parameterInt->cast<int>();
+
+			//if (prop.getName() == name && prop.get()) 
+			if (b.get())
+			{
+				int iRandom = ofRandom(parameterInt->getMin(), parameterInt->getMax() + 1);
+				parameterInt->set(iRandom);
+			}
+
+
+			continue;
+		}
+	}
+
+	//	for (auto parameter : group)
+	//	{
+	//		//// Group.
+	//		//auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
+	//		//if (parameterGroup)
+	//		//{
+	//		//	//// Recurse through contents.
+	//		//	//ofxImGui::AddGroup(*parameterGroup, settings);
+	//		//	addGroupToEditor(*parameterGroup);
+	//		//	continue;
+	//		//}
+	//
+	//		// Parameter, try everything we know how to handle.
+	//#if OF_VERSION_MINOR >= 10
+	//		auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
+	//		if (parameterVec2f)
+	//		{
+	//			ofParameter<bool> b{ parameterVec2f->getName(), false };
+	//			editorPresets.push_back(b);
+	//			//ofxImGui::AddParameter(*parameterVec2f);
+	//			continue;
+	//		}
+	//		//auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
+	//		//if (parameterVec3f)
+	//		//{
+	//		//	ofxImGui::AddParameter(*parameterVec3f);
+	//		//	continue;
+	//		//}
+	//		//auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
+	//		//if (parameterVec4f)
+	//		//{
+	//		//	ofxImGui::AddParameter(*parameterVec4f);
+	//		//	continue;
+	//		//}
+	//#endif
+	//		//auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
+	//		//if (parameterOfVec2f)
+	//		//{
+	//		//	ofxImGui::AddParameter(*parameterOfVec2f);
+	//		//	continue;
+	//		//}
+	//		//auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
+	//		//if (parameterOfVec3f)
+	//		//{
+	//		//	ofxImGui::AddParameter(*parameterOfVec3f);
+	//		//	continue;
+	//		//}
+	//		//auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
+	//		//if (parameterOfVec4f)
+	//		//{
+	//		//	ofxImGui::AddParameter(*parameterOfVec4f);
+	//		//	continue;
+	//		//}
+	//		//auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
+	//		//if (parameterFloatColor)
+	//		//{
+	//		//	ofxImGui::AddParameter(*parameterFloatColor);
+	//		//	continue;
+	//		//}
+	//		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
+	//		if (parameterFloat)
+	//		{
+	//			ofParameter<bool> b{ parameterFloat->getName(), false };
+	//			editorPresets.push_back(b);
+	//			//ofxImGui::AddParameter(*parameterFloat);
+	//			continue;
+	//		}
+	//		auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
+	//		if (parameterInt)
+	//		{
+	//			ofParameter<bool> b{ parameterInt->getName(), false };
+	//			editorPresets.push_back(b);
+	//			//ofxImGui::AddParameter(*parameterInt);
+	//			continue;
+	//		}
+	//		//auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
+	//		//if (parameterBool)
+	//		//{
+	//		//	ofxImGui::AddParameter(*parameterBool);
+	//		//	continue;
+	//		//}
+	//
+	//		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
+	//	}
+
+		//for (auto &p : editorPresets) {
+		//	p.getName();
+		//}
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::setupEditor()
+{
+	//int num = groups[0].getGroupHierarchyNames().size();
+	ofParameterGroup group = groups[0];
+	addGroupToEditor(groups[0]);
+
+	//add to group
+	editorRandomize.set("RANDOMIZE", false);
+	params_Editor.setName("EDITOR");
+	params_Editor.add(editorRandomize);
+
+	params_Editor_Toggles.setName("PARAMETERS");
+	for (auto &p : editorPresets) {
+		params_Editor_Toggles.add(p);
+	}
+	params_Editor.add(params_Editor_Toggles);
+
+	ofAddListener(params_Editor.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Editor);
 }
 
 //--------------------------------------------------------------
@@ -132,7 +407,7 @@ void ofxPresetsManager::setupRandomizer()
 	MODE_DicesProbs.set("MODE DICES", true);
 	randomizeDuration.set("DURATION", 500, 10, randomize_MAX_DURATION);
 	randomizeDurationShort.set("DURATION SHORT", 250, 10, 1000);
-	_randomDice.set("DICE", 0, 0, 8);
+	_randomDice.set("DICE", 0, 0, numPresetsFavorites);
 	randomizeSpeedF.set("SPEED", 0.8f, 0.f, 1.f);
 	bResetDices.set("RESET DICES", false);
 
@@ -162,8 +437,8 @@ void ofxPresetsManager::setupRandomizer()
 	}
 
 	params_Randomizer.setName("RANDOMIZER");
-	params_Randomizer.add(bRandomize);
 	params_Randomizer.add(ENABLE_RandomizeTimer);
+	params_Randomizer.add(bRandomize);
 	params_Randomizer.add(MODE_DicesProbs);
 	params_Randomizer.add(randomizeSpeedF);
 	params_Randomizer.add(randomizeDuration);
@@ -408,7 +683,7 @@ void ofxPresetsManager::setup()
 	//-
 
 	//ofSetLogLevel("ofxPresetsManager", OF_LOG_NOTICE);
-	ofLogNotice("ofxPresetsManager") << "setup()";
+	ofLogNotice(__FUNCTION__) << "setup()";
 
 	//-
 
@@ -486,6 +761,8 @@ void ofxPresetsManager::setup()
 
 	//radomizer
 	setupRandomizer();
+
+	setupEditor();
 #endif
 
 	//--
@@ -529,7 +806,7 @@ void ofxPresetsManager::setup()
 //--------------------------------------------------------------
 void ofxPresetsManager::windowResized(int w, int h)
 {
-	ofLogNotice("ofxPresetsManager") << "windowResized: " << w << "," << h;
+	ofLogNotice(__FUNCTION__) << "windowResized: " << w << "," << h;
 
 	////use this bc save/load is not working
 	//#ifdef INCLUDE_FILE_BROWSER_IM_GUI
@@ -568,6 +845,11 @@ void ofxPresetsManager::update(ofEventArgs & args)
 
 	//-
 
+	//TODO:
+	//_totalDicesStr = "/ " + ofToString(_randomDice.getMax());
+
+	//-
+
 	//plotters
 #ifdef TIME_SAMPLE_MEASURES 
 	TS_START("load1");
@@ -588,7 +870,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 	if (!MODE_Browser_NewPreset && autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
 #endif
 	{
-		ofLogNotice("ofxPresetsManager") << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t[AUTOSAVE]";
+		ofLogNotice(__FUNCTION__) << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t[AUTOSAVE]";
 
 		//app settings
 		save_ControlSettings();
@@ -613,7 +895,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//auto save timer
 		timerLast_Autosave = ofGetElapsedTimeMillis();
 	}
-}
+	}
 
 //---------------------------------------------------------------------
 void ofxPresetsManager::draw(ofEventArgs & args)
@@ -687,7 +969,7 @@ void ofxPresetsManager::drawPresetClicker()
 	ofFill();
 	ofSetColor(0, 128);
 	ofDrawRectangle(0, 0,
-		clicker_cellSize * (keys[0].size() + 1), clicker_cellSize*groups.size());
+		clicker_cellSize * (keys[0].size() + 2), clicker_cellSize*groups.size());
 
 	//-
 
@@ -722,7 +1004,7 @@ void ofxPresetsManager::drawPresetClicker()
 			//-
 
 			//2. inner box. double mark current selected preset
-			if (lastIndices[i] == k)
+			if (lastIndices[i] == k)//it is selected
 			{
 				float r = 3.0f;
 				float pd = 4.0f;
@@ -774,27 +1056,88 @@ void ofxPresetsManager::drawPresetClicker()
 
 		//-
 
+		string _label;
+
 		//save label
+		_label = "SAVE";
 		int ySave = clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF;
 		if (!myFont.isLoaded())//without ttf font
 		{
-			ofDrawBitmapString("SAVE",
+			ofDrawBitmapString(_label,
 				clicker_cellSize*k + 8,
 				clicker_cellSize*i + 18);
 		}
 		else//custom font 
 		{
-			float wx = 0.5f * myFont.getStringBoundingBox("SAVE", 0, 0).width;
-			myFont.drawString("SAVE",
+			float wx = 0.5f * myFont.getStringBoundingBox(_label, 0, 0).width;
+			myFont.drawString(_label,
 				clicker_cellSize * k + 0.5 * clicker_cellSize - wx,
 				//clicker_cellSize * k + 0.5 * clicker_cellSize - 1.8f * sizeTTF,
 				ySave);
 		}
-		k++;//?
+		k++;
 
 		//-
 
-		//group kit name
+		//4. gui toggle
+
+		//box
+		ofDrawRectangle(clicker_cellSize * (k), clicker_cellSize * i, clicker_cellSize, clicker_cellSize);
+
+		//-
+
+		//save label
+		//int ySave = clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF;
+		_label = "GUI";
+		if (!myFont.isLoaded())//without ttf font
+		{
+			ofDrawBitmapString(_label,
+				clicker_cellSize*(k)+8,
+				clicker_cellSize*i + 18);
+		}
+		else//custom font 
+		{
+			float wx = 0.5f * myFont.getStringBoundingBox(_label, 0, 0).width;
+			myFont.drawString(_label,
+				clicker_cellSize * (k)+0.5 * clicker_cellSize - wx,
+				//clicker_cellSize * k + 0.5 * clicker_cellSize - 1.8f * sizeTTF,
+				ySave);
+		}
+		//mark if gui visible
+		if (SHOW_Browser)
+		{
+			float r = 3.0f;
+			float pd = 4.0f;
+			int color = 200;
+
+			ofPushStyle();
+			ofSetColor(color, 164);
+
+			//-
+
+			////border only
+			//ofNoFill();
+			//ofDrawRectRounded(clicker_cellSize * k + pd, clicker_cellSize * i + pd,
+			//	clicker_cellSize - 2 * pd, clicker_cellSize - 2 * pd,
+			//	r);
+
+			//-
+
+			//filled
+			ofFill();
+			ofSetColor(color, 64);
+			ofDrawRectRounded(clicker_cellSize * k + pd, clicker_cellSize * i + pd,
+				clicker_cellSize - 2 * pd, clicker_cellSize - 2 * pd,
+				r);
+			//ofNoFill();
+
+			ofPopStyle();
+		}
+		k++;
+
+		//-
+
+		//5. group kit name
 		if (SHOW_GroupName)
 		{
 			string info = groups[i].getName();
@@ -907,7 +1250,7 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 {
 	//main adder of a ofParameterGroup for preset management
 
-	ofLogNotice("ofxPresetsManager") << "added group";
+	ofLogNotice(__FUNCTION__) << "added group";
 
 	groups.push_back(params);//each enqued group-param handles all (_num_presets) '8' presets
 
@@ -930,7 +1273,7 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 	groupName = groups[0].getName();//TODO: one group only
 	//groupName2 = groups[1].getName();//TODO: one group only
 
-	ofLogNotice("ofxPresetsManager") << "groupName: " << groupName;
+	ofLogNotice(__FUNCTION__) << "groupName: " << groupName;
 
 	//-
 
@@ -969,13 +1312,13 @@ void ofxPresetsManager::add(ofParameterGroup params, initializer_list<int> keysL
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, int guiIndex)
 {
-	ofLogVerbose("ofxPresetsManager") << "save(" << presetIndex << "," << guiIndex << ")";
+	ofLogVerbose(__FUNCTION__) << "save(" << presetIndex << "," << guiIndex << ")";
 
 	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
 		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
-		ofLogVerbose("ofxPresetsManager") << "DONE_save (1)";
+		ofLogVerbose(__FUNCTION__) << "DONE_save (1)";
 
 		//it's important if this line is before or after ofSerialize
 		DONE_save = true;
@@ -1006,7 +1349,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 			TS_START("saveMem1");
 
-			//ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
+			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
 
 			ofSerialize(settingsArray[presetIndex], groups[guiIndex]);
 
@@ -1022,14 +1365,14 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, string gName)
 {
-	ofLogVerbose("ofxPresetsManager") << "save(" << presetIndex << "," << gName << ")";
+	ofLogVerbose(__FUNCTION__) << "save(" << presetIndex << "," << gName << ")";
 
 	int guiIndex = getGuiIndex(gName);
 
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
 		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
-		ofLogVerbose("ofxPresetsManager") << "DONE_save (2)";
+		ofLogVerbose(__FUNCTION__) << "DONE_save (2)";
 
 		//it's important if this line is before or after ofSerialize
 		DONE_save = true;
@@ -1061,7 +1404,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 		{
 			TS_START("saveMem2");//for TimeMeasurements only
 
-			//ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
+			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
 
 			ofSerialize(settingsArray[presetIndex], groups[guiIndex]);
 
@@ -1078,7 +1421,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, int guiIndex)
 {
-	ofLogVerbose("ofxPresetsManager") << "load(" << presetIndex << "," << guiIndex << ")";
+	ofLogVerbose(__FUNCTION__) << "load(" << presetIndex << "," << guiIndex << ")";
 
 	//TODO:
 	//guiIndex is not the preset position, it's for multiplye guis!
@@ -1107,7 +1450,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 
 			TS_START("loadMem1");//for TimeMeasurements only
 
-			//ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
+			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
 
 			//using xml array
 			ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
@@ -1129,7 +1472,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 		//-
 
 		//callback
-		ofLogVerbose("ofxPresetsManager") << "DONE_load (1)";
+		ofLogVerbose(__FUNCTION__) << "DONE_load (1)";
 		DONE_load = true;
 
 		//simple callback
@@ -1144,7 +1487,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, string gName)
 {
-	ofLogVerbose("ofxPresetsManager") << "load(" << presetIndex << "," << gName << ")";
+	ofLogVerbose(__FUNCTION__) << "load(" << presetIndex << "," << gName << ")";
 
 	int guiIndex = getGuiIndex(gName);
 
@@ -1170,7 +1513,7 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 
 			TS_START("loadMem2");//for TimeMeasurements only
 
-			//ofLogNotice("ofxPresetsManager") << "MEMORY MODE";
+			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
 
 			ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
 
@@ -1184,7 +1527,7 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 
 		//-
 
-		ofLogVerbose("ofxPresetsManager") << "DONE_load (1)";
+		ofLogVerbose(__FUNCTION__) << "DONE_load (1)";
 		DONE_load = true;
 	}
 	else
@@ -1198,13 +1541,13 @@ void ofxPresetsManager::loadPreset(int p)
 {
 	if (!DISABLE_CALLBACKS)// && (PRESET_selected != PRESET_selected_PRE))
 	{
-		ofLogNotice("ofxPresetsManager") << "loadPreset(" << ofToString(p) << ")";
-		ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";
+		ofLogNotice(__FUNCTION__) << "loadPreset(" << ofToString(p) << ")";
+		ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
 		if (PRESET_selected >= 1 && PRESET_selected <= numPresetsFavorites)
 		{
 			PRESET_selected = p;
-			//ofLogNotice("ofxPresetsManager") << ".";
+			//ofLogNotice(__FUNCTION__) << ".";
 
 			//PRESET_selected_PRE = PRESET_selected;//TODO:
 		}
@@ -1292,7 +1635,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		if (key == modeKeySave)
 		{
 			bKeySave = true;
-			ofLogVerbose("ofxPresetsManager") << "modeKeySave TRUE" << endl;
+			ofLogVerbose(__FUNCTION__) << "modeKeySave TRUE" << endl;
 			return;
 		}
 
@@ -1300,7 +1643,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		else if (key == modKeySwap)
 		{
 			bKeySwap = true;
-			ofLogVerbose("ofxPresetsManager") << "modKeySwap TRUE" << endl;
+			ofLogVerbose(__FUNCTION__) << "modKeySwap TRUE" << endl;
 			return;
 		}
 
@@ -1333,7 +1676,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		}
 		else if (key == 'r')
 		{
-			doRandomizer();
+			doRandomizePresetCurr();
 		}
 #endif
 
@@ -1353,8 +1696,8 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 					currentFile = files.size() - 1;
 				}
 				browser_PresetName = fileNames[currentFile];
-				ofLogNotice("ofxPresetsManager") << "[>] LOAD" << endl;
-				ofLogNotice("ofxPresetsManager") << "Preset Name: " << browser_PresetName;
+				ofLogNotice(__FUNCTION__) << "[>] LOAD" << endl;
+				ofLogNotice(__FUNCTION__) << "Preset Name: " << browser_PresetName;
 				browser_PresetLoad(browser_PresetName);
 			}
 			else
@@ -1381,8 +1724,8 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 					currentFile = 0;
 				}
 				browser_PresetName = fileNames[currentFile];
-				ofLogNotice("ofxPresetsManager") << "[<] LOAD" << endl;
-				ofLogNotice("ofxPresetsManager") << "Preset Name: " << browser_PresetName;
+				ofLogNotice(__FUNCTION__) << "[<] LOAD" << endl;
+				ofLogNotice(__FUNCTION__) << "Preset Name: " << browser_PresetName;
 				browser_PresetLoad(browser_PresetName);
 			}
 			else
@@ -1408,7 +1751,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				if (key == keys[i][k])
 				{
-					ofLogNotice("ofxPresetsManager") << "Key: " << (char)key;
+					ofLogNotice(__FUNCTION__) << "Key: " << (char)key;
 
 					if (bKeySave)
 					{
@@ -1416,7 +1759,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 					}
 					else
 					{
-						ofLogNotice("ofxPresetsManager") << "[" << k << "][" << i << "]";
+						ofLogNotice(__FUNCTION__) << "[" << k << "][" << i << "]";
 
 						PRESET_selected = 1 + k;
 					}
@@ -1434,12 +1777,12 @@ void ofxPresetsManager::keyReleased(ofKeyEventArgs &eventArgs)
 	if (eventArgs.key == modeKeySave && ENABLE_Keys)
 	{
 		bKeySave = false;
-		ofLogVerbose("ofxPresetsManager") << "modeKeySave FALSE" << endl;
+		ofLogVerbose(__FUNCTION__) << "modeKeySave FALSE" << endl;
 	}
 	else if (eventArgs.key == modKeySwap && ENABLE_Keys)
 	{
 		bKeySwap = false;
-		ofLogVerbose("ofxPresetsManager") << "modKeySwap FALSE" << endl;
+		ofLogVerbose(__FUNCTION__) << "modKeySwap FALSE" << endl;
 	}
 }
 
@@ -1466,25 +1809,24 @@ void ofxPresetsManager::mousePressed(int x, int y)
 	y = y - clicker_Pos.y;
 
 	int xIndex = x / clicker_cellSize;
-	int yIndex = y / clicker_cellSize;
-	//yIndex is for when we add more groups feature! (just one group for now)
+	int yIndex = y / clicker_cellSize;//yIndex is for when we add more groups feature! (just one group for now)
 
-	//Index -1 for out of boxes
+	//Index -1 for out (left) of boxes
 	xIndex = (x > 0) ? xIndex : -1;
 	yIndex = (y > 0) ? yIndex : -1;
 
 	//debug mouse out of click cells
-	if (false && xIndex != -1 && yIndex != -1)
-		ofLogNotice("ofxPresetsManager") << "mousePressed: (" << xIndex << "," << yIndex << ")";
+	if (xIndex != -1 && yIndex != -1)
+		ofLogVerbose(__FUNCTION__) << "(" << xIndex << "," << yIndex << ")";
 
 	//-
 
-	//1. key presets buttons
-	if (yIndex >= 0 && yIndex < (int)groups.size())
+	//1. key presets buttons & save button
+	if (yIndex >= 0 && yIndex < (int)groups.size())// + 1)//+1 for extra gui button
 	{
 		//avoid outer panel logs. only into the group row levels
 		if (xIndex != -1 && yIndex != -1)
-			ofLogVerbose("ofxPresetsManager") << "mousePressed: (" << xIndex << "," << yIndex << ")";
+			ofLogVerbose(__FUNCTION__) << "(" << xIndex << "," << yIndex << ")";
 
 		//-
 
@@ -1558,11 +1900,20 @@ void ofxPresetsManager::mousePressed(int x, int y)
 		//2. last button (save button)
 		else if (xIndex == presets[yIndex])
 		{
-			ofLogNotice("ofxPresetsManager") << "saveButton: (" << yIndex << ")";
+			ofLogNotice(__FUNCTION__) << "saveButton: (" << yIndex << ")";
 
 			doSave(lastIndices[yIndex]);
 			//save( lastIndices[yIndex], yIndex );
 		}
+
+	}
+
+	//TODO:
+	//3. toggle gui
+	if (yIndex == 0 && xIndex == presets[yIndex] + 1)
+	{
+		ofLogNotice(__FUNCTION__) << "toggle SHOW_Browser : " << SHOW_Browser;
+		SHOW_Browser = !SHOW_Browser;
 	}
 }
 
@@ -1573,7 +1924,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 //--------------------------------------------------------------
 void ofxPresetsManager::doCloneRight(int pIndex)
 {
-	ofLogNotice("ofxPresetsManager") << "doCloneRight: pIndex: " << pIndex;
+	ofLogNotice(__FUNCTION__) << "doCloneRight: pIndex: " << pIndex;
 	for (int i = pIndex + 1; i < numPresetsFavorites; i++)
 	{
 		save(i, 0);//0 is bc it's the only 1st params group implemented
@@ -1583,12 +1934,12 @@ void ofxPresetsManager::doCloneRight(int pIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::doCloneAll()
 {
-	ofLogNotice("ofxPresetsManager") << "doCloneAll";// << pIndex;
+	ofLogNotice(__FUNCTION__) << "doCloneAll";// << pIndex;
 
 	//save current preset
 	if (autoSave)
 	{
-		ofLogNotice("ofxPresetsManager") << "autosave current preset";
+		ofLogNotice(__FUNCTION__) << "autosave current preset";
 		doSave(PRESET_selected - 1);
 	}
 
@@ -1602,14 +1953,14 @@ void ofxPresetsManager::doCloneAll()
 //--------------------------------------------------------------
 void ofxPresetsManager::doLoad(int pIndex)
 {
-	ofLogVerbose("ofxPresetsManager") << "doLoad: pIndex: " << pIndex;
+	ofLogVerbose(__FUNCTION__) << "doLoad: pIndex: " << pIndex;
 	load(pIndex, 0);//0 is bc it's the only 1st params group implemented
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doSave(int pIndex)
 {
-	ofLogVerbose("ofxPresetsManager") << "doSave: pIndex: " << pIndex;
+	ofLogVerbose(__FUNCTION__) << "doSave: pIndex: " << pIndex;
 	save(pIndex, 0);//0 is bc it's the only 1st params group implemented
 }
 
@@ -1622,26 +1973,46 @@ void ofxPresetsManager::setToggleKeysControl(bool active)
 #pragma mark - CALLBACKS
 
 //--------------------------------------------------------------
+void ofxPresetsManager::Changed_Params_Editor(ofAbstractParameter &e)
+{
+	if (!DISABLE_CALLBACKS)
+	{
+		string name = e.getName();
+
+		ofLogNotice(__FUNCTION__) << name << " : " << e;
+
+		//-
+
+		if (name == editorRandomize.getName() && editorRandomize)
+		{
+			editorRandomize = false;
+
+			doRandomizeEditor();
+		}
+	}
+}
+
+//--------------------------------------------------------------
 void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 {
 	if (!DISABLE_CALLBACKS)
 	{
 		string name = e.getName();
 
-		ofLogNotice("ofxPresetsManager") << "Changed_Params_Control '" << name << "': " << e;
+		ofLogNotice(__FUNCTION__) << name << " : " << e;
 
 		//-
 
 		if (name == "SAVE" && bSave)
 		{
-			ofLogNotice("ofxPresetsManager") << "SAVE: " << e;
+			ofLogNotice(__FUNCTION__) << "SAVE: " << e;
 			bSave = false;
 			doSave(PRESET_selected - 1);
 		}
 
 		//else if (name == "LOAD" && bLoad)
 		//{
-		//	ofLogNotice("ofxPresetsManager") << "LOAD: " << e;
+		//	ofLogNotice(__FUNCTION__) << "LOAD: " << e;
 		//	bLoad = false;
 		//	doLoad(PRESET_selected - 1);
 		//}
@@ -1651,13 +2022,13 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//tools
 		else if (name == "CLONE >" && bCloneRight)
 		{
-			ofLogNotice("ofxPresetsManager") << "CLONE >: " << e;
+			ofLogNotice(__FUNCTION__) << "CLONE >: " << e;
 			bCloneRight = false;
 			doCloneRight(PRESET_selected - 1);
 		}
 		else if (name == "CLONE ALL" && bCloneAll)
 		{
-			ofLogNotice("ofxPresetsManager") << "CLONE ALL: " << e;
+			ofLogNotice(__FUNCTION__) << "CLONE ALL: " << e;
 			bCloneAll = false;
 			doCloneAll();
 		}
@@ -1668,24 +2039,24 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 		else if (name == "RANDOMIZE" && bRandomize)
 		{
-			ofLogNotice("ofxPresetsManager") << "RANDOMIZE !";
+			//ofLogNotice(__FUNCTION__) << "RANDOMIZE !";
 			bRandomize = false;
 
-			doRandomizer();
+			doRandomizePresetCurr();
 		}
 		else if (name == "ENABLE TIMER RANDOMIZER")
 		{
-			ofLogNotice("ofxPresetsManager") << "MODE TIMER: " << e;
+			ofLogNotice(__FUNCTION__) << "MODE TIMER: " << e;
 		}
 		else if (name == "SPEED")
 		{
-			ofLogNotice("ofxPresetsManager") << "SPEED: " << e;
+			ofLogNotice(__FUNCTION__) << "SPEED: " << e;
 
 			randomizeDuration = randomize_MAX_DURATION * (1.f - randomizeSpeedF);
 		}
 		else if (name == "DURATION")
 		{
-			ofLogNotice("ofxPresetsManager") << "DURATION: " << e;
+			ofLogNotice(__FUNCTION__) << "DURATION: " << e;
 
 			//randomizeSpeedF = 1 + (randomizeDuration / (float)randomize_MAX_DURATION);
 			randomizeSpeedF = -((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
@@ -1693,12 +2064,12 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//TODO:
 		else if (name == "DICE" && DEBUG_randomTest)//set dice by user
 		{
-			ofLogNotice("ofxPresetsManager") << "DICE: " << e;
-			doRandomizer();
+			ofLogNotice(__FUNCTION__) << "DICE: " << e;
+			doRandomizePresetCurr();
 		}
 		else if (name == "RESET DICES" && bResetDices)
 		{
-			ofLogNotice("ofxPresetsManager") << "RESET DICES: " << e;
+			ofLogNotice(__FUNCTION__) << "RESET DICES: " << e;
 			doResetDices();
 			bResetDices = false;
 		}
@@ -1711,10 +2082,11 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		}
 
 		//--
+
 #ifndef INCLUDE_FILE_BROWSER_IM_GUI
 		else if (name == "GUI POSITION")
 		{
-			ofLogVerbose("ofxPresetsManager") << "GUI POSITION: " << e;
+			ofLogVerbose(__FUNCTION__) << "GUI POSITION: " << e;
 			//clamp inside window
 			float x, y;
 			x = ofClamp(Gui_Internal_Position.get().x, 0, ofGetWidth() - 200);
@@ -1726,7 +2098,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 		else if (name == "GUI BROWSER POSITION")
 		{
-			ofLogVerbose("ofxPresetsManager") << "GUI BROWSER POSITION: " << e;
+			ofLogVerbose(__FUNCTION__) << "GUI BROWSER POSITION: " << e;
 
 			////clamp inside window
 			//float x, y;
@@ -1739,21 +2111,21 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "LOAD TO MEMORY" && loadToMemory)
 		{
-			ofLogNotice("ofxPresetsManager") << "loadToMemory:" << e;
+			ofLogNotice(__FUNCTION__) << "loadToMemory:" << e;
 			loadToMemory = false;
 			load_AllKit_ToMemory();
 		}
 
 		else if (name == "SAVE FROM MEMORY" && saveFromMemory)
 		{
-			ofLogNotice("ofxPresetsManager") << "saveFromMemory:" << e;
+			ofLogNotice(__FUNCTION__) << "saveFromMemory:" << e;
 			saveFromMemory = false;
 			save_AllKit_FromMemory();
 		}
 
 		else if (name == "MODE MEMORY")
 		{
-			ofLogNotice("ofxPresetsManager") << "MODE MEMORY: " << e;
+			ofLogNotice(__FUNCTION__) << "MODE MEMORY: " << e;
 
 			if (MODE_MemoryLive)
 			{
@@ -1778,8 +2150,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESETS" && (PRESET_selected == PRESET_selected_PRE))
 		{
-			ofLogNotice("ofxPresetsManager") << "PRESET NOT Changed: " << e << ". BUT..";
-			ofLogNotice("ofxPresetsManager") << "TRIG PRESET!";
+			ofLogNotice(__FUNCTION__) << "PRESET NOT Changed: " << e << ". BUT..";
+			ofLogNotice(__FUNCTION__) << "TRIG PRESET!";
 
 			//browser
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
@@ -1801,7 +2173,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESETS" && (PRESET_selected != PRESET_selected_PRE))
 		{
-			ofLogNotice("ofxPresetsManager") << "PRESET: " << e;
+			//ofLogNotice(__FUNCTION__) << "PRESET: " << e;
 
 			//-
 
@@ -1846,12 +2218,36 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				}
 			}
 		}
+
+		//--
+
+		else
+		{
+			bool doDices = false;
+			for (int i = 0; i < presetsRandomFactor.size(); i++) {
+				if (name == "PROB " + ofToString(i + 1)) {
+					doDices = true;
+				}
+			}
+			if (doDices)
+			{
+				//sum total dices/all probs
+				numDices = 0;
+				for (auto &p : presetsRandomFactor) {
+					numDices += p.get();
+				}
+				_randomDice.setMax(numDices);
+
+				ofLogNotice(__FUNCTION__) << "numDices:" << numDices;
+			}
+		}
+
 		//else
 		//{
 		//	ofLogError("ofxPresetsManager") << "IGNORED PRESETS CHANGE";
 		//}
-	}
-}
+		}
+		}
 
 #pragma mark - SETTINGS
 
@@ -1869,8 +2265,8 @@ void ofxPresetsManager::load_ControlSettings()
 	}
 #endif
 
-	ofLogNotice("ofxPresetsManager") << "load_ControlSettings: " << path;
-	ofLogNotice("ofxPresetsManager") << "load_ControlSettings: PRESET " << PRESET_selected;
+	ofLogNotice(__FUNCTION__) << "load_ControlSettings: " << path;
+	ofLogNotice(__FUNCTION__) << "load_ControlSettings: PRESET " << PRESET_selected;
 
 	if (bLoaded)
 	{
@@ -1887,7 +2283,7 @@ void ofxPresetsManager::save_ControlSettings()
 {
 #ifndef DEBUG_BLOCK_SAVE_SETTINGS
 
-	ofLogNotice("ofxPresetsManager") << "save_ControlSettings()";
+	ofLogNotice(__FUNCTION__) << "save_ControlSettings()";
 
 	//TODO:
 	//crashes!
@@ -1931,7 +2327,7 @@ void ofxPresetsManager::save_ControlSettings()
 
 	try
 	{
-		ofLogNotice("ofxPresetsManager") << endl << params_Control.toString() << endl;
+		ofLogNotice(__FUNCTION__) << endl << params_Control.toString() << endl;
 
 		ofXml settingsControl;
 
@@ -1940,13 +2336,13 @@ void ofxPresetsManager::save_ControlSettings()
 		ofSerialize(settingsControl, params_Control);
 
 		string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
-		ofLogNotice("ofxPresetsManager") << "path: " << path;
+		ofLogNotice(__FUNCTION__) << "path: " << path;
 
 		//TODO: 
 		//crashes here!
 		settingsControl.save(path);
 
-		ofLogNotice("ofxPresetsManager") << settingsControl << endl;
+		ofLogNotice(__FUNCTION__) << settingsControl << endl;
 	}
 	catch (int n)
 	{
@@ -1993,7 +2389,7 @@ void ofxPresetsManager::save_ControlSettings()
 
 	DISABLE_CALLBACKS = false;
 #else
-	ofLogNotice("ofxPresetsManager") << "[DEBUG] BLOCKED save_ControlSettings()";
+	ofLogNotice(__FUNCTION__) << "[DEBUG] BLOCKED save_ControlSettings()";
 #endif
 }
 
@@ -2022,7 +2418,7 @@ void ofxPresetsManager::setPath_GlobalFolder(string folder)
 //--------------------------------------------------------------
 void ofxPresetsManager::save_AllKit_FromMemory()
 {
-	ofLogVerbose("ofxPresetsManager") << "save_AllKit_FromMemory()";
+	ofLogVerbose(__FUNCTION__) << "save_AllKit_FromMemory()";
 
 	for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{
@@ -2043,7 +2439,7 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 	{
 		for (int i = 0; i < NUM_OF_PRESETS; i++)
 		{
-			ofLogNotice("ofxPresetsManager") << "settingsArray[" << i << "] " << ofToString(settingsArray[i].toString());
+			ofLogNotice(__FUNCTION__) << "settingsArray[" << i << "] " << ofToString(settingsArray[i].toString());
 		}
 	}
 }
@@ -2051,11 +2447,11 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 //--------------------------------------------------------------
 void ofxPresetsManager::load_AllKit_ToMemory()
 {
-	ofLogNotice("ofxPresetsManager") << "load_AllKit_ToMemory()";
+	ofLogNotice(__FUNCTION__) << "load_AllKit_ToMemory()";
 
 	////TODO:
 	//groupName = groups[0].getName();
-	//ofLogNotice("ofxPresetsManager") << "groups[0].getName(): " << groupName;
+	//ofLogNotice(__FUNCTION__) << "groups[0].getName(): " << groupName;
 	//groupsMem.clear();
 	//groupsMem.reserve(NUM_OF_PRESETS);
 	//groupsMem.resize(NUM_OF_PRESETS);
@@ -2086,8 +2482,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 		//debug
 		if (false)
 		{
-			ofLogNotice("ofxPresetsManager") << "[" << i << "]";
-			ofLogNotice("ofxPresetsManager") << "File: " << pathComplete
+			ofLogNotice(__FUNCTION__) << "[" << i << "]";
+			ofLogNotice(__FUNCTION__) << "File: " << pathComplete
 				<< "\n" << ofToString(settings.toString());
 		}
 
@@ -2095,7 +2491,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 
 		////TODO:
 		//ofDeserialize(settings, groupsMem[i]);
-		//ofLogNotice("ofxPresetsManager") << "ofParameterGroup: " << i << "\n" << ofToString(groupsMem[i]);
+		//ofLogNotice(__FUNCTION__) << "ofParameterGroup: " << i << "\n" << ofToString(groupsMem[i]);
 
 		if (bLoaded)
 		{
@@ -2111,7 +2507,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #endif
 	}
 
-	ofLogNotice("ofxPresetsManager") << "-------------------------------------------------------------------------------------------------------";
+	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
 	//debug params
 	bool bDEBUG = false;
@@ -2119,21 +2515,21 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	{
 		for (int i = 0; i < NUM_OF_PRESETS; i++)
 		{
-			ofLogNotice("ofxPresetsManager") << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
+			ofLogNotice(__FUNCTION__) << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
 		}
 	}
 
 	////debug params
 	//for (int i = 0; i < NUM_OF_PRESETS; i++)
 	//{
-	//	ofLogNotice("ofxPresetsManager") << "groupsMem[" << i << "]\n" << ofToString(groupsMem[i]);
+	//	ofLogNotice(__FUNCTION__) << "groupsMem[" << i << "]\n" << ofToString(groupsMem[i]);
 	//}
 }
 
 ////--------------------------------------------------------------
 //void ofxPresetsManager::addGroup_TARGET(ofParameterGroup &g)
 //{
-//	ofLogNotice("ofxPresetsManager") << "addGroup_TARGET:" << "" << endl;
+//	ofLogNotice(__FUNCTION__) << "addGroup_TARGET:" << "" << endl;
 //
 //	group_TARGET = g;
 //}
@@ -2141,13 +2537,14 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 //--------------------------------------------------------------
 void ofxPresetsManager::exit()
 {
-	ofLogVerbose("ofxPresetsManager") << "exit()";
+	ofLogVerbose(__FUNCTION__) << "exit()";
 
 	DISABLE_CALLBACKS = true;
 
 	//destroy callbacks
 	removeKeysListeners();
 	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
+	ofRemoveListener(params_Editor.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Editor);
 	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
 	ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
 
@@ -2211,7 +2608,7 @@ bool ofxPresetsManager::browser_draw_ImGuiWindow()
 
 		if (bMouseOver_Changed)
 		{
-			ofLogVerbose("ofxPresetsManager") << "bImGui_mouseOver: " << (bImGui_mouseOver ? "INSIDE" : "OUTSIDE");
+			ofLogVerbose(__FUNCTION__) << "bImGui_mouseOver: " << (bImGui_mouseOver ? "INSIDE" : "OUTSIDE");
 		}
 	}
 
@@ -2224,17 +2621,6 @@ bool ofxPresetsManager::browser_draw_ImGuiWindow()
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 {
-	//ImGui::SetNextItemWidth(100);
-	ofxImGui::AddParameter(this->MODE_Browser_NewPreset);
-	//ofxImGui::AddParameter(this->SHOW_Browser);//this
-
-	//-
-
-	//other usefull params from hidden internal panel
-	ofxImGui::AddParameter(this->SHOW_ClickPanel);
-	//ofxImGui::AddParameter(this->SHOW_Browser);
-	//ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
-
 	//ofxImGui::AddGroup(this->params_Options, settings);//grouped
 	//ofxImGui::AddParameter(this->MODE_MemoryLive);
 	//ofxImGui::AddParameter(this->PRESET_selected);
@@ -2243,10 +2629,10 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 	// send/save browsed preset to favorites
 
-	if (ImGui::Button("TO LIVE"))
+	if (ImGui::Button("TO FAVS"))
 	{
-		ofLogNotice("ofxPresetsManager") << "TO LIVE: SAVE browsed Preset: " << browser_PresetName;
-		ofLogNotice("ofxPresetsManager") << "to favorites Preset: [" << PRESET_selected << "]";
+		ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE browsed preset: " << browser_PresetName;
+		ofLogNotice(__FUNCTION__) << "to favorites preset: [" << PRESET_selected << "]";
 
 		if (MODE_Browser_NewPreset)
 		{
@@ -2261,7 +2647,7 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 	ImGui::SameLine();
 	if (ImGui::Button("FROM FAVS"))
 	{
-		ofLogNotice("ofxPresetsManager") << "FROM FAVS";
+		ofLogNotice(__FUNCTION__) << "FROM FAVS";
 		doGetFavsFromBrowser();
 	}
 
@@ -2282,7 +2668,6 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 	//-
 
 	//ImGui::SetNextItemWidth(_w);
-	ofxImGui::AddParameter(this->PRESET_selected);//TODO: customize width to make stretch
 	ofxImGui::AddParameter(this->autoSave);
 
 	//-
@@ -2311,11 +2696,14 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 	//static ImVec4 color = ImVec4(114.0f/255.0f, 144.0f/255.0f, 154.0f/255.0f, 200.0f/255.0f);
 
 	float _prog;
-	//long mode
-	if (presetsRandomModeShort[PRESET_selected - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
-	//short mode
-	else _prog = timerRandomizer / (float)randomizeDurationShort;
 
+	////long mode
+	//if (presetsRandomModeShort[PRESET_selected - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
+	////short mode
+	//else _prog = timerRandomizer / (float)randomizeDurationShort;
+
+	//relative to long
+	_prog = timerRandomizer / (float)randomizeDuration;
 	ImGui::ProgressBar(_prog);
 
 
@@ -2327,7 +2715,47 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 	ofxImGui::AddGroup(params_Randomizer, settings);
 
+	ImGui::SameLine();
+	//ImGui::Text(_totalDicesStr.get().c_str());
+	ImGui::Text("%d/%d", _randomDice.get(), _randomDice.getMax());
 
+	//-
+
+	//TODO:
+	ofxImGui::AddGroup(params_Editor, settings);
+
+	//-
+
+	//other usefull params from hidden internal panel
+	ofxImGui::AddParameter(this->SHOW_ClickPanel);
+	//ofxImGui::AddParameter(this->SHOW_Browser);
+	//ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
+
+	//---
+
+	ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
+
+	if (SHOW_Gui_AdvancedControl) {
+		bool b = true;
+		//if (ofxImGui::BeginTree(b, mainSettings))
+		{
+			//ofxImGui::AddParameter(MODE_MemoryLive);
+			ofxImGui::AddGroup(params_Control, settings);
+
+			//ofxImGui::EndTree(mainSettings);
+		}
+		if (ImGui::Button("Set folder..."))
+		{
+			auto dialogResult = ofSystemLoadDialog("Set presets folder", true, ofToDataPath(""));
+			if (dialogResult.bSuccess)
+			{
+				path_PresetsFolder_Custom = dialogResult.filePath;
+				bUseCustomPath = true;
+				ofLogNotice(__FUNCTION__) << "path custom: " << path_PresetsFolder_Custom;
+
+			}
+		}
+	}
 }
 
 //--------------------------------------------------------------
@@ -2360,15 +2788,18 @@ bool ofxPresetsManager::browser_draw_ImGui()
 
 		//--
 
-		//1. user params
-		browser_draw_ImGui_User(mainSettings);
+		ofxImGui::AddParameter(this->PRESET_selected);
+
+		//ImGui::SetNextItemWidth(100);
+		ofxImGui::AddParameter(this->MODE_Browser_NewPreset);
+		//ofxImGui::AddParameter(this->SHOW_Browser);//this
 
 		//-- 
 
 		//2. browser params
 		//TreeNodeEx(label, ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_NoTreePushOnOpen);
 		//if (ofxImGui::BeginTree("BROWSER", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_NoTreePushOnOpen))
-		ImGui::SetNextTreeNodeOpen(false);//not working
+		//ImGui::SetNextTreeNodeOpen(false);//not working bc helper inside
 		if (ofxImGui::BeginTree("BROWSER", mainSettings))
 		{
 			int numFilePresets = fileNames.size();
@@ -2412,11 +2843,11 @@ bool ofxPresetsManager::browser_draw_ImGui()
 						if (currentFile < files.size())
 						{
 							browser_PresetName = fileNames[currentFile];
-							ofLogNotice("ofxPresetsManager") << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
+							ofLogNotice(__FUNCTION__) << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
 
 							//if (MODE_Browser_NewPreset)
-							ofLogNotice("ofxPresetsManager") << "LOAD" << endl;
-							ofLogNotice("ofxPresetsManager") << "Preset Name: " << browser_PresetName;
+							ofLogNotice(__FUNCTION__) << "LOAD" << endl;
+							ofLogNotice(__FUNCTION__) << "Preset Name: " << browser_PresetName;
 							browser_PresetLoad(browser_PresetName);
 						}
 					}
@@ -2436,10 +2867,10 @@ bool ofxPresetsManager::browser_draw_ImGui()
 						if (currentFile < files.size())
 						{
 							browser_PresetName = fileNames[currentFile];
-							ofLogNotice("ofxPresetsManager") << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
+							ofLogNotice(__FUNCTION__) << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
 
 							//if (MODE_Browser_NewPreset)
-							ofLogNotice("ofxPresetsManager") << "LOAD Preset Name: " << browser_PresetName;
+							ofLogNotice(__FUNCTION__) << "LOAD Preset Name: " << browser_PresetName;
 							browser_PresetLoad(browser_PresetName);
 						}
 					}
@@ -2471,13 +2902,13 @@ bool ofxPresetsManager::browser_draw_ImGui()
 				int currentFileIndex = currentFile;
 				if (ofxImGui::VectorCombo(" ", &currentFileIndex, fileNames))
 				{
-					ofLogNotice("ofxPresetsManager") << "Preset Index: " << ofToString(currentFileIndex);
+					ofLogNotice(__FUNCTION__) << "Preset Index: " << ofToString(currentFileIndex);
 					if (currentFileIndex < fileNames.size())
 					{
 						currentFile = currentFileIndex;
 						browser_PresetName = fileNames[currentFile];
 
-						ofLogNotice("ofxPresetsManager") << "LOAD Preset Name: " << browser_PresetName;
+						ofLogNotice(__FUNCTION__) << "LOAD Preset Name: " << browser_PresetName;
 						browser_PresetLoad(browser_PresetName);
 					}
 				}
@@ -2490,11 +2921,11 @@ bool ofxPresetsManager::browser_draw_ImGui()
 			if (ImGui::Button("UPDATE"))
 			{
 				//browser_PresetName = textInput_temp;
-				//ofLogNotice("ofxPresetsManager") << "UPDATE Preset Name: " << browser_PresetName << endl;
+				//ofLogNotice(__FUNCTION__) << "UPDATE Preset Name: " << browser_PresetName << endl;
 
 				//0. get filename of selected
 				string _currName = files[currentFile].getBaseName();
-				ofLogNotice("ofxPresetsManager") << "UPDATE Preset Name: " << _currName;
+				ofLogNotice(__FUNCTION__) << "UPDATE Preset Name: " << _currName;
 
 				//1. delete old file
 				files[currentFile].remove();
@@ -2510,7 +2941,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 				browser_FilesRefresh();
 
 				//4. reselect last save preset (bc directory sorting changes)
-				ofLogNotice("ofxPresetsManager") << "Reload last updated preset:";
+				ofLogNotice(__FUNCTION__) << "Reload last updated preset:";
 				int iNew = -1;//search index for filename
 				for (size_t i = 0; i < files.size(); i++)
 				{
@@ -2522,7 +2953,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 				}
 				if (iNew != -1)
 				{
-					ofLogNotice("ofxPresetsManager") << "Index [" << iNew << "] " << files[iNew].getBaseName();
+					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << files[iNew].getBaseName();
 					currentFile = iNew;
 					browser_PresetName = fileNames[currentFile];
 					browser_PresetLoad(browser_PresetName);
@@ -2540,7 +2971,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 			ImGui::SameLine();
 			if (ImGui::Button("RELOAD"))
 			{
-				ofLogNotice("ofxPresetsManager") << "RELOAD Preset Name: " << browser_PresetName;
+				ofLogNotice(__FUNCTION__) << "RELOAD Preset Name: " << browser_PresetName;
 				browser_PresetLoad(browser_PresetName);
 			}
 
@@ -2551,8 +2982,8 @@ bool ofxPresetsManager::browser_draw_ImGui()
 			ImGui::SameLine();
 			if (ImGui::Button("DELETE"))//current preset
 			{
-				ofLogNotice("ofxPresetsManager") << "DELETE Preset Name: " << browser_PresetName;
-				ofLogNotice("ofxPresetsManager") << "filepath: " << files[currentFile].getAbsolutePath();
+				ofLogNotice(__FUNCTION__) << "DELETE Preset Name: " << browser_PresetName;
+				ofLogNotice(__FUNCTION__) << "filepath: " << files[currentFile].getAbsolutePath();
 
 				//1. delete file
 				files[currentFile].remove();
@@ -2568,7 +2999,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 					currentFile = 0;
 					browser_PresetName = fileNames[currentFile];
 					browser_PresetLoad(browser_PresetName);
-					//ofLogNotice("ofxPresetsManager") << "Load preset [0] " << browser_PresetName;
+					//ofLogNotice(__FUNCTION__) << "Load preset [0] " << browser_PresetName;
 				}
 				else
 				{
@@ -2599,9 +3030,9 @@ bool ofxPresetsManager::browser_draw_ImGui()
 
 				if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
 				{
-					ofLogNotice("ofxPresetsManager") << "InputText [tab]:" << ofToString(tab) << endl;
+					ofLogNotice(__FUNCTION__) << "InputText [tab]:" << ofToString(tab) << endl;
 					textInput_New = ofToString(tab);
-					ofLogNotice("ofxPresetsManager") << "textInput_New:" << textInput_New << endl;
+					ofLogNotice(__FUNCTION__) << "textInput_New:" << textInput_New << endl;
 
 					//bBlink = true;//not workind. we like to blink when mouse_on_text_input
 				}
@@ -2626,7 +3057,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 
 				if (ImGui::Button("SAVE"))
 				{
-					ofLogNotice("ofxPresetsManager") << "textInput_New: " << textInput_New << endl;
+					ofLogNotice(__FUNCTION__) << "textInput_New: " << textInput_New << endl;
 
 					//1. save
 					browser_PresetSave(textInput_New);
@@ -2642,7 +3073,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 					browser_FilesRefresh();
 
 					//4. reselect last save preset (bc directory sorting changes)
-					ofLogNotice("ofxPresetsManager") << "Reload last saved preset:";
+					ofLogNotice(__FUNCTION__) << "Reload last saved preset:";
 					int iNew = -1;
 					for (size_t i = 0; i < files.size(); i++)
 					{
@@ -2652,7 +3083,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 							iNew = i;
 						}
 					}
-					ofLogNotice("ofxPresetsManager") << "Index [" << iNew << "] " << files[iNew].getBaseName();
+					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << files[iNew].getBaseName();
 					currentFile = iNew;
 					browser_PresetLoad(textInput_New);
 				}
@@ -2664,38 +3095,16 @@ bool ofxPresetsManager::browser_draw_ImGui()
 
 			}
 
-
-			//---
-
-			ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
-
-			if (SHOW_Gui_AdvancedControl) {
-				bool b = true;
-				//if (ofxImGui::BeginTree(b, mainSettings))
-				{
-					//ofxImGui::AddParameter(MODE_MemoryLive);
-					ofxImGui::AddGroup(params_Control, mainSettings);
-
-					//ofxImGui::EndTree(mainSettings);
-				}
-				if (ImGui::Button("Set folder..."))
-				{
-					auto dialogResult = ofSystemLoadDialog("Set presets folder", true, ofToDataPath(""));
-					if (dialogResult.bSuccess)
-					{
-						path_PresetsFolder_Custom = dialogResult.filePath;
-						bUseCustomPath = true;
-						ofLogNotice("ofxPresetsManager") << "path custom: " << path_PresetsFolder_Custom;
-
-					}
-				}
-
-			}
-
-
-
 			ofxImGui::EndTree(mainSettings);
 		}
+
+		//--
+
+		//1. user params
+		browser_draw_ImGui_User(mainSettings);
+
+		//-
+
 	}
 	ofxImGui::EndWindow(mainSettings);
 
@@ -2705,7 +3114,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_PresetSave(string name)//without xml extension nor path
 {
-	ofLogNotice("ofxPresetsManager") << "browser_PresetSave: \t\t\t\t" << name << ".xml";
+	ofLogNotice(__FUNCTION__) << "browser_PresetSave: \t\t\t\t" << name << ".xml";
 
 	ofXml settings;
 	ofSerialize(settings, groups[0]);
@@ -2719,18 +3128,18 @@ void ofxPresetsManager::browser_PresetSave(string name)//without xml extension n
 	}
 
 	settings.save(_path);
-	ofLogNotice("ofxPresetsManager") << "File: " << _path;
+	ofLogNotice(__FUNCTION__) << "File: " << _path;
 
 	//-
 
-	//ofLogVerbose("ofxPresetsManager") << "DONE_save";
+	//ofLogVerbose(__FUNCTION__) << "DONE_save";
 	//DONE_save = true;//TODO:?
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_PresetLoad(string name)//without xml extension nor path
 {
-	ofLogNotice("ofxPresetsManager") << "browser_PresetLoad: \t\t\t\t" << name << ".xml";
+	ofLogNotice(__FUNCTION__) << "browser_PresetLoad: \t\t\t\t" << name << ".xml";
 
 	ofXml settings;
 	string _path;
@@ -2743,13 +3152,13 @@ void ofxPresetsManager::browser_PresetLoad(string name)//without xml extension n
 	}
 
 	settings.load(_path);
-	ofLogNotice("ofxPresetsManager") << "File: " << _path;
+	ofLogNotice(__FUNCTION__) << "File: " << _path;
 
 	ofDeserialize(settings, groups[0]);
 
 	//-
 
-	//ofLogVerbose("ofxPresetsManager") << "DONE_load";
+	//ofLogVerbose(__FUNCTION__) << "DONE_load";
 	//DONE_load = true;//TODO:?
 }
 
@@ -2795,7 +3204,7 @@ void ofxPresetsManager::browser_Setup()
 //--------------------------------------------------------------
 bool ofxPresetsManager::browser_FilesRefresh()
 {
-	ofLogNotice("ofxPresetsManager") << "browser_FilesRefresh()";
+	ofLogNotice(__FUNCTION__) << "browser_FilesRefresh()";
 
 	string _path;
 
@@ -2814,7 +3223,7 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	//	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
 	//else
 	//	_path = path_BrowserPathFree;
-	ofLogNotice("ofxPresetsManager") << "Path: " << _path;
+	ofLogNotice(__FUNCTION__) << "Path: " << _path;
 
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
 
@@ -2828,7 +3237,7 @@ bool ofxPresetsManager::browser_FilesRefresh()
 		ofLogError("ofxPresetsManager") << "FOLDER DOES NOT EXIST!";
 		bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
 		if (b)
-			ofLogNotice("ofxPresetsManager") << "CREATED FOLDER: " << _path;
+			ofLogNotice(__FUNCTION__) << "CREATED FOLDER: " << _path;
 		else
 			ofLogError("ofxPresetsManager") << "UNABLE TO CREATE FOLDER: " << _path;
 
@@ -2857,11 +3266,11 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	//load all folder files in one call
 	files = dataDirectory.getFiles();
 
-	ofLogNotice("ofxPresetsManager") << "Preset files:";
+	ofLogNotice(__FUNCTION__) << "Preset files:";
 	for (size_t i = 0; i < files.size(); i++)
 	{
 		fileNames.push_back(files[i].getBaseName());
-		ofLogNotice("ofxPresetsManager") << "[" << i << "] " << files[i].getBaseName();
+		ofLogNotice(__FUNCTION__) << "[" << i << "] " << files[i].getBaseName();
 	}
 
 	//-
