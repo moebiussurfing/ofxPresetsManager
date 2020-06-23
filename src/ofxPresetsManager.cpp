@@ -132,63 +132,67 @@ void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 
 	for (auto parameter : group)
 	{
-		// Group.
+		//group
 		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
 		if (parameterGroup)
 		{
-			//// Recurse through contents.
-			//ofxImGui::AddGroup(*parameterGroup, settings);
 			addGroupToEditor(*parameterGroup);
 			continue;
 		}
 
-		// Parameter, try everything we know how to handle.
+		//parameter, try everything we know how to handle.
 #if OF_VERSION_MINOR >= 10
 		auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
 		if (parameterVec2f)
 		{
 			ofParameter<bool> b{ parameterVec2f->getName(), false };
 			editorPresets.push_back(b);
-			//ofxImGui::AddParameter(*parameterVec2f);
 			continue;
 		}
-		//auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
-		//if (parameterVec3f)
-		//{
-		//	ofxImGui::AddParameter(*parameterVec3f);
-		//	continue;
-		//}
-		//auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
-		//if (parameterVec4f)
-		//{
-		//	ofxImGui::AddParameter(*parameterVec4f);
-		//	continue;
-		//}
+		auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
+		if (parameterVec3f)
+		{
+			ofParameter<bool> b{ parameterVec3f->getName(), false };
+			editorPresets.push_back(b);
+			continue;
+		}
+		auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
+		if (parameterVec4f)
+		{
+			ofParameter<bool> b{ parameterVec4f->getName(), false };
+			editorPresets.push_back(b);
+			continue;
+		}
 #endif
-		//auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
-		//if (parameterOfVec2f)
-		//{
-		//	ofxImGui::AddParameter(*parameterOfVec2f);
-		//	continue;
-		//}
-		//auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
-		//if (parameterOfVec3f)
-		//{
-		//	ofxImGui::AddParameter(*parameterOfVec3f);
-		//	continue;
-		//}
-		//auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
-		//if (parameterOfVec4f)
-		//{
-		//	ofxImGui::AddParameter(*parameterOfVec4f);
-		//	continue;
-		//}
+		auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
+		if (parameterOfVec2f)
+		{
+			//ofxImGui::AddParameter(*parameterOfVec2f);
+			ofParameter<bool> b{ parameterOfVec2f->getName(), false };
+			editorPresets.push_back(b);
+			continue;
+		}
+		auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
+		if (parameterOfVec3f)
+		{
+			//ofxImGui::AddParameter(*parameterOfVec3f);
+			ofParameter<bool> b{ parameterOfVec3f->getName(), false };
+			editorPresets.push_back(b);
+			continue;
+		}
+		auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
+		if (parameterOfVec4f)
+		{
+			ofParameter<bool> b{ parameterOfVec4f->getName(), false };
+			editorPresets.push_back(b);
+			//ofxImGui::AddParameter(*parameterOfVec4f);
+			continue;
+		}
 		auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
 		if (parameterFloatColor)
 		{
 			ofParameter<bool> b{ parameterFloatColor->getName(), false };
-			editorPresets.push_back(b); 
-			//ofxImGui::AddParameter(*parameterFloatColor);
+			editorPresets.push_back(b);
 			continue;
 		}
 		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
@@ -204,7 +208,6 @@ void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 		{
 			ofParameter<bool> b{ parameterInt->getName(), false };
 			editorPresets.push_back(b);
-			//ofxImGui::AddParameter(*parameterInt);
 			continue;
 		}
 		auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
@@ -212,7 +215,6 @@ void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 		{
 			ofParameter<bool> b{ parameterBool->getName(), false };
 			editorPresets.push_back(b);
-			//ofxImGui::AddParameter(*parameterBool);
 			continue;
 		}
 
@@ -220,8 +222,6 @@ void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 	}
 }
 
-//TODO:
-//randomize enable toggle params of the preset
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doRandomizeEditor() {
@@ -258,15 +258,12 @@ void ofxPresetsManager::doRandomizeEditorGroup(ofParameterGroup& group) {
 			//str += ofToString(parameterInt->getMin()) + ", ";
 			//str += ofToString(parameterInt->getMax()) + ")";
 			//cout << str << endl;
-
 			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
-
 			if (b.get())
 			{
 				int random = ofRandom(parameterInt->getMin(), parameterInt->getMax() + 1);
 				parameterInt->set(random);
 			}
-
 			continue;
 		}
 
@@ -281,15 +278,12 @@ void ofxPresetsManager::doRandomizeEditorGroup(ofParameterGroup& group) {
 			//str += ofToString(parameterFloat->getMin()) + ", ";
 			//str += ofToString(parameterFloat->getMax()) + ")";
 			//cout << str << endl;
-
 			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
-
 			if (b.get())
 			{
 				float random = ofRandom(parameterFloat->getMin(), parameterFloat->getMax());
 				parameterFloat->set(random);
 			}
-
 			continue;
 		}
 
@@ -304,15 +298,12 @@ void ofxPresetsManager::doRandomizeEditorGroup(ofParameterGroup& group) {
 			//str += ofToString(parameterBool->getMin()) + ", ";
 			//str += ofToString(parameterBool->getMax()) + ")";
 			//cout << str << endl;
-
 			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
-
 			if (b.get())
 			{
 				bool random = (ofRandom(0, 2) >= 1);
 				parameterBool->set(random);
 			}
-
 			continue;
 		}
 
@@ -321,110 +312,113 @@ void ofxPresetsManager::doRandomizeEditorGroup(ofParameterGroup& group) {
 		{
 			string name = parameterFloatColor->getName();
 			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
-
 			if (b.get())
 			{
 				ofFloatColor random;
 				random = ofColor(ofRandom(0, 255), ofRandom(0, 255), ofRandom(0, 255));
 				parameterFloatColor->set(random);
 			}
-
 			continue;
 		}
 
-	}
+		//glm::vec compatible
+#if OF_VERSION_MINOR >= 10
+		auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
+		if (parameterVec2f)
+		{
+			string name = parameterVec2f->getName();
+			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+			if (b.get())
+			{
+				float randomx = ofRandom(parameterVec2f->getMin().x, parameterVec2f->getMax().x);
+				float randomy = ofRandom(parameterVec2f->getMin().y, parameterVec2f->getMax().y);
+				parameterVec2f->set(glm::vec2(randomx, randomy));
+			}
+			continue;
+		}
+		auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
+		if (parameterVec3f)
+		{
+			string name = parameterVec3f->getName();
+			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+			if (b.get())
+			{
+				float randomx = ofRandom(parameterVec3f->getMin().x, parameterVec3f->getMax().x);
+				float randomy = ofRandom(parameterVec3f->getMin().y, parameterVec3f->getMax().y);
+				float randomz = ofRandom(parameterVec3f->getMin().z, parameterVec3f->getMax().z);
+				parameterVec3f->set(glm::vec3(randomx, randomy, randomz));
+			}
+			continue;
+		}
+		auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
+		if (parameterVec4f)
+		{
+			string name = parameterVec4f->getName();
+			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+			if (b.get())
+			{
+				float randomx = ofRandom(parameterVec4f->getMin().x, parameterVec4f->getMax().x);
+				float randomy = ofRandom(parameterVec4f->getMin().y, parameterVec4f->getMax().y);
+				float randomz = ofRandom(parameterVec4f->getMin().z, parameterVec4f->getMax().z);
+				float randomw = ofRandom(parameterVec4f->getMin().w, parameterVec4f->getMax().w);
+				parameterVec4f->set(glm::vec4(randomx, randomy, randomz, randomw));
+			}
+			continue;
+		}
+#endif
 
-	//	for (auto parameter : group)
-	//	{
-	//		//// Group.
-	//		//auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
-	//		//if (parameterGroup)
-	//		//{
-	//		//	//// Recurse through contents.
-	//		//	//ofxImGui::AddGroup(*parameterGroup, settings);
-	//		//	addGroupToEditor(*parameterGroup);
-	//		//	continue;
-	//		//}
-	//
-	//		// Parameter, try everything we know how to handle.
-	//#if OF_VERSION_MINOR >= 10
-	//		auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
-	//		if (parameterVec2f)
-	//		{
-	//			ofParameter<bool> b{ parameterVec2f->getName(), false };
-	//			editorPresets.push_back(b);
-	//			//ofxImGui::AddParameter(*parameterVec2f);
-	//			continue;
-	//		}
-	//		//auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
-	//		//if (parameterVec3f)
-	//		//{
-	//		//	ofxImGui::AddParameter(*parameterVec3f);
-	//		//	continue;
-	//		//}
-	//		//auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
-	//		//if (parameterVec4f)
-	//		//{
-	//		//	ofxImGui::AddParameter(*parameterVec4f);
-	//		//	continue;
-	//		//}
-	//#endif
-	//		//auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
-	//		//if (parameterOfVec2f)
-	//		//{
-	//		//	ofxImGui::AddParameter(*parameterOfVec2f);
-	//		//	continue;
-	//		//}
-	//		//auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
-	//		//if (parameterOfVec3f)
-	//		//{
-	//		//	ofxImGui::AddParameter(*parameterOfVec3f);
-	//		//	continue;
-	//		//}
-	//		//auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
-	//		//if (parameterOfVec4f)
-	//		//{
-	//		//	ofxImGui::AddParameter(*parameterOfVec4f);
-	//		//	continue;
-	//		//}
-	//		//auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
-	//		//if (parameterFloatColor)
-	//		//{
-	//		//	ofxImGui::AddParameter(*parameterFloatColor);
-	//		//	continue;
-	//		//}
-	//		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
-	//		if (parameterFloat)
-	//		{
-	//			ofParameter<bool> b{ parameterFloat->getName(), false };
-	//			editorPresets.push_back(b);
-	//			//ofxImGui::AddParameter(*parameterFloat);
-	//			continue;
-	//		}
-	//		auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
-	//		if (parameterInt)
-	//		{
-	//			ofParameter<bool> b{ parameterInt->getName(), false };
-	//			editorPresets.push_back(b);
-	//			//ofxImGui::AddParameter(*parameterInt);
-	//			continue;
-	//		}
-	//		//auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
-	//		//if (parameterBool)
-	//		//{
-	//		//	ofxImGui::AddParameter(*parameterBool);
-	//		//	continue;
-	//		//}
-	//
-	//		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
-	//	}
+		auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
+		if (parameterOfVec2f)
+		{
+			string name = parameterOfVec2f->getName();
+			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+			if (b.get())
+			{
+				float randomx = ofRandom(parameterOfVec2f->getMin().x, parameterOfVec2f->getMax().x);
+				float randomy = ofRandom(parameterOfVec2f->getMin().y, parameterOfVec2f->getMax().y);
+				parameterOfVec2f->set(ofVec2f(randomx, randomy));
+			}
+			continue;
+		}
+		auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
+		if (parameterOfVec3f)
+		{
+			string name = parameterOfVec3f->getName();
+			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+			if (b.get())
+			{
+				float randomx = ofRandom(parameterOfVec3f->getMin().x, parameterOfVec3f->getMax().x);
+				float randomy = ofRandom(parameterOfVec3f->getMin().y, parameterOfVec3f->getMax().y);
+				float randomz = ofRandom(parameterOfVec3f->getMin().z, parameterOfVec3f->getMax().z);
+				parameterOfVec3f->set(ofVec3f(randomx, randomy, randomz));
+			}
+			continue;
+		}
+		auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
+		if (parameterOfVec4f)
+		{
+			string name = parameterOfVec4f->getName();
+			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+			if (b.get())
+			{
+				float randomx = ofRandom(parameterOfVec4f->getMin().x, parameterOfVec4f->getMax().x);
+				float randomy = ofRandom(parameterOfVec4f->getMin().y, parameterOfVec4f->getMax().y);
+				float randomz = ofRandom(parameterOfVec4f->getMin().z, parameterOfVec4f->getMax().z);
+				float randomw = ofRandom(parameterOfVec4f->getMin().w, parameterOfVec4f->getMax().w);
+				parameterOfVec4f->set(ofVec4f(randomx, randomy, randomz, randomw));
+			}
+			continue;
+		}
+
+		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
+	}
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::setupEditor()
 {
 	editorPresets.clear();//?
-	
+
 	//int num = groups[0].getGroupHierarchyNames().size();
 	ofParameterGroup group = groups[0];
 	addGroupToEditor(groups[0]);
@@ -2218,7 +2212,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 #endif
 
 			bMustTrig = true;
-				}
+		}
 
 		//-
 
@@ -2299,8 +2293,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//{
 		//	ofLogError("ofxPresetsManager") << "IGNORED PRESETS CHANGE";
 		//}
-			}
-		}
+	}
+}
 
 #pragma mark - SETTINGS
 
@@ -2444,7 +2438,7 @@ void ofxPresetsManager::save_ControlSettings()
 #else
 	ofLogNotice(__FUNCTION__) << "[DEBUG] BLOCKED save_ControlSettings()";
 #endif
-		}
+}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::setPath_KitFolder(string folder)

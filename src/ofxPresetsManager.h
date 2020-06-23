@@ -17,7 +17,7 @@
 ///	++	add clone using editor toggles to avoid clone disabled toggle params
 ///	++	add mode state to allow overwrite only enabled toggle params
 ///	++	randomize editor preset
-///			add other types
+///			add other types: ofColor?
 ///			test recursive nested groups
 ///	++	add ofxUndo to randomizers
 ///	+	improve ImGui trees collapse
