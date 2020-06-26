@@ -425,7 +425,7 @@ void ofxPresetsManager::setupEditor()
 
 	//add to group
 	editorRandomize.set("RANDOMIZE", false);
-	params_Editor.setName("EDITOR");
+	params_Editor.setName("PRESET EDIT TOOLS");
 	params_Editor.add(editorRandomize);
 
 	params_Editor_Toggles.setName("PARAMETERS");
@@ -444,7 +444,7 @@ void ofxPresetsManager::setupRandomizer()
 	//params_Randomizer.setName("Randomizer");
 	bRandomize.set("RANDOMIZE", false);
 	ENABLE_RandomizeTimer.set("PLAY TIMER RANDOMIZER", false);
-	MODE_DicesProbs.set("MODE DICES", true);
+	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
 	randomizeDuration.set("DURATION", 500, 10, randomize_MAX_DURATION);
 	randomizeDurationShort.set("DURATION SHORT", 250, 10, 1000);
 	_randomDice.set("DICE", 0, 0, numPresetsFavorites);
@@ -461,7 +461,7 @@ void ofxPresetsManager::setupRandomizer()
 	int i;
 	//ints as probability for every preset
 	i = 1;
-	ofParameterGroup _gOdds{ "PRESETS ODDS" };
+	ofParameterGroup _gOdds{ "PRESETS PROBS" };
 	for (auto &p : presetsRandomFactor) {
 		string n = "PROB " + ofToString(i++);
 		p.set(n, 5, 0, 10);
@@ -476,14 +476,14 @@ void ofxPresetsManager::setupRandomizer()
 		_gShort.add(p);
 	}
 
-	params_Randomizer.setName("RANDOMIZER");
+	params_Randomizer.setName("RANDOMIZER PRESET SELECTOR");
 	params_Randomizer.add(ENABLE_RandomizeTimer);
 	params_Randomizer.add(bRandomize);
-	params_Randomizer.add(MODE_DicesProbs);
 	params_Randomizer.add(randomizeSpeedF);
 	params_Randomizer.add(randomizeDuration);
 	params_Randomizer.add(randomizeDurationShort);
-	params_Randomizer.add(_gOdds);
+    params_Randomizer.add(MODE_DicesProbs);
+    params_Randomizer.add(_gOdds);
 	params_Randomizer.add(_gShort);
 	params_Randomizer.add(bResetDices);
 	params_Randomizer.add(_randomDice);
@@ -528,7 +528,8 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//big browser
 	path_PresetsFolder = "archive";
-	//default archive presets folder to browse
+    //TODO:
+    //default absolute archive presets folder to browse
 	path_PresetsFolder_Custom = "F:\openFrameworks\addons\ofxPresetsManager\2_presetsManager\bin\data\ofxPresetsManager\archive";
 
 	//app settings
@@ -800,14 +801,26 @@ void ofxPresetsManager::setup()
 
 	//--
 
+    //create data folders if they are not presets: when you create a new project or added the addon to your existing project
+    //and no /data files are present
+
+    string _path;
+    _path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+    CheckFolder(_path);
+    _path = path_GLOBAL_Folder + "/" + path_Kit_Folder;
+    CheckFolder(_path);
+
+    //--
+
 	//browser
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	browser_Setup();
 
 	//radomizer
 	setupRandomizer();
-
+    //preset editor tools
 	setupEditor();
+    params_randomizer.setName("RANDOMIZERS");
 #endif
 
 	//--
@@ -863,6 +876,7 @@ void ofxPresetsManager::windowResized(int w, int h)
 //--------------------------------------------------------------
 void ofxPresetsManager::update(ofEventArgs & args)
 {
+
 	//-
 
 	//randomize timer
@@ -2522,6 +2536,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 		pathFilename = groupName + path_Prefix + ofToString(i) + ".xml";
 		pathComplete = pathFolder + pathFilename;
 
+
 		//load xml file
 		ofXml settings;
 		bool bLoaded = settings.load(pathComplete);
@@ -2719,6 +2734,11 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 	//-
 
+    //randomizers
+    bool b = false;
+    if (ImGui::TreeNode("RANDOMIZERS"))
+    {
+
 	//randomizer
 	//ofxImGui::AddParameter(this->ENABLE_RandomizeTimer);
 	//if (ImGui::TreeNode("RANDOMIZER"))
@@ -2727,10 +2747,8 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 	//	{
 	//		bRandomize = true;
 	//	}
-
 	//	ImGui::SetNextItemWidth(_w);
 	//	ofxImGui::AddParameter(this->randomizeSpeedF);
-
 	//	ImGui::TreePop();
 	//}
 
@@ -2762,14 +2780,25 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 	ofxImGui::AddGroup(params_Randomizer, settings);
 
-	ImGui::SameLine();
+//    ImGui::SameLine();
 	//ImGui::Text(_totalDicesStr.get().c_str());
 	ImGui::Text("%d/%d", _randomDice.get(), _randomDice.getMax());
+
+
+        //TODO:
+//        const ImGuiTreeNodeFlags NodeFlags = 0;
+//        const bool NodeOpen = ImGui::TreeNodeEx(this, NodeFlags, "Click me!");
+        //if(NodeOpen) ImGui::TreePop();
+
 
 	//-
 
 	//TODO:
 	ofxImGui::AddGroup(params_Editor, settings);
+
+
+        ImGui::TreePop();
+    }
 
 	//-
 
@@ -2862,7 +2891,11 @@ bool ofxPresetsManager::browser_draw_ImGui()
 				//ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
 				ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
 
-				ImGui::Text("DIR NOT FOUND!");
+				ImGui::Text("DIR OR FILES NOT FOUND!");
+                //browser path
+                string browser_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+                const char *array = browser_path.c_str();
+                ImGui::Text(array);
 
 				ImGui::PopStyleColor(1);
 				ImGui::PopID();
@@ -3262,6 +3295,7 @@ bool ofxPresetsManager::browser_FilesRefresh()
 		_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
 	}
 
+    CheckFolder(_path);
 
 	//-
 

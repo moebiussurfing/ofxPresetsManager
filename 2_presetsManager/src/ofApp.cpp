@@ -6,8 +6,8 @@ void ofApp::setup()
 	//-
 
 #ifdef USE_WindowApp
-	WindowApp.setFrameRate(60);
-	WindowApp.setVerticalSync(true);
+	WindowApp.setFrameRate(25);
+	WindowApp.setSetVerticalSync(false);
 	//WindowApp.setDEBUG_Position(0);//top position
 #else
 	ofSetFrameRate(60);
@@ -160,13 +160,19 @@ void ofApp::draw()
 	int pad = 20;
 	int i = 0;
 	{
-		str = "shapeType: " + ofToString(shapeType);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "numShapes: " + ofToString(numShapes);
+        str = "fill      : " + ofToString(fill);
+        ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+        str = "lineWidth : " + ofToString(lineWidth);
+        ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+        //str = "color     : " + ofToString(color);
+        //ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+        str = "shapeType : " + ofToString(shapeType);
+        ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		str = "numShapes : " + ofToString(numShapes);
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 		str = "separation: " + ofToString(separation);
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "shapeSide: " + ofToString(shapeSide);
+		str = "shapeSide : " + ofToString(shapeSide);
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 	}
 

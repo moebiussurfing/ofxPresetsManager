@@ -626,7 +626,7 @@ private:
 
 public:
 	ofParameter<bool> bImGui_mouseOver;
-
+    ofParameterGroup params_randomizer;
 private:
 	void browser_Setup();
 
@@ -880,4 +880,23 @@ public:
 		ENABLE_KeysArrowBrowse = b;
 	}
 
+    void CheckFolder(string _path)
+    {
+        ofDirectory dataDirectory(ofToDataPath(_path, true));
+
+        //check if target data folder exist
+        if (!dataDirectory.isDirectory())
+        {
+            ofLogError("__FUNCTION__") << "FOLDER DOES NOT EXIST!";
+
+            //create folder
+            bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
+
+            //debug if creation has been succed
+            if (b)
+                ofLogNotice("__FUNCTION__") << "FOLDER '" << _path << "' CREATED SUCCESSFULLY!";
+            else
+                ofLogError("__FUNCTION__") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
+        }
+    }
 };
