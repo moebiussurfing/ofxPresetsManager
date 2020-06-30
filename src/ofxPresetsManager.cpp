@@ -469,7 +469,7 @@ void ofxPresetsManager::setupRandomizer()
 	}
 	//toggles to enable short duration mode
 	i = 1;
-	ofParameterGroup _gShort{ "MODE SHORT" };
+	ofParameterGroup _gShort{ "MODE DURATION SHORT" };
 	for (auto &p : presetsRandomModeShort) {
 		string n = "SHORT " + ofToString(i++);
 		p.set(n, false);
@@ -482,8 +482,8 @@ void ofxPresetsManager::setupRandomizer()
 	params_Randomizer.add(randomizeSpeedF);
 	params_Randomizer.add(randomizeDuration);
 	params_Randomizer.add(randomizeDurationShort);
-    params_Randomizer.add(MODE_DicesProbs);
-    params_Randomizer.add(_gOdds);
+	params_Randomizer.add(MODE_DicesProbs);
+	params_Randomizer.add(_gOdds);
 	params_Randomizer.add(_gShort);
 	params_Randomizer.add(bResetDices);
 	params_Randomizer.add(_randomDice);
@@ -528,8 +528,8 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//big browser
 	path_PresetsFolder = "archive";
-    //TODO:
-    //default absolute archive presets folder to browse
+	//TODO:
+	//default absolute archive presets folder to browse
 	path_PresetsFolder_Custom = "F:\openFrameworks\addons\ofxPresetsManager\2_presetsManager\bin\data\ofxPresetsManager\archive";
 
 	//app settings
@@ -554,7 +554,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//this multidimension is for multiple gui/groups (feature not implemented!)
 	groups.reserve(NUM_MAX_GUIS);
-	lastIndices.reserve(NUM_MAX_GUIS);
+	lastIndices.reserve(NUM_MAX_GUIS);//TODO: not sure if it's being used
 	keys.reserve(NUM_MAX_GUIS);
 
 	//--
@@ -729,7 +729,7 @@ void ofxPresetsManager::setup()
 	//-
 
 	//ofSetLogLevel("ofxPresetsManager", OF_LOG_NOTICE);
-	ofLogNotice(__FUNCTION__) << "setup()";
+	ofLogNotice(__FUNCTION__);
 
 	//-
 
@@ -748,7 +748,6 @@ void ofxPresetsManager::setup()
 	//--
 
 	//ofxGui theme
-
 	string pathFont = path_GLOBAL_Folder + "/" + "fonts/overpass-mono-bold.otf";
 	//must check this font file is found there
 	ofFile file(pathFont);
@@ -801,16 +800,18 @@ void ofxPresetsManager::setup()
 
 	//--
 
-    //create data folders if they are not presets: when you create a new project or added the addon to your existing project
-    //and no /data files are present
+	//create data folders if they are not presets: 
+	//when you create a new project or added the addon to your existing project
+	//and no /data files are present
+	string _path;
+	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+	CheckFolder(_path);
+	_path = path_GLOBAL_Folder + "/" + path_Kit_Folder;
+	CheckFolder(_path);
+	_path = path_GLOBAL_Folder + "/" + path_Control;
+	CheckFolder(_path);
 
-    string _path;
-    _path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
-    CheckFolder(_path);
-    _path = path_GLOBAL_Folder + "/" + path_Kit_Folder;
-    CheckFolder(_path);
-
-    //--
+	//--
 
 	//browser
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
@@ -818,9 +819,9 @@ void ofxPresetsManager::setup()
 
 	//radomizer
 	setupRandomizer();
-    //preset editor tools
+	//preset editor tools
 	setupEditor();
-    params_randomizer.setName("RANDOMIZERS");
+	params_randomizer.setName("RANDOMIZERS");
 #endif
 
 	//--
@@ -1488,7 +1489,9 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 
 	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
-		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
+		&& (presetIndex >= 0) && (presetIndex < numPresetsFavorites))//TODO:
+		//&& (presetIndex >= 0) && (presetIndex < lastIndices[0]))//TODO:
+		//&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
 		if (!MODE_MemoryLive)
 		{
@@ -1892,7 +1895,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 		if (xIndex >= 0 && xIndex < presetsOnGroup[yIndex])//? presets[0] its's the same than numPresetsFavorites!
 		//if (xIndex >= 0 && xIndex < numPresetsFavorites)
 		{
-			//1. mod controlled by save modeKeySave
+			//1. mod save controlled by modeKeySave
 			if (bKeySave)
 			{
 				//save "memory" to the clicked Index
@@ -1904,7 +1907,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 			//-
 
-			//2. mod controlled by modKeySwap
+			//2. mod swap controlled by modKeySwap
 			else if (bKeySwap)
 			{
 				int IndexSource = PRESET_selected - 1;
@@ -2479,7 +2482,7 @@ void ofxPresetsManager::setPath_GlobalFolder(string folder)
 //--------------------------------------------------------------
 void ofxPresetsManager::save_AllKit_FromMemory()
 {
-	ofLogVerbose(__FUNCTION__) << "save_AllKit_FromMemory()";
+	ofLogVerbose(__FUNCTION__);
 
 	for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{
@@ -2734,71 +2737,66 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 	//-
 
-    //randomizers
-    bool b = false;
-    if (ImGui::TreeNode("RANDOMIZERS"))
-    {
+	//randomizers
+	bool b = false;
+	if (ImGui::TreeNode("RANDOMIZERS"))
+	{
+		//randomizer
+		//ofxImGui::AddParameter(this->ENABLE_RandomizeTimer);
+		//if (ImGui::TreeNode("RANDOMIZER"))
+		//{
+		//	if (ImGui::Button("RANDOMIZE"))
+		//	{
+		//		bRandomize = true;
+		//	}
+		//	ImGui::SetNextItemWidth(_w);
+		//	ofxImGui::AddParameter(this->randomizeSpeedF);
+		//	ImGui::TreePop();
+		//}
 
-	//randomizer
-	//ofxImGui::AddParameter(this->ENABLE_RandomizeTimer);
-	//if (ImGui::TreeNode("RANDOMIZER"))
-	//{
-	//	if (ImGui::Button("RANDOMIZE"))
-	//	{
-	//		bRandomize = true;
-	//	}
-	//	ImGui::SetNextItemWidth(_w);
-	//	ofxImGui::AddParameter(this->randomizeSpeedF);
-	//	ImGui::TreePop();
-	//}
+		//TODO:
+		//collapse
+		//auto gsettings = ofxImGui::Settings();
+		//gsettings.
+		//ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(.5, .5, 1));
+		//ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(1, 1, 1));
+		//static ImVec4 color = ImVec4(114.0f/255.0f, 144.0f/255.0f, 154.0f/255.0f, 200.0f/255.0f);
 
-	//TODO:
-	//collapse
-	//auto gsettings = ofxImGui::Settings();
-	//gsettings.
-	//ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(.5, .5, 1));
-	//ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(1, 1, 1));
-	//static ImVec4 color = ImVec4(114.0f/255.0f, 144.0f/255.0f, 154.0f/255.0f, 200.0f/255.0f);
+		float _prog;
 
-	float _prog;
+		////long mode
+		//if (presetsRandomModeShort[PRESET_selected - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
+		////short mode
+		//else _prog = timerRandomizer / (float)randomizeDurationShort;
 
-	////long mode
-	//if (presetsRandomModeShort[PRESET_selected - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
-	////short mode
-	//else _prog = timerRandomizer / (float)randomizeDurationShort;
+		//relative to long
+		_prog = timerRandomizer / (float)randomizeDuration;
+		ImGui::ProgressBar(_prog);
+		
+		//ImGui::ProgressBar(timerRandomizer / (float)randomizeDuration, ImVec2(0.f, 0.f));
+		//ImGui::PopStyleColor(1);
 
-	//relative to long
-	_prog = timerRandomizer / (float)randomizeDuration;
-	ImGui::ProgressBar(_prog);
+		//TODO:
+		//ImGui::SetNextItemOpen(false, 1);
 
+		ofxImGui::AddGroup(params_Randomizer, settings);
 
-	//ImGui::ProgressBar(timerRandomizer / (float)randomizeDuration, ImVec2(0.f, 0.f));
-	//ImGui::PopStyleColor(1);
+		//ImGui::SameLine();
+		//ImGui::Text(_totalDicesStr.get().c_str());
+		ImGui::Text("%d/%d", _randomDice.get(), _randomDice.getMax());
 
-	//TODO:
-	//ImGui::SetNextItemOpen(false, 1);
+		//TODO:
+		//const ImGuiTreeNodeFlags NodeFlags = 0;
+		//const bool NodeOpen = ImGui::TreeNodeEx(this, NodeFlags, "Click me!");
+		//if(NodeOpen) ImGui::TreePop();
 
-	ofxImGui::AddGroup(params_Randomizer, settings);
+		//-
 
-//    ImGui::SameLine();
-	//ImGui::Text(_totalDicesStr.get().c_str());
-	ImGui::Text("%d/%d", _randomDice.get(), _randomDice.getMax());
-
-
-        //TODO:
-//        const ImGuiTreeNodeFlags NodeFlags = 0;
-//        const bool NodeOpen = ImGui::TreeNodeEx(this, NodeFlags, "Click me!");
-        //if(NodeOpen) ImGui::TreePop();
-
-
-	//-
-
-	//TODO:
-	ofxImGui::AddGroup(params_Editor, settings);
-
-
-        ImGui::TreePop();
-    }
+		//TODO:
+		ofxImGui::AddGroup(params_Editor, settings);
+		
+		ImGui::TreePop();
+	}
 
 	//-
 
@@ -2892,10 +2890,10 @@ bool ofxPresetsManager::browser_draw_ImGui()
 				ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
 
 				ImGui::Text("DIR OR FILES NOT FOUND!");
-                //browser path
-                string browser_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
-                const char *array = browser_path.c_str();
-                ImGui::Text(array);
+				//browser path
+				string browser_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+				const char *array = browser_path.c_str();
+				ImGui::Text(array);
 
 				ImGui::PopStyleColor(1);
 				ImGui::PopID();
@@ -3184,7 +3182,6 @@ bool ofxPresetsManager::browser_draw_ImGui()
 		browser_draw_ImGui_User(mainSettings);
 
 		//-
-
 	}
 	ofxImGui::EndWindow(mainSettings);
 
@@ -3284,7 +3281,7 @@ void ofxPresetsManager::browser_Setup()
 //--------------------------------------------------------------
 bool ofxPresetsManager::browser_FilesRefresh()
 {
-	ofLogNotice(__FUNCTION__) << "browser_FilesRefresh()";
+	ofLogNotice(__FUNCTION__);
 
 	string _path;
 
@@ -3295,7 +3292,7 @@ bool ofxPresetsManager::browser_FilesRefresh()
 		_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
 	}
 
-    CheckFolder(_path);
+	CheckFolder(_path);
 
 	//-
 
@@ -3320,7 +3317,7 @@ bool ofxPresetsManager::browser_FilesRefresh()
 		if (b)
 			ofLogNotice(__FUNCTION__) << "CREATED FOLDER: " << _path;
 		else
-			ofLogError("ofxPresetsManager") << "UNABLE TO CREATE FOLDER: " << _path;
+			ofLogError(__FUNCTION__) << "UNABLE TO CREATE FOLDER: " << _path;
 
 	}
 
@@ -3380,15 +3377,15 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	}
 	else
 	{
-		ofLogError("ofxPresetsManager") << "BROWSER: FILES NOT FOUND ON FOLDER!";
+		ofLogError(__FUNCTION__) << "BROWSER: FILES NOT FOUND ON FOLDER!";
 		bFilesError = true;
 
 		//TODO:
 		//disable custom path bc error
-		ofLogError("ofxPresetsManager") << "Disable custom path: " << path_BrowserPathFree;
+		ofLogError(__FUNCTION__) << "Disable custom path: " << path_BrowserPathFree;
 		bCustomBrowserPath = false;
 
-		ofLogError("ofxPresetsManager") << "------------------------";
+		ofLogError(__FUNCTION__) << "------------------------";
 	}
 
 	//workflow

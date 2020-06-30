@@ -6,9 +6,9 @@ void ofApp::setup()
 	//-
 
 #ifdef USE_WindowApp
-	WindowApp.setFrameRate(25);
-	WindowApp.setSetVerticalSync(false);
-	//WindowApp.setDEBUG_Position(0);//top position
+	//WindowApp.setFrameRate(25);
+	//WindowApp.setVerticalSync(false);
+	////WindowApp.setDEBUG_Position(0);//top position
 #else
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
@@ -20,13 +20,21 @@ void ofApp::setup()
 
 	//group1
 	params.setName("myGroupParameters");
-	params.add(fill.set("fill", false));
-	params.add(color.set("color", ofColor(1), ofColor(0, 0), ofColor(1, 1)));
-	params.add(lineWidth.set("lineWidth", 1, 0.1, 10));
 	params.add(shapeType.set("shape", 1, 1, 2));
 	params.add(numShapes.set("num squares", 1, 1, 24));
 	params.add(separation.set("separation", 5, 1, 100));
 	params.add(shapeSide.set("square side", 50, 5, 200));
+
+	params2.setName("style");
+	params2.add(fill.set("fill", false));
+	params2.add(color.set("color", ofColor(1), ofColor(0, 0), ofColor(1, 1)));
+	params2.add(lineWidth.set("lineWidth", 1, 0.1, 10));
+	params.add(params2);
+
+	////TODO:
+	//separationREF.makeReferenceTo(separation);
+	//params.add(separationREF.set("separationREF", 5, 1, 100));
+
 
 	//-
 
@@ -56,7 +64,8 @@ void ofApp::setup()
 	//add (target) parameters group: 
 	//this is "the preset" container itself
 	//params group and trigger keys associated too.
-	presetsManager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
+	//presetsManager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
+	presetsManager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8', 'q', 'w' });
 
 	//-
 
@@ -160,14 +169,14 @@ void ofApp::draw()
 	int pad = 20;
 	int i = 0;
 	{
-        str = "fill      : " + ofToString(fill);
-        ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-        str = "lineWidth : " + ofToString(lineWidth);
-        ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-        //str = "color     : " + ofToString(color);
-        //ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-        str = "shapeType : " + ofToString(shapeType);
-        ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		str = "fill      : " + ofToString(fill);
+		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		str = "lineWidth : " + ofToString(lineWidth);
+		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		//str = "color     : " + ofToString(color);
+		//ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		str = "shapeType : " + ofToString(shapeType);
+		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 		str = "numShapes : " + ofToString(numShapes);
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 		str = "separation: " + ofToString(separation);

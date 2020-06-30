@@ -14,15 +14,16 @@
 ///
 ///	TODO:
 ///
+///	+	disable log on autosave timer mode
 ///	++	add clone using editor toggles to avoid clone disabled toggle params
 ///	++	add mode state to allow overwrite only enabled toggle params
 ///	++	randomize editor preset
-///			add other types: ofColor?
 ///			test recursive nested groups
 ///	++	add ofxUndo to randomizers
-///	+	improve ImGui trees collapse
+///	+	improve ImGui trees collapse and sizes
 ///	+	add define to disable all randomize stuff to make addon minimal expression 
 ///	+	could make tween when changing params (?)
+///	+	add limit range min/max to randomize
 ///
 ///---
 
@@ -98,6 +99,7 @@
 
 //-
 
+//TODO
 #define NUM_OF_PRESETS 8
 
 //only one it's implemented! can't add more than one parameter group!
@@ -126,6 +128,7 @@ private:
 	std::string path_Control;//path for app state session settings
 	std::string path_Kit_Folder;//path for kit of favorite presets. live kit
 	std::string path_PresetsFolder;//path for browse other presets. archive kit
+
 	ofParameter<std::string> path_PresetsFolder_Custom;//path for browse other presets. archive kit
 	ofParameter<bool> bUseCustomPath{ "bUseCustomPath", false };
 	std::string path_Prefix;//to add to file names
@@ -168,7 +171,7 @@ private:
 
 	//randomizer
 public:
-	ofParameter<bool> ENABLE_RandomizeTimer;
+	ofParameter<bool> ENABLE_RandomizeTimer;//play randomizer
 private:
 	//ofParameterGroup params_Randomizer;
 	ofParameter<bool> bRandomize;
@@ -176,9 +179,11 @@ private:
 	ofParameter<bool> bResetDices;
 	ofParameter<int> _randomDice;//to test
 	//ofParameter<string> _totalDicesStr;
+public:
 	ofParameter<float> randomizeSpeedF;
 	ofParameter<int> randomizeDuration;
 	ofParameter<int> randomizeDurationShort;
+private:
 	int randomizeSpeed;//real time dureation
 	uint32_t randomizerTimer;
 	int randomize_MAX_DURATION = 5000;
@@ -740,6 +745,7 @@ public:
 
 	//----
 
+	private:
 
 	//layout
 	ofVec2f guiPos_InternalControl = ofVec2f(500, 500);
@@ -756,7 +762,8 @@ public:
 
 	//--
 
-	std::vector<int> lastIndices;//? this seems to be the last selected of any group(?)
+	std::vector<int> lastIndices;//seems to be the size of any group
+	//? this seems to be the last selected of any group(?)
 	//TODO:
 	//lastIndices it's the gui box clicked only, not important.. ?
 
@@ -764,11 +771,13 @@ public:
 
 	//--
 
-	void addKeysListeners();
-	void removeKeysListeners();
-
+	public:
 	void keyPressed(ofKeyEventArgs &eventArgs);
 	void keyReleased(ofKeyEventArgs &eventArgs);
+
+	private:
+	void addKeysListeners();
+	void removeKeysListeners();
 
 	bool bKeys;//enabled keys
 	vector<vector<int>> keys;//trigger keys for all presets
@@ -793,7 +802,7 @@ public:
 	//---
 
 	//helpers
-
+	public:
 	void doCloneRight(int pIndex);//clone from selected preset to all others to the right
 	void doCloneAll();//clone all presets from the current selected
 
@@ -805,7 +814,7 @@ public:
 	//void doSave2(int pIndex);
 
 	//-
-
+	private:
 	//font to label clicker boxes
 	ofTrueTypeFont myFont;
 	string myTTF;//gui font for all gui theme
@@ -822,7 +831,7 @@ public:
 	//-
 
 	//control panel settings/states
-
+	private:
 	void Changed_Params_Control(ofAbstractParameter &e);
 
 	//-

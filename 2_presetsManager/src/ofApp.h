@@ -39,6 +39,7 @@ public:
 
 	//group1
     ofParameterGroup params;
+    ofParameterGroup params2;
 	ofParameter<bool> fill;
 	ofParameter<float> lineWidth;
 	ofParameter<ofFloatColor> color;
@@ -47,6 +48,8 @@ public:
 	ofParameter<int> separation;
     ofParameter<int> shapeSide;
 
+	//ofParameter<int> separationREF;
+	
 	////group2
 	//ofParameterGroup params2;
 	//ofParameter<int> numCircles;
