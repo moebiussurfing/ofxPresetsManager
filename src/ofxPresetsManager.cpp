@@ -1327,6 +1327,9 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 	//TODO:
 	//PRESET2_selected.setMax(numPresetsFavorites);
 
+	//TODO:
+	settingsArray.resize(numPresetsFavorites);
+
 	//-
 
 	//path folder and xml presets file names
@@ -1376,7 +1379,8 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
-		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
+		&& (presetIndex >= 0) && (presetIndex < settingsArray.size()))
+		//&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
 		ofLogVerbose(__FUNCTION__) << "DONE_save (1)";
 
@@ -1411,14 +1415,19 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
 
-			ofSerialize(settingsArray[presetIndex], groups[guiIndex]);
+			if (presetIndex < settingsArray.size()) {
+				ofSerialize(settingsArray[presetIndex], groups[guiIndex]);
+			}
+			else {
+				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
+			}
 
 			TS_STOP("saveMem1");
 		}
 	}
 	else
 	{
-		ofLogError("ofxPresetsManager") << "OUT OF RANGE SAVE";
+		ofLogError(__FUNCTION__) << "OUT OF RANGE SAVE";
 	}
 }
 
@@ -1430,7 +1439,8 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 	int guiIndex = getGuiIndex(gName);
 
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
-		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
+		&& (presetIndex >= 0) && (presetIndex < settingsArray.size()))
+		//&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
 		ofLogVerbose(__FUNCTION__) << "DONE_save (2)";
 
@@ -1466,7 +1476,12 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 
 			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
 
-			ofSerialize(settingsArray[presetIndex], groups[guiIndex]);
+			if (presetIndex < settingsArray.size()) {
+				ofSerialize(settingsArray[presetIndex], groups[guiIndex]);
+			}
+			else {
+				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
+			}
 
 			TS_STOP("saveMem2");//for TimeMeasurements only
 		}
@@ -1489,7 +1504,8 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 
 	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
-		&& (presetIndex >= 0) && (presetIndex < numPresetsFavorites))//TODO:
+		&& (presetIndex >= 0) && (presetIndex < settingsArray.size()))//TODO:
+		//&& (presetIndex >= 0) && (presetIndex < numPresetsFavorites))//TODO:
 		//&& (presetIndex >= 0) && (presetIndex < lastIndices[0]))//TODO:
 		//&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
@@ -1515,7 +1531,13 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
 
 			//using xml array
-			ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
+
+			if (presetIndex < settingsArray.size()) {
+				ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
+			}
+			else {
+				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
+			}
 
 			//TODO:
 			//ERROR do not loads the group content
@@ -1554,7 +1576,8 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 	int guiIndex = getGuiIndex(gName);
 
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
-		&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
+		//&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
+		&& (presetIndex >= 0) && (presetIndex < settingsArray.size()))
 	{
 		if (!MODE_MemoryLive)
 		{
@@ -1577,7 +1600,13 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 
 			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
 
-			ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
+
+			if (presetIndex < settingsArray.size()) {
+				ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
+			}
+			else {
+				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE LOAD";
+			}
 
 			TS_STOP("loadMem2");//for TimeMeasurements only
 		}
@@ -1768,8 +1797,10 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				int i = PRESET_selected;
 				i++;
-				if (i > NUM_OF_PRESETS)
-					i = NUM_OF_PRESETS;
+				//if (i > NUM_OF_PRESETS)
+				//	i = NUM_OF_PRESETS;
+				if (i > settingsArray.size())
+					i = settingsArray.size();
 				PRESET_selected = i;
 			}
 		}
@@ -2269,9 +2300,10 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			}
 			else
 			{
-				if (lastIndices.size() > 0
-					&& yIndex < lastIndices.size()
-					&& xIndex < NUM_OF_PRESETS)
+				if (lastIndices.size() > 0//amount of groups
+					&& yIndex < lastIndices.size()//amount of groups
+					&& xIndex < settingsArray.size())
+					//&& xIndex < NUM_OF_PRESETS)
 				{
 					//mark selector as lastone trigged
 					lastIndices[yIndex] = xIndex;
@@ -2484,7 +2516,8 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 {
 	ofLogVerbose(__FUNCTION__);
 
-	for (int i = 0; i < NUM_OF_PRESETS; i++)
+	for (int i = 0; i < settingsArray.size(); i++)
+		//for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{
 		string strFolder;
 		string strFile;
@@ -2494,14 +2527,22 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 		strFile = groupName + path_Prefix + ofToString(i) + ".xml";
 		strPath = strFolder + strFile;
 
-		settingsArray[i].save(strPath);
+
+		if (i < settingsArray.size()) {
+			settingsArray[i].save(strPath);
+		}
+		else {
+			ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
+		}
+
 	}
 
 	//debug params
 	bool bDEBUG = false;
 	if (bDEBUG)
 	{
-		for (int i = 0; i < NUM_OF_PRESETS; i++)
+		for (int i = 0; i < settingsArray.size(); i++)
+			//for (int i = 0; i < NUM_OF_PRESETS; i++)
 		{
 			ofLogNotice(__FUNCTION__) << "settingsArray[" << i << "] " << ofToString(settingsArray[i].toString());
 		}
@@ -2520,7 +2561,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	//groupsMem.reserve(NUM_OF_PRESETS);
 	//groupsMem.resize(NUM_OF_PRESETS);
 
-	for (int i = 0; i < NUM_OF_PRESETS; i++)
+	for (int i = 0; i < settingsArray.size(); i++)
+	//for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{
 		//TODO:
 		//PROBLEM:
@@ -2560,7 +2602,12 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 
 		if (bLoaded)
 		{
-			settingsArray[i] = settings;
+			if (i < settingsArray.size()) {
+				settingsArray[i] = settings;
+			}
+			else {
+				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
+			}
 		}
 #ifdef INCLUDE_DEBUG_ERRORS
 		else if (!bLoaded)
@@ -2578,7 +2625,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	bool bDEBUG = false;
 	if (bDEBUG)
 	{
-		for (int i = 0; i < NUM_OF_PRESETS; i++)
+		for (int i = 0; i < settingsArray.size(); i++)
+			//for (int i = 0; i < NUM_OF_PRESETS; i++)
 		{
 			ofLogNotice(__FUNCTION__) << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
 		}
@@ -2772,7 +2820,7 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 		//relative to long
 		_prog = timerRandomizer / (float)randomizeDuration;
 		ImGui::ProgressBar(_prog);
-		
+
 		//ImGui::ProgressBar(timerRandomizer / (float)randomizeDuration, ImVec2(0.f, 0.f));
 		//ImGui::PopStyleColor(1);
 
@@ -2794,7 +2842,7 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 		//TODO:
 		ofxImGui::AddGroup(params_Editor, settings);
-		
+
 		ImGui::TreePop();
 	}
 

@@ -220,7 +220,8 @@ public:
 
 	//data
 private:
-	ofXml settingsArray[NUM_OF_PRESETS];
+	//ofXml settingsArray[NUM_OF_PRESETS];
+	vector<ofXml> settingsArray;
 
 	//--
 
@@ -762,7 +763,7 @@ public:
 
 	//--
 
-	std::vector<int> lastIndices;//seems to be the size of any group
+	std::vector<int> lastIndices;//? seems to be the size of any group or:
 	//? this seems to be the last selected of any group(?)
 	//TODO:
 	//lastIndices it's the gui box clicked only, not important.. ?
