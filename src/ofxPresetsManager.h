@@ -100,7 +100,7 @@
 //-
 
 //TODO
-#define NUM_OF_PRESETS 8
+//#define NUM_OF_PRESETS 8//delete this
 
 //only one it's implemented! can't add more than one parameter group!
 #define NUM_MAX_GUIS 1
@@ -163,6 +163,8 @@ private:
 
 private:
 #ifdef INCLUDE_RANDOMIZER
+	//#define DEBUG_randomTest //uncomment to debug. comment to normal use
+
 	ofParameter<bool> MODE_MemoryLive;
 	ofParameter<bool> loadToMemory;
 	ofParameter<bool> saveFromMemory;
@@ -177,7 +179,7 @@ private:
 	ofParameter<bool> bRandomize;
 	ofParameter<bool> MODE_DicesProbs;
 	ofParameter<bool> bResetDices;
-	ofParameter<int> _randomDice;//to test
+	ofParameter<int> randomizedDice;//to test
 	//ofParameter<string> _totalDicesStr;
 public:
 	ofParameter<float> randomizeSpeedF;
@@ -190,16 +192,17 @@ private:
 	vector<ofParameter<int>> presetsRandomFactor;//probability of every preset
 	vector<ofParameter<bool>> presetsRandomModeShort;//mode short for ebvery preset
 	vector<int> randomFactorsDices;
-	void setupRandomizer();
-	void doRandomizePresetCurr();
-	void doResetDices();
-	int numDices;
-	bool DEBUG_randomTest = false;
+	void setupRandomizer();//engine to get a random between all posible dices (from 0 to numDices) and then select the preset associated to the resulting dice.
+	void doRandomizeWichSelectedPreset();//randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
+	void doResetDices();//reset all probs to 0
+	int numDices;//total dices summing the prob of any preset probability (PROB1 + PROB2 + ...)
+
+
 	int timerRandomizer;
 #endif
 
 	//TODO:
-	//system to select what params to clone, randomize etc
+	//system to select what params of current selected preset to: clone, randomize etc
 	void setupEditor();
 	vector<ofParameter<bool>> editorPresets;
 	ofParameterGroup params_Editor;
@@ -207,10 +210,10 @@ private:
 	void addGroupToEditor(ofParameterGroup& group);
 	ofParameter<bool> editorRandomize;
 	void Changed_Params_Editor(ofAbstractParameter &e);
-	void doRandomizeEditor();
-	void doRandomizeEditorGroup(ofParameterGroup& group);
+	void doRandomizeEditor();//randomize params of current selected preset
+	void doRandomizeEditorGroup(ofParameterGroup& group);//randomize params of current selected preset
 public:
-	void randomizePreset() {
+	void randomizePreset() {//randomize params of current selected preset
 		doRandomizeEditor();
 	}
 	////TODO:
@@ -220,8 +223,10 @@ public:
 
 	//data
 private:
-	//ofXml settingsArray[NUM_OF_PRESETS];
+	//TODO:
+	//should use keys[i].size() instead of this:
 	vector<ofXml> settingsArray;
+	//ofXml settingsArray[NUM_OF_PRESETS];//fixed lenght mode..
 
 	//--
 
@@ -632,7 +637,7 @@ private:
 
 public:
 	ofParameter<bool> bImGui_mouseOver;
-    ofParameterGroup params_randomizer;
+	ofParameterGroup params_randomizer;
 private:
 	void browser_Setup();
 
@@ -746,7 +751,7 @@ public:
 
 	//----
 
-	private:
+private:
 
 	//layout
 	ofVec2f guiPos_InternalControl = ofVec2f(500, 500);
@@ -772,11 +777,11 @@ public:
 
 	//--
 
-	public:
+public:
 	void keyPressed(ofKeyEventArgs &eventArgs);
 	void keyReleased(ofKeyEventArgs &eventArgs);
 
-	private:
+private:
 	void addKeysListeners();
 	void removeKeysListeners();
 
@@ -803,7 +808,7 @@ public:
 	//---
 
 	//helpers
-	public:
+public:
 	void doCloneRight(int pIndex);//clone from selected preset to all others to the right
 	void doCloneAll();//clone all presets from the current selected
 
@@ -815,7 +820,7 @@ public:
 	//void doSave2(int pIndex);
 
 	//-
-	private:
+private:
 	//font to label clicker boxes
 	ofTrueTypeFont myFont;
 	string myTTF;//gui font for all gui theme
@@ -832,7 +837,7 @@ public:
 	//-
 
 	//control panel settings/states
-	private:
+private:
 	void Changed_Params_Control(ofAbstractParameter &e);
 
 	//-
@@ -890,23 +895,23 @@ public:
 		ENABLE_KeysArrowBrowse = b;
 	}
 
-    void CheckFolder(string _path)
-    {
-        ofDirectory dataDirectory(ofToDataPath(_path, true));
+	void CheckFolder(string _path)
+	{
+		ofDirectory dataDirectory(ofToDataPath(_path, true));
 
-        //check if target data folder exist
-        if (!dataDirectory.isDirectory())
-        {
-            ofLogError("__FUNCTION__") << "FOLDER DOES NOT EXIST!";
+		//check if target data folder exist
+		if (!dataDirectory.isDirectory())
+		{
+			ofLogError("__FUNCTION__") << "FOLDER DOES NOT EXIST!";
 
-            //create folder
-            bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
+			//create folder
+			bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
 
-            //debug if creation has been succed
-            if (b)
-                ofLogNotice("__FUNCTION__") << "FOLDER '" << _path << "' CREATED SUCCESSFULLY!";
-            else
-                ofLogError("__FUNCTION__") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
-        }
-    }
+			//debug if creation has been succed
+			if (b)
+				ofLogNotice("__FUNCTION__") << "FOLDER '" << _path << "' CREATED SUCCESSFULLY!";
+			else
+				ofLogError("__FUNCTION__") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
+		}
+	}
 };

@@ -4,7 +4,7 @@
 
 #ifdef INCLUDE_RANDOMIZER
 //--------------------------------------------------------------
-void ofxPresetsManager::doRandomizePresetCurr()
+void ofxPresetsManager::doRandomizeWichSelectedPreset()
 {
 	ofLogNotice(__FUNCTION__);
 
@@ -12,25 +12,23 @@ void ofxPresetsManager::doRandomizePresetCurr()
 
 	//avoid random is the same previuous preset (TODO:improve)
 	int _r = PRESET_selected;
-	int _numPresets = 8;
+	//int _numPresets = 8;
 
 	if (MODE_DicesProbs) {
-		////sum total dices/all probs
-		//numDices = 0;
-		//for (auto &p : presetsRandomFactor) {
-		//	numDices += p.get();
-		//}
-		//
-		//_randomDice.setMax(numDices);
 
-		//randomize
-		if (!DEBUG_randomTest) {
-			_randomDice = ofRandom(0, numDices);
+		//1. dice randomize
 
-			ofLogVerbose(__FUNCTION__) << "random: " << _randomDice.get() << "/" << numDices;
+#ifndef DEBUG_randomTest
+		{
+			//get a random between all posible dices (from 0 to numDices) and then select the preset associated to the resulting dice.
+			randomizedDice = ofRandom(0, numDices);
+
+			ofLogVerbose(__FUNCTION__) << "random: " << randomizedDice.get() << "/" << numDices;
 			//ofLogVerbose(__FUNCTION__) << "numDices:" << numDices;
 		}
-		//presets dices limits
+#endif
+		//2. define limits for range dices associated to any preset
+
 		//randomFactorsDices[0] = 0;
 		for (int i = 0; i < presetsRandomFactor.size(); i++) {
 			randomFactorsDices[i] = 0;
@@ -40,8 +38,13 @@ void ofxPresetsManager::doRandomizePresetCurr()
 			}
 		}
 
+		//3. check if dice is inside both ranges. to select preset (_rr) associated to dice 
+
 		int _rr = 0;
-		for (int i = 0; i < presetsRandomFactor.size(); i++) {
+		//for (int i = 0; i < presetsRandomFactor.size(); i++) {
+		for (int i = 0; i <= presetsRandomFactor.size(); i++) {
+
+			//define upper/lower limits for each dices/preset
 			int start;
 			int end;
 
@@ -58,31 +61,47 @@ void ofxPresetsManager::doRandomizePresetCurr()
 			//else
 			//	end = randomFactorsDices[i];
 
-			if (i != presetsRandomFactor.size() - 1)
+			//end = randomFactorsDices[i];
+
+			if (i != presetsRandomFactor.size())
 				end = randomFactorsDices[i];
 			else
 				end = numDices;
 
-			ofLogVerbose(__FUNCTION__) << "start:" << start;
-			ofLogVerbose(__FUNCTION__) << "end:" << end;
-			if (_randomDice >= start && _randomDice < end)
+#ifdef DEBUG_randomTest
+			ofLogNotice(__FUNCTION__) << (start == end ? "\t\t\t\t" : "") << "[" << i << "] " << start << "-" << end;
+#endif
+			//check if dice is inside both limits
+			if (randomizedDice >= start && randomizedDice < end)
 			{
 				_rr = i - 1;
 			}
 		}
-		ofLogVerbose(__FUNCTION__) << "preset: " << _rr + 1;
+#ifdef DEBUG_randomTest
+		ofLogNotice(__FUNCTION__) << "dice: " << randomizedDice << "  ->  index preset: [" << _rr << "]";
+		//ofLogNotice(__FUNCTION__) << "preset: " << _rr + 1;
+#endif
 		_r = _rr + 1;
 
 		//debug
+		ofLogNotice(__FUNCTION__) << "DEBUG";
+		//for (int i = 0; i < presetsRandomFactor.size(); i++) {
 		for (int i = 0; i < presetsRandomFactor.size(); i++) {
-			ofLogVerbose(__FUNCTION__) << "randomFactorsDices: " << i << " " << randomFactorsDices[i] << endl;// << "-" << randomFactorsDices[i + 1] << endl;
+#ifdef DEBUG_randomTest
+			ofLogNotice(__FUNCTION__) << "randomFactorsDices: [" << i << "] " << randomFactorsDices[i];
+			// << "-" << randomFactorsDices[i + 1] << endl;
+#endif
 		}
+		//last
+#ifdef DEBUG_randomTest
+		ofLogNotice(__FUNCTION__) << "randomFactorsDices: [" << presetsRandomFactor.size() << "] " << numDices;
+#endif
 
 		//for (int f = 1; f < presetsRandomFactor.size(); f++) {
 		//	start = presetsRandomFactor[i - 1].get();
 		//}
 		//
-		//if (_randomDice >= presetsRandomFactor[i - 1].get() && _randomDice < presetsRandomFactor[i].get()) {
+		//if (randomizedDice >= presetsRandomFactor[i - 1].get() && randomizedDice < presetsRandomFactor[i].get()) {
 		//}
 		//}
 
@@ -94,13 +113,15 @@ void ofxPresetsManager::doRandomizePresetCurr()
 		//avoid jump to same current preset
 		while (_r == PRESET_selected)
 		{
-			_r = (int)ofRandom(1, _numPresets + 1);
+			_r = (int)ofRandom(1, settingsArray.size() + 1);
 		}
 	}
 
 	//--
 
-	ofLogNotice(__FUNCTION__) << "\t > " << ofToString(_r);
+	//4. apply preset selection
+
+	ofLogNotice(__FUNCTION__) << "PRESET > " << ofToString(_r);
 	loadPreset(_r);
 
 	//int __r = (int)ofRandom(1.0f, 9.0f);
@@ -109,7 +130,8 @@ void ofxPresetsManager::doRandomizePresetCurr()
 
 	//--
 
-	//start timer again
+	//5. start timer again
+
 	if (ENABLE_RandomizeTimer)
 	{
 		randomizerTimer = ofGetElapsedTimeMillis();
@@ -123,7 +145,7 @@ void ofxPresetsManager::doResetDices()
 		p = 0;
 	}
 	numDices = 0;
-	_randomDice.setMax(numDices);
+	randomizedDice.setMax(numDices - 1);
 }
 
 //--------------------------------------------------------------
@@ -447,7 +469,7 @@ void ofxPresetsManager::setupRandomizer()
 	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
 	randomizeDuration.set("DURATION", 500, 10, randomize_MAX_DURATION);
 	randomizeDurationShort.set("DURATION SHORT", 250, 10, 1000);
-	_randomDice.set("DICE", 0, 0, numPresetsFavorites);
+	randomizedDice.set("DICE", 0, 0, numPresetsFavorites - 1);
 	randomizeSpeedF.set("SPEED", 0.8f, 0.f, 1.f);
 	bResetDices.set("RESET DICES", false);
 
@@ -486,7 +508,9 @@ void ofxPresetsManager::setupRandomizer()
 	params_Randomizer.add(_gOdds);
 	params_Randomizer.add(_gShort);
 	params_Randomizer.add(bResetDices);
-	params_Randomizer.add(_randomDice);
+#ifdef DEBUG_randomTest
+	params_Randomizer.add(randomizedDice);
+#endif
 }
 #endif
 
@@ -728,7 +752,10 @@ void ofxPresetsManager::setup()
 
 	//-
 
-	//ofSetLogLevel("ofxPresetsManager", OF_LOG_NOTICE);
+//#ifdef DEBUG_randomTest
+//	ofSetLogLevel("ofxPresetsManager", OF_LOG_VERBOSE);
+//#endif
+
 	ofLogNotice(__FUNCTION__);
 
 	//-
@@ -877,7 +904,6 @@ void ofxPresetsManager::windowResized(int w, int h)
 //--------------------------------------------------------------
 void ofxPresetsManager::update(ofEventArgs & args)
 {
-
 	//-
 
 	//randomize timer
@@ -906,7 +932,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 	//-
 
 	//TODO:
-	//_totalDicesStr = "/ " + ofToString(_randomDice.getMax());
+	//_totalDicesStr = "/ " + ofToString(randomizedDice.getMax());
 
 	//-
 
@@ -1767,7 +1793,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		}
 		else if (key == 'r')
 		{
-			doRandomizePresetCurr();
+			doRandomizeWichSelectedPreset();
 		}
 #endif
 
@@ -2094,7 +2120,11 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 	{
 		string name = e.getName();
 
-		ofLogNotice(__FUNCTION__) << name << " : " << e;
+		if ((name != "exclude") &&
+			(name != "DICE"))
+		{
+			ofLogNotice(__FUNCTION__) << name << " : " << e;
+		}
 
 		//-
 
@@ -2137,7 +2167,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			//ofLogNotice(__FUNCTION__) << "RANDOMIZE !";
 			bRandomize = false;
 
-			doRandomizePresetCurr();
+			doRandomizeWichSelectedPreset();
 		}
 		else if (name == "ENABLE TIMER RANDOMIZER")
 		{
@@ -2157,11 +2187,13 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			randomizeSpeedF = -((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
 		}
 		//TODO:
-		else if (name == "DICE" && DEBUG_randomTest)//set dice by user
+#ifdef DEBUG_randomTest
+		else if (name == "DICE")//when debug enabled: set dice by user to test
 		{
 			ofLogNotice(__FUNCTION__) << "DICE: " << e;
-			doRandomizePresetCurr();
+			doRandomizeWichSelectedPreset();
 		}
+#endif
 		else if (name == "RESET DICES" && bResetDices)
 		{
 			ofLogNotice(__FUNCTION__) << "RESET DICES: " << e;
@@ -2332,7 +2364,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				for (auto &p : presetsRandomFactor) {
 					numDices += p.get();
 				}
-				_randomDice.setMax(numDices);
+				randomizedDice.setMax(numDices - 1);
 
 				ofLogNotice(__FUNCTION__) << "numDices:" << numDices;
 			}
@@ -2527,7 +2559,6 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 		strFile = groupName + path_Prefix + ofToString(i) + ".xml";
 		strPath = strFolder + strFile;
 
-
 		if (i < settingsArray.size()) {
 			settingsArray[i].save(strPath);
 		}
@@ -2562,7 +2593,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	//groupsMem.resize(NUM_OF_PRESETS);
 
 	for (int i = 0; i < settingsArray.size(); i++)
-	//for (int i = 0; i < NUM_OF_PRESETS; i++)
+		//for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{
 		//TODO:
 		//PROBLEM:
@@ -2829,9 +2860,11 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 		ofxImGui::AddGroup(params_Randomizer, settings);
 
+#ifdef DEBUG_randomTest
 		//ImGui::SameLine();
 		//ImGui::Text(_totalDicesStr.get().c_str());
-		ImGui::Text("%d/%d", _randomDice.get(), _randomDice.getMax());
+		ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
+#endif
 
 		//TODO:
 		//const ImGuiTreeNodeFlags NodeFlags = 0;

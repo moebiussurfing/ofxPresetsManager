@@ -65,7 +65,7 @@ void ofApp::setup()
 	//this is "the preset" container itself
 	//params group and trigger keys associated too.
 	//presetsManager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8' });
-	presetsManager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8', 'q', 'w' });
+	presetsManager.add(params, { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' });
 
 	//-
 
