@@ -468,9 +468,9 @@ void ofxPresetsManager::setupRandomizer()
 	ENABLE_RandomizeTimer.set("PLAY TIMER RANDOMIZER", false);
 	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
 	randomizeDuration.set("DURATION", 500, 10, randomize_MAX_DURATION);
-	randomizeDurationShort.set("DURATION SHORT", 250, 10, 1000);
+	randomizeDurationShort.set("DURATION SHORT", 250, 10, randomize_MAX_DURATION_SHORT);
 	randomizedDice.set("DICE", 0, 0, numPresetsFavorites - 1);
-	randomizeSpeedF.set("SPEED", 0.8f, 0.f, 1.f);
+	//randomizeSpeedF.set("SPEED FACTOR", 1.f, 0.01f, 2.f);
 	bResetDices.set("RESET DICES", false);
 
 	bRandomize.setSerializable(false);
@@ -501,7 +501,7 @@ void ofxPresetsManager::setupRandomizer()
 	params_Randomizer.setName("RANDOMIZER PRESET SELECTOR");
 	params_Randomizer.add(ENABLE_RandomizeTimer);
 	params_Randomizer.add(bRandomize);
-	params_Randomizer.add(randomizeSpeedF);
+	//params_Randomizer.add(randomizeSpeedF);
 	params_Randomizer.add(randomizeDuration);
 	params_Randomizer.add(randomizeDurationShort);
 	params_Randomizer.add(MODE_DicesProbs);
@@ -916,6 +916,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		if (presetsRandomModeShort[PRESET_selected - 1] == false)
 		{
 			if (timerRandomizer >= randomizeDuration)
+			//if (timerRandomizer >= randomizeDuration * randomizeSpeedF)
 			{
 				bRandomize = true;
 			}
@@ -923,6 +924,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//short mode
 		else {
 			if (timerRandomizer >= randomizeDurationShort)
+			//if (timerRandomizer >= randomizeDurationShort * randomizeSpeedF)
 			{
 				bRandomize = true;
 			}
@@ -2173,18 +2175,21 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		{
 			ofLogNotice(__FUNCTION__) << "MODE TIMER: " << e;
 		}
-		else if (name == "SPEED")
-		{
-			ofLogNotice(__FUNCTION__) << "SPEED: " << e;
-
-			randomizeDuration = randomize_MAX_DURATION * (1.f - randomizeSpeedF);
-		}
+		//else if (name == "SPEED FACTOR")
+		//{
+		//	ofLogNotice(__FUNCTION__) << "SPEED FACTOR: " << e;
+		//
+		//	//randomizeDuration = randomize_MAX_DURATION * (1.f - randomizeSpeedF);
+		//
+		//	randomizeDuration.setMax(randomizeSpeedF * randomize_MAX_DURATION);
+		//	randomizeDurationShort.setMax(randomizeSpeedF * randomize_MAX_DURATION_SHORT);
+		//}
 		else if (name == "DURATION")
 		{
 			ofLogNotice(__FUNCTION__) << "DURATION: " << e;
 
-			//randomizeSpeedF = 1 + (randomizeDuration / (float)randomize_MAX_DURATION);
-			randomizeSpeedF = -((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
+			//randomizeSpeedF = -((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
+			////randomizeSpeedF = 1 + (randomizeDuration / (float)randomize_MAX_DURATION);
 		}
 		//TODO:
 #ifdef DEBUG_randomTest
@@ -2290,7 +2295,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				}
 			}
 #endif
-
 			bMustTrig = true;
 		}
 
@@ -2850,6 +2854,7 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 		//relative to long
 		_prog = timerRandomizer / (float)randomizeDuration;
+		//_prog = timerRandomizer / (float)(randomizeDuration * randomizeSpeedF);
 		ImGui::ProgressBar(_prog);
 
 		//ImGui::ProgressBar(timerRandomizer / (float)randomizeDuration, ImVec2(0.f, 0.f));

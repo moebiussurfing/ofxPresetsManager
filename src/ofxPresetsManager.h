@@ -182,13 +182,14 @@ private:
 	ofParameter<int> randomizedDice;//to test
 	//ofParameter<string> _totalDicesStr;
 public:
-	ofParameter<float> randomizeSpeedF;
+	//ofParameter<float> randomizeSpeedF;
 	ofParameter<int> randomizeDuration;
 	ofParameter<int> randomizeDurationShort;
 private:
 	int randomizeSpeed;//real time dureation
 	uint32_t randomizerTimer;
 	int randomize_MAX_DURATION = 5000;
+	int randomize_MAX_DURATION_SHORT = 1000;
 	vector<ofParameter<int>> presetsRandomFactor;//probability of every preset
 	vector<ofParameter<bool>> presetsRandomModeShort;//mode short for ebvery preset
 	vector<int> randomFactorsDices;
