@@ -148,6 +148,8 @@ void ofxPresetsManager::doResetDices()
 	}
 	numDices = 0;
 	randomizedDice.setMax(numDices - 1);
+	randomizeDuration = 1000;
+	randomizeDurationShort = 250;
 }
 
 //--------------------------------------------------------------
@@ -470,7 +472,7 @@ void ofxPresetsManager::setupRandomizer()
 	ENABLE_RandomizeTimer.set("PLAY TIMER RANDOMIZER", false);
 	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
 	MODE_LatchTrig.set("MODE LATCH", false);
-	randomizeDuration.set("DURATION", 500, 10, randomize_MAX_DURATION);
+	randomizeDuration.set("DURATION", 1000, 10, randomize_MAX_DURATION);
 	randomizeDurationShort.set("DURATION SHORT", 250, 10, randomize_MAX_DURATION_SHORT);
 	randomizedDice.set("DICE", 0, 0, numPresetsFavorites - 1);
 	//randomizeSpeedF.set("SPEED FACTOR", 1.f, 0.01f, 2.f);
@@ -597,7 +599,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//control parameters
 
-	PRESET_selected.set("PRESETS", 0, 0, numPresetsFavorites-1);
+	PRESET_selected.set("PRESETS", 0, 0, numPresetsFavorites - 1);
 	//PRESET_selected.set("PRESETS", 1, 1, numPresetsFavorites);
 	//PRESET2_selected.set("PRESETS2", 1, 1, numPresetsFavorites);//this multidimension is for multiple gui/groups (feature not implemented!)
 
@@ -911,8 +913,16 @@ void ofxPresetsManager::update(ofEventArgs & args)
 {
 	if (!DISABLE_CALLBACKS) {
 
-		if (MODE_LatchTrig && isDoneLoad() && !ENABLE_RandomizeTimer) {
+		//TODO:
+		if (isDoneLoad() && MODE_LatchTrig && !ENABLE_RandomizeTimer) {
 			randomizerTimer = ofGetElapsedTimeMillis();
+
+			if (PRESET_selected != 0) {
+				bLatchRun = true;
+			}
+			else {
+				bLatchRun = false;
+			}
 		}
 
 		//-
@@ -923,35 +933,37 @@ void ofxPresetsManager::update(ofEventArgs & args)
 			uint32_t _time = ofGetElapsedTimeMillis();
 			timerRandomizer = _time - randomizerTimer;
 
-			//long mode
-			if (PRESET_selected < presetsRandomModeShort.size()) {
+			if (PRESET_selected < presetsRandomModeShort.size()) {//avoid out of range
+
+				//A. long mode
+				//if (presetsRandomModeShort[PRESET_selected - 1] == false)
 				if (presetsRandomModeShort[PRESET_selected] == false)
-					//if (presetsRandomModeShort[PRESET_selected - 1] == false)
 				{
-					//if (timerRandomizer >= randomizeDuration * randomizeSpeedF)//with factor
 					if (timerRandomizer >= randomizeDuration)
 					{
 						if (MODE_LatchTrig) {
-							loadPreset(0);
-							//loadPreset(1);
+							if (bLatchRun) {
+								loadPreset(0);
+							}
 						}
 						else {
 							bRandomize = true;
 						}
 					}
 				}
-			}
 
-			//short mode
-			else {
-				if (timerRandomizer >= randomizeDurationShort)
-				{
-					if (MODE_LatchTrig) {
-						loadPreset(0);
-						//loadPreset(1);
-					}
-					else {
-						bRandomize = true;
+				//B. short mode
+				else {
+					if (timerRandomizer >= randomizeDurationShort)
+					{
+						if (MODE_LatchTrig) {
+							if (bLatchRun) {
+								loadPreset(0);
+							}
+						}
+						else {
+							bRandomize = true;
+						}
 					}
 				}
 			}
@@ -1378,7 +1390,7 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 
 	//update control gui panel params
 	numPresetsFavorites = _num_presets;
-	PRESET_selected.setMax(numPresetsFavorites-1);
+	PRESET_selected.setMax(numPresetsFavorites - 1);
 	//PRESET_selected.setMax(numPresetsFavorites);
 
 	//TODO:
@@ -1692,8 +1704,21 @@ void ofxPresetsManager::loadPreset(int p)
 		ofLogNotice(__FUNCTION__) << "loadPreset(" << ofToString(p) << ")";
 		ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
-		if (PRESET_selected >= 0 && PRESET_selected <= numPresetsFavorites-1)
+		//TODO:
+		//mode latch
+		if (MODE_LatchTrig && bLatchRun) {
+			if (p != 0) {
+				bLatchRun = true;
+			}
+			else if (p == 0) {
+				bLatchRun = false;
+			}
+
+			//randomizerTimer = ofGetElapsedTimeMillis();
+		}
+
 		//if (PRESET_selected >= 1 && PRESET_selected <= numPresetsFavorites)
+		if (PRESET_selected >= 0 && PRESET_selected <= numPresetsFavorites - 1)
 		{
 			PRESET_selected = p;
 			//ofLogNotice(__FUNCTION__) << ".";
@@ -1859,8 +1884,8 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 
 				//if (i > NUM_OF_PRESETS)
 				//	i = NUM_OF_PRESETS;
-				if (i > settingsArray.size()-1)
-					i = settingsArray.size()-1;
+				if (i > settingsArray.size() - 1)
+					i = settingsArray.size() - 1;
 				//if (i > settingsArray.size())
 				//	i = settingsArray.size();
 				PRESET_selected = i;
@@ -2110,8 +2135,8 @@ void ofxPresetsManager::doCloneAll()
 	}
 
 	//clone all
-	for (int i = 0; i < numPresetsFavorites-1; i++)
-	//for (int i = 0; i < numPresetsFavorites; i++)
+	for (int i = 0; i < numPresetsFavorites - 1; i++)
+		//for (int i = 0; i < numPresetsFavorites; i++)
 	{
 		save(i, 0);//0 is bc it's the only 1st params group implemented
 	}
@@ -2914,9 +2939,18 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 		////short mode
 		//else _prog = timerRandomizer / (float)randomizeDurationShort;
 
-		//relative to long
-		_prog = timerRandomizer / (float)randomizeDuration;
-		//_prog = timerRandomizer / (float)(randomizeDuration * randomizeSpeedF);
+		//bar relative to long
+		if (ENABLE_RandomizeTimer) {
+			_prog = timerRandomizer / (float)randomizeDuration;
+		}
+		else if (MODE_LatchTrig) {
+			if (!bLatchRun) {
+				_prog = 0;
+			}
+			else {
+				_prog = timerRandomizer / (float)randomizeDuration;
+			}
+		}
 		ImGui::ProgressBar(_prog);
 
 		//ImGui::ProgressBar(timerRandomizer / (float)randomizeDuration, ImVec2(0.f, 0.f));

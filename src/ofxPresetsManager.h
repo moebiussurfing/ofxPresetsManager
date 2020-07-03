@@ -180,6 +180,7 @@ private:
 	ofParameter<bool> bRandomize;
 	ofParameter<bool> MODE_DicesProbs;
 	ofParameter<bool> MODE_LatchTrig;//this mode trigs preset but goes back to preset 1 after duration timer
+	bool bLatchRun = false;
 	ofParameter<bool> bResetDices;
 	ofParameter<int> randomizedDice;//to test
 	//ofParameter<string> _totalDicesStr;
