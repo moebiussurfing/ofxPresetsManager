@@ -81,7 +81,8 @@ void ofxPresetsManager::doRandomizeWichSelectedPreset()
 		ofLogNotice(__FUNCTION__) << "dice: " << randomizedDice << "  ->  index preset: [" << _rr << "]";
 		//ofLogNotice(__FUNCTION__) << "preset: " << _rr + 1;
 #endif
-		_r = _rr + 1;
+		_r = _rr;
+		//_r = _rr + 1;
 
 		//debug
 		ofLogNotice(__FUNCTION__) << "DEBUG";
@@ -113,7 +114,8 @@ void ofxPresetsManager::doRandomizeWichSelectedPreset()
 		//avoid jump to same current preset
 		while (_r == PRESET_selected)
 		{
-			_r = (int)ofRandom(1, settingsArray.size() + 1);
+			_r = (int)ofRandom(0, settingsArray.size());
+			//_r = (int)ofRandom(1, settingsArray.size() + 1);
 		}
 	}
 
@@ -595,7 +597,8 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//control parameters
 
-	PRESET_selected.set("PRESETS", 1, 1, numPresetsFavorites);
+	PRESET_selected.set("PRESETS", 0, 0, numPresetsFavorites-1);
+	//PRESET_selected.set("PRESETS", 1, 1, numPresetsFavorites);
 	//PRESET2_selected.set("PRESETS2", 1, 1, numPresetsFavorites);//this multidimension is for multiple gui/groups (feature not implemented!)
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
@@ -906,98 +909,107 @@ void ofxPresetsManager::windowResized(int w, int h)
 //--------------------------------------------------------------
 void ofxPresetsManager::update(ofEventArgs & args)
 {
-	if (MODE_LatchTrig && isDoneLoad() && !ENABLE_RandomizeTimer) {
-		randomizerTimer = ofGetElapsedTimeMillis();
-	}
+	if (!DISABLE_CALLBACKS) {
 
-	//-
-
-	//randomize timer
-	if (ENABLE_RandomizeTimer || MODE_LatchTrig)
-	{
-		uint32_t _time = ofGetElapsedTimeMillis();
-		timerRandomizer = _time - randomizerTimer;
-
-		//long mode
-		if (presetsRandomModeShort[PRESET_selected - 1] == false)
-		{
-			//if (timerRandomizer >= randomizeDuration * randomizeSpeedF)//with factor
-			if (timerRandomizer >= randomizeDuration)
-			{
-				if (MODE_LatchTrig) {
-					loadPreset(1);
-				}
-				else {
-					bRandomize = true;
-				}
-			}
-		}
-
-		//short mode
-		else {
-			if (timerRandomizer >= randomizeDurationShort)
-			{
-				if (MODE_LatchTrig) {
-					loadPreset(1);
-				}
-				else {
-					bRandomize = true;
-				}
-			}
-		}
-	}
-
-	//-
-
-	//TODO:
-	//_totalDicesStr = "/ " + ofToString(randomizedDice.getMax());
-
-	//-
-
-	//plotters
-#ifdef TIME_SAMPLE_MEASURES 
-	TS_START("load1");
-	TS_STOP("load1");
-	TS_START("load2");
-	TS_STOP("load2");
-	TS_START("loadMem");
-	TS_STOP("loadMem");
-#endif
-
-	//--
-
-	//autosave
-	//&& autoLoad? 
-#ifndef INCLUDE_FILE_BROWSER_IM_GUI
-	if (autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
-#else
-	if (!MODE_Browser_NewPreset && autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
-#endif
-	{
-		ofLogNotice(__FUNCTION__) << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t[AUTOSAVE]";
-
-		//app settings
-		save_ControlSettings();
-
-		//save current preset
-		doSave(PRESET_selected - 1);
-		//doSave2(PRESET2_selected - 1);
-
-		if (!MODE_MemoryLive)
-		{
-			//MODE A: from hd file
-			//not required because the files are already there
-		}
-		else
-		{
-			//MODE B: direct from memory
-			save_AllKit_FromMemory();
+		if (MODE_LatchTrig && isDoneLoad() && !ENABLE_RandomizeTimer) {
+			randomizerTimer = ofGetElapsedTimeMillis();
 		}
 
 		//-
 
-		//auto save timer
-		timerLast_Autosave = ofGetElapsedTimeMillis();
+		//randomize timer
+		if (ENABLE_RandomizeTimer || MODE_LatchTrig)
+		{
+			uint32_t _time = ofGetElapsedTimeMillis();
+			timerRandomizer = _time - randomizerTimer;
+
+			//long mode
+			if (PRESET_selected < presetsRandomModeShort.size()) {
+				if (presetsRandomModeShort[PRESET_selected] == false)
+					//if (presetsRandomModeShort[PRESET_selected - 1] == false)
+				{
+					//if (timerRandomizer >= randomizeDuration * randomizeSpeedF)//with factor
+					if (timerRandomizer >= randomizeDuration)
+					{
+						if (MODE_LatchTrig) {
+							loadPreset(0);
+							//loadPreset(1);
+						}
+						else {
+							bRandomize = true;
+						}
+					}
+				}
+			}
+
+			//short mode
+			else {
+				if (timerRandomizer >= randomizeDurationShort)
+				{
+					if (MODE_LatchTrig) {
+						loadPreset(0);
+						//loadPreset(1);
+					}
+					else {
+						bRandomize = true;
+					}
+				}
+			}
+		}
+
+		//-
+
+		//TODO:
+		//_totalDicesStr = "/ " + ofToString(randomizedDice.getMax());
+
+		//-
+
+		//plotters
+#ifdef TIME_SAMPLE_MEASURES 
+		TS_START("load1");
+		TS_STOP("load1");
+		TS_START("load2");
+		TS_STOP("load2");
+		TS_START("loadMem");
+		TS_STOP("loadMem");
+#endif
+
+		//--
+
+		//autosave
+		//&& autoLoad? 
+#ifndef INCLUDE_FILE_BROWSER_IM_GUI
+		if (autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
+#else
+		if (!MODE_Browser_NewPreset && autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
+#endif
+		{
+			ofLogNotice(__FUNCTION__) << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t[AUTOSAVE]";
+
+			//app settings
+			save_ControlSettings();
+
+			//save current preset
+			doSave(PRESET_selected);
+			//doSave(PRESET_selected - 1);
+			//doSave2(PRESET2_selected - 1);
+
+			if (!MODE_MemoryLive)
+			{
+				//MODE A: from hd file
+				//not required because the files are already there
+			}
+			else
+			{
+				//MODE B: direct from memory
+				save_AllKit_FromMemory();
+			}
+
+			//-
+
+			//auto save timer
+			timerLast_Autosave = ofGetElapsedTimeMillis();
+		}
 	}
 }
 
@@ -1366,7 +1378,8 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 
 	//update control gui panel params
 	numPresetsFavorites = _num_presets;
-	PRESET_selected.setMax(numPresetsFavorites);
+	PRESET_selected.setMax(numPresetsFavorites-1);
+	//PRESET_selected.setMax(numPresetsFavorites);
 
 	//TODO:
 	//PRESET2_selected.setMax(numPresetsFavorites);
@@ -1679,7 +1692,8 @@ void ofxPresetsManager::loadPreset(int p)
 		ofLogNotice(__FUNCTION__) << "loadPreset(" << ofToString(p) << ")";
 		ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
-		if (PRESET_selected >= 1 && PRESET_selected <= numPresetsFavorites)
+		if (PRESET_selected >= 0 && PRESET_selected <= numPresetsFavorites-1)
+		//if (PRESET_selected >= 1 && PRESET_selected <= numPresetsFavorites)
 		{
 			PRESET_selected = p;
 			//ofLogNotice(__FUNCTION__) << ".";
@@ -1690,7 +1704,8 @@ void ofxPresetsManager::loadPreset(int p)
 		{
 			ofLogError("ofxPresetsManager") << "IGNORE LOAD PRESET";
 			//workaround clamp
-			PRESET_selected = 1;//set to first as default presets when out of range
+			PRESET_selected = 0;//set to first as default presets when out of range
+			//PRESET_selected = 1;//set to first as default presets when out of range
 		}
 	}
 }
@@ -1841,10 +1856,13 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				int i = PRESET_selected;
 				i++;
+
 				//if (i > NUM_OF_PRESETS)
 				//	i = NUM_OF_PRESETS;
-				if (i > settingsArray.size())
-					i = settingsArray.size();
+				if (i > settingsArray.size()-1)
+					i = settingsArray.size()-1;
+				//if (i > settingsArray.size())
+				//	i = settingsArray.size();
 				PRESET_selected = i;
 			}
 		}
@@ -1871,8 +1889,11 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				int i = PRESET_selected;
 				i--;
-				if (i < 1)
-					i = 1;
+
+				//if (i < 1)
+				//	i = 1;
+				if (i < 0)
+					i = 0;
 				PRESET_selected = i;
 			}
 		}
@@ -1898,7 +1919,8 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 					{
 						ofLogNotice(__FUNCTION__) << "[" << k << "][" << i << "]";
 
-						PRESET_selected = 1 + k;
+						PRESET_selected = k;
+						//PRESET_selected = 1 + k;
 					}
 					return;
 				}
@@ -1977,7 +1999,8 @@ void ofxPresetsManager::mousePressed(int x, int y)
 				doSave(xIndex);
 
 				//will auto load
-				PRESET_selected = 1 + xIndex;
+				PRESET_selected = xIndex;
+				//PRESET_selected = 1 + xIndex;
 			}
 
 			//-
@@ -1985,7 +2008,8 @@ void ofxPresetsManager::mousePressed(int x, int y)
 			//2. mod swap controlled by modKeySwap
 			else if (bKeySwap)
 			{
-				int IndexSource = PRESET_selected - 1;
+				int IndexSource = PRESET_selected;
+				//int IndexSource = PRESET_selected - 1;
 				int IndexDest = xIndex;
 				string srcName = getPresetName(groups[0].getName(), IndexSource);
 				string dstName = getPresetName(groups[0].getName(), IndexDest);
@@ -2021,7 +2045,8 @@ void ofxPresetsManager::mousePressed(int x, int y)
 				_file.removeFile(_pathSrc);
 
 				//6. auto load source (the same preset was selected befor swap clicked!)
-				PRESET_selected = 1 + xIndex;
+				PRESET_selected = xIndex;
+				//PRESET_selected = 1 + xIndex;
 			}
 
 			//-
@@ -2030,7 +2055,8 @@ void ofxPresetsManager::mousePressed(int x, int y)
 			else
 			{
 				//will trig autoload callback on change, calling load(p, 0);
-				PRESET_selected = 1 + xIndex;
+				PRESET_selected = xIndex;
+				//PRESET_selected = 1 + xIndex;
 			}
 		}
 
@@ -2079,11 +2105,13 @@ void ofxPresetsManager::doCloneAll()
 	if (autoSave)
 	{
 		ofLogNotice(__FUNCTION__) << "autosave current preset";
-		doSave(PRESET_selected - 1);
+		doSave(PRESET_selected);
+		//doSave(PRESET_selected - 1);
 	}
 
 	//clone all
-	for (int i = 0; i < numPresetsFavorites; i++)
+	for (int i = 0; i < numPresetsFavorites-1; i++)
+	//for (int i = 0; i < numPresetsFavorites; i++)
 	{
 		save(i, 0);//0 is bc it's the only 1st params group implemented
 	}
@@ -2150,7 +2178,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		{
 			ofLogNotice(__FUNCTION__) << "SAVE: " << e;
 			bSave = false;
-			doSave(PRESET_selected - 1);
+			doSave(PRESET_selected);
+			//doSave(PRESET_selected - 1);
 		}
 
 		//else if (name == "LOAD" && bLoad)
@@ -2167,7 +2196,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		{
 			ofLogNotice(__FUNCTION__) << "CLONE >: " << e;
 			bCloneRight = false;
-			doCloneRight(PRESET_selected - 1);
+			doCloneRight(PRESET_selected);
+			//doCloneRight(PRESET_selected - 1);
 		}
 		else if (name == "CLONE ALL" && bCloneAll)
 		{
@@ -2318,7 +2348,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			{
 				if (autoLoad)
 				{
-					load(PRESET_selected - 1, 0);
+					load(PRESET_selected, 0);
+					//load(PRESET_selected - 1, 0);
 				}
 			}
 #endif
@@ -2341,7 +2372,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			if (autoSave && !MODE_Browser_NewPreset)//workflow: browser mode bypasses autosave
 #endif
 			{
-				save(PRESET_selected_PRE - 1, 0);
+				save(PRESET_selected_PRE, 0);
+				//save(PRESET_selected_PRE - 1, 0);
 			}
 
 			//-
@@ -2352,7 +2384,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			//-
 
 			//indexes starts from 0, not from 1 like presets
-			int xIndex = PRESET_selected - 1;
+			int xIndex = PRESET_selected;
+			//int xIndex = PRESET_selected - 1;
 			int yIndex = 0;//TODO: one group only for now
 
 			//-
@@ -2405,8 +2438,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//{
 		//	ofLogError("ofxPresetsManager") << "IGNORED PRESETS CHANGE";
 		//}
-		}
 	}
+}
 
 #pragma mark - SETTINGS
 
@@ -2726,7 +2759,8 @@ void ofxPresetsManager::exit()
 	//autosave PRESET_selected preset on exit
 	if (autoSave)// && autoLoad)
 	{
-		doSave(PRESET_selected - 1);
+		doSave(PRESET_selected);
+		//doSave(PRESET_selected - 1);
 
 		//doSave2(PRESET2_selected - 1);
 	}
@@ -2811,7 +2845,8 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 		if (MODE_Browser_NewPreset)
 		{
-			save(PRESET_selected - 1, 0);
+			save(PRESET_selected, 0);
+			//save(PRESET_selected - 1, 0);
 		}
 	}
 

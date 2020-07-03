@@ -51,7 +51,7 @@
 ///measure performance ofxTimeMeasurements
 ///#define TIME_SAMPLE_MEASURES 
 ///
-	#define DEBUG_randomTest //uncomment to debug. comment to normal use
+//#define DEBUG_randomTest //uncomment to debug. comment to normal use. if enabled, random engine stops working
 
 ///----------------------------------------------
 
