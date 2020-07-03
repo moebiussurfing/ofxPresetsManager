@@ -467,6 +467,7 @@ void ofxPresetsManager::setupRandomizer()
 	bRandomize.set("RANDOMIZE", false);
 	ENABLE_RandomizeTimer.set("PLAY TIMER RANDOMIZER", false);
 	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
+	MODE_LatchTrig.set("MODE LATCH", false);
 	randomizeDuration.set("DURATION", 500, 10, randomize_MAX_DURATION);
 	randomizeDurationShort.set("DURATION SHORT", 250, 10, randomize_MAX_DURATION_SHORT);
 	randomizedDice.set("DICE", 0, 0, numPresetsFavorites - 1);
@@ -482,7 +483,7 @@ void ofxPresetsManager::setupRandomizer()
 	randomFactorsDices.resize(numPresetsFavorites);
 	int i;
 	//ints as probability for every preset
-	i = 1;
+	i = 0;
 	ofParameterGroup _gOdds{ "PRESETS PROBS" };
 	for (auto &p : presetsRandomFactor) {
 		string n = "PROB " + ofToString(i++);
@@ -490,7 +491,7 @@ void ofxPresetsManager::setupRandomizer()
 		_gOdds.add(p);
 	}
 	//toggles to enable short duration mode
-	i = 1;
+	i = 0;
 	ofParameterGroup _gShort{ "MODE DURATION SHORT" };
 	for (auto &p : presetsRandomModeShort) {
 		string n = "SHORT " + ofToString(i++);
@@ -505,6 +506,7 @@ void ofxPresetsManager::setupRandomizer()
 	params_Randomizer.add(randomizeDuration);
 	params_Randomizer.add(randomizeDurationShort);
 	params_Randomizer.add(MODE_DicesProbs);
+	params_Randomizer.add(MODE_LatchTrig);
 	params_Randomizer.add(_gOdds);
 	params_Randomizer.add(_gShort);
 	params_Randomizer.add(bResetDices);
@@ -904,10 +906,14 @@ void ofxPresetsManager::windowResized(int w, int h)
 //--------------------------------------------------------------
 void ofxPresetsManager::update(ofEventArgs & args)
 {
+	if (MODE_LatchTrig && isDoneLoad() && !ENABLE_RandomizeTimer) {
+		randomizerTimer = ofGetElapsedTimeMillis();
+	}
+
 	//-
 
 	//randomize timer
-	if (ENABLE_RandomizeTimer)
+	if (ENABLE_RandomizeTimer || MODE_LatchTrig)
 	{
 		uint32_t _time = ofGetElapsedTimeMillis();
 		timerRandomizer = _time - randomizerTimer;
@@ -915,18 +921,28 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//long mode
 		if (presetsRandomModeShort[PRESET_selected - 1] == false)
 		{
+			//if (timerRandomizer >= randomizeDuration * randomizeSpeedF)//with factor
 			if (timerRandomizer >= randomizeDuration)
-			//if (timerRandomizer >= randomizeDuration * randomizeSpeedF)
 			{
-				bRandomize = true;
+				if (MODE_LatchTrig) {
+					loadPreset(1);
+				}
+				else {
+					bRandomize = true;
+				}
 			}
 		}
+
 		//short mode
 		else {
 			if (timerRandomizer >= randomizeDurationShort)
-			//if (timerRandomizer >= randomizeDurationShort * randomizeSpeedF)
 			{
-				bRandomize = true;
+				if (MODE_LatchTrig) {
+					loadPreset(1);
+				}
+				else {
+					bRandomize = true;
+				}
 			}
 		}
 	}
@@ -2171,9 +2187,20 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 			doRandomizeWichSelectedPreset();
 		}
-		else if (name == "ENABLE TIMER RANDOMIZER")
+		else if (name == ENABLE_RandomizeTimer.getName())//"PLAY TIMER RANDOMIZER"
 		{
 			ofLogNotice(__FUNCTION__) << "MODE TIMER: " << e;
+			if (ENABLE_RandomizeTimer) {
+				MODE_LatchTrig = false;
+			}
+		}
+		else if (name == "MODE LATCH")
+		{
+			ofLogNotice(__FUNCTION__) << "MODE LATCH: " << e;
+
+			if (MODE_LatchTrig) {
+				ENABLE_RandomizeTimer = false;
+			}
 		}
 		//else if (name == "SPEED FACTOR")
 		//{
@@ -2357,7 +2384,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		{
 			bool doDices = false;
 			for (int i = 0; i < presetsRandomFactor.size(); i++) {
-				if (name == "PROB " + ofToString(i + 1)) {
+				if (name == "PROB " + ofToString(i)) {
 					doDices = true;
 				}
 			}
@@ -2378,8 +2405,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//{
 		//	ofLogError("ofxPresetsManager") << "IGNORED PRESETS CHANGE";
 		//}
+		}
 	}
-}
 
 #pragma mark - SETTINGS
 

@@ -51,6 +51,8 @@
 ///measure performance ofxTimeMeasurements
 ///#define TIME_SAMPLE_MEASURES 
 ///
+	#define DEBUG_randomTest //uncomment to debug. comment to normal use
+
 ///----------------------------------------------
 
 
@@ -163,7 +165,6 @@ private:
 
 private:
 #ifdef INCLUDE_RANDOMIZER
-	//#define DEBUG_randomTest //uncomment to debug. comment to normal use
 
 	ofParameter<bool> MODE_MemoryLive;
 	ofParameter<bool> loadToMemory;
@@ -178,6 +179,7 @@ private:
 	//ofParameterGroup params_Randomizer;
 	ofParameter<bool> bRandomize;
 	ofParameter<bool> MODE_DicesProbs;
+	ofParameter<bool> MODE_LatchTrig;//this mode trigs preset but goes back to preset 1 after duration timer
 	ofParameter<bool> bResetDices;
 	ofParameter<int> randomizedDice;//to test
 	//ofParameter<string> _totalDicesStr;
