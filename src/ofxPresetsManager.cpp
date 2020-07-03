@@ -2861,33 +2861,6 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 
 	//-
 
-	// send/save browsed preset to favorites
-
-	if (ImGui::Button("TO FAVS"))
-	{
-		ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE browsed preset: " << browser_PresetName;
-		ofLogNotice(__FUNCTION__) << "to favorites preset: [" << PRESET_selected << "]";
-
-		if (MODE_Browser_NewPreset)
-		{
-			save(PRESET_selected, 0);
-			//save(PRESET_selected - 1, 0);
-		}
-	}
-
-	//-
-
-	//get/copy all [8] presets from favs and send/save to browser folder ("archive")
-
-	ImGui::SameLine();
-	if (ImGui::Button("FROM FAVS"))
-	{
-		ofLogNotice(__FUNCTION__) << "FROM FAVS";
-		doGetFavsFromBrowser();
-	}
-
-	//-
-
 	//helpers
 
 	if (ImGui::Button("CLONE ALL"))
@@ -2944,12 +2917,15 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 			_prog = timerRandomizer / (float)randomizeDuration;
 		}
 		else if (MODE_LatchTrig) {
-			if (!bLatchRun) {
-				_prog = 0;
-			}
-			else {
+			if (bLatchRun) {
 				_prog = timerRandomizer / (float)randomizeDuration;
 			}
+			else {
+				_prog = 0;
+			}
+		}
+		else {
+			_prog = 0;
 		}
 		ImGui::ProgressBar(_prog);
 
@@ -3059,6 +3035,35 @@ bool ofxPresetsManager::browser_draw_ImGui()
 		if (ofxImGui::BeginTree("BROWSER", mainSettings))
 		{
 			int numFilePresets = fileNames.size();
+
+			//-
+
+			// send/save browsed preset to favorites
+
+			if (ImGui::Button("TO FAVS"))
+			{
+				ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE browsed preset: " << browser_PresetName;
+				ofLogNotice(__FUNCTION__) << "to favorites preset: [" << PRESET_selected << "]";
+
+				if (MODE_Browser_NewPreset)
+				{
+					save(PRESET_selected, 0);
+					//save(PRESET_selected - 1, 0);
+				}
+			}
+
+			//-
+
+			//get/copy all [8] presets from favs and send/save to browser folder ("archive")
+
+			ImGui::SameLine();
+			if (ImGui::Button("FROM FAVS"))
+			{
+				ofLogNotice(__FUNCTION__) << "FROM FAVS";
+				doGetFavsFromBrowser();
+			}
+
+			//-
 
 			//0. error when no files detected
 
