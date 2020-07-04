@@ -1444,12 +1444,11 @@ void ofxPresetsManager::add(ofParameterGroup params, initializer_list<int> keysL
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, int guiIndex)
 {
-	ofLogVerbose(__FUNCTION__) << "save(" << presetIndex << "," << guiIndex << ")";
+	ofLogNotice(__FUNCTION__) << "save(" << presetIndex << "," << guiIndex << ")";
 
 	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
 		&& (presetIndex >= 0) && (presetIndex < settingsArray.size()))
-		//&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
 		ofLogVerbose(__FUNCTION__) << "DONE_save (1)";
 
@@ -1509,7 +1508,6 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
 		&& (presetIndex >= 0) && (presetIndex < settingsArray.size()))
-		//&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
 		ofLogVerbose(__FUNCTION__) << "DONE_save (2)";
 
@@ -1565,7 +1563,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, int guiIndex)
 {
-	ofLogVerbose(__FUNCTION__) << "load(" << presetIndex << "," << guiIndex << ")";
+	ofLogNotice(__FUNCTION__) << "load(" << presetIndex << "," << guiIndex << ")";
 
 	//TODO:
 	//guiIndex is not the preset position, it's for multiplye guis!
@@ -1574,9 +1572,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
 		&& (presetIndex >= 0) && (presetIndex < settingsArray.size()))//TODO:
-		//&& (presetIndex >= 0) && (presetIndex < numPresetsFavorites))//TODO:
 		//&& (presetIndex >= 0) && (presetIndex < lastIndices[0]))//TODO:
-		//&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 	{
 		if (!MODE_MemoryLive)
 		{
@@ -1645,7 +1641,6 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 	int guiIndex = getGuiIndex(gName);
 
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
-		//&& (presetIndex >= 0) && (presetIndex < NUM_OF_PRESETS))
 		&& (presetIndex >= 0) && (presetIndex < settingsArray.size()))
 	{
 		if (!MODE_MemoryLive)
@@ -1882,12 +1877,8 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				int i = PRESET_selected;
 				i++;
 
-				//if (i > NUM_OF_PRESETS)
-				//	i = NUM_OF_PRESETS;
 				if (i > settingsArray.size() - 1)
 					i = settingsArray.size() - 1;
-				//if (i > settingsArray.size())
-				//	i = settingsArray.size();
 				PRESET_selected = i;
 			}
 		}
@@ -2424,7 +2415,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				if (lastIndices.size() > 0//amount of groups
 					&& yIndex < lastIndices.size()//amount of groups
 					&& xIndex < settingsArray.size())
-					//&& xIndex < NUM_OF_PRESETS)
 				{
 					//mark selector as lastone trigged
 					lastIndices[yIndex] = xIndex;
@@ -2500,7 +2490,7 @@ void ofxPresetsManager::save_ControlSettings()
 {
 #ifndef DEBUG_BLOCK_SAVE_SETTINGS
 
-	ofLogNotice(__FUNCTION__) << "save_ControlSettings()";
+	//ofLogNotice(__FUNCTION__);
 
 	//TODO:
 	//crashes!
@@ -2544,7 +2534,7 @@ void ofxPresetsManager::save_ControlSettings()
 
 	try
 	{
-		ofLogNotice(__FUNCTION__) << endl << params_Control.toString() << endl;
+		ofLogVerbose(__FUNCTION__)<<endl << params_Control.toString() << endl;
 
 		ofXml settingsControl;
 
@@ -2553,13 +2543,13 @@ void ofxPresetsManager::save_ControlSettings()
 		ofSerialize(settingsControl, params_Control);
 
 		string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
-		ofLogNotice(__FUNCTION__) << "path: " << path;
+		ofLogNotice(__FUNCTION__) << path;
 
 		//TODO: 
 		//crashes here!
 		settingsControl.save(path);
 
-		ofLogNotice(__FUNCTION__) << settingsControl << endl;
+		//ofLogNotice(__FUNCTION__) << settingsControl << endl;
 	}
 	catch (int n)
 	{
@@ -2638,7 +2628,6 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 	ofLogVerbose(__FUNCTION__);
 
 	for (int i = 0; i < settingsArray.size(); i++)
-		//for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{
 		string strFolder;
 		string strFile;
@@ -2662,7 +2651,6 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 	if (bDEBUG)
 	{
 		for (int i = 0; i < settingsArray.size(); i++)
-			//for (int i = 0; i < NUM_OF_PRESETS; i++)
 		{
 			ofLogNotice(__FUNCTION__) << "settingsArray[" << i << "] " << ofToString(settingsArray[i].toString());
 		}
@@ -2682,7 +2670,6 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	//groupsMem.resize(NUM_OF_PRESETS);
 
 	for (int i = 0; i < settingsArray.size(); i++)
-		//for (int i = 0; i < NUM_OF_PRESETS; i++)
 	{
 		//TODO:
 		//PROBLEM:
@@ -2746,17 +2733,10 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	if (bDEBUG)
 	{
 		for (int i = 0; i < settingsArray.size(); i++)
-			//for (int i = 0; i < NUM_OF_PRESETS; i++)
 		{
 			ofLogNotice(__FUNCTION__) << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
 		}
 	}
-
-	////debug params
-	//for (int i = 0; i < NUM_OF_PRESETS; i++)
-	//{
-	//	ofLogNotice(__FUNCTION__) << "groupsMem[" << i << "]\n" << ofToString(groupsMem[i]);
-	//}
 }
 
 ////--------------------------------------------------------------
@@ -2855,28 +2835,6 @@ bool ofxPresetsManager::browser_draw_ImGuiWindow()
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 {
-	//ofxImGui::AddGroup(this->params_Options, settings);//grouped
-	//ofxImGui::AddParameter(this->MODE_MemoryLive);
-	//ofxImGui::AddParameter(this->PRESET_selected);
-
-	//-
-
-	//helpers
-
-	if (ImGui::Button("CLONE ALL"))
-	{
-		bCloneAll = true;
-	}
-	ImGui::SameLine();
-	if (ImGui::Button("CLONE >"))
-	{
-		bCloneRight = true;
-	}
-
-	//-
-
-	//ImGui::SetNextItemWidth(_w);
-	ofxImGui::AddParameter(this->autoSave);
 
 	//-
 
@@ -2995,14 +2953,29 @@ bool ofxPresetsManager::browser_draw_ImGui()
 {
 	//-
 
-	ofVec2f pos, size;
+	ofVec2f pos;
 	pos = ofVec2f(ImGui_Position.get().x, ImGui_Position.get().y);
-	size = ofVec2f(ImGui_Size.get().x, ImGui_Size.get().y);
+	
+	//ofVec2f size;
+	//size = ofVec2f(ImGui_Size.get().x, ImGui_Size.get().y);
+
+	//TODO:
+	//TESTING IMGUI
+	//ImGuiWindowFlags winFlags =
+	//	ImGuiWindowFlags_NoMove |
+	//	ImGuiWindowFlags_NoResize |
+	//	ImGuiWindowFlags_NoCollapse |
+	//	ImGuiWindowFlags_NoSavedSettings |
+	//	ImGuiWindowFlags_AlwaysAutoResize |
+	//	//ImGuiCond_Always |
+	//	ImGuiWindowFlags_NoTitleBar;
 
 	auto mainSettings = ofxImGui::Settings();
 	mainSettings.windowPos = pos;
 
-	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y));
+	//ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), winFlags);//crash..
+	//ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), ImGuiCond_Always);
 	//ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), ImGuiCond_Always | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_NoTreePushOnOpen);
 
 	//-
@@ -3021,6 +2994,28 @@ bool ofxPresetsManager::browser_draw_ImGui()
 		//--
 
 		ofxImGui::AddParameter(this->PRESET_selected);
+		//ofxImGui::AddGroup(this->params_Options, settings);//grouped
+		//ofxImGui::AddParameter(this->MODE_MemoryLive);
+		//ofxImGui::AddParameter(this->PRESET_selected);
+
+		//-
+
+		//helpers
+
+		if (ImGui::Button("CLONE ALL"))
+		{
+			bCloneAll = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("CLONE >"))
+		{
+			bCloneRight = true;
+		}
+
+		//-
+
+		//ImGui::SetNextItemWidth(_w);
+		ofxImGui::AddParameter(this->autoSave);
 
 		//ImGui::SetNextItemWidth(100);
 		ofxImGui::AddParameter(this->MODE_Browser_NewPreset);
@@ -3073,8 +3068,8 @@ bool ofxPresetsManager::browser_draw_ImGui()
 				float a = ofMap(ofGetFrameNum() % n, 0, n, 0.f, 1.f);
 
 				ImGui::PushID(1);
-				//ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
 				ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+				//ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
 
 				ImGui::Text("DIR OR FILES NOT FOUND!");
 				//browser path
@@ -3429,12 +3424,20 @@ void ofxPresetsManager::browser_PresetLoad(string name)//without xml extension n
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_Setup()
 {
-	//font customize 
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	string _name = "overpass-mono-bold.otf";
-	string _path = path_GLOBAL_Folder + "/fonts/" + _name;
-	io.Fonts->AddFontFromFileTTF(&ofToDataPath(_path)[0], 13.0f);
+	//--
+
+	//TODO:
+	//crashes if wrong folder?
+	//font customize
+	if (false) {
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO();
+		string _name = "overpass-mono-bold.otf";
+		string _path = path_GLOBAL_Folder + "/fonts/" + _name;
+		io.Fonts->AddFontFromFileTTF(&ofToDataPath(_path)[0], 13.0f);
+	}
+
+	//--
 
 	//widgets width
 	_w = 100;
@@ -3462,7 +3465,6 @@ void ofxPresetsManager::browser_Setup()
 			browser_PresetLoad(browser_PresetName);
 		}
 	}
-
 }
 
 //--------------------------------------------------------------
@@ -3774,118 +3776,3 @@ void ofxPresetsManager::browser_ImGui_theme()
 //	}
 //}
 
-////TODO: 
-////DEBUG:
-////--------------------------------------------------------------
-//void ofxPresetsManager::groupDebug(ofParameterGroup &group)
-//{
-//	string str;
-//	int x = 200;
-//	int y = 100;
-//	int pad = 20;
-//	int i = 0;
-//	int ig = 0;
-//
-//	for (auto parameter : group)
-//	{
-//		//Group.
-//		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
-//		if (parameterGroup)
-//		{
-//			//Recurse through contents.
-//			//ofxImGui::AddGroup(*parameterGroup, settings);
-//			groupDebug(*parameterGroup);
-//
-//			ig++;
-//			str = "group : [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x + ig * 300, y + pad * i++);
-//			continue;
-//		}
-//
-//		//Parameter, try everything we know how to handle.
-//#if OF_VERSION_MINOR >= 10
-//		auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
-//		if (parameterVec2f)
-//		{
-//			//ofxImGui::AddParameter(*parameterVec2f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
-//		if (parameterVec3f)
-//		{
-//			//ofxImGui::AddParameter(*parameterVec3f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
-//		if (parameterVec4f)
-//		{
-//			//ofxImGui::AddParameter(*parameterVec4f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//#endif
-//		auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
-//		if (parameterOfVec2f)
-//		{
-//			//ofxImGui::AddParameter(*parameterOfVec2f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
-//		if (parameterOfVec3f)
-//		{
-//			//ofxImGui::AddParameter(*parameterOfVec3f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
-//		if (parameterOfVec4f)
-//		{
-//			//ofxImGui::AddParameter(*parameterOfVec4f);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
-//		if (parameterFloatColor)
-//		{
-//			//ofxImGui::AddParameter(*parameterFloatColor);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
-//		if (parameterFloat)
-//		{
-//			//ofxImGui::AddParameter(*parameterFloat);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
-//		if (parameterInt)
-//		{
-//			//ofxImGui::AddParameter(*parameterInt);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//		auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
-//		if (parameterBool)
-//		{
-//			//ofxImGui::AddParameter(*parameterBool);
-//			str = "parameter : [" + ofToString(ig) + "] [" + ofToString(i) + "] " + ofToString(parameter->getName());
-//			ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-//			continue;
-//		}
-//
-//		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
-//	}
-//}
