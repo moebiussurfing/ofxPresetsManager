@@ -214,6 +214,13 @@ void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 			//ofxImGui::AddParameter(*parameterOfVec4f);
 			continue;
 		}
+		auto parameterColor = std::dynamic_pointer_cast<ofParameter<ofColor>>(parameter);
+		if (parameterColor)
+		{
+			ofParameter<bool> b{ parameterColor->getName(), false };
+			editorPresets.push_back(b);
+			continue;
+		}
 		auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
 		if (parameterFloatColor)
 		{
@@ -259,8 +266,6 @@ void ofxPresetsManager::doRandomizeEditor() {
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doRandomizeEditorGroup(ofParameterGroup& group) {
-	//auto ghn = group.getGroupHierarchyNames();
-	//cout << "ghn: " << ofToString(ghn) << endl;
 
 	for (auto parameter : group)
 	{
@@ -268,7 +273,7 @@ void ofxPresetsManager::doRandomizeEditorGroup(ofParameterGroup& group) {
 		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
 		if (parameterGroup)
 		{
-			cout << "parameterGroup: " << ofToString(parameterGroup->getName()) << endl;
+			//cout << "parameterGroup: " << ofToString(parameterGroup->getName()) << endl;
 			doRandomizeEditorGroup(*parameterGroup);
 			continue;
 		}
@@ -343,6 +348,20 @@ void ofxPresetsManager::doRandomizeEditorGroup(ofParameterGroup& group) {
 				ofFloatColor random;
 				random = ofColor(ofRandom(0, 255), ofRandom(0, 255), ofRandom(0, 255));
 				parameterFloatColor->set(random);
+			}
+			continue;
+		}
+
+		auto parameterColor = std::dynamic_pointer_cast<ofParameter<ofColor>>(parameter);
+		if (parameterColor)
+		{
+			string name = parameterColor->getName();
+			ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+			if (b.get())
+			{
+				ofColor random;
+				random = ofColor(ofRandom(0, 255), ofRandom(0, 255), ofRandom(0, 255));
+				parameterColor->set(random);
 			}
 			continue;
 		}
@@ -450,9 +469,9 @@ void ofxPresetsManager::setupEditor()
 	addGroupToEditor(groups[0]);
 
 	//add to group
-	editorRandomize.set("RANDOMIZE", false);
+	bRandomizeEditor.set("RANDOMIZE", false);
 	params_Editor.setName("PRESET EDIT TOOLS");
-	params_Editor.add(editorRandomize);
+	params_Editor.add(bRandomizeEditor);
 
 	params_Editor_Toggles.setName("PARAMETERS");
 	for (auto &p : editorPresets) {
@@ -468,7 +487,7 @@ void ofxPresetsManager::setupRandomizer()
 {
 	//select a random preset (from 1 to 8)
 	//params_Randomizer.setName("Randomizer");
-	bRandomize.set("RANDOMIZE", false);
+	bRandomizeSelect.set("RANDOMIZE", false);
 	ENABLE_RandomizeTimer.set("PLAY TIMER RANDOMIZER", false);
 	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
 	MODE_LatchTrig.set("MODE LATCH", false);
@@ -478,7 +497,7 @@ void ofxPresetsManager::setupRandomizer()
 	//randomizeSpeedF.set("SPEED FACTOR", 1.f, 0.01f, 2.f);
 	bResetDices.set("RESET DICES", false);
 
-	bRandomize.setSerializable(false);
+	bRandomizeSelect.setSerializable(false);
 	bResetDices.setSerializable(false);
 	//randomizeDuration.setSerializable(false);
 
@@ -505,7 +524,7 @@ void ofxPresetsManager::setupRandomizer()
 
 	params_Randomizer.setName("RANDOMIZER PRESET SELECTOR");
 	params_Randomizer.add(ENABLE_RandomizeTimer);
-	params_Randomizer.add(bRandomize);
+	params_Randomizer.add(bRandomizeSelect);
 	//params_Randomizer.add(randomizeSpeedF);
 	params_Randomizer.add(randomizeDuration);
 	params_Randomizer.add(randomizeDurationShort);
@@ -558,6 +577,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//big browser
 	path_PresetsFolder = "archive";
+
 	//TODO:
 	//default absolute archive presets folder to browse
 	path_PresetsFolder_Custom = "F:\openFrameworks\addons\ofxPresetsManager\2_presetsManager\bin\data\ofxPresetsManager\archive";
@@ -635,7 +655,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//-
 
 	//layout
-	Gui_Internal_Position.set("GUI POSITION",
+	Gui_Internal_Position.set("GUI INTERNAL POSITION",
 		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
@@ -643,15 +663,16 @@ ofxPresetsManager::ofxPresetsManager()
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	ImGui_Position.set("GUI BROWSER POSITION",
-		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
+		glm::vec2(ofGetWidth() * 0.5, 10),//top
+		//glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),//center
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
-	ImGui_Size.set("GUI BROWSER SIZE",
-		glm::vec2(100, 0),
-		glm::vec2(0, 0),
-		glm::vec2(ofGetWidth(), ofGetHeight())
-	);
+	//ImGui_Size.set("GUI BROWSER SIZE",
+	//	glm::vec2(100, 0),
+	//	glm::vec2(0, 0),
+	//	glm::vec2(ofGetWidth(), ofGetHeight())
+	//);
 #endif
 
 	//-
@@ -704,11 +725,11 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.add(ENABLE_Keys);
 
 	//layout
-	params_Gui.add(Gui_Internal_Position);
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	params_Gui.add(ImGui_Position);
-	params_Gui.add(ImGui_Size);
+	//params_Gui.add(ImGui_Size);
 #endif
+	params_Gui.add(Gui_Internal_Position);
 
 	params_Tools.setName("HELPER TOOLS");
 	params_Tools.add(bCloneRight);
@@ -759,16 +780,22 @@ void ofxPresetsManager::setup()
 
 	//-
 
-//#ifdef DEBUG_randomTest
-//	ofSetLogLevel("ofxPresetsManager", OF_LOG_VERBOSE);
-//#endif
+	//#ifdef DEBUG_randomTest
+	//	ofSetLogLevel("ofxPresetsManager", OF_LOG_VERBOSE);
+	//#endif
 
 	ofLogNotice(__FUNCTION__);
 
 	//-
 
 	//gui font
-	myTTF = path_GLOBAL_Folder + "/" + "fonts/overpass-mono-bold.otf";
+
+	string str;
+	str = "overpass-mono-bold.otf";
+
+	//myTTF = path_GLOBAL_Folder + "/" + "fonts/" + str;//addon folder
+	myTTF = "assets/fonts/" + str;//assets folder
+
 	sizeTTF = 10;
 	bool bLoaded = myFont.load(myTTF, sizeTTF, true, true);
 
@@ -782,7 +809,11 @@ void ofxPresetsManager::setup()
 	//--
 
 	//ofxGui theme
-	string pathFont = path_GLOBAL_Folder + "/" + "fonts/overpass-mono-bold.otf";
+	str = "overpass-mono-bold.otf";
+
+	//string pathFont = path_GLOBAL_Folder + "/" + "fonts/" + str;//addon folder
+	string pathFont = "assets/fonts/" + str;//assets folder
+
 	//must check this font file is found there
 	ofFile file(pathFont);
 	if (file.exists())
@@ -817,7 +848,7 @@ void ofxPresetsManager::setup()
 	auto &gGui = gPanel.getGroup("GUI");
 	gGui.minimize();
 
-	auto &gGuiPos = gGui.getGroup("GUI POSITION");
+	auto &gGuiPos = gGui.getGroup("GUI INTERNAL POSITION");
 	gGuiPos.minimize();
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	auto &gGuiPos1 = gGui.getGroup("GUI BROWSER POSITION");
@@ -936,7 +967,6 @@ void ofxPresetsManager::update(ofEventArgs & args)
 			if (PRESET_selected < presetsRandomModeShort.size()) {//avoid out of range
 
 				//A. long mode
-				//if (presetsRandomModeShort[PRESET_selected - 1] == false)
 				if (presetsRandomModeShort[PRESET_selected] == false)
 				{
 					if (timerRandomizer >= randomizeDuration)
@@ -947,7 +977,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 							}
 						}
 						else {
-							bRandomize = true;
+							bRandomizeSelect = true;
 						}
 					}
 				}
@@ -962,7 +992,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 							}
 						}
 						else {
-							bRandomize = true;
+							bRandomizeSelect = true;
 						}
 					}
 				}
@@ -1091,15 +1121,16 @@ void ofxPresetsManager::drawPresetClicker()
 
 	ofTranslate(clicker_Pos);
 
-	//-
+	//----
 
-	//0. box of all boxes background
+	//0. bg box of all boxes background
+
 	ofFill();
 	ofSetColor(0, 128);
 	ofDrawRectangle(0, 0,
 		clicker_cellSize * (keys[0].size() + 2), clicker_cellSize*groups.size());
 
-	//-
+	//--
 
 	ofNoFill();
 	ofSetColor(ofColor::white);
@@ -1113,7 +1144,7 @@ void ofxPresetsManager::drawPresetClicker()
 			//1.1 outbox border container
 			ofDrawRectangle(clicker_cellSize * k, clicker_cellSize * i, clicker_cellSize, clicker_cellSize);
 
-			//-
+			//--
 
 			//1.2 label boxes
 			if (!myFont.isLoaded())//without ttf font
@@ -1129,7 +1160,7 @@ void ofxPresetsManager::drawPresetClicker()
 					clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF);
 			}
 
-			//-
+			//--
 
 			//2. inner box. double mark current selected preset
 			if (lastIndices[i] == k)//it is selected
@@ -1163,7 +1194,7 @@ void ofxPresetsManager::drawPresetClicker()
 			}
 		}
 
-		//-
+		//--
 
 		//?
 		//for (; k < presets[i]; ++k)
@@ -1175,18 +1206,19 @@ void ofxPresetsManager::drawPresetClicker()
 		//		ofDrawRectangle(clicker_cellSize * k + 4, clicker_cellSize * i + 4, clicker_cellSize - 8, clicker_cellSize - 8);
 		//}
 
-		//-
+		//--
 
 		//3. save button
 
 		//box
 		ofDrawRectangle(clicker_cellSize * k, clicker_cellSize * i, clicker_cellSize, clicker_cellSize);
 
-		//-
+		//--
+
+		//4. save label
 
 		string _label;
 
-		//save label
 		_label = "SAVE";
 		int ySave = clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF;
 		if (!myFont.isLoaded())//without ttf font
@@ -1205,23 +1237,22 @@ void ofxPresetsManager::drawPresetClicker()
 		}
 		k++;
 
-		//-
+		//--
 
-		//4. gui toggle
+		//5. gui toggle
 
 		//box
 		ofDrawRectangle(clicker_cellSize * (k), clicker_cellSize * i, clicker_cellSize, clicker_cellSize);
 
-		//-
+		//--
 
-		//save label
+		//6. gui label
+
 		//int ySave = clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF;
 		_label = "GUI";
 		if (!myFont.isLoaded())//without ttf font
 		{
-			ofDrawBitmapString(_label,
-				clicker_cellSize*(k)+8,
-				clicker_cellSize*i + 18);
+			ofDrawBitmapString(_label, clicker_cellSize*(k)+8, clicker_cellSize*i + 18);
 		}
 		else//custom font 
 		{
@@ -1238,7 +1269,6 @@ void ofxPresetsManager::drawPresetClicker()
 			float pd = 4.0f;
 			int color = 200;
 
-			ofPushStyle();
 			ofSetColor(color, 164);
 
 			//-
@@ -1257,15 +1287,13 @@ void ofxPresetsManager::drawPresetClicker()
 			ofDrawRectRounded(clicker_cellSize * k + pd, clicker_cellSize * i + pd,
 				clicker_cellSize - 2 * pd, clicker_cellSize - 2 * pd,
 				r);
-			//ofNoFill();
-
-			ofPopStyle();
 		}
 		k++;
 
-		//-
+		//--
 
-		//5. group kit name
+		//7. paramGroup / kit name
+
 		if (SHOW_GroupName)
 		{
 			string info = groups[i].getName();
@@ -1279,30 +1307,28 @@ void ofxPresetsManager::drawPresetClicker()
 			ySave = ySave - 2;//little up
 
 			ofSetColor(ofColor::black);//shadow
-			if (myFont.isLoaded())
-				myFont.drawString(info, xG + gap, ySave + gap);
-			else
-				ofDrawBitmapString(info, xG + gap, ySave + gap);
+			if (myFont.isLoaded()) myFont.drawString(info, xG + gap, ySave + gap);
+			else ofDrawBitmapString(info, xG + gap, ySave + gap);
 
 			ofSetColor(ofColor::white);//white
-			if (myFont.isLoaded())
-				myFont.drawString(info, xG, ySave);
-			else
-				ofDrawBitmapString(info, xG, ySave);
+			if (myFont.isLoaded()) myFont.drawString(info, xG, ySave);
+			else ofDrawBitmapString(info, xG, ySave);
 		}
 
-		//-
+		//--
+
+		//8. help info text
 
 		bool bLateralPosition = true;
+		bool bLeftPosition = true;
 
-		//4. help info text
 		if (debugClicker && ENABLE_Keys)
 		{
 			string info = "";
 			bool bSimpleInfo = true;
 			if (bSimpleInfo)
 			{
-				// keys[i][k]
+				//keys[i][k]
 				info += "[" + ofToString((char)keys[0][0]) + "|";
 				info += ofToString((char)keys[0][keys[0].size() - 1]) + "]";
 			}
@@ -1317,30 +1343,37 @@ void ofxPresetsManager::drawPresetClicker()
 			int gap = 1;
 			int pad = 13;
 
-			if (!bLateralPosition)//vertical position below boxes
+			if (!bLateralPosition)//A. vertical position below boxes
 			{
 				x = 0;
 				y = (clicker_cellSize + 15) * groups.size();
 			}
-			else//lateral position right to the boxes
+			else//B. lateral position right to the boxes
 			{
-				x = clicker_cellSize * k + pad;
-				y = ySave - (bSimpleInfo ? -2 : sizeTTF);
+				if (!bLeftPosition) {
+					x = clicker_cellSize * k + pad;
+					y = ySave - (bSimpleInfo ? -2 : sizeTTF);
+				}
+				else {
+					float strW = myFont.getStringBoundingBox(info, 0, 0).width;
+					int xG = -strW - 20;
+
+					x = xG;
+					y = ySave + sizeTTF + 10;
+				}
 			}
 
 			//double font to improve different background colors
 			ofSetColor(ofColor::black);//shadow
-			if (myFont.isLoaded())
-				myFont.drawString(info, x + gap, y + gap);
-			else
-				ofDrawBitmapString(info, x + gap, y + gap);
+			if (myFont.isLoaded()) myFont.drawString(info, x + gap, y + gap);
+			else ofDrawBitmapString(info, x + gap, y + gap);
 
 			ofSetColor(ofColor::white);//white
-			if (myFont.isLoaded())
-				myFont.drawString(info, x, y);
-			else
-				ofDrawBitmapString(info, x, y);
+			if (myFont.isLoaded()) myFont.drawString(info, x, y);
+			else ofDrawBitmapString(info, x, y);
 		}
+
+		//----
 
 		ofPopStyle();
 		ofPopMatrix();
@@ -1391,7 +1424,6 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 	//update control gui panel params
 	numPresetsFavorites = _num_presets;
 	PRESET_selected.setMax(numPresetsFavorites - 1);
-	//PRESET_selected.setMax(numPresetsFavorites);
 
 	//TODO:
 	//PRESET2_selected.setMax(numPresetsFavorites);
@@ -1401,9 +1433,12 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 
 	//-
 
-	//path folder and xml presets file names
-	groupName = groups[0].getName();//TODO: one group only
-	//groupName2 = groups[1].getName();//TODO: one group only
+	//used for path folder and xml presets file names
+
+	//TODO: 
+	//one group only
+	groupName = groups[0].getName();
+	//groupName2 = groups[1].getName();
 
 	ofLogNotice(__FUNCTION__) << "groupName: " << groupName;
 
@@ -1412,7 +1447,8 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 	//temporary name only to debug purposes
 	//final label name to gui display will be setted if setup("name") is called 
 	gui_LabelName = groups[0].getName();
-	//TODO: one group only
+	//TODO: 
+	//one group only
 
 	//-
 
@@ -1555,7 +1591,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 	}
 	else
 	{
-		ofLogError("ofxPresetsManager") << "OUT OF RANGE SAVE";
+		ofLogError(__FUNCTION__) << "OUT OF RANGE SAVE";
 	}
 
 }
@@ -1629,7 +1665,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	}
 	else
 	{
-		ofLogError("ofxPresetsManager") << "OUT OF RANGE LOAD";
+		ofLogError(__FUNCTION__) << "OUT OF RANGE LOAD";
 	}
 }
 
@@ -1687,7 +1723,7 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 	}
 	else
 	{
-		ofLogError("ofxPresetsManager") << "OUT OF RANGE LOAD";
+		ofLogError(__FUNCTION__) << "OUT OF RANGE LOAD";
 	}
 }
 
@@ -1722,7 +1758,7 @@ void ofxPresetsManager::loadPreset(int p)
 		}
 		else
 		{
-			ofLogError("ofxPresetsManager") << "IGNORE LOAD PRESET";
+			ofLogError(__FUNCTION__) << "IGNORE LOAD PRESET";
 			//workaround clamp
 			PRESET_selected = 0;//set to first as default presets when out of range
 			//PRESET_selected = 1;//set to first as default presets when out of range
@@ -1847,6 +1883,10 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		else if (key == 'r')
 		{
 			doRandomizeWichSelectedPreset();
+		}
+		else if (key == 'E')
+		{
+			doRandomizeEditor();
 		}
 #endif
 
@@ -2105,46 +2145,46 @@ void ofxPresetsManager::mousePressed(int x, int y)
 //--------------------------------------------------------------
 void ofxPresetsManager::doCloneRight(int pIndex)
 {
-	ofLogNotice(__FUNCTION__) << "doCloneRight: pIndex: " << pIndex;
+	ofLogNotice(__FUNCTION__) << "from preset: " << pIndex;
 	for (int i = pIndex + 1; i < numPresetsFavorites; i++)
 	{
-		save(i, 0);//0 is bc it's the only 1st params group implemented
+		save(i, 0);
+		//TODO: 0 it's bc it's the only 1st params group implemented
 	}
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doCloneAll()
 {
-	ofLogNotice(__FUNCTION__) << "doCloneAll";// << pIndex;
+	ofLogNotice(__FUNCTION__);
 
-	//save current preset
+	//auto save current preset
 	if (autoSave)
 	{
-		ofLogNotice(__FUNCTION__) << "autosave current preset";
+		ofLogVerbose(__FUNCTION__) << "autosave preset: " << PRESET_selected.get();
 		doSave(PRESET_selected);
-		//doSave(PRESET_selected - 1);
 	}
 
 	//clone all
-	for (int i = 0; i < numPresetsFavorites - 1; i++)
-		//for (int i = 0; i < numPresetsFavorites; i++)
+	for (int i = 0; i < numPresetsFavorites; i++)
 	{
-		save(i, 0);//0 is bc it's the only 1st params group implemented
+		save(i, 0);
+		//TODO: 0 it's bc it's the only 1st params group implemented
 	}
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doLoad(int pIndex)
 {
-	ofLogVerbose(__FUNCTION__) << "doLoad: pIndex: " << pIndex;
-	load(pIndex, 0);//0 is bc it's the only 1st params group implemented
+	ofLogVerbose(__FUNCTION__) << "preset: " << pIndex;
+	load(pIndex, 0);
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doSave(int pIndex)
 {
-	ofLogVerbose(__FUNCTION__) << "doSave: pIndex: " << pIndex;
-	save(pIndex, 0);//0 is bc it's the only 1st params group implemented
+	ofLogVerbose(__FUNCTION__) << "preset: " << pIndex;
+	save(pIndex, 0);
 }
 
 //--------------------------------------------------------------
@@ -2166,9 +2206,9 @@ void ofxPresetsManager::Changed_Params_Editor(ofAbstractParameter &e)
 
 		//-
 
-		if (name == editorRandomize.getName() && editorRandomize)
+		if (name == bRandomizeEditor.getName() && bRandomizeEditor)
 		{
-			editorRandomize = false;
+			bRandomizeEditor = false;
 
 			doRandomizeEditor();
 		}
@@ -2226,10 +2266,14 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		//randomizer
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
-		else if (name == "RANDOMIZE" && bRandomize)
+		else if (name == "SHOW CLICK PANEL" && !SHOW_ClickPanel.get())
+		{
+			SHOW_Browser = false;//workflow
+		}
+		else if (name == "RANDOMIZE" && bRandomizeSelect)
 		{
 			//ofLogNotice(__FUNCTION__) << "RANDOMIZE !";
-			bRandomize = false;
+			bRandomizeSelect = false;
 
 			doRandomizeWichSelectedPreset();
 		}
@@ -2270,7 +2314,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		{
 			ofLogNotice(__FUNCTION__) << "DICE: " << e;
 			doRandomizeWichSelectedPreset();
-		}
+	}
 #endif
 		else if (name == "RESET DICES" && bResetDices)
 		{
@@ -2289,7 +2333,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//--
 
 #ifndef INCLUDE_FILE_BROWSER_IM_GUI
-		else if (name == "GUI POSITION")
+		else if (name == "GUI INTERNAL POSITION")
 		{
 			ofLogVerbose(__FUNCTION__) << "GUI POSITION: " << e;
 			//clamp inside window
@@ -2297,7 +2341,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			x = ofClamp(Gui_Internal_Position.get().x, 0, ofGetWidth() - 200);
 			y = ofClamp(Gui_Internal_Position.get().y, 0, ofGetHeight() - 20);
 			gui_InternalControl.setPosition(x, y);
-		}
+}
 #endif
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
@@ -2421,7 +2465,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				}
 				else
 				{
-					ofLogError("ofxPresetsManager") << "lastIndices has 0 size!";
+					ofLogError(__FUNCTION__) << "lastIndices has 0 size!";
 				}
 			}
 		}
@@ -2451,7 +2495,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		//else
 		//{
-		//	ofLogError("ofxPresetsManager") << "IGNORED PRESETS CHANGE";
+		//	ofLogError(__FUNCTION__) << "IGNORED PRESETS CHANGE";
 		//}
 	}
 }
@@ -2481,7 +2525,7 @@ void ofxPresetsManager::load_ControlSettings()
 	}
 	else
 	{
-		ofLogError("ofxPresetsManager") << "FILE '" << path << "' NOT FOUND!";
+		ofLogError(__FUNCTION__) << "FILE '" << path << "' NOT FOUND!";
 	}
 }
 
@@ -2534,7 +2578,7 @@ void ofxPresetsManager::save_ControlSettings()
 
 	try
 	{
-		ofLogVerbose(__FUNCTION__)<<endl << params_Control.toString() << endl;
+		ofLogVerbose(__FUNCTION__) << endl << params_Control.toString() << endl;
 
 		ofXml settingsControl;
 
@@ -2553,7 +2597,7 @@ void ofxPresetsManager::save_ControlSettings()
 	}
 	catch (int n)
 	{
-		ofLogError("ofxPresetsManager") << "CATCH ERROR" << endl;
+		ofLogError(__FUNCTION__) << "CATCH ERROR" << endl;
 		throw;
 	}
 
@@ -2600,22 +2644,30 @@ void ofxPresetsManager::save_ControlSettings()
 #endif
 }
 
+//--
+
+//--------------------------------------------------------------
+void ofxPresetsManager::setPath_GlobalFolder(string folder)
+{
+	ofLogNotice(__FUNCTION__) << folder;
+	path_GLOBAL_Folder = folder;
+	CheckFolder(folder);
+}
+
 //--------------------------------------------------------------
 void ofxPresetsManager::setPath_KitFolder(string folder)
 {
+	ofLogNotice(__FUNCTION__) << folder;
 	path_Kit_Folder = folder;
+	CheckFolder(path_GLOBAL_Folder + "/" + path_Kit_Folder);
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::setPath_PresetsFolder(string folder)
 {
+	ofLogNotice(__FUNCTION__) << folder;
 	path_PresetsFolder = folder;
-}
-
-//--------------------------------------------------------------
-void ofxPresetsManager::setPath_GlobalFolder(string folder)
-{
-	path_GLOBAL_Folder = folder;
+	CheckFolder(path_GLOBAL_Folder + "/" + path_PresetsFolder);
 }
 
 //--
@@ -2848,7 +2900,7 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 		//{
 		//	if (ImGui::Button("RANDOMIZE"))
 		//	{
-		//		bRandomize = true;
+		//		bRandomizeSelect = true;
 		//	}
 		//	ImGui::SetNextItemWidth(_w);
 		//	ofxImGui::AddParameter(this->randomizeSpeedF);
@@ -2955,7 +3007,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 
 	ofVec2f pos;
 	pos = ofVec2f(ImGui_Position.get().x, ImGui_Position.get().y);
-	
+
 	//ofVec2f size;
 	//size = ofVec2f(ImGui_Size.get().x, ImGui_Size.get().y);
 
@@ -3024,9 +3076,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 		//-- 
 
 		//2. browser params
-		//TreeNodeEx(label, ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_NoTreePushOnOpen);
-		//if (ofxImGui::BeginTree("BROWSER", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_NoTreePushOnOpen))
-		//ImGui::SetNextTreeNodeOpen(false);//not working bc helper inside
+
 		if (ofxImGui::BeginTree("BROWSER", mainSettings))
 		{
 			int numFilePresets = fileNames.size();
@@ -3043,7 +3093,6 @@ bool ofxPresetsManager::browser_draw_ImGui()
 				if (MODE_Browser_NewPreset)
 				{
 					save(PRESET_selected, 0);
-					//save(PRESET_selected - 1, 0);
 				}
 			}
 
@@ -3145,7 +3194,8 @@ bool ofxPresetsManager::browser_draw_ImGui()
 				ImGui::SameLine();
 				//if (numFilePresets > 0)
 				{
-					ImGui::Text("%d/%d", currentFile + 1, numFilePresets);
+					ImGui::Text("%d/%d", currentFile, numFilePresets-1);
+					//ImGui::Text("%d/%d", currentFile + 1, numFilePresets);
 					//ImGui::Text("%d/%d", 0, numFilePresets);
 				}
 			}
@@ -3220,7 +3270,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 				}
 				else
 				{
-					ofLogError("ofxPresetsManager") << "Not found! Bad Index [" << iNew << "]";
+					ofLogError(__FUNCTION__) << "Not found! Bad Index [" << iNew << "]";
 				}
 			}
 
@@ -3263,7 +3313,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 				}
 				else
 				{
-					ofLogError("ofxPresetsManager") << "Error listing directory!";
+					ofLogError(__FUNCTION__) << "Error listing directory!";
 				}
 			}
 
@@ -3373,7 +3423,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_PresetSave(string name)//without xml extension nor path
 {
-	ofLogNotice(__FUNCTION__) << "browser_PresetSave: \t\t\t\t" << name << ".xml";
+	ofLogNotice(__FUNCTION__) << "\t\t\t\t" << name << ".xml";
 
 	ofXml settings;
 	ofSerialize(settings, groups[0]);
@@ -3398,7 +3448,7 @@ void ofxPresetsManager::browser_PresetSave(string name)//without xml extension n
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_PresetLoad(string name)//without xml extension nor path
 {
-	ofLogNotice(__FUNCTION__) << "browser_PresetLoad: \t\t\t\t" << name << ".xml";
+	ofLogNotice(__FUNCTION__) << "\t\t\t\t" << name << ".xml";
 
 	ofXml settings;
 	string _path;
@@ -3429,13 +3479,16 @@ void ofxPresetsManager::browser_Setup()
 	//TODO:
 	//crashes if wrong folder?
 	//font customize
-	if (false) {
-		ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO();
-		string _name = "overpass-mono-bold.otf";
-		string _path = path_GLOBAL_Folder + "/fonts/" + _name;
-		io.Fonts->AddFontFromFileTTF(&ofToDataPath(_path)[0], 13.0f);
-	}
+#ifdef INCLUDE_IMGUI_CUSTOM_FONT
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	string _name = "overpass-mono-bold.otf";
+
+	//string _path = path_GLOBAL_Folder + "/fonts/" + _name;//addon folder
+	string _path = "assets/fonts/" + _name;//assets folder
+
+	io.Fonts->AddFontFromFileTTF(&ofToDataPath(_path)[0], 13.0f);
+#endif
 
 	//--
 
@@ -3501,7 +3554,7 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	//create folder if do not exist!
 	if (!dataDirectory.isDirectory())
 	{
-		ofLogError("ofxPresetsManager") << "FOLDER DOES NOT EXIST!";
+		ofLogError(__FUNCTION__) << "FOLDER DOES NOT EXIST!";
 		bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
 		if (b)
 			ofLogNotice(__FUNCTION__) << "CREATED FOLDER: " << _path;
@@ -3682,97 +3735,5 @@ void ofxPresetsManager::browser_ImGui_theme()
 	//   style->ScrollbarRounding = 0.0f;
 }
 
-//TODO:
-////--------------------------------------------------------------
-//void ofxPresetsManager::gui_loadFromFile(const std::string &filename, ofAbstractParameter &parameter)
-//{
-//	ofXml xml;
-//	xml.load(filename);
-//	ofDeserialize(xml, parameter);
-//}
-//
-////--------------------------------------------------------------
-//void ofxPresetsManager::gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter)
-//{
-//	ofXml xml;
-//	ofSerialize(xml, parameter);
-//	xml.save(filename);
-//}
-//
-////--------------------------------------------------------------
-//void ofxPresetsManager::gui_SaveAsSettings()
-//{
-//
-//}
-
-////--------------------------------------------------------------
-//static void ShowHelpMarker(const char *desc)
-//{
-//	ImGui::TextDisabled("(?)");
-//	if (ImGui::IsItemHovered())
-//	{
-//		ImGui::BeginTooltip();
-//		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-//		ImGui::TextUnformatted(desc);
-//		ImGui::PopTextWrapPos();
-//		ImGui::EndTooltip();
-//	}
-//}
-
 #endif
-
-
-//SNIPPET - GIST:
-////NESTED GROUPS
-//for (auto parameter : paramsFull)
-//{
-//    //Group.
-//    auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
-//    if (parameterGroup)
-//    {
-//        //Recurse through contents.
-//        ofxImGui::AddGroup(*parameterGroup, mainSettings);
-//        continue;
-//    }
-//}
-
-
-////--------------------------------------------------------------
-//void ofxPresetsManager::browser_draw_ImGui_MenuBar()
-//{
-//	if (ImGui::BeginMainMenuBar())
-//	{
-//		if (ImGui::BeginMenu("File"))
-//		{
-//			browser_draw_ImGui_MenuFile();
-//			ImGui::EndMenu();
-//		}
-//		ImGui::EndMainMenuBar();
-//	}
-//}
-//
-////--------------------------------------------------------------
-//void ofxPresetsManager::browser_draw_ImGui_MenuFile()
-//{
-//	if (ImGui::MenuItem("New"))
-//	{
-//	}
-//	if (ImGui::MenuItem("Open", "l"))
-//	{
-//		//gui_loadFromFile("settings.xml", params_Control);
-//	}
-//	if (ImGui::MenuItem("Save", "s"))
-//	{
-//		//gui_saveToFile("settings.xml", params_Control);
-//	}
-//	if (ImGui::MenuItem("Save As.."))
-//	{
-//		//gui_SaveAsSettings();
-//	}
-//	ImGui::Separator();
-//	ImGui::Separator();
-//	if (ImGui::MenuItem("Quit", "ESQ"))
-//	{
-//	}
-//}
 

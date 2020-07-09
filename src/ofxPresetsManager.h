@@ -14,16 +14,17 @@
 ///
 ///	TODO:
 ///
+///	++	add workflow to not collide manual preset click with randomizer timer
+///	++	randomize editor preset
+///			add limit range min/max to randomize
+///	++	add ofxUndo to randomizers
+///	++	ImGui: switch out of ofxImGui to simpleImGui
+///			improve ImGui trees collapse and sizes
 ///	+	disable log on autosave timer mode
 ///	++	add clone using editor toggles to avoid clone disabled toggle params
 ///	++	add mode state to allow overwrite only enabled toggle params
-///	++	randomize editor preset
-///			test recursive nested groups
-///	++	add ofxUndo to randomizers
-///	+	improve ImGui trees collapse and sizes
 ///	+	add define to disable all randomize stuff to make addon minimal expression 
 ///	+	could make tween when changing params (?)
-///	+	add limit range min/max to randomize
 ///
 ///---
 
@@ -44,6 +45,8 @@
 ///
 ///debug errors
 #define INCLUDE_DEBUG_ERRORS
+//
+#define INCLUDE_IMGUI_CUSTOM_FONT
 ///
 ///disable save settings
 ///#define DEBUG_BLOCK_SAVE_SETTINGS//enable this bc sometimes there's crashes on exit
@@ -175,9 +178,9 @@ private:
 	//randomizer
 public:
 	ofParameter<bool> ENABLE_RandomizeTimer;//play randomizer
+	ofParameter<bool> bRandomizeSelect;
 private:
 	//ofParameterGroup params_Randomizer;
-	ofParameter<bool> bRandomize;
 	ofParameter<bool> MODE_DicesProbs;
 	ofParameter<bool> MODE_LatchTrig;//this mode trigs preset but goes back to preset 1 after duration timer
 	bool bLatchRun = false;
@@ -204,6 +207,9 @@ private:
 
 	int timerRandomizer;
 #endif
+public:
+	ofParameter<bool> bRandomizeEditor;
+private:
 
 	//TODO:
 	//system to select what params of current selected preset to: clone, randomize etc
@@ -212,11 +218,12 @@ private:
 	ofParameterGroup params_Editor;
 	ofParameterGroup params_Editor_Toggles;
 	void addGroupToEditor(ofParameterGroup& group);
-	ofParameter<bool> editorRandomize;
 	void Changed_Params_Editor(ofAbstractParameter &e);
 	void doRandomizeEditor();//randomize params of current selected preset
 	void doRandomizeEditorGroup(ofParameterGroup& group);//randomize params of current selected preset
 public:
+
+	//--------------------------------------------------------------
 	void randomizePreset() {//randomize params of current selected preset
 		doRandomizeEditor();
 	}
@@ -281,12 +288,11 @@ private:
 	bool bIsDoneLoad = false;
 
 public:
-
 	ofParameter<bool> DONE_load;//easy callback to know (in ofApp) that preset LOAD is done 
 	ofParameter<bool> DONE_save;//easy callback to know (in ofApp) that preset SAVE is done
 
 public:
-
+	//--------------------------------------------------------------
 	bool isDoneLoad()//easy callback to ofApp integration 
 	{
 		if (bIsDoneLoad)
@@ -325,14 +331,17 @@ public:
 
 	void setPosition_DEBUG(int x, int y);
 
+	//--------------------------------------------------------------
 	float getPresetClicker_Width()
 	{
 		return clicker_cellSize * (keys[0].size() + 2);
 	}
+	//--------------------------------------------------------------
 	float getPresetClicker_BoxSize()
 	{
 		return clicker_cellSize;
 	}
+	//--------------------------------------------------------------
 	float getPresetClicker_Height()
 	{
 		return clicker_cellSize;
@@ -344,18 +353,21 @@ public:
 	void setModeKeySwap(int key);//set the key you have to hold for swap, default is OF_KEY_ALT
 
 	//set keys active
+	//--------------------------------------------------------------
 	void setEnableKeys(bool active)
 	{
 		bKeys = active;
 		ENABLE_Keys = active;
 	}
 
+	//--------------------------------------------------------------
 	void setToggleEnableKeys()
 	{
 		ENABLE_Keys = !ENABLE_Keys;
 		bKeys = ENABLE_Keys;
 	}
 
+	//--------------------------------------------------------------
 	bool isKeysEnabled()
 	{
 		return ENABLE_Keys;
@@ -363,6 +375,7 @@ public:
 
 	//-
 
+	//--------------------------------------------------------------
 	void load_Next()
 	{
 		PRESET_selected++;
@@ -372,6 +385,7 @@ public:
 		}
 	}
 
+	//--------------------------------------------------------------
 	void load_Previous()
 	{
 		PRESET_selected--;
@@ -382,11 +396,14 @@ public:
 	}
 
 	void loadPreset(int p);//load preset by code from ofApp
+
+	//--------------------------------------------------------------
 	int getNumPresets()
 	{
 		return numPresetsFavorites;
 	}
 
+	//--------------------------------------------------------------
 	int getCurrentPreset()//get index of selected preset
 	{
 		return PRESET_selected;
@@ -394,6 +411,7 @@ public:
 
 	//-
 
+	//--------------------------------------------------------------
 	void setVisible_GroupName(bool b)//disabler for minimal design
 	{
 		SHOW_GroupName = b;
@@ -403,23 +421,25 @@ public:
 
 	//randomizer
 public:
+	//--------------------------------------------------------------
 	void setModeRandomizerPreset(bool b)
 	{
 		ENABLE_RandomizeTimer = b;
 	}
+	//--------------------------------------------------------------
 	void setToggleRandomizerPreset()
 	{
 		ENABLE_RandomizeTimer = !ENABLE_RandomizeTimer;
 	}
+	//--------------------------------------------------------------
 	void randomizeBang()
 	{
-		bRandomize = true;
+		bRandomizeSelect = true;
 	}
 
 	//--
 
 private:
-
 	//draws group name into clicker boxes panel
 	bool SHOW_GroupName = true;
 
@@ -429,7 +449,7 @@ private:
 	bool bMustTrig = false;
 
 public:
-
+	//--------------------------------------------------------------
 	bool isMustTrig()//trig on select preset or not
 	{
 		if (bMustTrig)
@@ -468,6 +488,7 @@ public:
 	//BUG: 
 	//workflow 
 	//to solve auto load fail because the sorting of xml autoSave after preset selector tag
+	//--------------------------------------------------------------
 	void refresh()
 	{
 		windowResized(ofGetWidth(), ofGetHeight());
@@ -477,62 +498,74 @@ public:
 
 		//-
 
-		ofLogNotice("ofxPresetsManager") << "Refresh()";
+		ofLogNotice(__FUNCTION__);
 		PRESET_selected_PRE = -1;
 		PRESET_selected = PRESET_selected;
-		ofLogNotice("ofxPresetsManager") << "Preset " << PRESET_selected;
+		ofLogNotice(__FUNCTION__) << "Preset " << PRESET_selected;
 	}
 
+	//--------------------------------------------------------------
 	void setVisible_Help(bool b)
 	{
 		debugClicker = b;
 	}
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
+
+	//--------------------------------------------------------------
 	void setPosition_GUI_Browser(int x, int y)
 	{
 		ImGui_Position = ofVec2f(x, y);
 	}
-	void setSize_GUI_Browser(int w, int h)
-	{
-		ImGui_Size = ofVec2f(w, h);
-	}
+	////--------------------------------------------------------------
+	//void setSize_GUI_Browser(int w, int h)
+	//{
+	//	ImGui_Size = ofVec2f(w, h);
+	//}
+	//--------------------------------------------------------------
 	void setVisible_GUI_Browser(bool b)
 	{
 		SHOW_Browser = b;
 	}
+	//--------------------------------------------------------------
 	void toggleVisible_GUI_Browser()
 	{
 		SHOW_Browser = !SHOW_Browser;
 	}
+	//--------------------------------------------------------------
 	bool getVisible_GUI_Browser()
 	{
 		return SHOW_Browser;
 	}
 #endif
 #ifndef INCLUDE_FILE_BROWSER_IM_GUI
+	//--------------------------------------------------------------
 	void setPosition_GUI_InternalControl(int x, int y)
 	{
 		guiPos_InternalControl = ofVec2f(x, y);
 		gui_InternalControl.setPosition(guiPos_InternalControl.x, guiPos_InternalControl.y);
-}
+	}
 #endif
 
+	//--------------------------------------------------------------
 	void setVisible_GUI_Internal(bool visible)
 	{
 		SHOW_Gui_AdvancedControl = visible;
 	}
 
+	//--------------------------------------------------------------
 	bool isVisible_GUI_Internal()
 	{
 		return SHOW_Gui_AdvancedControl;
 	}
 
+	//--------------------------------------------------------------
 	void setToggleVisible_GUI_Internal()
 	{
 		SHOW_Gui_AdvancedControl = !SHOW_Gui_AdvancedControl;
 	}
 
+	//--------------------------------------------------------------
 	void setPosition_PresetClicker(int x, int y, int _cellSize)
 	{
 		clicker_Pos.x = x;
@@ -540,19 +573,22 @@ public:
 		clicker_cellSize = _cellSize;
 	}
 
+	//--------------------------------------------------------------
 	void setVisible_PresetClicker(bool visible)
 	{
 		SHOW_ClickPanel = visible;
 	}
+	//--------------------------------------------------------------
 	void toggleVisible_PresetClicker()
 	{
 		SHOW_ClickPanel = !SHOW_ClickPanel;
 	}
+	//--------------------------------------------------------------
 	bool getVisible_PresetClicker()
 	{
 		return SHOW_ClickPanel;
 	}
-
+	//--------------------------------------------------------------
 	bool isVisible_PresetClicker()
 	{
 		return SHOW_ClickPanel;
@@ -562,8 +598,10 @@ public:
 
 #pragma mark - SETTINGS
 
+	//--------------------------------------------------------------
 	void setPath_ControlSettings(string str)//main addon settings
 	{
+		ofLogNotice(__FUNCTION__) << str;
 		path_Control = str;
 	}
 
@@ -571,16 +609,19 @@ public:
 	void setPath_PresetsFolder(string folder);//path folder for kit for the browser
 	void setPath_GlobalFolder(string folder);//path for root container folder
 
+	//--------------------------------------------------------------
 	void setAutoLoad(bool b)
 	{
 		autoLoad = b;
 	}
 
+	//--------------------------------------------------------------
 	void setAutoSave(bool b)
 	{
 		autoSave = b;
 	}
 
+	//--------------------------------------------------------------
 	void setAutoSaveTimer(bool b)
 	{
 		bAutosaveTimer = b;
@@ -590,7 +631,7 @@ public:
 
 public:
 
-	//from 1 to 8. (indexed vector vars starts from 0)
+	//from 0 to last (7).
 	ofParameter<int> PRESET_selected;
 
 private:
@@ -668,7 +709,7 @@ private:
 	void browser_ImGui_theme();
 	//ofxImGui::Settings mainSettings;
 	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. must move by gui!  
-	ofParameter<glm::vec2> ImGui_Size;//not used yet
+	//ofParameter<glm::vec2> ImGui_Size;//not used yet
 
 	////TODO: 
 	////DEBUG:
@@ -677,6 +718,7 @@ private:
 	//-
 
 public:
+	//--------------------------------------------------------------
 	bool isMouseOver()
 	{
 		bool b;
@@ -714,9 +756,10 @@ private:
 
 	//helpers
 public:
+	//--------------------------------------------------------------
 	void doGetFavsFromBrowser()
 	{
-		ofLogNotice("ofxPresetsManager") << "doGetFavsFromBrowser()";
+		ofLogNotice(__FUNCTION__);
 
 		//browser path
 		string browser_path;
@@ -737,8 +780,8 @@ public:
 			string fileName = ofToString(bPath.filename().generic_string());
 			pathDst = browser_path + "/" + fileName;
 
-			ofLogNotice("ofxPresetsManager") << "pathSrc: " << pathSrc;
-			ofLogNotice("ofxPresetsManager") << "pathDst: " << pathDst;
+			ofLogNotice(__FUNCTION__) << "pathSrc: " << pathSrc;
+			ofLogNotice(__FUNCTION__) << "pathDst: " << pathDst;
 
 			ofFile file;
 			file.copyFromTo(pathSrc, pathDst, true, true);//relative, overwrite
@@ -848,11 +891,14 @@ private:
 
 	//control presetsManager params
 	//to select presets, clone, save..
-
-	ofParameterGroup params_Control;
+public:
 	ofParameter<bool> SHOW_ClickPanel;
+
+private:
+	ofParameterGroup params_Control;
+
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
-	ofParameter<bool> SHOW_MenuTopBar;
+	//ofParameter<bool> SHOW_MenuTopBar;
 	ofParameter<bool> SHOW_Browser;
 #endif
 
@@ -893,29 +939,34 @@ private:
 	bool ENABLE_KeysArrowBrowse = true;//allow browse by arrows keys by default
 
 public:
-
+	//--------------------------------------------------------------
 	void setEnableKeysArrowBrowse(bool b)
 	{
 		ENABLE_KeysArrowBrowse = b;
 	}
 
+	//--------------------------------------------------------------
 	void CheckFolder(string _path)
 	{
+		ofLogNotice(__FUNCTION__) << _path;
+
 		ofDirectory dataDirectory(ofToDataPath(_path, true));
 
-		//check if target data folder exist
+		//check if folder path exist
 		if (!dataDirectory.isDirectory())
 		{
-			ofLogError("__FUNCTION__") << "FOLDER DOES NOT EXIST!";
+			ofLogError(__FUNCTION__) << "FOLDER NOT FOUND! TRYING TO CREATE...";
 
-			//create folder
+			//try to create folder
 			bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
 
-			//debug if creation has been succed
-			if (b)
-				ofLogNotice("__FUNCTION__") << "FOLDER '" << _path << "' CREATED SUCCESSFULLY!";
-			else
-				ofLogError("__FUNCTION__") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
+			//debug if creation has been succeded
+			if (b) ofLogNotice(__FUNCTION__) << "CREATED '" << _path << "'  SUCCESSFULLY!";
+			else ofLogError(__FUNCTION__) << "UNABLE TO CREATE '" << _path << "' FOLDER!";
+		}
+		else
+		{
+			ofLogNotice(__FUNCTION__) << "OK! LOCATED FOLDER: '" << _path << "'";//nothing to do
 		}
 	}
 };
