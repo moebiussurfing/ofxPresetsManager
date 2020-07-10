@@ -470,8 +470,20 @@ void ofxPresetsManager::setupEditor()
 
 	//add to group
 	bRandomizeEditor.set("RANDOMIZE", false);
+	bRandomizeEditorPopulateFavs.set("POPULATE FAVS!", false);
+	bRandomizeEditorAll.set("ALL", false);
+	bRandomizeEditorNone.set("NONE", false);
+
+	bRandomizeEditor.setSerializable(false);
+	bRandomizeEditorPopulateFavs.setSerializable(false);
+	bRandomizeEditorAll.setSerializable(false);
+	bRandomizeEditorNone.setSerializable(false);
+
 	params_Editor.setName("PRESET EDIT TOOLS");
 	params_Editor.add(bRandomizeEditor);
+	params_Editor.add(bRandomizeEditorAll);
+	params_Editor.add(bRandomizeEditorNone);
+	params_Editor.add(bRandomizeEditorPopulateFavs);
 
 	params_Editor_Toggles.setName("PARAMETERS");
 	for (auto &p : editorPresets) {
@@ -586,7 +598,8 @@ ofxPresetsManager::ofxPresetsManager()
 	path_Control = "settings";
 
 	//to add to all presets filenames
-	path_Prefix = "_preset_";
+	//path_Prefix = "_preset_";
+	path_Prefix = "_";
 
 	//--
 
@@ -619,9 +632,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//control parameters
 
-	PRESET_selected.set("PRESETS", 0, 0, numPresetsFavorites - 1);
-	//PRESET_selected.set("PRESETS", 1, 1, numPresetsFavorites);
-	//PRESET2_selected.set("PRESETS2", 1, 1, numPresetsFavorites);//this multidimension is for multiple gui/groups (feature not implemented!)
+	PRESET_selected.set("PRESET", 0, 0, numPresetsFavorites - 1);
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
 	MODE_Browser_NewPreset.set("NEW!", false);
@@ -734,6 +745,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Tools.setName("HELPER TOOLS");
 	params_Tools.add(bCloneRight);
 	params_Tools.add(bCloneAll);
+	//params_Tools.add(bRandomizeEditorPopulateFavs);
 
 #ifdef INCLUDE_RANDOMIZER
 	params_Tools.add(params_Randomizer);
@@ -914,6 +926,12 @@ void ofxPresetsManager::setup()
 
 	setVisible_GUI_Internal(false);
 
+	//TODO:
+	bRandomizeEditorAll = true;
+
+	//TODO:
+	//refresh();
+
 	//--------
 
 
@@ -924,7 +942,6 @@ void ofxPresetsManager::setup()
 
 	////memory mode
 	//load_AllKit_ToMemory();
-
 }
 
 //--------------------------------------------------------------
@@ -2140,8 +2157,6 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 //----
 
-#pragma mark - ENGINE
-
 //--------------------------------------------------------------
 void ofxPresetsManager::doCloneRight(int pIndex)
 {
@@ -2150,6 +2165,17 @@ void ofxPresetsManager::doCloneRight(int pIndex)
 	{
 		save(i, 0);
 		//TODO: 0 it's bc it's the only 1st params group implemented
+	}
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::doPopulateFavs()
+{
+	ofLogNotice(__FUNCTION__);
+	for (int i = 0; i < numPresetsFavorites; i++)
+	{
+		doRandomizeEditor();
+		save(i, 0);
 	}
 }
 
@@ -2169,7 +2195,6 @@ void ofxPresetsManager::doCloneAll()
 	for (int i = 0; i < numPresetsFavorites; i++)
 	{
 		save(i, 0);
-		//TODO: 0 it's bc it's the only 1st params group implemented
 	}
 }
 
@@ -2211,6 +2236,27 @@ void ofxPresetsManager::Changed_Params_Editor(ofAbstractParameter &e)
 			bRandomizeEditor = false;
 
 			doRandomizeEditor();
+		}
+		else if (name == bRandomizeEditorAll.getName() && bRandomizeEditorAll)
+		{
+			bRandomizeEditorAll = false;
+
+			for (auto &p : editorPresets) {
+				p.set(true);
+			}
+		}
+		else if (name == bRandomizeEditorNone.getName() && bRandomizeEditorNone)
+		{
+			bRandomizeEditorNone = false;
+
+			for (auto &p : editorPresets) {
+				p.set(false);
+			}
+		}
+		else if (name == bRandomizeEditorPopulateFavs.getName() && bRandomizeEditorPopulateFavs)
+		{
+			bRandomizeEditorPopulateFavs = false;
+			doPopulateFavs();
 		}
 	}
 }
@@ -2314,7 +2360,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		{
 			ofLogNotice(__FUNCTION__) << "DICE: " << e;
 			doRandomizeWichSelectedPreset();
-	}
+		}
 #endif
 		else if (name == "RESET DICES" && bResetDices)
 		{
@@ -2341,7 +2387,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			x = ofClamp(Gui_Internal_Position.get().x, 0, ofGetWidth() - 200);
 			y = ofClamp(Gui_Internal_Position.get().y, 0, ofGetHeight() - 20);
 			gui_InternalControl.setPosition(x, y);
-}
+		}
 #endif
 
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
@@ -2397,7 +2443,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//TODO: 
 		//should be nice to add toggle to auto retrig or not behavior 
 
-		else if (name == "PRESETS" && (PRESET_selected == PRESET_selected_PRE))
+		else if (name == "PRESET" && (PRESET_selected == PRESET_selected_PRE))
 		{
 			ofLogNotice(__FUNCTION__) << "PRESET NOT Changed: " << e << ". BUT..";
 			ofLogNotice(__FUNCTION__) << "TRIG PRESET!";
@@ -2420,9 +2466,9 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		//2. selected preset CHANGED
 
-		else if (name == "PRESETS" && (PRESET_selected != PRESET_selected_PRE))
+		else if (name == "PRESET" && (PRESET_selected != PRESET_selected_PRE))
 		{
-			//ofLogNotice(__FUNCTION__) << "PRESET: " << e;
+			ofLogNotice(__FUNCTION__) << "> PRESET: " << PRESET_selected;
 
 			//-
 
@@ -2445,7 +2491,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 			//indexes starts from 0, not from 1 like presets
 			int xIndex = PRESET_selected;
-			//int xIndex = PRESET_selected - 1;
 			int yIndex = 0;//TODO: one group only for now
 
 			//-
@@ -2497,8 +2542,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//{
 		//	ofLogError(__FUNCTION__) << "IGNORED PRESETS CHANGE";
 		//}
+		}
 	}
-}
 
 #pragma mark - SETTINGS
 
@@ -2817,12 +2862,9 @@ void ofxPresetsManager::exit()
 	if (autoSave)// && autoLoad)
 	{
 		doSave(PRESET_selected);
-		//doSave(PRESET_selected - 1);
-
 		//doSave2(PRESET2_selected - 1);
 	}
 
-	//TODO:
 	//app settings
 	save_ControlSettings();//crashes?
 
@@ -3003,37 +3045,15 @@ void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
 //--------------------------------------------------------------
 bool ofxPresetsManager::browser_draw_ImGui()
 {
-	//-
-
 	ofVec2f pos;
 	pos = ofVec2f(ImGui_Position.get().x, ImGui_Position.get().y);
-
-	//ofVec2f size;
-	//size = ofVec2f(ImGui_Size.get().x, ImGui_Size.get().y);
-
-	//TODO:
-	//TESTING IMGUI
-	//ImGuiWindowFlags winFlags =
-	//	ImGuiWindowFlags_NoMove |
-	//	ImGuiWindowFlags_NoResize |
-	//	ImGuiWindowFlags_NoCollapse |
-	//	ImGuiWindowFlags_NoSavedSettings |
-	//	ImGuiWindowFlags_AlwaysAutoResize |
-	//	//ImGuiCond_Always |
-	//	ImGuiWindowFlags_NoTitleBar;
 
 	auto mainSettings = ofxImGui::Settings();
 	mainSettings.windowPos = pos;
 
 	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y));
-	//ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), winFlags);//crash..
-	//ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), ImGuiCond_Always);
-	//ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), ImGuiCond_Always | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_NoTreePushOnOpen);
 
 	//-
-
-	//NOTE:
-	//seems that window (not tree) is required to allow text input stills inside box...
 
 	string _name;
 	_name = groups[0].getName();
@@ -3041,19 +3061,11 @@ bool ofxPresetsManager::browser_draw_ImGui()
 	bool _collapse = true;
 	if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
 	{
-		ImGui::Text("PRESET MANAGER");
+		ImGui::Text("PRESETS MANAGER");//tittle
 
-		//--
+		ofxImGui::AddParameter(this->PRESET_selected);//main preset selector
 
-		ofxImGui::AddParameter(this->PRESET_selected);
-		//ofxImGui::AddGroup(this->params_Options, settings);//grouped
-		//ofxImGui::AddParameter(this->MODE_MemoryLive);
-		//ofxImGui::AddParameter(this->PRESET_selected);
-
-		//-
-
-		//helpers
-
+		//main helpers
 		if (ImGui::Button("CLONE ALL"))
 		{
 			bCloneAll = true;
@@ -3063,15 +3075,20 @@ bool ofxPresetsManager::browser_draw_ImGui()
 		{
 			bCloneRight = true;
 		}
+		ImGui::SameLine();
+		if (ImGui::Button("POPULATE!"))
+		{
+			//popupale all favs
+			doPopulateFavs();
+			//create browser files too
+			doGetFavsFromBrowser();
+		}
 
 		//-
 
 		//ImGui::SetNextItemWidth(_w);
 		ofxImGui::AddParameter(this->autoSave);
-
-		//ImGui::SetNextItemWidth(100);
 		ofxImGui::AddParameter(this->MODE_Browser_NewPreset);
-		//ofxImGui::AddParameter(this->SHOW_Browser);//this
 
 		//-- 
 
@@ -3083,12 +3100,12 @@ bool ofxPresetsManager::browser_draw_ImGui()
 
 			//-
 
-			// send/save browsed preset to favorites
+			//send/save current browsed (from "/archive/") preset to current presets on favorites
 
 			if (ImGui::Button("TO FAVS"))
 			{
-				ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE browsed preset: " << browser_PresetName;
-				ofLogNotice(__FUNCTION__) << "to favorites preset: [" << PRESET_selected << "]";
+				ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE BROWSED PRESET: " << browser_PresetName;
+				ofLogNotice(__FUNCTION__) << "TO FAVORITES PRESET: [" << PRESET_selected << "]";
 
 				if (MODE_Browser_NewPreset)
 				{
@@ -3098,7 +3115,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 
 			//-
 
-			//get/copy all [8] presets from favs and send/save to browser folder ("archive")
+			//get/copy all favs presets from favs and send/save to browser folder ("archive")
 
 			ImGui::SameLine();
 			if (ImGui::Button("FROM FAVS"))
@@ -3115,17 +3132,12 @@ bool ofxPresetsManager::browser_draw_ImGui()
 			{
 				int n = 30;
 				float a = ofMap(ofGetFrameNum() % n, 0, n, 0.f, 1.f);
-
 				ImGui::PushID(1);
 				ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
-				//ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
-
 				ImGui::Text("DIR OR FILES NOT FOUND!");
-				//browser path
 				string browser_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
 				const char *array = browser_path.c_str();
 				ImGui::Text(array);
-
 				ImGui::PopStyleColor(1);
 				ImGui::PopID();
 			}
@@ -3136,7 +3148,6 @@ bool ofxPresetsManager::browser_draw_ImGui()
 
 				static int counter = currentFile;
 				float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
-
 				ImGui::PushButtonRepeat(true);
 
 				//--
@@ -3153,10 +3164,9 @@ bool ofxPresetsManager::browser_draw_ImGui()
 						{
 							browser_PresetName = fileNames[currentFile];
 							ofLogNotice(__FUNCTION__) << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
-
 							//if (MODE_Browser_NewPreset)
 							ofLogNotice(__FUNCTION__) << "LOAD" << endl;
-							ofLogNotice(__FUNCTION__) << "Preset Name: " << browser_PresetName;
+							ofLogNotice(__FUNCTION__) << "PRESET NAME: " << browser_PresetName;
 							browser_PresetLoad(browser_PresetName);
 						}
 					}
@@ -3179,12 +3189,11 @@ bool ofxPresetsManager::browser_draw_ImGui()
 							ofLogNotice(__FUNCTION__) << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
 
 							//if (MODE_Browser_NewPreset)
-							ofLogNotice(__FUNCTION__) << "LOAD Preset Name: " << browser_PresetName;
+							ofLogNotice(__FUNCTION__) << "LOAD PRESET NAME: " << browser_PresetName;
 							browser_PresetLoad(browser_PresetName);
 						}
 					}
 				}
-
 				ImGui::PopButtonRepeat();
 
 				//--
@@ -3192,12 +3201,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 				//1.3 text preview current preset number to total. (1/4)
 
 				ImGui::SameLine();
-				//if (numFilePresets > 0)
-				{
-					ImGui::Text("%d/%d", currentFile, numFilePresets-1);
-					//ImGui::Text("%d/%d", currentFile + 1, numFilePresets);
-					//ImGui::Text("%d/%d", 0, numFilePresets);
-				}
+				ImGui::Text("%d/%d", currentFile, numFilePresets - 1);
 			}
 
 			//--
@@ -3206,7 +3210,6 @@ bool ofxPresetsManager::browser_draw_ImGui()
 
 			if (!fileNames.empty())
 			{
-				//ImGui::SetNextItemWidth(_w);
 				ImGui::SetNextItemWidth(140);
 
 				int currentFileIndex = currentFile;
@@ -3231,7 +3234,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 			if (ImGui::Button("UPDATE"))
 			{
 				//browser_PresetName = textInput_temp;
-				//ofLogNotice(__FUNCTION__) << "UPDATE Preset Name: " << browser_PresetName << endl;
+				//ofLogNotice(__FUNCTION__) << "UPDATE PRESET NAME: " << browser_PresetName << endl;
 
 				//0. get filename of selected
 				string _currName = files[currentFile].getBaseName();
@@ -3309,7 +3312,6 @@ bool ofxPresetsManager::browser_draw_ImGui()
 					currentFile = 0;
 					browser_PresetName = fileNames[currentFile];
 					browser_PresetLoad(browser_PresetName);
-					//ofLogNotice(__FUNCTION__) << "Load preset [0] " << browser_PresetName;
 				}
 				else
 				{
@@ -3402,9 +3404,7 @@ bool ofxPresetsManager::browser_draw_ImGui()
 				{
 					ImGui::PopStyleColor(1);
 				}
-
 			}
-
 			ofxImGui::EndTree(mainSettings);
 		}
 
@@ -3438,11 +3438,6 @@ void ofxPresetsManager::browser_PresetSave(string name)//without xml extension n
 
 	settings.save(_path);
 	ofLogNotice(__FUNCTION__) << "File: " << _path;
-
-	//-
-
-	//ofLogVerbose(__FUNCTION__) << "DONE_save";
-	//DONE_save = true;//TODO:?
 }
 
 //--------------------------------------------------------------
@@ -3464,11 +3459,6 @@ void ofxPresetsManager::browser_PresetLoad(string name)//without xml extension n
 	ofLogNotice(__FUNCTION__) << "File: " << _path;
 
 	ofDeserialize(settings, groups[0]);
-
-	//-
-
-	//ofLogVerbose(__FUNCTION__) << "DONE_load";
-	//DONE_load = true;//TODO:?
 }
 
 //--------------------------------------------------------------
@@ -3476,17 +3466,12 @@ void ofxPresetsManager::browser_Setup()
 {
 	//--
 
-	//TODO:
-	//crashes if wrong folder?
 	//font customize
 #ifdef INCLUDE_IMGUI_CUSTOM_FONT
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	string _name = "overpass-mono-bold.otf";
-
-	//string _path = path_GLOBAL_Folder + "/fonts/" + _name;//addon folder
 	string _path = "assets/fonts/" + _name;//assets folder
-
 	io.Fonts->AddFontFromFileTTF(&ofToDataPath(_path)[0], 13.0f);
 #endif
 
@@ -3513,7 +3498,6 @@ void ofxPresetsManager::browser_Setup()
 		if (fileNames.size() > 0)
 		{
 			currentFile = 0;
-
 			browser_PresetName = fileNames[currentFile];
 			browser_PresetLoad(browser_PresetName);
 		}
@@ -3603,18 +3587,6 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	//should check names because sorting changes..
 	if (fileNames.size() > 0)
 	{
-		//TODO:
-		//disabled autoload preset. just list files!
-
-		////workflow
-		////clamp selected file to folder limits. select last one (?)
-		//if (currentFile > fileNames.size() - 1)
-		//	currentFile = fileNames.size() - 1;
-		////else if (currentFile > fileNames.size() - 1)
-
-		//browser_PresetName = fileNames[currentFile];
-		//browser_PresetLoad(browser_PresetName);
-
 		bFilesError = false;
 	}
 	else

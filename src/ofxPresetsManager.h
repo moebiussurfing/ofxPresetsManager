@@ -26,6 +26,10 @@
 ///	+	add define to disable all randomize stuff to make addon minimal expression 
 ///	+	could make tween when changing params (?)
 ///
+///	BUG:
+///
+///	+	there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager"
+///
 ///---
 
 
@@ -204,12 +208,14 @@ private:
 	void doResetDices();//reset all probs to 0
 	int numDices;//total dices summing the prob of any preset probability (PROB1 + PROB2 + ...)
 
-
 	int timerRandomizer;
 #endif
 public:
 	ofParameter<bool> bRandomizeEditor;
 private:
+	ofParameter<bool> bRandomizeEditorAll;
+	ofParameter<bool> bRandomizeEditorNone;
+	ofParameter<bool> bRandomizeEditorPopulateFavs;
 
 	//TODO:
 	//system to select what params of current selected preset to: clone, randomize etc
@@ -221,12 +227,7 @@ private:
 	void Changed_Params_Editor(ofAbstractParameter &e);
 	void doRandomizeEditor();//randomize params of current selected preset
 	void doRandomizeEditorGroup(ofParameterGroup& group);//randomize params of current selected preset
-public:
 
-	//--------------------------------------------------------------
-	void randomizePreset() {//randomize params of current selected preset
-		doRandomizeEditor();
-	}
 	////TODO:
 	//ofParameterGroup group_TARGET;
 	//void addGroup_TARGET(ofParameterGroup &g);	
@@ -241,55 +242,59 @@ private:
 
 	//--
 
-#pragma mark - OF
-
-public:
-
-	ofxPresetsManager();
-	~ofxPresetsManager();
-
-	//-
-
-#pragma mark - API
-
-public:
+#pragma mark - CALLBACKS
+private:
+	bool DISABLE_CALLBACKS = true;//to avoid startup crashes and objects are not initialized properly
+	bool bIsDoneLoad = false;
 
 	//--
 
-	//must be called after params group has been added!
-	void setup();
-	void setup(std::string name);//to set gui panel name header label
+#pragma mark - OF
 
-	void exit();
+public:
+	ofxPresetsManager();
+	~ofxPresetsManager();
 
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
-
+	void exit();
 	void windowResized(int w, int h);
-
-	//-
 
 	void drawPresetClicker();//user clickeable box panel preset selector
 
-	//-
+	//--
 
-#pragma mark - DIFFERENT_DATA_TYPES_METHODS
+#pragma mark - API
 
-	void add(ofParameterGroup params, int numPresets = 8);//add a param group for preset saving
-	void add(ofParameterGroup params, initializer_list<int> keysList);//adds and activate keys to switch
+	//---------------
+	//
+	//	API
+	//
+	//-----
 
 	//--
 
 private:
+	//TODO:
+	//BUG:
+	//not working
+	void add(ofParameterGroup params, int numPresets = 8);//add a param group for preset saving and how many presets on favs
 
-#pragma mark - CALLBACKS
+public:
 
-	bool DISABLE_CALLBACKS = true;//to avoid startup crashes and objects are not initialized properly
-	bool bIsDoneLoad = false;
+	void add(ofParameterGroup params, initializer_list<int> keysList);//adds and define keys to trig presets too
 
+	void setup();//must be called after params group has been added!
+	void setup(std::string name);//optional to set gui panel name header label
+
+	//-
+
+	//easy callback to get from ofApp if required
 public:
 	ofParameter<bool> DONE_load;//easy callback to know (in ofApp) that preset LOAD is done 
 	ofParameter<bool> DONE_save;//easy callback to know (in ofApp) that preset SAVE is done
+
+	//--
 
 public:
 	//--------------------------------------------------------------
@@ -319,17 +324,8 @@ public:
 	//    return isDone;
 	//}
 
-	//--
-
-#pragma mark - API
-
-public:
-
-	//API
-
-	//-
-
-	void setPosition_DEBUG(int x, int y);
+	//--------------------------------------------------------------
+	void setPosition_DEBUG(int x, int y);//where to display if we get errors (ie: data files not found) on startup
 
 	//--------------------------------------------------------------
 	float getPresetClicker_Width()
@@ -419,23 +415,36 @@ public:
 
 	//--
 
-	//randomizer
+	//randomizer helpers
 public:
 	//--------------------------------------------------------------
-	void setModeRandomizerPreset(bool b)
+	void setModeRandomizerPreset(bool b)//play randomizer timer
 	{
 		ENABLE_RandomizeTimer = b;
 	}
 	//--------------------------------------------------------------
-	void setToggleRandomizerPreset()
+	void setToggleRandomizerPreset()//toggle randomizer timer
 	{
 		ENABLE_RandomizeTimer = !ENABLE_RandomizeTimer;
 	}
 	//--------------------------------------------------------------
-	void randomizeBang()
+	void doRandomizeBang()//trig randomize and select one of the favs presets
 	{
 		bRandomizeSelect = true;
 	}
+	//--------------------------------------------------------------
+	void doRandomizePreset() {//randomize params of current selected preset
+		doRandomizeEditor();
+	}
+	////--------------------------------------------------------------
+	//void populateFavs()//create 
+	//{
+	//	doPopulateFavs();
+	//}
+
+	void doCloneRight(int pIndex);//clone from selected preset to all others to the right
+	void doCloneAll();//clone all presets from the current selected
+	void doPopulateFavs();//fast populate random presets around all favs
 
 	//--
 
@@ -488,6 +497,7 @@ public:
 	//BUG: 
 	//workflow 
 	//to solve auto load fail because the sorting of xml autoSave after preset selector tag
+	////(optional) on startup: called at the end of your ofApp setup() 
 	//--------------------------------------------------------------
 	void refresh()
 	{
@@ -599,12 +609,11 @@ public:
 #pragma mark - SETTINGS
 
 	//--------------------------------------------------------------
-	void setPath_ControlSettings(string str)//main addon settings
+	void setPath_ControlSettings(string str)//for the session states settings
 	{
 		ofLogNotice(__FUNCTION__) << str;
 		path_Control = str;
 	}
-
 	void setPath_KitFolder(string folder);//path folder for favorite/live presets
 	void setPath_PresetsFolder(string folder);//path folder for kit for the browser
 	void setPath_GlobalFolder(string folder);//path for root container folder
@@ -752,12 +761,13 @@ private:
 	string textInput_temp = "";
 	bool bFilesError = false;
 
-	//--
+	//-------
 
 	//helpers
+
 public:
 	//--------------------------------------------------------------
-	void doGetFavsFromBrowser()
+	void doGetFavsFromBrowser()//save al favorites presets to the browser (archive) folder
 	{
 		ofLogNotice(__FUNCTION__);
 
@@ -854,11 +864,7 @@ private:
 
 	//---
 
-	//helpers
-public:
-	void doCloneRight(int pIndex);//clone from selected preset to all others to the right
-	void doCloneAll();//clone all presets from the current selected
-
+private:
 	void doLoad(int pIndex);//engine loader. not used? bc bug on bLoad trigger..
 	void doSave(int pIndex);//engine saver starting at 0
 
@@ -867,6 +873,7 @@ public:
 	//void doSave2(int pIndex);
 
 	//-
+
 private:
 	//font to label clicker boxes
 	ofTrueTypeFont myFont;
@@ -945,6 +952,7 @@ public:
 		ENABLE_KeysArrowBrowse = b;
 	}
 
+private:
 	//--------------------------------------------------------------
 	void CheckFolder(string _path)
 	{
