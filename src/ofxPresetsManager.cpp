@@ -166,92 +166,97 @@ void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 			continue;
 		}
 
-		//parameter, try everything we know how to handle.
-#if OF_VERSION_MINOR >= 10
-		auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
-		if (parameterVec2f)
+		//exclude
+		if (parameter->isSerializable())
 		{
-			ofParameter<bool> b{ parameterVec2f->getName(), false };
-			editorPresets.push_back(b);
-			continue;
-		}
-		auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
-		if (parameterVec3f)
-		{
-			ofParameter<bool> b{ parameterVec3f->getName(), false };
-			editorPresets.push_back(b);
-			continue;
-		}
-		auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
-		if (parameterVec4f)
-		{
-			ofParameter<bool> b{ parameterVec4f->getName(), false };
-			editorPresets.push_back(b);
-			continue;
-		}
-#endif
-		auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
-		if (parameterOfVec2f)
-		{
-			//ofxImGui::AddParameter(*parameterOfVec2f);
-			ofParameter<bool> b{ parameterOfVec2f->getName(), false };
-			editorPresets.push_back(b);
-			continue;
-		}
-		auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
-		if (parameterOfVec3f)
-		{
-			//ofxImGui::AddParameter(*parameterOfVec3f);
-			ofParameter<bool> b{ parameterOfVec3f->getName(), false };
-			editorPresets.push_back(b);
-			continue;
-		}
-		auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
-		if (parameterOfVec4f)
-		{
-			ofParameter<bool> b{ parameterOfVec4f->getName(), false };
-			editorPresets.push_back(b);
-			//ofxImGui::AddParameter(*parameterOfVec4f);
-			continue;
-		}
-		auto parameterColor = std::dynamic_pointer_cast<ofParameter<ofColor>>(parameter);
-		if (parameterColor)
-		{
-			ofParameter<bool> b{ parameterColor->getName(), false };
-			editorPresets.push_back(b);
-			continue;
-		}
-		auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
-		if (parameterFloatColor)
-		{
-			ofParameter<bool> b{ parameterFloatColor->getName(), false };
-			editorPresets.push_back(b);
-			continue;
-		}
-		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
-		if (parameterFloat)
-		{
-			ofParameter<bool> b{ parameterFloat->getName(), false };
-			editorPresets.push_back(b);
-			//ofxImGui::AddParameter(*parameterFloat);
-			continue;
-		}
-		auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
-		if (parameterInt)
-		{
-			ofParameter<bool> b{ parameterInt->getName(), false };
-			editorPresets.push_back(b);
-			continue;
-		}
-		auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
-		if (parameterBool)
-		{
-			ofParameter<bool> b{ parameterBool->getName(), false };
-			editorPresets.push_back(b);
-			continue;
-		}
 
-		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
+			//parameter, try everything we know how to handle.
+#if OF_VERSION_MINOR >= 10
+			auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
+			if (parameterVec2f)
+			{
+				ofParameter<bool> b{ parameterVec2f->getName(), false };
+				editorPresets.push_back(b);
+				continue;
+			}
+			auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
+			if (parameterVec3f)
+			{
+				ofParameter<bool> b{ parameterVec3f->getName(), false };
+				editorPresets.push_back(b);
+				continue;
+			}
+			auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
+			if (parameterVec4f)
+			{
+				ofParameter<bool> b{ parameterVec4f->getName(), false };
+				editorPresets.push_back(b);
+				continue;
+			}
+#endif
+			auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
+			if (parameterOfVec2f)
+			{
+				//ofxImGui::AddParameter(*parameterOfVec2f);
+				ofParameter<bool> b{ parameterOfVec2f->getName(), false };
+				editorPresets.push_back(b);
+				continue;
+			}
+			auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
+			if (parameterOfVec3f)
+			{
+				//ofxImGui::AddParameter(*parameterOfVec3f);
+				ofParameter<bool> b{ parameterOfVec3f->getName(), false };
+				editorPresets.push_back(b);
+				continue;
+			}
+			auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
+			if (parameterOfVec4f)
+			{
+				ofParameter<bool> b{ parameterOfVec4f->getName(), false };
+				editorPresets.push_back(b);
+				//ofxImGui::AddParameter(*parameterOfVec4f);
+				continue;
+			}
+			auto parameterColor = std::dynamic_pointer_cast<ofParameter<ofColor>>(parameter);
+			if (parameterColor)
+			{
+				ofParameter<bool> b{ parameterColor->getName(), false };
+				editorPresets.push_back(b);
+				continue;
+			}
+			auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
+			if (parameterFloatColor)
+			{
+				ofParameter<bool> b{ parameterFloatColor->getName(), false };
+				editorPresets.push_back(b);
+				continue;
+			}
+			auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
+			if (parameterFloat)
+			{
+				ofParameter<bool> b{ parameterFloat->getName(), false };
+				editorPresets.push_back(b);
+				//ofxImGui::AddParameter(*parameterFloat);
+				continue;
+			}
+			auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
+			if (parameterInt)
+			{
+				ofParameter<bool> b{ parameterInt->getName(), false };
+				editorPresets.push_back(b);
+				continue;
+			}
+			auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
+			if (parameterBool)
+			{
+				ofParameter<bool> b{ parameterBool->getName(), false };
+				editorPresets.push_back(b);
+				continue;
+			}
+
+			ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
+		}
 	}
 }
 
@@ -1514,15 +1519,14 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 		if (!MODE_MemoryLive)
 		{
-
-			TS_START("saveFile1");
+			TS_START("SAVE FILE 1");
 
 			std::string strPath = getPresetName(groups[guiIndex].getName(), presetIndex);
 			ofXml settings;
 			ofSerialize(settings, groups[guiIndex]);
 			settings.save(strPath);
 
-			TS_STOP("saveFile1");
+			TS_STOP("SAVE FILE 1");
 		}
 
 		//-
@@ -1531,8 +1535,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 		else
 		{
-
-			TS_START("saveMem1");
+			TS_START("SAVE MEM 1");
 
 			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
 
@@ -1543,7 +1546,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
 			}
 
-			TS_STOP("saveMem1");
+			TS_STOP("SAVE MEM 1");
 		}
 	}
 	else
@@ -1573,17 +1576,14 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 
 		if (!MODE_MemoryLive)
 		{
-			TS_START("saveFile2");//for TimeMeasurements only
+			TS_START("SAVE FILE 2");//for TimeMeasurements only
 
 			std::string strPath = getPresetName(gName, presetIndex);
 			ofXml settings;
 			ofSerialize(settings, groups[guiIndex]);
 			settings.save(strPath);
 
-			////it's important if this line is before or after ofSerialize
-			//DONE_save = true;
-
-			TS_STOP("saveFile2");//for TimeMeasurements only
+			TS_STOP("SAVE FILE 2");//for TimeMeasurements only
 		}
 
 		//-
@@ -1592,9 +1592,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 
 		else
 		{
-			TS_START("saveMem2");//for TimeMeasurements only
-
-			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
+			TS_START("SAVE MEM 2");//for TimeMeasurements only
 
 			if (presetIndex < settingsArray.size()) {
 				ofSerialize(settingsArray[presetIndex], groups[guiIndex]);
@@ -1603,7 +1601,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
 			}
 
-			TS_STOP("saveMem2");//for TimeMeasurements only
+			TS_STOP("SAVE MEM 2");//for TimeMeasurements only
 		}
 	}
 	else
@@ -1631,25 +1629,22 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 		{
 			//MODE A: from hd file
 
-			TS_START("loadFile1");//for TimeMeasurements only
+			TS_START("LOAD FILE 1");//for TimeMeasurements only
 
 			std::string strPath = getPresetName(groups[guiIndex].getName(), presetIndex);
 			ofXml settings;
 			settings.load(strPath);
 			ofDeserialize(settings, groups[guiIndex]);
 
-			TS_STOP("loadFile1");//for TimeMeasurements only
+			TS_STOP("LOAD FILE 1");//for TimeMeasurements only
 		}
 		else
 		{
 			//MODE B: direct from memory
 
-			TS_START("loadMem1");//for TimeMeasurements only
-
-			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
+			TS_START("LOAD MEM 1");//for TimeMeasurements only
 
 			//using xml array
-
 			if (presetIndex < settingsArray.size()) {
 				ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
 			}
@@ -1663,7 +1658,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 			//g = groupsMem[presetIndex];
 			//groups[0] = g;
 
-			TS_STOP("loadMem1");//for TimeMeasurements only
+			TS_STOP("LOAD MEM 1");//for TimeMeasurements only
 		}
 
 		//-
@@ -2542,8 +2537,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//{
 		//	ofLogError(__FUNCTION__) << "IGNORED PRESETS CHANGE";
 		//}
-		}
 	}
+}
 
 #pragma mark - SETTINGS
 
@@ -2577,9 +2572,9 @@ void ofxPresetsManager::load_ControlSettings()
 //--------------------------------------------------------------
 void ofxPresetsManager::save_ControlSettings()
 {
-#ifndef DEBUG_BLOCK_SAVE_SETTINGS
+	ofLogNotice(__FUNCTION__);
 
-	//ofLogNotice(__FUNCTION__);
+#ifndef DEBUG_BLOCK_SAVE_SETTINGS
 
 	//TODO:
 	//crashes!
@@ -2603,28 +2598,11 @@ void ofxPresetsManager::save_ControlSettings()
 
 	//---
 
-//#ifdef INCLUDE_FILE_BROWSER_IM_GUI
-//	//BUG: can't get gui settings...
-//	//gui_Browser.~Gui.get
-//	auto settings = ofxImGui::Settings();
-//	auto p = settings.windowPos;
-//	auto w = settings.windowSize;
-//	ImGui_Position = glm::vec2(p.x, p.y);
-//
-//	//cout << "pos:" << ofToString(p) << endl;
-//	//cout << "size:" << ofToString(w) << endl;
-//	//cout << "ImGui_Position:" << ofToString(ImGui_Position.get()) << endl;
-//#endif
-
-	//---
-
 	//TODO: 
 	//crashes?
-
 	try
 	{
 		ofLogVerbose(__FUNCTION__) << endl << params_Control.toString() << endl;
-
 		ofXml settingsControl;
 
 		//TODO: 
@@ -2646,41 +2624,6 @@ void ofxPresetsManager::save_ControlSettings()
 		throw;
 	}
 
-	//---
-	//NOTES:
-	/*
-	//TODO:
-	//BUG?
-	//BUG: avoid make the HELPER group xml empty!
-
-	//try
-	//{
-	//	throw 20;
-	//}
-	//catch (int e)
-	//{
-	//	cout << "An exception occurred. Exception Nr. " << e << '\n';
-	//}
-
-	//try {
-	//	// code here
-	//}
-	//catch (int param) { cout << "int exception"; }
-	//catch (char param) { cout << "char exception"; }
-	//catch (...) { cout << "default exception"; }
-
-	//try {
-	//	try {
-	//		// code here
-	//	}
-	//	catch (int n) {
-	//		throw;
-	//	}
-	//}
-	//catch (...) {
-	//	cout << "Exception occurred";
-	//}
-	*/
 	//---
 
 	DISABLE_CALLBACKS = false;
@@ -2847,7 +2790,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 //--------------------------------------------------------------
 void ofxPresetsManager::exit()
 {
-	ofLogVerbose(__FUNCTION__) << "exit()";
+	ofLogVerbose(__FUNCTION__);
 
 	DISABLE_CALLBACKS = true;
 
@@ -2855,18 +2798,16 @@ void ofxPresetsManager::exit()
 	removeKeysListeners();
 	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 	ofRemoveListener(params_Editor.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Editor);
-	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
-	ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
 
-	//autosave PRESET_selected preset on exit
-	if (autoSave)// && autoLoad)
+	//TODO: required?
+	//ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
+	//ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
+
+	//autosave preset
+	if (autoSave)
 	{
 		doSave(PRESET_selected);
-		//doSave2(PRESET2_selected - 1);
 	}
-
-	//app settings
-	save_ControlSettings();//crashes?
 
 	//-
 
@@ -2878,6 +2819,14 @@ void ofxPresetsManager::exit()
 	}
 
 	//--
+
+	//app settings
+	save_ControlSettings();//crashes?
+
+	//--
+
+	//TODO: debug crash
+	//gui_Browser.exit();
 }
 
 
@@ -2892,533 +2841,542 @@ void ofxPresetsManager::exit()
 //--------------------------------------------------------------
 bool ofxPresetsManager::browser_draw_ImGuiWindow()
 {
+#ifndef INCLUDE_ofxImGuiSimple
 	auto mainSettings = ofxImGui::Settings();
-
 	this->gui_Browser.begin();
-
-	if (SHOW_ImGui)//not useful..
-	{
-		//mouse over gui system
-		bMouseOver_Changed = false;
-		bImGui_mouseOver = false;
-
-		//-
-
-		bImGui_mouseOver = browser_draw_ImGui();
-
-		//-
-
-		if (bImGui_mouseOver != bImGui_mouseOver_PRE)
-		{
-			bImGui_mouseOver_PRE = bImGui_mouseOver;
-			bMouseOver_Changed = true;
-		}
-
-		if (bMouseOver_Changed)
-		{
-			ofLogVerbose(__FUNCTION__) << "bImGui_mouseOver: " << (bImGui_mouseOver ? "INSIDE" : "OUTSIDE");
-		}
-	}
-
-	this->gui_Browser.end();
-
-	return mainSettings.mouseOverGui;
-}
-
-//TODO:
-//--------------------------------------------------------------
-void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
-{
-
-	//-
-
-	//randomizers
-	bool b = false;
-	if (ImGui::TreeNode("RANDOMIZERS"))
-	{
-		//randomizer
-		//ofxImGui::AddParameter(this->ENABLE_RandomizeTimer);
-		//if (ImGui::TreeNode("RANDOMIZER"))
-		//{
-		//	if (ImGui::Button("RANDOMIZE"))
-		//	{
-		//		bRandomizeSelect = true;
-		//	}
-		//	ImGui::SetNextItemWidth(_w);
-		//	ofxImGui::AddParameter(this->randomizeSpeedF);
-		//	ImGui::TreePop();
-		//}
-
-		//TODO:
-		//collapse
-		//auto gsettings = ofxImGui::Settings();
-		//gsettings.
-		//ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(.5, .5, 1));
-		//ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(1, 1, 1));
-		//static ImVec4 color = ImVec4(114.0f/255.0f, 144.0f/255.0f, 154.0f/255.0f, 200.0f/255.0f);
-
-		float _prog;
-
-		////long mode
-		//if (presetsRandomModeShort[PRESET_selected - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
-		////short mode
-		//else _prog = timerRandomizer / (float)randomizeDurationShort;
-
-		//bar relative to long
-		if (ENABLE_RandomizeTimer) {
-			_prog = timerRandomizer / (float)randomizeDuration;
-		}
-		else if (MODE_LatchTrig) {
-			if (bLatchRun) {
-				_prog = timerRandomizer / (float)randomizeDuration;
-			}
-			else {
-				_prog = 0;
-			}
-		}
-		else {
-			_prog = 0;
-		}
-		ImGui::ProgressBar(_prog);
-
-		//ImGui::ProgressBar(timerRandomizer / (float)randomizeDuration, ImVec2(0.f, 0.f));
-		//ImGui::PopStyleColor(1);
-
-		//TODO:
-		//ImGui::SetNextItemOpen(false, 1);
-
-		ofxImGui::AddGroup(params_Randomizer, settings);
-
-#ifdef DEBUG_randomTest
-		//ImGui::SameLine();
-		//ImGui::Text(_totalDicesStr.get().c_str());
-		ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
+#else
+	gui_Browser.begin();
+	ImGui::ShowDemoWindow();
 #endif
 
-		//TODO:
-		//const ImGuiTreeNodeFlags NodeFlags = 0;
-		//const bool NodeOpen = ImGui::TreeNodeEx(this, NodeFlags, "Click me!");
-		//if(NodeOpen) ImGui::TreePop();
-
-		//-
-
-		//TODO:
-		ofxImGui::AddGroup(params_Editor, settings);
-
-		ImGui::TreePop();
-	}
-
-	//-
-
-	//other usefull params from hidden internal panel
-	ofxImGui::AddParameter(this->SHOW_ClickPanel);
-	//ofxImGui::AddParameter(this->SHOW_Browser);
-	//ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
-
-	//---
-
-	ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
-
-	if (SHOW_Gui_AdvancedControl) {
-		bool b = true;
-		//if (ofxImGui::BeginTree(b, mainSettings))
-		{
-			//ofxImGui::AddParameter(MODE_MemoryLive);
-			ofxImGui::AddGroup(params_Control, settings);
-
-			//ofxImGui::EndTree(mainSettings);
-		}
-		if (ImGui::Button("Set folder..."))
-		{
-			auto dialogResult = ofSystemLoadDialog("Set presets folder", true, ofToDataPath(""));
-			if (dialogResult.bSuccess)
-			{
-				path_PresetsFolder_Custom = dialogResult.filePath;
-				bUseCustomPath = true;
-				ofLogNotice(__FUNCTION__) << "path custom: " << path_PresetsFolder_Custom;
-
-			}
-		}
-	}
-}
-
-//--------------------------------------------------------------
-bool ofxPresetsManager::browser_draw_ImGui()
-{
-	ofVec2f pos;
-	pos = ofVec2f(ImGui_Position.get().x, ImGui_Position.get().y);
-
-	auto mainSettings = ofxImGui::Settings();
-	mainSettings.windowPos = pos;
-
-	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y));
-
-	//-
-
-	string _name;
-	_name = groups[0].getName();
-
-	bool _collapse = true;
-	if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
-	{
-		ImGui::Text("PRESETS MANAGER");//tittle
-
-		ofxImGui::AddParameter(this->PRESET_selected);//main preset selector
-
-		//main helpers
-		if (ImGui::Button("CLONE ALL"))
-		{
-			bCloneAll = true;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("CLONE >"))
-		{
-			bCloneRight = true;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("POPULATE!"))
-		{
-			//popupale all favs
-			doPopulateFavs();
-			//create browser files too
-			doGetFavsFromBrowser();
-		}
-
-		//-
-
-		//ImGui::SetNextItemWidth(_w);
-		ofxImGui::AddParameter(this->autoSave);
-		ofxImGui::AddParameter(this->MODE_Browser_NewPreset);
-
-		//-- 
-
-		//2. browser params
-
-		if (ofxImGui::BeginTree("BROWSER", mainSettings))
-		{
-			int numFilePresets = fileNames.size();
-
-			//-
-
-			//send/save current browsed (from "/archive/") preset to current presets on favorites
-
-			if (ImGui::Button("TO FAVS"))
-			{
-				ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE BROWSED PRESET: " << browser_PresetName;
-				ofLogNotice(__FUNCTION__) << "TO FAVORITES PRESET: [" << PRESET_selected << "]";
-
-				if (MODE_Browser_NewPreset)
-				{
-					save(PRESET_selected, 0);
-				}
-			}
-
-			//-
-
-			//get/copy all favs presets from favs and send/save to browser folder ("archive")
-
-			ImGui::SameLine();
-			if (ImGui::Button("FROM FAVS"))
-			{
-				ofLogNotice(__FUNCTION__) << "FROM FAVS";
-				doGetFavsFromBrowser();
-			}
-
-			//-
-
-			//0. error when no files detected
-
-			if (numFilePresets == 0)
-			{
-				int n = 30;
-				float a = ofMap(ofGetFrameNum() % n, 0, n, 0.f, 1.f);
-				ImGui::PushID(1);
-				ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
-				ImGui::Text("DIR OR FILES NOT FOUND!");
-				string browser_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
-				const char *array = browser_path.c_str();
-				ImGui::Text(array);
-				ImGui::PopStyleColor(1);
-				ImGui::PopID();
-			}
-
-			else if (numFilePresets > 0)
-			{
-				//1. arrow buttons
-
-				static int counter = currentFile;
-				float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
-				ImGui::PushButtonRepeat(true);
-
-				//--
-
-				//1.1 prev
-
-				if (ImGui::ArrowButton("##left", ImGuiDir_Left))
-				{
-					if (counter > 0)
-					{
-						counter--;
-						currentFile = counter;
-						if (currentFile < files.size())
-						{
-							browser_PresetName = fileNames[currentFile];
-							ofLogNotice(__FUNCTION__) << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
-							//if (MODE_Browser_NewPreset)
-							ofLogNotice(__FUNCTION__) << "LOAD" << endl;
-							ofLogNotice(__FUNCTION__) << "PRESET NAME: " << browser_PresetName;
-							browser_PresetLoad(browser_PresetName);
-						}
-					}
-				}
-
-				//--
-
-				//1.2 next
-
-				ImGui::SameLine(0.0f, spacing);
-				if (ImGui::ArrowButton("##right", ImGuiDir_Right))
-				{
-					if (counter < files.size() - 1)
-					{
-						counter++;
-						currentFile = counter;
-						if (currentFile < files.size())
-						{
-							browser_PresetName = fileNames[currentFile];
-							ofLogNotice(__FUNCTION__) << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
-
-							//if (MODE_Browser_NewPreset)
-							ofLogNotice(__FUNCTION__) << "LOAD PRESET NAME: " << browser_PresetName;
-							browser_PresetLoad(browser_PresetName);
-						}
-					}
-				}
-				ImGui::PopButtonRepeat();
-
-				//--
-
-				//1.3 text preview current preset number to total. (1/4)
-
-				ImGui::SameLine();
-				ImGui::Text("%d/%d", currentFile, numFilePresets - 1);
-			}
-
-			//--
-
-			//3. scrollable list
-
-			if (!fileNames.empty())
-			{
-				ImGui::SetNextItemWidth(140);
-
-				int currentFileIndex = currentFile;
-				if (ofxImGui::VectorCombo(" ", &currentFileIndex, fileNames))
-				{
-					ofLogNotice(__FUNCTION__) << "Preset Index: " << ofToString(currentFileIndex);
-					if (currentFileIndex < fileNames.size())
-					{
-						currentFile = currentFileIndex;
-						browser_PresetName = fileNames[currentFile];
-
-						ofLogNotice(__FUNCTION__) << "LOAD Preset Name: " << browser_PresetName;
-						browser_PresetLoad(browser_PresetName);
-					}
-				}
-			}
-
-			//--
-
-			//4.2 update
-
-			if (ImGui::Button("UPDATE"))
-			{
-				//browser_PresetName = textInput_temp;
-				//ofLogNotice(__FUNCTION__) << "UPDATE PRESET NAME: " << browser_PresetName << endl;
-
-				//0. get filename of selected
-				string _currName = files[currentFile].getBaseName();
-				ofLogNotice(__FUNCTION__) << "UPDATE Preset Name: " << _currName;
-
-				//1. delete old file
-				files[currentFile].remove();
-
-				//2. save "ovewrite"
-				browser_PresetSave(_currName);
-
-				//-
-
-				//workflow
-
-				//3. refresh files
-				browser_FilesRefresh();
-
-				//4. reselect last save preset (bc directory sorting changes)
-				ofLogNotice(__FUNCTION__) << "Reload last updated preset:";
-				int iNew = -1;//search index for filename
-				for (size_t i = 0; i < files.size(); i++)
-				{
-					string n = files[i].getBaseName();
-					if (n == _currName)
-					{
-						iNew = i;
-					}
-				}
-				if (iNew != -1)
-				{
-					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << files[iNew].getBaseName();
-					currentFile = iNew;
-					browser_PresetName = fileNames[currentFile];
-					browser_PresetLoad(browser_PresetName);
-				}
-				else
-				{
-					ofLogError(__FUNCTION__) << "Not found! Bad Index [" << iNew << "]";
-				}
-			}
-
-			//-
-
-			//4.3 reload
-
-			ImGui::SameLine();
-			if (ImGui::Button("RELOAD"))
-			{
-				ofLogNotice(__FUNCTION__) << "RELOAD Preset Name: " << browser_PresetName;
-				browser_PresetLoad(browser_PresetName);
-			}
-
-			//-
-
-			//4.4 delete
-
-			ImGui::SameLine();
-			if (ImGui::Button("DELETE"))//current preset
-			{
-				ofLogNotice(__FUNCTION__) << "DELETE Preset Name: " << browser_PresetName;
-				ofLogNotice(__FUNCTION__) << "filepath: " << files[currentFile].getAbsolutePath();
-
-				//1. delete file
-				files[currentFile].remove();
-
-				//-
-
-				//workflow
-
-				//2. refresh files
-				bool b = browser_FilesRefresh();
-				if (b)
-				{
-					currentFile = 0;
-					browser_PresetName = fileNames[currentFile];
-					browser_PresetLoad(browser_PresetName);
-				}
-				else
-				{
-					ofLogError(__FUNCTION__) << "Error listing directory!";
-				}
-			}
-
-			//----
-
-			//mode new preset enabled
-
-			//5. second panel
-
-			if (MODE_Browser_NewPreset)
-			{
-				//5.1 new preset name
-
-				//ImGui::Text("NEW PRESET:");
-
-				//-
-
-				//5.2 user input text
-
-				//loaded string into char array
-				char tab[32];
-				strncpy(tab, textInput_New.c_str(), sizeof(tab));
-				tab[sizeof(tab) - 1] = 0;
-
-				if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
-				{
-					ofLogNotice(__FUNCTION__) << "InputText [tab]:" << ofToString(tab) << endl;
-					textInput_New = ofToString(tab);
-					ofLogNotice(__FUNCTION__) << "textInput_New:" << textInput_New << endl;
-
-					//bBlink = true;//not workind. we like to blink when mouse_on_text_input
-				}
-
-				//--
-
-				//5.3 save new
-
-				//workflow
-
-				//blink when it's editing a new preset..
-				//TODO:
-				bool bBlink;
-				bBlink = true;
-				if (bBlink)
-				{
-					//ImGui::PushID(1);
-					int n = 30;
-					float a = ofMap(ofGetFrameNum() % n, 0, n, 0.2f, 0.5f);
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
-				}
-
-				if (ImGui::Button("SAVE"))
-				{
-					ofLogNotice(__FUNCTION__) << "textInput_New: " << textInput_New << endl;
-
-					//1. save
-					browser_PresetSave(textInput_New);
-
-					//-
-
-					//workflow
-
-					//2. disable new preset mode
-					MODE_Browser_NewPreset = false;
-
-					//3. refresh files
-					browser_FilesRefresh();
-
-					//4. reselect last save preset (bc directory sorting changes)
-					ofLogNotice(__FUNCTION__) << "Reload last saved preset:";
-					int iNew = -1;
-					for (size_t i = 0; i < files.size(); i++)
-					{
-						string n = files[i].getBaseName();
-						if (n == textInput_New)
-						{
-							iNew = i;
-						}
-					}
-					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << files[iNew].getBaseName();
-					currentFile = iNew;
-					browser_PresetLoad(textInput_New);
-				}
-
-				if (bBlink)
-				{
-					ImGui::PopStyleColor(1);
-				}
-			}
-			ofxImGui::EndTree(mainSettings);
-		}
-
-		//--
-
-		//1. user params
-		browser_draw_ImGui_User(mainSettings);
-
-		//-
-	}
-	ofxImGui::EndWindow(mainSettings);
-
+	//if (SHOW_ImGui)//not useful..
+	//{
+	//	//mouse over gui system
+	//	bMouseOver_Changed = false;
+	//	bImGui_mouseOver = false;
+
+	//	//-
+
+	//	bImGui_mouseOver = browser_draw_ImGui();
+
+	//	//-
+
+	//	if (bImGui_mouseOver != bImGui_mouseOver_PRE)
+	//	{
+	//		bImGui_mouseOver_PRE = bImGui_mouseOver;
+	//		bMouseOver_Changed = true;
+	//	}
+
+	//	if (bMouseOver_Changed)
+	//	{
+	//		ofLogVerbose(__FUNCTION__) << "bImGui_mouseOver: " << (bImGui_mouseOver ? "INSIDE" : "OUTSIDE");
+	//	}
+	//}
+
+#ifndef INCLUDE_ofxImGuiSimple
+	this->gui_Browser.end();
 	return mainSettings.mouseOverGui;
+#else
+	gui_Browser.end();
+	return true;
+#endif
 }
+
+////TODO:
+////--------------------------------------------------------------
+//void ofxPresetsManager::browser_draw_ImGui_User(ofxImGui::Settings &settings)
+//{
+//
+//	//-
+//
+//	//randomizers
+//	bool b = false;
+//	if (ImGui::TreeNode("RANDOMIZERS"))
+//	{
+//		//randomizer
+//		//ofxImGui::AddParameter(this->ENABLE_RandomizeTimer);
+//		//if (ImGui::TreeNode("RANDOMIZER"))
+//		//{
+//		//	if (ImGui::Button("RANDOMIZE"))
+//		//	{
+//		//		bRandomizeSelect = true;
+//		//	}
+//		//	ImGui::SetNextItemWidth(_w);
+//		//	ofxImGui::AddParameter(this->randomizeSpeedF);
+//		//	ImGui::TreePop();
+//		//}
+//
+//		//TODO:
+//		//collapse
+//		//auto gsettings = ofxImGui::Settings();
+//		//gsettings.
+//		//ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(.5, .5, 1));
+//		//ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(1, 1, 1));
+//		//static ImVec4 color = ImVec4(114.0f/255.0f, 144.0f/255.0f, 154.0f/255.0f, 200.0f/255.0f);
+//
+//		float _prog;
+//
+//		////long mode
+//		//if (presetsRandomModeShort[PRESET_selected - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
+//		////short mode
+//		//else _prog = timerRandomizer / (float)randomizeDurationShort;
+//
+//		//bar relative to long
+//		if (ENABLE_RandomizeTimer) {
+//			_prog = timerRandomizer / (float)randomizeDuration;
+//		}
+//		else if (MODE_LatchTrig) {
+//			if (bLatchRun) {
+//				_prog = timerRandomizer / (float)randomizeDuration;
+//			}
+//			else {
+//				_prog = 0;
+//			}
+//		}
+//		else {
+//			_prog = 0;
+//		}
+//		ImGui::ProgressBar(_prog);
+//
+//		//ImGui::ProgressBar(timerRandomizer / (float)randomizeDuration, ImVec2(0.f, 0.f));
+//		//ImGui::PopStyleColor(1);
+//
+//		//TODO:
+//		//ImGui::SetNextItemOpen(false, 1);
+//
+//		ofxImGui::AddGroup(params_Randomizer, settings);
+//
+//#ifdef DEBUG_randomTest
+//		//ImGui::SameLine();
+//		//ImGui::Text(_totalDicesStr.get().c_str());
+//		ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
+//#endif
+//
+//		//TODO:
+//		//const ImGuiTreeNodeFlags NodeFlags = 0;
+//		//const bool NodeOpen = ImGui::TreeNodeEx(this, NodeFlags, "Click me!");
+//		//if(NodeOpen) ImGui::TreePop();
+//
+//		//-
+//
+//		//TODO:
+//		ofxImGui::AddGroup(params_Editor, settings);
+//
+//		ImGui::TreePop();
+//	}
+//
+//	//-
+//
+//	//other usefull params from hidden internal panel
+//	ofxImGui::AddParameter(this->SHOW_ClickPanel);
+//	//ofxImGui::AddParameter(this->SHOW_Browser);
+//	//ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
+//
+//	//---
+//
+//	ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
+//
+//	if (SHOW_Gui_AdvancedControl) {
+//		bool b = true;
+//		//if (ofxImGui::BeginTree(b, mainSettings))
+//		{
+//			//ofxImGui::AddParameter(MODE_MemoryLive);
+//			ofxImGui::AddGroup(params_Control, settings);
+//
+//			//ofxImGui::EndTree(mainSettings);
+//		}
+//		if (ImGui::Button("Set custom folder..."))
+//		{
+//			auto dialogResult = ofSystemLoadDialog("Set presets folder", true, ofToDataPath(""));
+//			if (dialogResult.bSuccess)
+//			{
+//				path_PresetsFolder_Custom = dialogResult.filePath;
+//				bUseCustomPath = true;
+//				ofLogNotice(__FUNCTION__) << "path custom: " << path_PresetsFolder_Custom;
+//
+//			}
+//		}
+//	}
+//}
+
+////--------------------------------------------------------------
+//bool ofxPresetsManager::browser_draw_ImGui()
+//{
+	//ofVec2f pos;
+	//pos = ofVec2f(ImGui_Position.get().x, ImGui_Position.get().y);
+
+	//auto mainSettings = ofxImGui::Settings();
+	//mainSettings.windowPos = pos;
+
+	//ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y));
+
+	////-
+
+	//string _name;
+	//_name = groups[0].getName();
+
+	//bool _collapse = true;
+	//if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
+	//{
+	//	ImGui::Text("PRESETS MANAGER");//tittle
+
+	//	ofxImGui::AddParameter(this->PRESET_selected);//main preset selector
+
+	//	//main helpers
+	//	if (ImGui::Button("CLONE ALL"))
+	//	{
+	//		bCloneAll = true;
+	//	}
+	//	ImGui::SameLine();
+	//	if (ImGui::Button("CLONE >"))
+	//	{
+	//		bCloneRight = true;
+	//	}
+	//	ImGui::SameLine();
+	//	if (ImGui::Button("POPULATE!"))
+	//	{
+	//		//popupale all favs
+	//		doPopulateFavs();
+	//		//create browser files too
+	//		doGetFavsFromBrowser();
+	//	}
+
+	//	//-
+
+	//	//ImGui::SetNextItemWidth(_w);
+	//	ofxImGui::AddParameter(this->autoSave);
+	//	ofxImGui::AddParameter(this->MODE_MemoryLive);
+	//	ofxImGui::AddParameter(this->MODE_Browser_NewPreset);
+
+	//	//-- 
+
+	//	//2. browser params
+
+	//	if (ofxImGui::BeginTree("BROWSER", mainSettings))
+	//	{
+	//		int numFilePresets = fileNames.size();
+
+	//		//-
+
+	//		//send/save current browsed (from "/archive/") preset to current presets on favorites
+
+	//		if (ImGui::Button("TO FAVS"))
+	//		{
+	//			ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE BROWSED PRESET: " << browser_PresetName;
+	//			ofLogNotice(__FUNCTION__) << "TO FAVORITES PRESET: [" << PRESET_selected << "]";
+
+	//			if (MODE_Browser_NewPreset)
+	//			{
+	//				save(PRESET_selected, 0);
+	//			}
+	//		}
+
+	//		//-
+
+	//		//get/copy all favs presets from favs and send/save to browser folder ("archive")
+
+	//		ImGui::SameLine();
+	//		if (ImGui::Button("FROM FAVS"))
+	//		{
+	//			ofLogNotice(__FUNCTION__) << "FROM FAVS";
+	//			doGetFavsFromBrowser();
+	//		}
+
+	//		//-
+
+	//		//0. error when no files detected
+
+	//		if (numFilePresets == 0)
+	//		{
+	//			int n = 30;
+	//			float a = ofMap(ofGetFrameNum() % n, 0, n, 0.f, 1.f);
+	//			ImGui::PushID(1);
+	//			ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+	//			ImGui::Text("DIR OR FILES NOT FOUND!");
+	//			string browser_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+	//			const char *array = browser_path.c_str();
+	//			ImGui::Text(array);
+	//			ImGui::PopStyleColor(1);
+	//			ImGui::PopID();
+	//		}
+
+	//		else if (numFilePresets > 0)
+	//		{
+	//			//1. arrow buttons
+
+	//			static int counter = currentFile;
+	//			float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+	//			ImGui::PushButtonRepeat(true);
+
+	//			//--
+
+	//			//1.1 prev
+
+	//			if (ImGui::ArrowButton("##left", ImGuiDir_Left))
+	//			{
+	//				if (counter > 0)
+	//				{
+	//					counter--;
+	//					currentFile = counter;
+	//					if (currentFile < files.size())
+	//					{
+	//						browser_PresetName = fileNames[currentFile];
+	//						ofLogNotice(__FUNCTION__) << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
+	//						//if (MODE_Browser_NewPreset)
+	//						ofLogNotice(__FUNCTION__) << "LOAD" << endl;
+	//						ofLogNotice(__FUNCTION__) << "PRESET NAME: " << browser_PresetName;
+	//						browser_PresetLoad(browser_PresetName);
+	//					}
+	//				}
+	//			}
+
+	//			//--
+
+	//			//1.2 next
+
+	//			ImGui::SameLine(0.0f, spacing);
+	//			if (ImGui::ArrowButton("##right", ImGuiDir_Right))
+	//			{
+	//				if (counter < files.size() - 1)
+	//				{
+	//					counter++;
+	//					currentFile = counter;
+	//					if (currentFile < files.size())
+	//					{
+	//						browser_PresetName = fileNames[currentFile];
+	//						ofLogNotice(__FUNCTION__) << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
+
+	//						//if (MODE_Browser_NewPreset)
+	//						ofLogNotice(__FUNCTION__) << "LOAD PRESET NAME: " << browser_PresetName;
+	//						browser_PresetLoad(browser_PresetName);
+	//					}
+	//				}
+	//			}
+	//			ImGui::PopButtonRepeat();
+
+	//			//--
+
+	//			//1.3 text preview current preset number to total. (1/4)
+
+	//			ImGui::SameLine();
+	//			ImGui::Text("%d/%d", currentFile, numFilePresets - 1);
+	//		}
+
+	//		//--
+
+	//		//3. scrollable list
+
+	//		if (!fileNames.empty())
+	//		{
+	//			ImGui::SetNextItemWidth(140);
+
+	//			int currentFileIndex = currentFile;
+	//			if (ofxImGui::VectorCombo(" ", &currentFileIndex, fileNames))
+	//			{
+	//				ofLogNotice(__FUNCTION__) << "Preset Index: " << ofToString(currentFileIndex);
+	//				if (currentFileIndex < fileNames.size())
+	//				{
+	//					currentFile = currentFileIndex;
+	//					browser_PresetName = fileNames[currentFile];
+
+	//					ofLogNotice(__FUNCTION__) << "LOAD Preset Name: " << browser_PresetName;
+	//					browser_PresetLoad(browser_PresetName);
+	//				}
+	//			}
+	//		}
+
+	//		//--
+
+	//		//4.2 update
+
+	//		if (ImGui::Button("UPDATE"))
+	//		{
+	//			//browser_PresetName = textInput_temp;
+	//			//ofLogNotice(__FUNCTION__) << "UPDATE PRESET NAME: " << browser_PresetName << endl;
+
+	//			//0. get filename of selected
+	//			string _currName = files[currentFile].getBaseName();
+	//			ofLogNotice(__FUNCTION__) << "UPDATE Preset Name: " << _currName;
+
+	//			//1. delete old file
+	//			files[currentFile].remove();
+
+	//			//2. save "ovewrite"
+	//			browser_PresetSave(_currName);
+
+	//			//-
+
+	//			//workflow
+
+	//			//3. refresh files
+	//			browser_FilesRefresh();
+
+	//			//4. reselect last save preset (bc directory sorting changes)
+	//			ofLogNotice(__FUNCTION__) << "Reload last updated preset:";
+	//			int iNew = -1;//search index for filename
+	//			for (size_t i = 0; i < files.size(); i++)
+	//			{
+	//				string n = files[i].getBaseName();
+	//				if (n == _currName)
+	//				{
+	//					iNew = i;
+	//				}
+	//			}
+	//			if (iNew != -1)
+	//			{
+	//				ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << files[iNew].getBaseName();
+	//				currentFile = iNew;
+	//				browser_PresetName = fileNames[currentFile];
+	//				browser_PresetLoad(browser_PresetName);
+	//			}
+	//			else
+	//			{
+	//				ofLogError(__FUNCTION__) << "Not found! Bad Index [" << iNew << "]";
+	//			}
+	//		}
+
+	//		//-
+
+	//		//4.3 reload
+
+	//		ImGui::SameLine();
+	//		if (ImGui::Button("RELOAD"))
+	//		{
+	//			ofLogNotice(__FUNCTION__) << "RELOAD Preset Name: " << browser_PresetName;
+	//			browser_PresetLoad(browser_PresetName);
+	//		}
+
+	//		//-
+
+	//		//4.4 delete
+
+	//		ImGui::SameLine();
+	//		if (ImGui::Button("DELETE"))//current preset
+	//		{
+	//			ofLogNotice(__FUNCTION__) << "DELETE Preset Name: " << browser_PresetName;
+	//			ofLogNotice(__FUNCTION__) << "filepath: " << files[currentFile].getAbsolutePath();
+
+	//			//1. delete file
+	//			files[currentFile].remove();
+
+	//			//-
+
+	//			//workflow
+
+	//			//2. refresh files
+	//			bool b = browser_FilesRefresh();
+	//			if (b)
+	//			{
+	//				currentFile = 0;
+	//				browser_PresetName = fileNames[currentFile];
+	//				browser_PresetLoad(browser_PresetName);
+	//			}
+	//			else
+	//			{
+	//				ofLogError(__FUNCTION__) << "Error listing directory!";
+	//			}
+	//		}
+
+	//		//----
+
+	//		//mode new preset enabled
+
+	//		//5. second panel
+
+	//		if (MODE_Browser_NewPreset)
+	//		{
+	//			//5.1 new preset name
+
+	//			//ImGui::Text("NEW PRESET:");
+
+	//			//-
+
+	//			//5.2 user input text
+
+	//			//loaded string into char array
+	//			char tab[32];
+	//			strncpy(tab, textInput_New.c_str(), sizeof(tab));
+	//			tab[sizeof(tab) - 1] = 0;
+
+	//			if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
+	//			{
+	//				ofLogNotice(__FUNCTION__) << "InputText [tab]:" << ofToString(tab) << endl;
+	//				textInput_New = ofToString(tab);
+	//				ofLogNotice(__FUNCTION__) << "textInput_New:" << textInput_New << endl;
+
+	//				//bBlink = true;//not workind. we like to blink when mouse_on_text_input
+	//			}
+
+	//			//--
+
+	//			//5.3 save new
+
+	//			//workflow
+
+	//			//blink when it's editing a new preset..
+	//			//TODO:
+	//			bool bBlink;
+	//			bBlink = true;
+	//			if (bBlink)
+	//			{
+	//				//ImGui::PushID(1);
+	//				int n = 30;
+	//				float a = ofMap(ofGetFrameNum() % n, 0, n, 0.2f, 0.5f);
+	//				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+	//			}
+
+	//			if (ImGui::Button("SAVE"))
+	//			{
+	//				ofLogNotice(__FUNCTION__) << "textInput_New: " << textInput_New << endl;
+
+	//				//1. save
+	//				browser_PresetSave(textInput_New);
+
+	//				//-
+
+	//				//workflow
+
+	//				//2. disable new preset mode
+	//				MODE_Browser_NewPreset = false;
+
+	//				//3. refresh files
+	//				browser_FilesRefresh();
+
+	//				//4. reselect last save preset (bc directory sorting changes)
+	//				ofLogNotice(__FUNCTION__) << "Reload last saved preset:";
+	//				int iNew = -1;
+	//				for (size_t i = 0; i < files.size(); i++)
+	//				{
+	//					string n = files[i].getBaseName();
+	//					if (n == textInput_New)
+	//					{
+	//						iNew = i;
+	//					}
+	//				}
+	//				ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << files[iNew].getBaseName();
+	//				currentFile = iNew;
+	//				browser_PresetLoad(textInput_New);
+	//			}
+
+	//			if (bBlink)
+	//			{
+	//				ImGui::PopStyleColor(1);
+	//			}
+	//		}
+	//		ofxImGui::EndTree(mainSettings);
+	//	}
+
+	//	//--
+
+	//	//1. user params
+	//	browser_draw_ImGui_User(mainSettings);
+
+	//	//-
+	//}
+	//ofxImGui::EndWindow(mainSettings);
+
+	//return mainSettings.mouseOverGui;
+//}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_PresetSave(string name)//without xml extension nor path
@@ -3484,9 +3442,11 @@ void ofxPresetsManager::browser_Setup()
 	//-
 
 	gui_Browser.setup();
+
 	browser_ImGui_theme();
-	SHOW_ImGui = true;//not useful
+
 	bImGui_mouseOver.set("mouseOverGui", false);
+	SHOW_ImGui = true;//not useful
 
 	//load files structure directory
 	bool bLoaded = browser_FilesRefresh();
@@ -3623,6 +3583,8 @@ bool ofxPresetsManager::browser_FilesRefresh()
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_ImGui_theme()
 {
+#ifndef INCLUDE_ofxImGuiSimple
+
 	//must be done after setup the gui
 
 	ImGuiStyle *style = &ImGui::GetStyle();
@@ -3705,6 +3667,8 @@ void ofxPresetsManager::browser_ImGui_theme()
 	//   style->GrabRounding = 0.0f;
 	//   style->ScrollbarSize = 12.0f;
 	//   style->ScrollbarRounding = 0.0f;
+
+#endif
 }
 
 #endif

@@ -14,51 +14,45 @@
 ///
 ///	TODO:
 ///
-///	++	add workflow to not collide manual preset click with randomizer timer
+///
+///	++	ImGui: switch out of ofxImGui to simpleImGui
+///			it seems that when using more than one instance it crashes on exit and windows collides
+///			improve ImGui trees collapse and sizes
+///	+	repair autosave timer. exclude log
+///	++	performance: check memory_mode
+///			check disable autosave
+///			check 
+///
+///	+	add workflow to not collide manual preset click with randomizer timer
 ///	++	randomize editor preset
 ///			add limit range min/max to randomize
+///			do nesting toggles to improve view. create a group for related toggles..	
+///			clone using editor toggles to avoid clone disabled toggle params
+///			mode state to allow overwrite only enabled toggle params
 ///	++	add ofxUndo to randomizers
-///	++	ImGui: switch out of ofxImGui to simpleImGui
-///			improve ImGui trees collapse and sizes
-///	+	disable log on autosave timer mode
-///	++	add clone using editor toggles to avoid clone disabled toggle params
-///	++	add mode state to allow overwrite only enabled toggle params
-///	+	add define to disable all randomize stuff to make addon minimal expression 
-///	+	could make tween when changing params (?)
+///	+	add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
+///	+	could make tween when changing params 
 ///
 ///	BUG:
 ///
-///	+	there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager"
+///	?	there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager"
 ///
 ///---
 
 
 #pragma once
 
-///----------------------------------------------
-///
-///	DEFINES
-///
-///browser system
-#define INCLUDE_FILE_BROWSER_IM_GUI
-#ifdef INCLUDE_FILE_BROWSER_IM_GUI
-#define INCLUDE_RANDOMIZER
-#endif
-///also includes ofxGui inside ImGui
-///BUG: seems to make exceptions when multiple ImGui/ofxPresetsManager instances...
-///
-///debug errors
-#define INCLUDE_DEBUG_ERRORS
+//----------------------------------------------
 //
-#define INCLUDE_IMGUI_CUSTOM_FONT
-///
-///disable save settings
-///#define DEBUG_BLOCK_SAVE_SETTINGS//enable this bc sometimes there's crashes on exit
-///
-///measure performance ofxTimeMeasurements
-///#define TIME_SAMPLE_MEASURES 
-///
-//#define DEBUG_randomTest //uncomment to debug. comment to normal use. if enabled, random engine stops working
+//	DEFINES
+//
+#define INCLUDE_FILE_BROWSER_IM_GUI		//browser system & ImGui
+#define INCLUDE_ofxImGuiSimple			//browser system & ImGui
+//#define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
+//#define TIME_SAMPLE_MEASURES			//measure performance ofxTimeMeasurements
+#define INCLUDE_DEBUG_ERRORS			//debug errors
+//#define DEBUG_randomTest				//uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
+//#define DEBUG_BLOCK_SAVE_SETTINGS		//disable save settings//enable this bc sometimes there's crashes on exit
 
 ///----------------------------------------------
 
@@ -67,6 +61,11 @@
 
 //--
 
+#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+#define INCLUDE_RANDOMIZER
+#endif
+//BUG: seems to make exceptions when multiple ImGui/ofxPresetsManager instances...
+
 //internal control
 #include "ofxGui.h"
 
@@ -74,7 +73,11 @@
 
 //browser system
 #ifdef INCLUDE_FILE_BROWSER_IM_GUI
+#ifdef INCLUDE_ofxImGuiSimple
+#include "ofxImGuiSimple.h"
+#else
 #include "ofxImGui.h"
+#endif
 #endif
 
 //--
@@ -428,12 +431,12 @@ public:
 		ENABLE_RandomizeTimer = !ENABLE_RandomizeTimer;
 	}
 	//--------------------------------------------------------------
-	void doRandomizeBang()//trig randomize and select one of the favs presets
+	void doRandomizePresetFromFavs()//trig randomize and select one of the favs presets
 	{
 		bRandomizeSelect = true;
 	}
 	//--------------------------------------------------------------
-	void doRandomizePreset() {//randomize params of current selected preset
+	void doRandomizePresetSelected() {//randomize params of current selected preset
 		doRandomizeEditor();
 	}
 	////--------------------------------------------------------------
@@ -692,37 +695,29 @@ private:
 public:
 	ofParameter<bool> bImGui_mouseOver;
 	ofParameterGroup params_randomizer;
+
 private:
 	void browser_Setup();
 
-	ofxImGui::Gui gui_Browser;
 
 	ofParameter<bool> MODE_Browser_NewPreset;
 
 	bool SHOW_ImGui;
-	//bool bImGui_mouseOver;
 	bool bImGui_mouseOver_PRE;
 
 	bool browser_draw_ImGuiWindow();
 	bool browser_draw_ImGui();
-	void browser_draw_ImGui_User(ofxImGui::Settings &settings);
-	//void browser_draw_ImGui_MenuBar();
-	//void browser_draw_ImGui_MenuFile();
 
-	//TODO:
-	//void gui_saveToFile(const std::string &filename, ofAbstractParameter &parameter);
-	//void gui_loadFromFile(const std::string &filename, ofAbstractParameter &parameter);
-	//void gui_SaveAsSettings();
+#ifdef INCLUDE_ofxImGuiSimple
+	ofxImGuiSimple gui_Browser;
+#else
+	ofxImGui::Gui gui_Browser;
+	void browser_draw_ImGui_User(ofxImGui::Settings &settings);
+#endif
 
 	//layout
 	void browser_ImGui_theme();
-	//ofxImGui::Settings mainSettings;
 	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. must move by gui!  
-	//ofParameter<glm::vec2> ImGui_Size;//not used yet
-
-	////TODO: 
-	////DEBUG:
-	//void groupDebug(ofParameterGroup &group);
 
 	//-
 
