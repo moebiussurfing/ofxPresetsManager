@@ -1,5 +1,5 @@
 ofxDEBUG_errors
 ofxGui
-ofxImGuiSimple
+ofxImGui
 ofxPresetsManager
 ofxWindowApp

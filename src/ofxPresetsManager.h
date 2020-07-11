@@ -46,9 +46,10 @@
 //
 //	DEFINES
 //
-#define INCLUDE_FILE_BROWSER_IM_GUI		//browser system & ImGui
-#define INCLUDE_ofxImGuiSimple			//browser system & ImGui
+#define INCLUDE_GUI_IM_GUI		//browser system & ImGui
+//#define INCLUDE_ofxImGuiSimple			//TEST
 //#define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
+//
 //#define TIME_SAMPLE_MEASURES			//measure performance ofxTimeMeasurements
 #define INCLUDE_DEBUG_ERRORS			//debug errors
 //#define DEBUG_randomTest				//uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
@@ -61,7 +62,7 @@
 
 //--
 
-#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+#ifdef INCLUDE_GUI_IM_GUI
 #define INCLUDE_RANDOMIZER
 #endif
 //BUG: seems to make exceptions when multiple ImGui/ofxPresetsManager instances...
@@ -72,9 +73,10 @@
 //--
 
 //browser system
-#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+#ifdef INCLUDE_GUI_IM_GUI
 #ifdef INCLUDE_ofxImGuiSimple
 #include "ofxImGuiSimple.h"
+#include "Helpers.h"
 #else
 #include "ofxImGui.h"
 #endif
@@ -169,7 +171,7 @@ private:
 	//-
 
 private:
-#ifndef INCLUDE_FILE_BROWSER_IM_GUI
+#ifndef INCLUDE_GUI_IM_GUI
 	ofxPanel gui_InternalControl;
 #endif
 
@@ -479,11 +481,12 @@ public:
 
 	//browser
 private:
-#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+#ifdef INCLUDE_GUI_IM_GUI
 	//load presets from preset folder, not from favorites presets folders
 	void browser_PresetLoad(string name);
 	void browser_PresetSave(string name);
 	bool browser_FilesRefresh();
+	void browser_Setup();
 	float _w;
 #endif
 
@@ -523,35 +526,30 @@ public:
 		debugClicker = b;
 	}
 
-#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+#ifdef INCLUDE_GUI_IM_GUI
 
 	//--------------------------------------------------------------
 	void setPosition_GUI_Browser(int x, int y)
 	{
 		ImGui_Position = ofVec2f(x, y);
 	}
-	////--------------------------------------------------------------
-	//void setSize_GUI_Browser(int w, int h)
-	//{
-	//	ImGui_Size = ofVec2f(w, h);
-	//}
 	//--------------------------------------------------------------
-	void setVisible_GUI_Browser(bool b)
+	void setVisible_GUI_ImGui(bool b)
 	{
-		SHOW_Browser = b;
+		SHOW_ImGui = b;
 	}
 	//--------------------------------------------------------------
-	void toggleVisible_GUI_Browser()
+	void toggleVisible_GUI_ImGui()
 	{
-		SHOW_Browser = !SHOW_Browser;
+		SHOW_ImGui = !SHOW_ImGui;
 	}
 	//--------------------------------------------------------------
-	bool getVisible_GUI_Browser()
+	bool getVisible_GUI_ImGui()
 	{
-		return SHOW_Browser;
+		return SHOW_ImGui;
 	}
 #endif
-#ifndef INCLUDE_FILE_BROWSER_IM_GUI
+#ifndef INCLUDE_GUI_IM_GUI
 	//--------------------------------------------------------------
 	void setPosition_GUI_InternalControl(int x, int y)
 	{
@@ -690,46 +688,49 @@ private:
 	//-
 
 	//browser
-#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+#ifdef INCLUDE_GUI_IM_GUI
 
 public:
 	ofParameter<bool> bImGui_mouseOver;
 	ofParameterGroup params_randomizer;
 
 private:
-	void browser_Setup();
+	void ImGui_Setup();
 
 
 	ofParameter<bool> MODE_Browser_NewPreset;
 
-	bool SHOW_ImGui;
+	//bool SHOW_ImGui;
 	bool bImGui_mouseOver_PRE;
 
-	bool browser_draw_ImGuiWindow();
-	bool browser_draw_ImGui();
+	void ImGui_Draw_WindowBegin();
+	void ImGui_Draw_WindowEnd();
+	bool ImGui_Draw_Window();
 
 #ifdef INCLUDE_ofxImGuiSimple
-	ofxImGuiSimple gui_Browser;
+	ofxImGuiSimple gui_ImGui;
 #else
-	ofxImGui::Gui gui_Browser;
-	void browser_draw_ImGui_User(ofxImGui::Settings &settings);
+	ofxImGui::Gui gui_ImGui;
+	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
+	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
+	void ImGui_Draw_Advanced(ofxImGui::Settings &settings);
 #endif
 
 	//layout
-	void browser_ImGui_theme();
+	void ImGui_Theme();
 	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. must move by gui!  
 
 	//-
 
 public:
-	//--------------------------------------------------------------
-	bool isMouseOver()
-	{
-		bool b;
-		if (!SHOW_Browser) b = false;
-		else b = bImGui_mouseOver;
-		return b;
-	}
+	////--------------------------------------------------------------
+	//bool isMouseOver()
+	//{
+	//	bool b;
+	//	if (!SHOW_ImGui) b = false;
+	//	else b = bImGui_mouseOver;
+	//	return b;
+	//}
 
 	//bool isMouseOver_Changed()
 	//{
@@ -899,9 +900,9 @@ public:
 private:
 	ofParameterGroup params_Control;
 
-#ifdef INCLUDE_FILE_BROWSER_IM_GUI
+#ifdef INCLUDE_GUI_IM_GUI
 	//ofParameter<bool> SHOW_MenuTopBar;
-	ofParameter<bool> SHOW_Browser;
+	ofParameter<bool> SHOW_ImGui;
 #endif
 
 	ofParameter<bool> bSave;
