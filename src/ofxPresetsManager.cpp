@@ -3085,6 +3085,8 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 		ofxImGui::AddParameter(this->SHOW_ImGui);
 		ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
 
+		//-
+
 		ImGui::TreePop();
 	}
 }
@@ -3094,7 +3096,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 {
 	if (ofxImGui::BeginTree("FILES BROWSER", settings))
 	{
-		int numFilePresets = fileNames.size();
+		int _numfiles = fileNames.size();
 
 		//-
 
@@ -3103,7 +3105,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 
 		//-
 
-		//send/save current browsed (from "/archive/") preset to current presets on favorites
+		//0. send/save current browsed (from "/archive/") preset to current presets on favorites
 
 		if (ImGui::Button("TO FAVS"))
 		{
@@ -3129,9 +3131,9 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 
 		//-
 
-		//0. error when no files detected
+		//blink error when no files detected on folder
 
-		if (numFilePresets == 0)
+		if (_numfiles == 0)
 		{
 			int n = 30;
 			float a = ofMap(ofGetFrameNum() % n, 0, n, 0.f, 1.f);
@@ -3145,7 +3147,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 			ImGui::PopID();
 		}
 
-		else if (numFilePresets > 0)
+		else if (_numfiles > 0)
 		{
 			//1. arrow buttons
 
@@ -3155,7 +3157,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 
 			//--
 
-			//1.1 prev
+			//1.1 prev file
 
 			if (ImGui::ArrowButton("##left", ImGuiDir_Left))
 			{
@@ -3177,7 +3179,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 
 			//--
 
-			//1.2 next
+			//1.2 next file
 
 			ImGui::SameLine(0.0f, spacing);
 			if (ImGui::ArrowButton("##right", ImGuiDir_Right))
@@ -3201,15 +3203,15 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 
 			//--
 
-			//1.3 text preview current preset number to total. (1/4)
+			//1.3 text preview current preset index to total amount.
 
 			ImGui::SameLine();
-			ImGui::Text("%d/%d", currentFile, numFilePresets - 1);
+			ImGui::Text("%d/%d", currentFile, _numfiles - 1);
 		}
 
 		//--
 
-		//3. scrollable list
+		//3. scrollable filenames list
 
 		if (!fileNames.empty())
 		{
@@ -3249,10 +3251,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 			//2. save "ovewrite"
 			browser_PresetSave(_currName);
 
-			//-
-
 			//workflow
-
 			//3. refresh files
 			browser_FilesRefresh();
 
@@ -3304,10 +3303,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 			//1. delete file
 			files[currentFile].remove();
 
-			//-
-
 			//workflow
-
 			//2. refresh files
 			bool b = browser_FilesRefresh();
 			if (b)
@@ -3357,9 +3353,8 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 			//5.3 save new
 
 			//workflow
-
-			//blink when it's editing a new preset..
 			//TODO:
+			//blink when it's editing a new preset..
 			bool bBlink;
 			bBlink = true;
 			if (bBlink)
@@ -3377,10 +3372,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 				//1. save
 				browser_PresetSave(textInput_New);
 
-				//-
-
 				//workflow
-
 				//2. disable new preset mode
 				MODE_Browser_NewPreset = false;
 
@@ -3410,8 +3402,6 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 		}
 		ofxImGui::EndTree(settings);
 	}
-
-
 }
 
 //--------------------------------------------------------------
@@ -3425,13 +3415,12 @@ void ofxPresetsManager::ImGui_Draw_Advanced(ofxImGui::Settings &settings)
 	{
 		//1. presets randomizers
 
+		//draw progress bar for the randomizer timer
 		float _prog;
-
 		////long mode
 		//if (presetsRandomModeShort[PRESET_selected - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
 		////short mode
 		//else _prog = timerRandomizer / (float)randomizeDurationShort;
-
 		//bar relative only to long
 		if (ENABLE_RandomizeTimer) {
 			_prog = timerRandomizer / (float)randomizeDuration;
@@ -3448,6 +3437,8 @@ void ofxPresetsManager::ImGui_Draw_Advanced(ofxImGui::Settings &settings)
 			_prog = 0;
 		}
 		ImGui::ProgressBar(_prog);
+
+		//--
 
 		//1.1 randomizers presets
 		ofxImGui::AddGroup(params_Randomizer, settings);
@@ -3467,11 +3458,16 @@ void ofxPresetsManager::ImGui_Draw_Advanced(ofxImGui::Settings &settings)
 
 	//---
 
-	//3. advanced
+	//2. advanced
+
 	if (SHOW_Gui_AdvancedControl) 
 	{
+		//show ALL the addon params! mainly to debug..
 		ofxImGui::AddGroup(params_Control, settings);
 
+		//TODO:
+		//to customize presets folder outside /data of our app...
+		//ie: this will allow to use any folder of our computer, and share the presets between apps...
 		if (ImGui::Button("Set custom folder..."))
 		{
 			auto dialogResult = ofSystemLoadDialog("Set presets folder", true, ofToDataPath(""));
@@ -3480,7 +3476,6 @@ void ofxPresetsManager::ImGui_Draw_Advanced(ofxImGui::Settings &settings)
 				path_PresetsFolder_Custom = dialogResult.filePath;
 				bUseCustomPath = true;
 				ofLogNotice(__FUNCTION__) << "path custom: " << path_PresetsFolder_Custom;
-
 			}
 		}
 	}
