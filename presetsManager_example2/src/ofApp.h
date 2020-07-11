@@ -4,7 +4,7 @@
 
 ///
 ///
-//#define MODE_ImGui_EXTERNAL		//can be defined at the addon class and not here. or in both places
+//#define MODE_ImGui_EXTERNAL		//MUST be defined at the addon class (or in both places: here too)
 ///
 ///
 
