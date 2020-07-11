@@ -23,7 +23,7 @@ void ofApp::setup()
 	params.add(shapeSide.set("square side", 50, 5, 200));
 	paramsNested.setName("style");//another nested group
 	paramsNested.add(fill.set("fill", false));
-	paramsNested.add(color.set("color", ofColor(1), ofColor(0, 0), ofColor(1, 1)));
+	paramsNested.add(color.set("color", ofColor(0, 0), ofColor(0, 0), ofColor(255, 255)));
 	paramsNested.add(lineWidth.set("lineWidth", 1, 0.1, 10));
 	params.add(paramsNested);//main preset settings container
 
@@ -44,13 +44,21 @@ void ofApp::setup()
 	presetsManager.setVisible_PresetClicker(true);//user panel clicker
 	presetsManager.setPosition_PresetClicker(200, 100, 50);
 
+	//--
+
+#ifdef MODE_ImGui_EXTERNAL
+	presetsManager.ImGui_FontCustom();
+	gui_ImGui.setup();
+	presetsManager.ImGui_Theme();
+#endif
+
 	//-------
 
 	//local ofApp gui to show/edit our settings/parameters
 	//to show how our params/settings changes when using the presets manager
 	gui.setup("ofApp");
 	gui.add(params);
-	gui.setPosition(50, 500);
+	gui.setPosition(50, 300);
 }
 
 //--------------------------------------------------------------
@@ -72,7 +80,7 @@ void ofApp::draw()
 
 	//debug object linked to grouped parameters
 	string str;
-	
+
 	int x = gui.getPosition().x + 15;
 	int y = gui.getPosition().y + gui.getHeight() + 30;
 	int pad = 20;
@@ -82,8 +90,8 @@ void ofApp::draw()
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 		str = "lineWidth : " + ofToString(lineWidth);
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		//str = "color     : " + ofToString(color);
-		//ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		str = "color     : " + ofToString(color);
+		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 		str = "shapeType : " + ofToString(shapeType);
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 		str = "numShapes : " + ofToString(numShapes);
@@ -98,12 +106,13 @@ void ofApp::draw()
 
 	//scene draw object linked to grouped parameters
 	ofPushStyle();
+	ofPushMatrix();
+
+	ofTranslate(300, 50);
 	ofSetColor(color.get());
 	ofSetLineWidth(lineWidth);
 	if (fill) ofFill();
 	else ofNoFill();
-	ofPushMatrix();
-	ofTranslate(300, 50);
 
 	for (int i = 0; i < numShapes; ++i)
 	{
@@ -119,9 +128,57 @@ void ofApp::draw()
 
 	//-
 
+#ifdef MODE_ImGui_EXTERNAL
+	drawImGui();
+#endif
+
+	//-
+
 	//local gui parameters
 	gui.draw();
+
+	//--
 }
+
+#ifdef MODE_ImGui_EXTERNAL
+//--------------------------------------------------------------
+void ofApp::drawImGui()
+{
+	gui_ImGui.begin();
+
+	//ImGui::ShowDemoWindow();
+
+	if (presetsManager.SHOW_ImGui)
+	{
+		ofVec2f pos(500, 10);
+		auto mainSettings = ofxImGui::Settings();
+		mainSettings.windowPos = pos;
+		ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y));
+
+		string _name = "ofxPresetsManager";
+		bool _collapse = true;
+		if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
+		{
+			////0. tittle
+			//ImGui::Text("PRESETS MANAGER");
+
+			//1. basic controls
+			presetsManager.ImGui_Draw_Basic(mainSettings);
+
+			//2. browser params
+			presetsManager.ImGui_Draw_Browser(mainSettings);
+
+			//3. advanced params
+			presetsManager.ImGui_Draw_Advanced(mainSettings);
+		}
+		ofxImGui::EndWindow(mainSettings);
+
+		bMouseOverGui = mainSettings.mouseOverGui;
+	}
+
+	gui_ImGui.end();
+}
+#endif
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)

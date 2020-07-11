@@ -2,6 +2,12 @@
 
 #include "ofMain.h"
 
+///
+///
+//#define MODE_ImGui_EXTERNAL		//can be defined at the addon class and not here. or in both places
+///
+///
+
 #include "ofxPresetsManager.h"
 
 #define USE_WindowApp
@@ -9,6 +15,10 @@
 #include "ofxWindowApp.h"
 #endif
 #include "ofxGui.h"
+
+#ifdef MODE_ImGui_EXTERNAL
+#include "ofxImGui.h"
+#endif
 
 class ofApp : public ofBaseApp
 {
@@ -28,6 +38,14 @@ public:
 
 	ofxPanel gui;
 
+	//--
+
+#ifdef MODE_ImGui_EXTERNAL
+	ofxImGui::Gui gui_ImGui;
+	void drawImGui();
+	bool bMouseOverGui;//TODO: should have a callback to remove key listeners inside the class..
+#endif
+
     //--
 
     //presetsManager
@@ -42,13 +60,11 @@ public:
     ofParameterGroup paramsNested;
 	ofParameter<bool> fill;
 	ofParameter<float> lineWidth;
-	ofParameter<ofFloatColor> color;
+	ofParameter<ofColor> color;
 	ofParameter<int> shapeType;
 	ofParameter<int> numShapes;
 	ofParameter<int> separation;
     ofParameter<int> shapeSide;
-
-	//ofParameter<int> separationREF;
 	
 	////group2
 	//ofParameterGroup paramsNested;

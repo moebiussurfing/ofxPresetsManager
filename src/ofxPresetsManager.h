@@ -46,16 +46,17 @@
 //
 //	DEFINES
 //
-#define INCLUDE_GUI_IM_GUI		//browser system & ImGui
-//#define INCLUDE_ofxImGuiSimple			//TEST
-//#define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
+#define MODE_ImGui_EXTERNAL			//MODE_ImGui_EXTERNAL. this must be defined here and (not only) in ofApp (too)!!
+#define INCLUDE_GUI_IM_GUI				//ImGui & browser system
+#define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
+//#define USE_ofxImGuiSimple			//TEST alternative addon
 //
 //#define TIME_SAMPLE_MEASURES			//measure performance ofxTimeMeasurements
 #define INCLUDE_DEBUG_ERRORS			//debug errors
 //#define DEBUG_randomTest				//uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
 //#define DEBUG_BLOCK_SAVE_SETTINGS		//disable save settings//enable this bc sometimes there's crashes on exit
-
-///----------------------------------------------
+//
+//----------------------------------------------
 
 
 #include "ofMain.h"
@@ -74,7 +75,7 @@
 
 //browser system
 #ifdef INCLUDE_GUI_IM_GUI
-#ifdef INCLUDE_ofxImGuiSimple
+#ifdef USE_ofxImGuiSimple
 #include "ofxImGuiSimple.h"
 #include "Helpers.h"
 #else
@@ -95,10 +96,6 @@
 #ifdef TIME_SAMPLE_MEASURES
 #include "ofxTimeMeasurements.h"
 #else
-#define TS_START_NIF
-#define TS_STOP_NIF
-#define TS_START_ACC
-#define TS_STOP_ACC
 #define TS_START
 #define TS_STOP
 #define TSGL_START
@@ -249,7 +246,12 @@ private:
 
 #pragma mark - CALLBACKS
 private:
+
 	bool DISABLE_CALLBACKS = true;//to avoid startup crashes and objects are not initialized properly
+	//updating some params before save will trigs also the group callbacks
+	//so we disable this callbacks just in case params updatings are required
+	//in this case we will need to update gui position param
+
 	bool bIsDoneLoad = false;
 
 	//--
@@ -291,6 +293,7 @@ public:
 
 	void setup();//must be called after params group has been added!
 	void setup(std::string name);//optional to set gui panel name header label
+	void startup();//must be called after setup to se initial states
 
 	//-
 
@@ -527,9 +530,8 @@ public:
 	}
 
 #ifdef INCLUDE_GUI_IM_GUI
-
 	//--------------------------------------------------------------
-	void setPosition_GUI_Browser(int x, int y)
+	void setPosition_GUI_ImGui(int x, int y)
 	{
 		ImGui_Position = ofVec2f(x, y);
 	}
@@ -549,6 +551,7 @@ public:
 		return SHOW_ImGui;
 	}
 #endif
+
 #ifndef INCLUDE_GUI_IM_GUI
 	//--------------------------------------------------------------
 	void setPosition_GUI_InternalControl(int x, int y)
@@ -563,13 +566,11 @@ public:
 	{
 		SHOW_Gui_AdvancedControl = visible;
 	}
-
 	//--------------------------------------------------------------
 	bool isVisible_GUI_Internal()
 	{
 		return SHOW_Gui_AdvancedControl;
 	}
-
 	//--------------------------------------------------------------
 	void setToggleVisible_GUI_Internal()
 	{
@@ -583,7 +584,6 @@ public:
 		clicker_Pos.y = y;
 		clicker_cellSize = _cellSize;
 	}
-
 	//--------------------------------------------------------------
 	void setVisible_PresetClicker(bool visible)
 	{
@@ -624,13 +624,11 @@ public:
 	{
 		autoLoad = b;
 	}
-
 	//--------------------------------------------------------------
 	void setAutoSave(bool b)
 	{
 		autoSave = b;
 	}
-
 	//--------------------------------------------------------------
 	void setAutoSaveTimer(bool b)
 	{
@@ -640,29 +638,21 @@ public:
 	//--
 
 public:
-
-	//from 0 to last (7).
-	ofParameter<int> PRESET_selected;
+	ofParameter<int> PRESET_selected;//main current preset selector
 
 private:
-
-	int PRESET_selected_PRE = -1;
-
-	//ofParameter<int> PRESET2_selected;
-	//int selected2_PRE = -1;
+	int PRESET_selected_PRE = -1;//used as callback
 
 	//--
 
 public:
-
 	//switch on or off the control with the keys
 	void setToggleKeysControl(bool active);
 
 	//-
 
-private:
-
 	//engine
+private:
 
 	//save to a preset
 	void save(int presetIndex, int guiIndex = 0);
@@ -683,44 +673,48 @@ private:
 
 	ofParameter<bool> SHOW_Gui_AdvancedControl;
 
-	bool debugClicker = true;//?
+	bool debugClicker = true;
 
 	//-
 
-	//browser
+	//ImGui
 #ifdef INCLUDE_GUI_IM_GUI
 
+	//ImGui pure content
 public:
-	ofParameter<bool> bImGui_mouseOver;
-	ofParameterGroup params_randomizer;
-
-private:
-	void ImGui_Setup();
-
-
-	ofParameter<bool> MODE_Browser_NewPreset;
-
-	//bool SHOW_ImGui;
-	bool bImGui_mouseOver_PRE;
-
-	void ImGui_Draw_WindowBegin();
-	void ImGui_Draw_WindowEnd();
-	bool ImGui_Draw_Window();
-
-#ifdef INCLUDE_ofxImGuiSimple
-	ofxImGuiSimple gui_ImGui;
-#else
-	ofxImGui::Gui gui_ImGui;
 	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
 	void ImGui_Draw_Advanced(ofxImGui::Settings &settings);
-#endif
 
-	//layout
 	void ImGui_Theme();
-	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. must move by gui!  
+	void ImGui_FontCustom();
 
 	//-
+
+private:
+#ifdef USE_ofxImGuiSimple
+	ofxImGuiSimple gui_ImGui;
+#else
+
+#ifndef MODE_ImGui_EXTERNAL
+	ofxImGui::Gui gui_ImGui;
+	void ImGui_Setup();
+	void ImGui_Draw_WindowBegin();
+	void ImGui_Draw_WindowEnd();
+	bool ImGui_Draw_Window();
+#endif
+#endif
+
+	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. 
+
+	ofParameter<bool> MODE_Browser_NewPreset;
+
+	//-
+
+private:
+	ofParameter<bool> bImGui_mouseOver;
+	bool bImGui_mouseOver_PRE;
+	bool bMouseOver_Changed = false;
 
 public:
 	////--------------------------------------------------------------
@@ -741,8 +735,10 @@ public:
 	//	}
 	//}
 
-private:
-	bool bMouseOver_Changed = false;
+	//--
+
+public:
+	ofParameterGroup params_randomizer;
 
 	//--
 
@@ -763,7 +759,7 @@ private:
 
 public:
 	//--------------------------------------------------------------
-	void doGetFavsFromBrowser()//save al favorites presets to the browser (archive) folder
+	void doGetFavsToFilesBrowser()//save all favorites presets to the browser (archive) folder
 	{
 		ofLogNotice(__FUNCTION__);
 
@@ -846,13 +842,12 @@ private:
 	int modeKeySave;//save mod key
 	bool bKeySave;//save mod key state
 
-	//TODO:
-	//swap selected preset swith the clicked (i.e: 4 -> 7  &  4 <- 7)
+	//swap selected preset with the currently clicked (i.e: 4 -> 7  &  4 <- 7)
 	int modKeySwap;//swap mod key 
 	bool bKeySwap;//swap mod key state
 
-	bool lastMouseButtonState;
 	void mousePressed(int x, int y);
+	bool lastMouseButtonState;
 
 	std::vector<int> newIndices;//? this seems to be the number of the groups(? )
 
@@ -864,10 +859,6 @@ private:
 	void doLoad(int pIndex);//engine loader. not used? bc bug on bLoad trigger..
 	void doSave(int pIndex);//engine saver starting at 0
 
-	//TODO:
-	//for multiple groups new feature..
-	//void doSave2(int pIndex);
-
 	//-
 
 private:
@@ -878,22 +869,12 @@ private:
 
 	//-
 
-	//void groupDebug(ofParameterGroup &group);
-
-	//-
-
-	//parameters
-
-	//-
-
-	//control panel settings/states
+	//callback
 private:
 	void Changed_Params_Control(ofAbstractParameter &e);
 
 	//-
 
-	//control presetsManager params
-	//to select presets, clone, save..
 public:
 	ofParameter<bool> SHOW_ClickPanel;
 
@@ -901,12 +882,13 @@ private:
 	ofParameterGroup params_Control;
 
 #ifdef INCLUDE_GUI_IM_GUI
-	//ofParameter<bool> SHOW_MenuTopBar;
+public:
 	ofParameter<bool> SHOW_ImGui;
 #endif
 
+private:
 	ofParameter<bool> bSave;
-	//ofParameter<bool> bLoad;//buggy
+	//ofParameter<bool> bLoad;
 
 	ofParameter<bool> autoSave;
 	ofParameter<bool> autoLoad;
@@ -931,11 +913,6 @@ private:
 	ofParameter<bool> bAutosaveTimer;
 	uint64_t timerLast_Autosave = 0;
 	int timeToAutosave = 9000;
-
-	//bool DISABLE_Callbacks = false;
-	//updating some params before save will trigs also the group callbacks
-	//so we disable this callbacks just in case params updatings are required
-	//in this case we will need to update gui position param
 
 	//--
 

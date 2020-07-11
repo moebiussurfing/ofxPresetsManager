@@ -484,7 +484,7 @@ void ofxPresetsManager::setupEditor()
 	bRandomizeEditorAll.setSerializable(false);
 	bRandomizeEditorNone.setSerializable(false);
 
-	params_Editor.setName("PRESET EDIT TOOLS");
+	params_Editor.setName("PRESET EDIT");
 	params_Editor.add(bRandomizeEditor);
 	params_Editor.add(bRandomizeEditorAll);
 	params_Editor.add(bRandomizeEditorNone);
@@ -539,7 +539,7 @@ void ofxPresetsManager::setupRandomizer()
 		_gShort.add(p);
 	}
 
-	params_Randomizer.setName("RANDOMIZER PRESET SELECTOR");
+	params_Randomizer.setName("FAVORITES");
 	params_Randomizer.add(ENABLE_RandomizeTimer);
 	params_Randomizer.add(bRandomizeSelect);
 	//params_Randomizer.add(randomizeSpeedF);
@@ -559,13 +559,15 @@ void ofxPresetsManager::setupRandomizer()
 //--------------------------------------------------------------
 ofxPresetsManager::ofxPresetsManager()
 {
-	//subscribed to auto run update and draw without required 'manual calls'
-	ofAddListener(ofEvents().update, this, &ofxPresetsManager::update);
-	ofAddListener(ofEvents().draw, this, &ofxPresetsManager::draw);
-
 	//-
 
 	DISABLE_CALLBACKS = true;
+
+	//-
+
+	//subscribed to auto run update and draw without required 'manual calls'
+	ofAddListener(ofEvents().update, this, &ofxPresetsManager::update);
+	ofAddListener(ofEvents().draw, this, &ofxPresetsManager::draw);
 
 	//-
 
@@ -627,27 +629,24 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//--
 
-	//alternative callbacks to know when preset loading/save is done
+	//callbacks to know when preset loading/save is done
+
+	//alternative callbacks
 	DONE_load.set("DONE LOAD", false);//easy callback to know (in ofApp) that preset LOAD is done
 	DONE_save.set("DONE SAVE", false);//easy callback to know (in ofApp) that preset SAVE is done
 
-	//we can use too the easy isDoneLoad() to check in ofApp update() as kind of callback.
+	//easy callback: we can use too the easy isDoneLoad() to check in ofApp update() as kind of callback.
 
-	//-
+	//--
 
 	//control parameters
 
 	PRESET_selected.set("PRESET", 0, 0, numPresetsFavorites - 1);
 
 #ifdef INCLUDE_GUI_IM_GUI
-	MODE_Browser_NewPreset.set("NEW!", false);
 	SHOW_ImGui.set("SHOW ImGui", false);
-	//SHOW_MenuTopBar.set("SHOW MENU", false);
-
+	MODE_Browser_NewPreset.set("NEW!", false);
 	browser_PresetName = "NO_NAME_PRESET";//browser loaded preset name
-
-	////radomizer
-	//setupRandomizer();
 #endif
 
 	bSave.set("SAVE", false);
@@ -684,29 +683,19 @@ ofxPresetsManager::ofxPresetsManager()
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
-	//ImGui_Size.set("GUI BROWSER SIZE",
-	//	glm::vec2(100, 0),
-	//	glm::vec2(0, 0),
-	//	glm::vec2(ofGetWidth(), ofGetHeight())
-	//);
 #endif
 
 	//-
 
 	//exclude from xml settings
 
-	//TODO:
-	//BUG: 
-	//avoid make the group xml empty (when all inside params are excluded!)
-
-	//bLoad.setSerializable(false);
 	bSave.setSerializable(false);
 	bCloneRight.setSerializable(false);
 	bCloneAll.setSerializable(false);
 	loadToMemory.setSerializable(false);
 	saveFromMemory.setSerializable(false);
+	//bLoad.setSerializable(false);
 	//SHOW_Gui_AdvancedControl.setSerializable(false);
-
 	//params_Tools.setSerializable(false);
 
 	//-
@@ -715,13 +704,9 @@ ofxPresetsManager::ofxPresetsManager()
 
 	params_Favorites.setName("USER");
 	params_Favorites.add(PRESET_selected);
-	//params_Favorites.add(PRESET2_selected);
 
 	//params_Favorites.add(bLoad);
 	params_Favorites.add(bSave);
-	//#ifdef INCLUDE_GUI_IM_GUI
-	//	params_Favorites.add(MODE_Browser_NewPreset);
-	//#endif
 
 	params_Options.setName("OPTIONS");
 	params_Options.add(MODE_MemoryLive);
@@ -734,7 +719,6 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.setName("GUI");
 	params_Gui.add(SHOW_Gui_AdvancedControl);
 	params_Gui.add(SHOW_ClickPanel);
-	//params_Gui.add(SHOW_MenuTopBar);
 #ifdef INCLUDE_GUI_IM_GUI
 	params_Gui.add(SHOW_ImGui);
 #endif
@@ -743,9 +727,10 @@ ofxPresetsManager::ofxPresetsManager()
 	//layout
 #ifdef INCLUDE_GUI_IM_GUI
 	params_Gui.add(ImGui_Position);
-	//params_Gui.add(ImGui_Size);
 #endif
 	params_Gui.add(Gui_Internal_Position);
+
+	//---
 
 	params_Tools.setName("HELPER TOOLS");
 	params_Tools.add(bCloneRight);
@@ -896,61 +881,69 @@ void ofxPresetsManager::setup()
 	//--
 
 #ifdef INCLUDE_GUI_IM_GUI
+
 	//browser
 	browser_Setup();
 
 	//radomizer
+	params_randomizer.setName("RANDOMIZERS");
 	setupRandomizer();
 
 	//preset editor tools
 	setupEditor();
-	params_randomizer.setName("RANDOMIZERS");
 
 	//ImGui
+#ifndef MODE_ImGui_EXTERNAL
 	ImGui_Setup();
 #endif
+
+#endif
+
+	//-------
+
+	startup();
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::startup()
+{
+	ofLogNotice(__FUNCTION__);
+
+	DISABLE_CALLBACKS = false;
+
+	//--
+
+	//all app session settings (not the presets related)
+	load_ControlSettings();
 
 	//--
 
 	//timer auto save
 	timerLast_Autosave = ofGetElapsedTimeMillis();
 
+	setVisible_GUI_Internal(false);
+
 	//--
 
 	////memory mode
 	//load_AllKit_ToMemory();
 
-
-	//-------
-
-	//STARTUP
-
-	//app settings
-	DISABLE_CALLBACKS = false;
-
-	load_ControlSettings();
-
 	//TODO:
 	//PRESET_selected_PRE = -1;
 
-	setVisible_GUI_Internal(false);
-
-	//TODO:
-	bRandomizeEditorAll = true;
-
-	//TODO:
-	//refresh();
-
-	//--------
-
+	//workflow
+	////TODO: enable all params toggles to the editor so rando affects all params by default
+	//bRandomizeEditorAll = true;
 
 	////TODO
 	////moved from add
 	////TODO: bug on mixerBlend.. in load_AllKit_ToMemory...
 	////gui_LabelName = groups[0].getName();//TODO: one group only
 
-	////memory mode
-	//load_AllKit_ToMemory();
+	//--------
+
+	//TODO:
+	//refresh();
 }
 
 //--------------------------------------------------------------
@@ -960,7 +953,6 @@ void ofxPresetsManager::windowResized(int w, int h)
 
 	////use this bc save/load is not working
 	//#ifdef INCLUDE_GUI_IM_GUI
-	//	ImGui_Size = glm::vec2(250, 0);//width/height
 	//	ImGui_Position = glm::vec2(w - ImGui_Size.get().x - 10, 10);
 	//#endif
 }
@@ -1115,7 +1107,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	//gui
 
 #ifdef INCLUDE_GUI_IM_GUI
-
+#ifndef MODE_ImGui_EXTERNAL
 	//draw ImGui
 	if (SHOW_ImGui)
 	{
@@ -1126,6 +1118,9 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 
 		ImGui_Draw_WindowEnd();
 	}
+#else
+	bImGui_mouseOver = false;
+#endif
 #endif
 }
 
@@ -2233,13 +2228,13 @@ void ofxPresetsManager::Changed_Params_Editor(ofAbstractParameter &e)
 
 		//-
 
-		if (name == bRandomizeEditor.getName() && bRandomizeEditor)
+		if (name == bRandomizeEditor.getName() && bRandomizeEditor)//trig randomize
 		{
 			bRandomizeEditor = false;
 
 			doRandomizeEditor();
 		}
-		else if (name == bRandomizeEditorAll.getName() && bRandomizeEditorAll)
+		else if (name == bRandomizeEditorAll.getName() && bRandomizeEditorAll)//all
 		{
 			bRandomizeEditorAll = false;
 
@@ -2247,7 +2242,7 @@ void ofxPresetsManager::Changed_Params_Editor(ofAbstractParameter &e)
 				p.set(true);
 			}
 		}
-		else if (name == bRandomizeEditorNone.getName() && bRandomizeEditorNone)
+		else if (name == bRandomizeEditorNone.getName() && bRandomizeEditorNone)//none
 		{
 			bRandomizeEditorNone = false;
 
@@ -2255,7 +2250,7 @@ void ofxPresetsManager::Changed_Params_Editor(ofAbstractParameter &e)
 				p.set(false);
 			}
 		}
-		else if (name == bRandomizeEditorPopulateFavs.getName() && bRandomizeEditorPopulateFavs)
+		else if (name == bRandomizeEditorPopulateFavs.getName() && bRandomizeEditorPopulateFavs)//populate random all favs
 		{
 			bRandomizeEditorPopulateFavs = false;
 			doPopulateFavs();
@@ -2552,6 +2547,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 //--------------------------------------------------------------
 void ofxPresetsManager::load_ControlSettings()
 {
+	ofLogNotice(__FUNCTION__);
+
 	ofXml settings;
 	string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
 	bool bLoaded = settings.load(path);
@@ -2559,12 +2556,12 @@ void ofxPresetsManager::load_ControlSettings()
 #ifdef INCLUDE_DEBUG_ERRORS
 	if (!bLoaded)
 	{
-		errorsDEBUG.addError(gui_LabelName + " ofxPresetsManager", "load_ControlSettings()", path);
+		errorsDEBUG.addError(gui_LabelName + ofToString(__FUNCTION__), "load_ControlSettings()", path);
 	}
 #endif
 
-	ofLogNotice(__FUNCTION__) << "load_ControlSettings: " << path;
-	ofLogNotice(__FUNCTION__) << "load_ControlSettings: PRESET " << PRESET_selected;
+	ofLogNotice(__FUNCTION__) << path;
+	ofLogNotice(__FUNCTION__) << "PRESET " << PRESET_selected;
 
 	if (bLoaded)
 	{
@@ -2594,7 +2591,7 @@ void ofxPresetsManager::save_ControlSettings()
 	//TODO: 
 	//crashes sometimes?
 #ifndef INCLUDE_GUI_IM_GUI
-//get gui position from panel to update the position param
+	//get gui position from panel to update the position param
 	Gui_Internal_Position = glm::vec2(gui_InternalControl.getPosition());
 
 	//float x, y;
@@ -2842,10 +2839,138 @@ void ofxPresetsManager::exit()
 
 #ifdef INCLUDE_GUI_IM_GUI
 
+//public
+
+//--------------------------------------------------------------
+void ofxPresetsManager::ImGui_FontCustom() {
+	ofLogNotice(__FUNCTION__);
+
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	string _name = "overpass-mono-bold.otf";
+	string _path = "assets/fonts/" + _name;//assets folder
+	io.Fonts->AddFontFromFileTTF(&ofToDataPath(_path)[0], 13.0f);
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::ImGui_Theme()
+{
+ofLogNotice(__FUNCTION__);
+
+#ifndef USE_ofxImGuiSimple
+
+	//must be done after setup the gui
+
+	ImGuiStyle *style = &ImGui::GetStyle();
+
+	style->FramePadding = ImVec2(4, 2);
+	//style->WindowMinSize = ImVec2(160, 65);
+	//style->ItemSpacing = ImVec2(6, 2);
+	style->ItemSpacing = ImVec2(6, 4);
+	style->ItemInnerSpacing = ImVec2(6, 4);
+	style->Alpha = 1.0f;
+	style->WindowRounding = 0.0f;
+	style->FrameRounding = 0.0f;
+	style->IndentSpacing = 6.0f;
+	style->ItemInnerSpacing = ImVec2(2, 4);
+	style->ColumnsMinSpacing = 50.0f;
+	style->GrabMinSize = 14.0f;
+	style->GrabRounding = 0.0f;
+	style->ScrollbarSize = 12.0f;
+	style->ScrollbarRounding = 0.0f;
+
+	//my dark theme
+
+	//ImVec4* colors = ImGui::GetStyle().Colors;
+	style->Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+	style->Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+	style->Colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
+	style->Colors[ImGuiCol_ChildBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.00f);
+	style->Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
+	style->Colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.50f);
+	style->Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+	style->Colors[ImGuiCol_FrameBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.54f);
+	style->Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.26f, 0.26f, 0.26f, 0.68f);
+	style->Colors[ImGuiCol_FrameBgActive] = ImVec4(0.25f, 0.25f, 0.25f, 0.67f);
+	style->Colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
+	style->Colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+	style->Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
+	style->Colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
+	style->Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
+	style->Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.11f, 0.11f, 1.00f);
+	style->Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
+	style->Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
+	style->Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+	style->Colors[ImGuiCol_SliderGrab] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+	style->Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.74f, 0.75f, 0.77f, 0.79f);
+	style->Colors[ImGuiCol_Button] = ImVec4(0.28f, 0.28f, 0.28f, 1.00f);
+	style->Colors[ImGuiCol_ButtonHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.79f);
+	style->Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.00f, 0.00f, 0.70f);
+	style->Colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.31f);
+	style->Colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+	style->Colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.26f, 0.26f, 1.00f);
+	style->Colors[ImGuiCol_Separator] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
+	style->Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.29f, 0.29f, 0.29f, 0.78f);
+	style->Colors[ImGuiCol_SeparatorActive] = ImVec4(0.37f, 0.37f, 0.37f, 1.00f);
+	style->Colors[ImGuiCol_ResizeGrip] = ImVec4(0.44f, 0.44f, 0.44f, 0.25f);
+	style->Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.68f, 0.68f, 0.68f, 0.67f);
+	style->Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.68f, 0.68f, 0.68f, 0.95f);
+	style->Colors[ImGuiCol_PlotLines] = ImVec4(0.81f, 0.79f, 0.79f, 1.00f);
+	style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.58f, 0.58f, 0.58f, 1.00f);
+	style->Colors[ImGuiCol_PlotHistogram] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+	style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+	style->Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.35f);
+	style->Colors[ImGuiCol_DragDropTarget] = ImVec4(0.50f, 0.50f, 0.50f, 0.90f);
+	style->Colors[ImGuiCol_NavHighlight] = ImVec4(0.79f, 0.79f, 0.79f, 1.00f);
+	style->Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+	style->Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+	style->Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+
+	//   //2. defaut dark theme exported
+	//   style->WindowMinSize = ImVec2(160, 65);
+	//   style->FramePadding = ImVec2(4, 2);
+	//   style->ItemSpacing = ImVec2(6, 2);
+	//   style->ItemInnerSpacing = ImVec2(6, 4);
+	//   style->Alpha = 1.0f;
+	//   style->WindowRounding = 0.0f;
+	//   style->FrameRounding = 0.0f;
+	//   style->IndentSpacing = 6.0f;
+	//   style->ItemInnerSpacing = ImVec2(2, 4);
+	//   style->ColumnsMinSpacing = 50.0f;
+	//   style->GrabMinSize = 14.0f;
+	//   style->GrabRounding = 0.0f;
+	//   style->ScrollbarSize = 12.0f;
+	//   style->ScrollbarRounding = 0.0f;
+
+#endif
+}
+
+#ifndef MODE_ImGui_EXTERNAL
+//--------------------------------------------------------------
+void ofxPresetsManager::ImGui_Setup()
+{
+ofLogNotice(__FUNCTION__);
+	//--
+
+	//font customize
+#ifdef INCLUDE_IMGUI_CUSTOM_FONT
+	ImGui_FontCustom();
+#endif
+
+	//--
+
+	gui_ImGui.setup();
+
+	ImGui_Theme();
+	bImGui_mouseOver.set("mouseOverGui", false);
+
+	//--
+}
+
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_WindowBegin()
 {
-#ifndef INCLUDE_ofxImGuiSimple
+#ifndef USE_ofxImGuiSimple
 	this->gui_ImGui.begin();
 #else
 	gui_ImGui.begin();
@@ -2877,13 +3002,50 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 
 	//--
 
-#ifndef INCLUDE_ofxImGuiSimple
+#ifndef USE_ofxImGuiSimple
 	this->gui_ImGui.end();
 #else
 	gui_ImGui.end();
 #endif
 }
 
+//--------------------------------------------------------------
+bool ofxPresetsManager::ImGui_Draw_Window()
+{
+	ofVec2f pos(ImGui_Position.get().x, ImGui_Position.get().y);
+
+	auto mainSettings = ofxImGui::Settings();
+	mainSettings.windowPos = pos;
+	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y));
+
+	//-
+
+	string _name = groups[0].getName();
+	bool _collapse = true;
+
+	if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
+	{
+		//0. tittle
+		ImGui::Text("PRESETS MANAGER");
+
+		//1. basic controls
+		ImGui_Draw_Basic(mainSettings);
+
+		//2. browser params
+		ImGui_Draw_Browser(mainSettings);
+
+		//3. advanced params
+		ImGui_Draw_Advanced(mainSettings);
+	}
+	ofxImGui::EndWindow(mainSettings);
+
+	return mainSettings.mouseOverGui;
+}
+
+#endif
+#endif
+
+#ifdef INCLUDE_GUI_IM_GUI//ImGui pure content
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 {
@@ -2907,7 +3069,7 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 			//popupale all favs
 			doPopulateFavs();
 			//create browser files too
-			doGetFavsFromBrowser();
+			doGetFavsToFilesBrowser();
 		}
 
 		//-
@@ -2915,12 +3077,10 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 		//ImGui::SetNextItemWidth(_w);
 		ofxImGui::AddParameter(this->autoSave);
 		ofxImGui::AddParameter(this->MODE_MemoryLive);
-		//ofxImGui::AddParameter(this->MODE_Browser_NewPreset);
 
+		//--
 
-	//--
-
-	//2. panels toggles
+		//2. panels toggles
 		ofxImGui::AddParameter(this->SHOW_ClickPanel);
 		ofxImGui::AddParameter(this->SHOW_ImGui);
 		ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
@@ -2964,7 +3124,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 		if (ImGui::Button("FROM FAVS"))
 		{
 			ofLogNotice(__FUNCTION__) << "FROM FAVS";
-			doGetFavsFromBrowser();
+			doGetFavsToFilesBrowser();
 		}
 
 		//-
@@ -3250,11 +3410,14 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 		}
 		ofxImGui::EndTree(settings);
 	}
+
+
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Advanced(ofxImGui::Settings &settings)
 {
+
 	//1. randomizers
 
 	bool b = false;
@@ -3283,7 +3446,7 @@ void ofxPresetsManager::ImGui_Draw_Advanced(ofxImGui::Settings &settings)
 		}
 		else {
 			_prog = 0;
-	}
+		}
 		ImGui::ProgressBar(_prog);
 
 		//1.1 randomizers presets
@@ -3300,27 +3463,15 @@ void ofxPresetsManager::ImGui_Draw_Advanced(ofxImGui::Settings &settings)
 		//-
 
 		ImGui::TreePop();
-}
-
-	//--
-
-	////2. panels toggles
-	//ofxImGui::AddParameter(this->SHOW_ClickPanel);
-	//ofxImGui::AddParameter(this->SHOW_ImGui);
-	//ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
+	}
 
 	//---
 
 	//3. advanced
-	if (SHOW_Gui_AdvancedControl) {
-		bool b = true;
-		//if (ofxImGui::BeginTree(b, mainSettings))
-		{
-			//ofxImGui::AddParameter(MODE_MemoryLive);
-			ofxImGui::AddGroup(params_Control, settings);
+	if (SHOW_Gui_AdvancedControl) 
+	{
+		ofxImGui::AddGroup(params_Control, settings);
 
-			//ofxImGui::EndTree(mainSettings);
-		}
 		if (ImGui::Button("Set custom folder..."))
 		{
 			auto dialogResult = ofSystemLoadDialog("Set presets folder", true, ofToDataPath(""));
@@ -3334,48 +3485,9 @@ void ofxPresetsManager::ImGui_Draw_Advanced(ofxImGui::Settings &settings)
 		}
 	}
 }
+#endif
 
-//--------------------------------------------------------------
-bool ofxPresetsManager::ImGui_Draw_Window()
-{
-	ofVec2f pos(ImGui_Position.get().x, ImGui_Position.get().y);
-
-	auto mainSettings = ofxImGui::Settings();
-	mainSettings.windowPos = pos;
-	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y));
-
-	//-
-
-	string _name = groups[0].getName();
-	bool _collapse = true;
-
-	if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
-	{
-		//0. tittle
-		ImGui::Text("PRESETS MANAGER");
-
-		//-- 
-
-		//1. basic controls
-		ImGui_Draw_Basic(mainSettings);
-
-		//-- 
-
-		//2. browser params
-		ImGui_Draw_Browser(mainSettings);
-
-		//--
-
-		//3. advanced params
-		ImGui_Draw_Advanced(mainSettings);
-
-		//-
-	}
-	ofxImGui::EndWindow(mainSettings);
-
-	return mainSettings.mouseOverGui;
-}
-
+#ifdef INCLUDE_GUI_IM_GUI//browser
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_PresetSave(string name)//without xml extension nor path
 {
@@ -3434,28 +3546,6 @@ void ofxPresetsManager::browser_Setup()
 		}
 	}
 }
-//--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Setup()
-{
-	//--
-
-	//font customize
-#ifdef INCLUDE_IMGUI_CUSTOM_FONT
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	string _name = "overpass-mono-bold.otf";
-	string _path = "assets/fonts/" + _name;//assets folder
-	io.Fonts->AddFontFromFileTTF(&ofToDataPath(_path)[0], 13.0f);
-#endif
-
-	//--
-
-	gui_ImGui.setup();
-	ImGui_Theme();
-	bImGui_mouseOver.set("mouseOverGui", false);
-
-	//--
-	}
 
 //--------------------------------------------------------------
 bool ofxPresetsManager::browser_FilesRefresh()
@@ -3571,97 +3661,6 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	//}
 
 	return !bFilesError;//true if ok
-}
-
-//--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Theme()
-{
-#ifndef INCLUDE_ofxImGuiSimple
-
-	//must be done after setup the gui
-
-	ImGuiStyle *style = &ImGui::GetStyle();
-
-	style->FramePadding = ImVec2(4, 2);
-	//style->WindowMinSize = ImVec2(160, 65);
-	//style->ItemSpacing = ImVec2(6, 2);
-	style->ItemSpacing = ImVec2(6, 4);
-	style->ItemInnerSpacing = ImVec2(6, 4);
-	style->Alpha = 1.0f;
-	style->WindowRounding = 0.0f;
-	style->FrameRounding = 0.0f;
-	style->IndentSpacing = 6.0f;
-	style->ItemInnerSpacing = ImVec2(2, 4);
-	style->ColumnsMinSpacing = 50.0f;
-	style->GrabMinSize = 14.0f;
-	style->GrabRounding = 0.0f;
-	style->ScrollbarSize = 12.0f;
-	style->ScrollbarRounding = 0.0f;
-
-	//my dark theme
-
-	//ImVec4* colors = ImGui::GetStyle().Colors;
-	style->Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-	style->Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-	style->Colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
-	style->Colors[ImGuiCol_ChildBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.00f);
-	style->Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
-	style->Colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.50f);
-	style->Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	style->Colors[ImGuiCol_FrameBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.54f);
-	style->Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.26f, 0.26f, 0.26f, 0.68f);
-	style->Colors[ImGuiCol_FrameBgActive] = ImVec4(0.25f, 0.25f, 0.25f, 0.67f);
-	style->Colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
-	style->Colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-	style->Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
-	style->Colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-	style->Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
-	style->Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.11f, 0.11f, 1.00f);
-	style->Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
-	style->Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
-	style->Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-	style->Colors[ImGuiCol_SliderGrab] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
-	style->Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.74f, 0.75f, 0.77f, 0.79f);
-	style->Colors[ImGuiCol_Button] = ImVec4(0.28f, 0.28f, 0.28f, 1.00f);
-	style->Colors[ImGuiCol_ButtonHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.79f);
-	style->Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.00f, 0.00f, 0.70f);
-	style->Colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.31f);
-	style->Colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-	style->Colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.26f, 0.26f, 1.00f);
-	style->Colors[ImGuiCol_Separator] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
-	style->Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.29f, 0.29f, 0.29f, 0.78f);
-	style->Colors[ImGuiCol_SeparatorActive] = ImVec4(0.37f, 0.37f, 0.37f, 1.00f);
-	style->Colors[ImGuiCol_ResizeGrip] = ImVec4(0.44f, 0.44f, 0.44f, 0.25f);
-	style->Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.68f, 0.68f, 0.68f, 0.67f);
-	style->Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.68f, 0.68f, 0.68f, 0.95f);
-	style->Colors[ImGuiCol_PlotLines] = ImVec4(0.81f, 0.79f, 0.79f, 1.00f);
-	style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.58f, 0.58f, 0.58f, 1.00f);
-	style->Colors[ImGuiCol_PlotHistogram] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-	style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-	style->Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.35f);
-	style->Colors[ImGuiCol_DragDropTarget] = ImVec4(0.50f, 0.50f, 0.50f, 0.90f);
-	style->Colors[ImGuiCol_NavHighlight] = ImVec4(0.79f, 0.79f, 0.79f, 1.00f);
-	style->Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
-	style->Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-	style->Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
-
-	//   //2. defaut dark theme exported
-	//   style->WindowMinSize = ImVec2(160, 65);
-	//   style->FramePadding = ImVec2(4, 2);
-	//   style->ItemSpacing = ImVec2(6, 2);
-	//   style->ItemInnerSpacing = ImVec2(6, 4);
-	//   style->Alpha = 1.0f;
-	//   style->WindowRounding = 0.0f;
-	//   style->FrameRounding = 0.0f;
-	//   style->IndentSpacing = 6.0f;
-	//   style->ItemInnerSpacing = ImVec2(2, 4);
-	//   style->ColumnsMinSpacing = 50.0f;
-	//   style->GrabMinSize = 14.0f;
-	//   style->GrabRounding = 0.0f;
-	//   style->ScrollbarSize = 12.0f;
-	//   style->ScrollbarRounding = 0.0f;
-
-#endif
 }
 
 #endif
