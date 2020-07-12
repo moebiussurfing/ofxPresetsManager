@@ -15,13 +15,10 @@
 ///	TODO:
 ///
 ///
-///	++	ImGui: switch out of ofxImGui to simpleImGui
-///			it seems that when using more than one instance it crashes on exit and windows collides
-///			improve ImGui trees collapse and sizes
-///	+	repair autosave timer. exclude log
 ///	++	performance: check memory_mode
+///			check workflow: when playing randomizer disable autosave
 ///			check disable autosave
-///			check 
+///	+	repair autosave timer. exclude log
 ///
 ///	+	add workflow to not collide manual preset click with randomizer timer
 ///	++	randomize editor preset
@@ -682,6 +679,7 @@ private:
 
 	//ImGui pure content
 public:
+	void ImGui_Draw_Content(ofxImGui::Settings &settings);
 	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
 	void ImGui_Draw_Advanced(ofxImGui::Settings &settings);

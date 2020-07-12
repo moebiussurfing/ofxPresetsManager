@@ -159,17 +159,7 @@ void ofApp::drawImGui()
 		bool _collapse = true;
 		if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
 		{
-			////0. tittle
-			//ImGui::Text("PRESETS MANAGER");
-
-			//1. basic controls
-			presetsManager.ImGui_Draw_Basic(mainSettings);
-
-			//2. browser params
-			presetsManager.ImGui_Draw_Browser(mainSettings);
-
-			//3. advanced params
-			presetsManager.ImGui_Draw_Advanced(mainSettings);
+			presetsManager.ImGui_Draw_Content(mainSettings);
 		}
 		ofxImGui::EndWindow(mainSettings);
 

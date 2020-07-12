@@ -2262,9 +2262,15 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		string name = e.getName();
 
 		if ((name != "exclude") &&
-			(name != "DICE"))
+			(name != "DICE") &&
+			(name != "PRESET")
+			)
 		{
 			ofLogNotice(__FUNCTION__) << name << " : " << e;
+		}
+		
+		if (name == "PRESET") {
+			ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------> PRESET";
 		}
 
 		//-
@@ -3021,18 +3027,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 	if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
 	{
-		//0. tittle
-		ImGui::Text("PRESETS MANAGER");
-		//ImGui::NewLine();
-
-		//1. basic controls
-		ImGui_Draw_Basic(mainSettings);
-
-		//2. browser params
-		ImGui_Draw_Browser(mainSettings);
-
-		//3. advanced params
-		ImGui_Draw_Advanced(mainSettings);
+		ImGui_Draw_Content(mainSettings);
 	}
 	ofxImGui::EndWindow(mainSettings);
 
@@ -3405,6 +3400,23 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 		}
 		ofxImGui::EndTree(settings);
 	}
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::ImGui_Draw_Content(ofxImGui::Settings &settings)
+{		
+	//0. tittle
+	ImGui::Text("PRESETS MANAGER");
+	//ImGui::NewLine();
+
+	//1. basic controls
+	ImGui_Draw_Basic(settings);
+
+	//2. browser params
+	ImGui_Draw_Browser(settings);
+
+	//3. advanced params
+	ImGui_Draw_Advanced(settings);
 }
 
 //--------------------------------------------------------------
