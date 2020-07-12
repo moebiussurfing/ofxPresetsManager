@@ -46,7 +46,7 @@
 //
 //	DEFINES
 //
-#define MODE_ImGui_EXTERNAL			//MODE_ImGui_EXTERNAL. this must be defined here and (not only) in ofApp (too)!!
+//#define MODE_ImGui_EXTERNAL			//MODE_ImGui_EXTERNAL. this must be defined here and (not only) in ofApp (too)!!
 #define INCLUDE_GUI_IM_GUI				//ImGui & browser system
 #define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
 //#define USE_ofxImGuiSimple			//TEST alternative addon
