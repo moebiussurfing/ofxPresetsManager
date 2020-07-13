@@ -365,8 +365,12 @@ public:
 	//--------------------------------------------------------------
 	void setEnableKeys(bool active)
 	{
-		bKeys = active;
-		ENABLE_Keys = active;
+		if (ENABLE_Keys != active) {//avoid if state not need to change
+			ENABLE_Keys = active;
+		}
+		if (bKeys != active) {//avoid if state not need to change
+			bKeys = active;
+		}
 	}
 
 	//--------------------------------------------------------------
@@ -569,7 +573,7 @@ public:
 	{
 		guiPos_InternalControl = ofVec2f(x, y);
 		gui_InternalControl.setPosition(guiPos_InternalControl.x, guiPos_InternalControl.y);
-	}
+}
 #endif
 
 	//--------------------------------------------------------------

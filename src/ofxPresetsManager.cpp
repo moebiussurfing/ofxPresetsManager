@@ -1724,38 +1724,40 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 //--------------------------------------------------------------
 void ofxPresetsManager::loadPreset(int p)
 {
-	if (!DISABLE_CALLBACKS)// && (PRESET_selected != PRESET_selected_PRE))
+	if (!DISABLE_CALLBACKS)
+		// && (PRESET_selected != PRESET_selected_PRE))
 	{
-		ofLogNotice(__FUNCTION__) << "loadPreset(" << ofToString(p) << ")";
-		//ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
+		ofLogNotice(__FUNCTION__) << ofToString(p);
 
 		//TODO:
 		//mode latch
-		if (MODE_LatchTrig && bLatchRun) {
-			if (p != 0) {
+		if (MODE_LatchTrig && bLatchRun) 
+		{
+			if (p != 0) 
+			{
 				bLatchRun = true;
 			}
-			else if (p == 0) {
+			else if (p == 0)
+			{
 				bLatchRun = false;
 			}
 
 			//randomizerTimer = ofGetElapsedTimeMillis();
 		}
 
-		//if (PRESET_selected >= 1 && PRESET_selected <= numPresetsFavorites)
 		if (PRESET_selected >= 0 && PRESET_selected <= numPresetsFavorites - 1)
 		{
 			PRESET_selected = p;
-			//ofLogNotice(__FUNCTION__) << ".";
 
 			//PRESET_selected_PRE = PRESET_selected;//TODO:
 		}
 		else
 		{
-			ofLogError(__FUNCTION__) << "IGNORE LOAD PRESET";
-			//workaround clamp
+			ofLogError(__FUNCTION__) << "OUT OF RANGE! CLAMP PRESET TO 0";
+
+			//workaround
+			//clamp
 			PRESET_selected = 0;//set to first as default presets when out of range
-			//PRESET_selected = 1;//set to first as default presets when out of range
 		}
 	}
 }
@@ -2204,7 +2206,7 @@ void ofxPresetsManager::Changed_Params_Editor(ofAbstractParameter &e)
 	{
 		string name = e.getName();
 
-		ofLogNotice(__FUNCTION__) << name << " : " << e;
+		ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] " << name << " : " << e;
 
 		//-
 
@@ -2251,11 +2253,11 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			(name != "PRESET")
 			)
 		{
-			ofLogNotice(__FUNCTION__) << name << " : " << e;
+			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] " << name << " : " << e;
 		}
 		
 		if (name == "PRESET") {
-			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]-------------------------------------------------------------> PRESET";
+			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]-------------------------------------------------------------";
 		}
 
 		//-
@@ -2265,25 +2267,23 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			ofLogNotice(__FUNCTION__) << "SAVE: " << e;
 			bSave = false;
 			doSave(PRESET_selected);
-			//doSave(PRESET_selected - 1);
 		}
 
 		//else if (name == "LOAD" && bLoad)
 		//{
 		//	ofLogNotice(__FUNCTION__) << "LOAD: " << e;
 		//	bLoad = false;
-		//	doLoad(PRESET_selected - 1);
+		//	doLoad(PRESET_selected);
 		//}
 
 		//-
 
-		//tools
+		//helper tools
 		else if (name == "CLONE >" && bCloneRight)
 		{
 			ofLogNotice(__FUNCTION__) << "CLONE >: " << e;
 			bCloneRight = false;
 			doCloneRight(PRESET_selected);
-			//doCloneRight(PRESET_selected - 1);
 		}
 		else if (name == "CLONE ALL" && bCloneAll)
 		{
@@ -2430,7 +2430,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESET" && (PRESET_selected == PRESET_selected_PRE))
 		{
-			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]  PRESET: " << e << "  (NOT Changed. TRIG!)";
+			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]  PRESET: " << e << "  [NOT Changed]";
 
 			//browser
 #ifdef INCLUDE_GUI_IM_GUI
@@ -2452,7 +2452,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESET" && (PRESET_selected != PRESET_selected_PRE))
 		{
-			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] > PRESET: " << PRESET_selected;
+			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] PRESET: " << PRESET_selected;
 
 			//-
 
