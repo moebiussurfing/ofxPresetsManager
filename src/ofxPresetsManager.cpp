@@ -134,7 +134,7 @@ void ofxPresetsManager::doRandomizeWichSelectedPreset()
 
 	//5. start timer again
 
-	if (ENABLE_RandomizeTimer)
+	if (PLAY_RandomizeTimer)
 	{
 		randomizerTimer = ofGetElapsedTimeMillis();
 	}
@@ -488,7 +488,7 @@ void ofxPresetsManager::setupRandomizer()
 	//select a random preset (from 1 to 8)
 	//params_Randomizer.setName("Randomizer");
 	bRandomizeSelect.set("RANDOMIZE", false);
-	ENABLE_RandomizeTimer.set("PLAY TIMER RANDOMIZER", false);
+	PLAY_RandomizeTimer.set("PLAY RANDOMIZER", false);
 	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
 	MODE_LatchTrig.set("MODE LATCH", false);
 	randomizeDuration.set("DURATION", 1000, 10, randomize_MAX_DURATION);
@@ -523,7 +523,7 @@ void ofxPresetsManager::setupRandomizer()
 	}
 
 	params_Randomizer.setName("FAVORITES");
-	params_Randomizer.add(ENABLE_RandomizeTimer);
+	params_Randomizer.add(PLAY_RandomizeTimer);
 	params_Randomizer.add(bRandomizeSelect);
 	//params_Randomizer.add(randomizeSpeedF);
 	params_Randomizer.add(randomizeDuration);
@@ -815,7 +815,7 @@ void ofxPresetsManager::setup()
 	//-
 
 	//colors
-#ifndef INCLUDE_GUI_IM_GUI
+#ifndef INCLUDE_GUI_IM_GUI	//this must be check if it works...
 	ofxGuiSetDefaultHeight(20);
 	ofxGuiSetBorderColor(32);
 	ofxGuiSetFillColor(ofColor(48));
@@ -953,7 +953,11 @@ void ofxPresetsManager::update(ofEventArgs & args)
 	if (!DISABLE_CALLBACKS) {
 
 		//TODO:
-		if (isDoneLoad() && MODE_LatchTrig && !ENABLE_RandomizeTimer) {
+		if (
+			//isDoneLoad() && //don't use this bc will be pulled off after readed!
+			bIsDoneLoad &&
+			MODE_LatchTrig && !PLAY_RandomizeTimer) {
+			
 			randomizerTimer = ofGetElapsedTimeMillis();
 
 			if (PRESET_selected != 0) {
@@ -967,7 +971,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//-
 
 		//randomize timer
-		if (ENABLE_RandomizeTimer || MODE_LatchTrig)
+		if (PLAY_RandomizeTimer || MODE_LatchTrig)
 		{
 			uint32_t _time = ofGetElapsedTimeMillis();
 			timerRandomizer = _time - randomizerTimer;
@@ -1149,7 +1153,7 @@ void ofxPresetsManager::drawPresetClicker()
 	ofNoFill();
 	ofSetColor(ofColor::white);
 
-	for (size_t i = 0; i < keys.size(); ++i)//draw all guis/groups
+	for (size_t i = 0; i < keys.size(); ++i)//draw all guis/groups. now using only one paramGroup!
 	{
 		//draw any preset box
 		size_t k = 0;
@@ -1260,10 +1264,10 @@ void ofxPresetsManager::drawPresetClicker()
 
 		//--
 
-		//6. gui label
+		//6. show gui label button
 
-		//int ySave = clicker_cellSize * i + 0.5 * clicker_cellSize + 0.5 * sizeTTF;
 		_label = "GUI";
+
 		if (!myFont.isLoaded())//without ttf font
 		{
 			ofDrawBitmapString(_label, clicker_cellSize*(k)+8, clicker_cellSize*i + 18);
@@ -1276,6 +1280,7 @@ void ofxPresetsManager::drawPresetClicker()
 				//clicker_cellSize * k + 0.5 * clicker_cellSize - 1.8f * sizeTTF,
 				ySave);
 		}
+
 		//mark if gui visible
 		if (SHOW_ImGui)
 		{
@@ -1500,7 +1505,7 @@ void ofxPresetsManager::add(ofParameterGroup params, initializer_list<int> keysL
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, int guiIndex)
 {
-	ofLogNotice(__FUNCTION__) << "save(" << presetIndex << "," << guiIndex << ")";
+	ofLogNotice(__FUNCTION__) << "(" << presetIndex << "," << guiIndex << ")";
 
 	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
@@ -1612,11 +1617,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, int guiIndex)
 {
-	ofLogNotice(__FUNCTION__) << "load(" << presetIndex << "," << guiIndex << ")";
-
-	//TODO:
-	//guiIndex is not the preset position, it's for multiplye guis!
-	//its the target group, there's only one for all the 8 presets (in only-one-gui-mode)
+	ofLogNotice(__FUNCTION__) << "(" << presetIndex << "," << guiIndex << ")";
 
 	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
@@ -1626,22 +1627,17 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 		if (!MODE_MemoryLive)
 		{
 			//MODE A: from hd file
-
 			TS_START("LOAD FILE 1");//for TimeMeasurements only
-
 			std::string strPath = getPresetName(groups[guiIndex].getName(), presetIndex);
 			ofXml settings;
 			settings.load(strPath);
 			ofDeserialize(settings, groups[guiIndex]);
-
 			TS_STOP("LOAD FILE 1");//for TimeMeasurements only
 		}
 		else
 		{
 			//MODE B: direct from memory
-
 			TS_START("LOAD MEM 1");//for TimeMeasurements only
-
 			//using xml array
 			if (presetIndex < settingsArray.size()) {
 				ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
@@ -1649,13 +1645,6 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 			else {
 				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
 			}
-
-			//TODO:
-			//ERROR do not loads the group content
-			//ofParameterGroup g;
-			//g = groupsMem[presetIndex];
-			//groups[0] = g;
-
 			TS_STOP("LOAD MEM 1");//for TimeMeasurements only
 		}
 
@@ -1682,7 +1671,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, string gName)
 {
-	ofLogVerbose(__FUNCTION__) << "load(" << presetIndex << "," << gName << ")";
+	ofLogVerbose(__FUNCTION__) << "(" << presetIndex << "," << gName << ")";
 
 	int guiIndex = getGuiIndex(gName);
 
@@ -1692,33 +1681,24 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 		if (!MODE_MemoryLive)
 		{
 			//MODE A: from hd file
-
-			TS_START("loadFile2");//for TimeMeasurements only
-
+			TS_START("LOAD FILE 2");//for TimeMeasurements only
 			std::string strPath = getPresetName(gName, presetIndex);
 			ofXml settings;
 			settings.load(strPath);
 			ofDeserialize(settings, groups[guiIndex]);
-
-			TS_STOP("loadFile2");//for TimeMeasurements only
+			TS_STOP("LOAD FILE 2");//for TimeMeasurements only
 		}
 		else
 		{
 			//MODE B: direct from memory
-
-			TS_START("loadMem2");//for TimeMeasurements only
-
-			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
-
-
+			TS_START("LOAD MEM 2""LOAD MEM 2");//for TimeMeasurements only
 			if (presetIndex < settingsArray.size()) {
 				ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
 			}
 			else {
 				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE LOAD";
 			}
-
-			TS_STOP("loadMem2");//for TimeMeasurements only
+			TS_STOP("LOAD MEM 2");//for TimeMeasurements only
 		}
 
 		//-
@@ -1728,8 +1708,12 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 
 		//-
 
-		ofLogVerbose(__FUNCTION__) << "DONE_load (1)";
+		ofLogVerbose(__FUNCTION__) << "DONE_load (2)";
 		DONE_load = true;
+
+		//TODO:
+		//simple callback
+		bIsDoneLoad = true;
 	}
 	else
 	{
@@ -1743,7 +1727,7 @@ void ofxPresetsManager::loadPreset(int p)
 	if (!DISABLE_CALLBACKS)// && (PRESET_selected != PRESET_selected_PRE))
 	{
 		ofLogNotice(__FUNCTION__) << "loadPreset(" << ofToString(p) << ")";
-		ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
+		//ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
 		//TODO:
 		//mode latch
@@ -2261,8 +2245,9 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 	{
 		string name = e.getName();
 
-		if ((name != "exclude") &&
-			(name != "DICE") &&
+		if ((name != "exclude") 
+			&&
+			//(name != "DICE") &&
 			(name != "PRESET")
 			)
 		{
@@ -2270,7 +2255,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		}
 		
 		if (name == "PRESET") {
-			ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------> PRESET";
+			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]-------------------------------------------------------------> PRESET";
 		}
 
 		//-
@@ -2322,10 +2307,10 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 			doRandomizeWichSelectedPreset();
 		}
-		else if (name == ENABLE_RandomizeTimer.getName())//"PLAY TIMER RANDOMIZER"
+		else if (name == PLAY_RandomizeTimer.getName())//"PLAY RANDOMIZER"
 		{
 			ofLogNotice(__FUNCTION__) << "MODE TIMER: " << e;
-			if (ENABLE_RandomizeTimer) {
+			if (PLAY_RandomizeTimer) {
 				MODE_LatchTrig = false;
 			}
 		}
@@ -2334,7 +2319,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			ofLogNotice(__FUNCTION__) << "MODE LATCH: " << e;
 
 			if (MODE_LatchTrig) {
-				ENABLE_RandomizeTimer = false;
+				PLAY_RandomizeTimer = false;
 			}
 		}
 		//else if (name == "SPEED FACTOR")
@@ -2353,6 +2338,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			//randomizeSpeedF = -((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
 			////randomizeSpeedF = 1 + (randomizeDuration / (float)randomize_MAX_DURATION);
 		}
+
 		//TODO:
 #ifdef DEBUG_randomTest
 		else if (name == "DICE")//when debug enabled: set dice by user to test
@@ -2444,8 +2430,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESET" && (PRESET_selected == PRESET_selected_PRE))
 		{
-			ofLogNotice(__FUNCTION__) << "PRESET NOT Changed: " << e << ". BUT..";
-			ofLogNotice(__FUNCTION__) << "TRIG PRESET!";
+			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]  PRESET: " << e << "  (NOT Changed. TRIG!)";
 
 			//browser
 #ifdef INCLUDE_GUI_IM_GUI
@@ -2467,7 +2452,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESET" && (PRESET_selected != PRESET_selected_PRE))
 		{
-			ofLogNotice(__FUNCTION__) << "> PRESET: " << PRESET_selected;
+			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] > PRESET: " << PRESET_selected;
 
 			//-
 
@@ -2806,8 +2791,8 @@ void ofxPresetsManager::exit()
 	ofRemoveListener(params_Editor.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Editor);
 
 	//TODO: required?
-	//ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
-	//ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
+	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
+	ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
 
 	//autosave preset
 	if (autoSave)
@@ -3438,7 +3423,7 @@ void ofxPresetsManager::ImGui_Draw_Advanced(ofxImGui::Settings &settings)
 		////short mode
 		//else _prog = timerRandomizer / (float)randomizeDurationShort;
 		//bar relative only to long
-		if (ENABLE_RandomizeTimer) {
+		if (PLAY_RandomizeTimer) {
 			_prog = timerRandomizer / (float)randomizeDuration;
 		}
 		else if (MODE_LatchTrig) {

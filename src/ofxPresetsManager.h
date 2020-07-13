@@ -169,18 +169,26 @@ private:
 	ofxPanel gui_InternalControl;
 #endif
 
-private:
-#ifdef INCLUDE_RANDOMIZER
+	//-
 
-	ofParameter<bool> MODE_MemoryLive;
+	//improve performance loading from memory nor xml files
+private:
 	ofParameter<bool> loadToMemory;
 	ofParameter<bool> saveFromMemory;
 	void load_AllKit_ToMemory();
 	void save_AllKit_FromMemory();
+	ofParameter<bool> MODE_MemoryLive;//when enabled all presets are handled from a memory vector to avoid lag of loading xml files
+public:
+	void setModeMemoryPerformance(bool b) {
+		MODE_MemoryLive = b;
+	}
+
+	//-
 
 	//randomizer
+#ifdef INCLUDE_RANDOMIZER//now cant' be disabled
 public:
-	ofParameter<bool> ENABLE_RandomizeTimer;//play randomizer
+	ofParameter<bool> PLAY_RandomizeTimer;//play randomizer
 	ofParameter<bool> bRandomizeSelect;
 private:
 	//ofParameterGroup params_Randomizer;
@@ -418,19 +426,25 @@ public:
 		SHOW_GroupName = b;
 	}
 
+	//--------------------------------------------------------------
+	std::string getGroupName()//get the paramGroup being managed here. Useful when using more than one ofxPresetsManager instances
+	{
+		return groups[0].getName();
+	}
+
 	//--
 
 	//randomizer helpers
 public:
 	//--------------------------------------------------------------
-	void setModeRandomizerPreset(bool b)//play randomizer timer
+	void setPlayRandomizerTimer(bool b)//play randomizer timer
 	{
-		ENABLE_RandomizeTimer = b;
+		PLAY_RandomizeTimer = b;
 	}
 	//--------------------------------------------------------------
 	void setToggleRandomizerPreset()//toggle randomizer timer
 	{
-		ENABLE_RandomizeTimer = !ENABLE_RandomizeTimer;
+		PLAY_RandomizeTimer = !PLAY_RandomizeTimer;
 	}
 	//--------------------------------------------------------------
 	void doRandomizePresetFromFavs()//trig randomize and select one of the favs presets
@@ -617,17 +631,17 @@ public:
 	void setPath_GlobalFolder(string folder);//path for root container folder
 
 	//--------------------------------------------------------------
-	void setAutoLoad(bool b)
+	void setModeAutoLoad(bool b)
 	{
 		autoLoad = b;
 	}
 	//--------------------------------------------------------------
-	void setAutoSave(bool b)
+	void setModeAutoSave(bool b)
 	{
 		autoSave = b;
 	}
 	//--------------------------------------------------------------
-	void setAutoSaveTimer(bool b)
+	void setModeAutoSaveTimer(bool b)
 	{
 		bAutosaveTimer = b;
 	}
