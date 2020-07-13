@@ -952,12 +952,13 @@ void ofxPresetsManager::update(ofEventArgs & args)
 {
 	if (!DISABLE_CALLBACKS) {
 
+
 		//TODO:
 		if (
 			//isDoneLoad() && //don't use this bc will be pulled off after readed!
 			bIsDoneLoad &&
 			MODE_LatchTrig && !PLAY_RandomizeTimer) {
-			
+
 			randomizerTimer = ofGetElapsedTimeMillis();
 
 			if (PRESET_selected != 0) {
@@ -1028,6 +1029,16 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		TS_STOP("loadMem");
 #endif
 
+		//-
+
+		//TODO: this disables the easycallback feature..
+		if (isDoneLoad())
+		{
+			ofLogNotice(__FUNCTION__) << "\t\t\t\t\t\t[ " + groups[0].getName() << " ] DONE LOADED PRESET "<< PRESET_selected;
+			ofLogNotice(__FUNCTION__) << "\t\t\t\t\t\t[ " + groups[0].getName() << " ]-------------------------------------------------------------";
+			ofLogNotice() << endl;
+		}
+
 		//--
 
 		//autosave
@@ -1045,8 +1056,6 @@ void ofxPresetsManager::update(ofEventArgs & args)
 
 			//save current preset
 			doSave(PRESET_selected);
-			//doSave(PRESET_selected - 1);
-			//doSave2(PRESET2_selected - 1);
 
 			if (!MODE_MemoryLive)
 			{
@@ -1084,7 +1093,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	if (SHOW_Gui_AdvancedControl)
 	{
 		gui_InternalControl.draw();
-	}
+}
 #endif
 
 	//----
@@ -1116,7 +1125,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	bImGui_mouseOver = false;
 #endif
 #endif
-}
+	}
 
 
 //--------------------------------------------------------------
@@ -1731,9 +1740,9 @@ void ofxPresetsManager::loadPreset(int p)
 
 		//TODO:
 		//mode latch
-		if (MODE_LatchTrig && bLatchRun) 
+		if (MODE_LatchTrig && bLatchRun)
 		{
-			if (p != 0) 
+			if (p != 0)
 			{
 				bLatchRun = true;
 			}
@@ -2247,17 +2256,13 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 	{
 		string name = e.getName();
 
-		if ((name != "exclude") 
+		if ((name != "exclude")
 			&&
 			//(name != "DICE") &&
 			(name != "PRESET")
 			)
 		{
 			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] " << name << " : " << e;
-		}
-		
-		if (name == "PRESET") {
-			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]-------------------------------------------------------------";
 		}
 
 		//-
@@ -2345,7 +2350,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		{
 			ofLogNotice(__FUNCTION__) << "DICE: " << e;
 			doRandomizeWichSelectedPreset();
-		}
+	}
 #endif
 		else if (name == "RESET DICES" && bResetDices)
 		{
@@ -2372,7 +2377,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			x = ofClamp(Gui_Internal_Position.get().x, 0, ofGetWidth() - 200);
 			y = ofClamp(Gui_Internal_Position.get().y, 0, ofGetHeight() - 20);
 			gui_InternalControl.setPosition(x, y);
-		}
+}
 #endif
 
 #ifdef INCLUDE_GUI_IM_GUI
@@ -2422,6 +2427,13 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		//----
 
+		//PRESET
+
+		if (name == "PRESET") {
+			ofLogNotice(__FUNCTION__) << "\t\t[ " + groups[0].getName() << " ]-------------------------------------------------------------";
+		}
+
+		//-
 
 		//1. selected preset NOT CHANGED
 
@@ -2430,7 +2442,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESET" && (PRESET_selected == PRESET_selected_PRE))
 		{
-			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]  PRESET: " << e << "  [NOT Changed]";
+			ofLogNotice(__FUNCTION__) << "\t\t[ " + groups[0].getName() << " ]  PRESET " << e << "  [NOT Changed]";
 
 			//browser
 #ifdef INCLUDE_GUI_IM_GUI
@@ -2439,7 +2451,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				if (autoLoad)
 				{
 					load(PRESET_selected, 0);
-					//load(PRESET_selected - 1, 0);
 				}
 			}
 #endif
@@ -2452,7 +2463,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESET" && (PRESET_selected != PRESET_selected_PRE))
 		{
-			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] PRESET: " << PRESET_selected;
+			ofLogNotice(__FUNCTION__) << "\t\t[ " + groups[0].getName() << " ] PRESET " << PRESET_selected;
 
 			//-
 
@@ -2463,7 +2474,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 #endif
 			{
 				save(PRESET_selected_PRE, 0);
-				//save(PRESET_selected_PRE - 1, 0);
 			}
 
 			//-
@@ -3389,7 +3399,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Content(ofxImGui::Settings &settings)
-{		
+{
 	//0. tittle
 	ImGui::Text("PRESETS MANAGER");
 	//ImGui::NewLine();
