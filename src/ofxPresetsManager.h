@@ -15,24 +15,25 @@
 ///	TODO:
 ///
 ///
-///	++	performance: check memory_mode
-///			check workflow: when playing randomizer disable autosave
-///			check disable autosave
-///	+	repair autosave timer. exclude log
+///	++		performance: check memory_mode
+///				check workflow: when playing randomizer disable autosave
+///				check disable autosave
+///	+		repair autosave timer. exclude log
+///	++		preset mini engine. ABC dropdown list for randomizers
+///	+++		lock (by toggle) params that we want to ignore on changid presets
+///	++		randomize editor preset
+///				add limit range min/max to randomize
+///				do nesting toggles to improve view. create a group for related toggles..	
+///				clone using editor toggles to avoid clone disabled toggle params
+///				mode state to allow overwrite only enabled toggle params
+///	++		add ofxUndo to randomizers
+///	+		add workflow to not collide manual preset click with randomizer timer
+///	+		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
+///	+		could make tween when changing params 
 ///
-///	+	add workflow to not collide manual preset click with randomizer timer
-///	++	randomize editor preset
-///			add limit range min/max to randomize
-///			do nesting toggles to improve view. create a group for related toggles..	
-///			clone using editor toggles to avoid clone disabled toggle params
-///			mode state to allow overwrite only enabled toggle params
-///	++	add ofxUndo to randomizers
-///	+	add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
-///	+	could make tween when changing params 
+///	BUG:	
 ///
-///	BUG:
-///
-///	?	there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager"
+///	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager"
 ///
 ///---
 
@@ -45,6 +46,7 @@
 //
 //#define MODE_ImGui_EXTERNAL			//MODE_ImGui_EXTERNAL. this must be defined here and (not only) in ofApp (too)!!
 #define INCLUDE_GUI_IM_GUI				//ImGui & browser system
+#define INCLUDE_ofxUndoSimple			//undo engine
 #define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
 //#define USE_ofxImGuiSimple			//TEST alternative addon
 //
@@ -57,6 +59,11 @@
 
 
 #include "ofMain.h"
+
+
+#ifdef INCLUDE_ofxUndoSimple
+#include "ofxUndoSimple.h"
+#endif
 
 //--
 
@@ -117,6 +124,17 @@
 
 class ofxPresetsManager : public ofBaseApp
 {
+	//--
+
+private:
+#ifdef INCLUDE_ofxUndoSimple
+	ofxUndoSimple<std::string> undoStringParams;
+	ofXml xmlParams;
+	void refreshParams();
+	void storeParams();
+#endif
+
+	//--
 
 private:
 
@@ -573,7 +591,7 @@ public:
 	{
 		guiPos_InternalControl = ofVec2f(x, y);
 		gui_InternalControl.setPosition(guiPos_InternalControl.x, guiPos_InternalControl.y);
-}
+	}
 #endif
 
 	//--------------------------------------------------------------
@@ -700,7 +718,7 @@ public:
 	void ImGui_Draw_Content(ofxImGui::Settings &settings);
 	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
-	void ImGui_Draw_Advanced(ofxImGui::Settings &settings);
+	void ImGui_Draw_Randomizers(ofxImGui::Settings &settings);
 
 	void ImGui_Theme();
 	void ImGui_FontCustom();
@@ -941,7 +959,11 @@ public:
 		ENABLE_KeysArrowBrowse = b;
 	}
 
+	//--
+
 private:
+	//check if a folder path exist and creates one if not
+	//many times when you try to save a file, this is not possible and do not happens bc the container folder do not exist
 	//--------------------------------------------------------------
 	void CheckFolder(string _path)
 	{

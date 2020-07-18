@@ -269,6 +269,10 @@ void ofxPresetsManager::doRandomizeEditor() {
 
 	ofParameterGroup _group = groups[0];
 	doRandomizeEditorGroup(_group);
+
+#ifdef INCLUDE_ofxUndoSimple
+	storeParams();// store scene
+#endif
 }
 
 //--------------------------------------------------------------
@@ -882,6 +886,10 @@ void ofxPresetsManager::setup()
 
 #endif
 
+#ifdef INCLUDE_ofxUndoSimple
+	undoStringParams = groups[0].toString();
+#endif
+
 	//-------
 
 	startup();
@@ -1034,8 +1042,8 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//TODO: this disables the easycallback feature..
 		if (isDoneLoad())
 		{
-			ofLogNotice(__FUNCTION__) << "\t\t\t\t\t\t[ " + groups[0].getName() << " ] DONE LOADED PRESET "<< PRESET_selected;
-			ofLogNotice(__FUNCTION__) << "\t\t\t\t\t\t[ " + groups[0].getName() << " ]-------------------------------------------------------------";
+			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] PRESET " << PRESET_selected << " LOADED.";
+			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]-------------------------------------------------------------";
 			ofLogNotice() << endl;
 		}
 
@@ -1049,7 +1057,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		if (!MODE_Browser_NewPreset && autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
 #endif
 		{
-			ofLogNotice(__FUNCTION__) << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t[AUTOSAVE]";
+			ofLogNotice(__FUNCTION__) << "[AUTOSAVE]";
 
 			//app settings
 			save_ControlSettings();
@@ -1093,7 +1101,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	if (SHOW_Gui_AdvancedControl)
 	{
 		gui_InternalControl.draw();
-}
+	}
 #endif
 
 	//----
@@ -1125,7 +1133,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	bImGui_mouseOver = false;
 #endif
 #endif
-	}
+}
 
 
 //--------------------------------------------------------------
@@ -1864,7 +1872,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//TODO: 
 		//controlled from outside
 		//hide/show control gui
-		else if (key == 'G')
+		if (key == 'G')
 		{
 			SHOW_Gui_AdvancedControl = !SHOW_Gui_AdvancedControl;
 			setVisible_GUI_Internal(SHOW_Gui_AdvancedControl);
@@ -1889,10 +1897,31 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		{
 			doRandomizeWichSelectedPreset();
 		}
+
 		else if (key == 'E')
 		{
 			doRandomizeEditor();
 		}
+#ifdef INCLUDE_ofxUndoSimple
+		else if (key == 'A')// previous
+		{
+			ofLogNotice(__FUNCTION__) << "UNDO <-";
+			undoStringParams.undo();
+			refreshParams();
+		}
+		else if (key == 'D')// next
+		{
+			ofLogNotice(__FUNCTION__) << "REDO ->";
+			undoStringParams.redo();
+			refreshParams();
+		}
+		else if (key == 'Q')// clear history
+		{
+			ofLogNotice(__FUNCTION__) << "UNDO CLEAR";
+			undoStringParams.clear();
+		}
+#endif
+
 #endif
 
 		//-
@@ -1906,10 +1935,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			if (MODE_Browser_NewPreset)
 			{
 				currentFile++;
-				if (currentFile > files.size() - 1)
-				{
-					currentFile = files.size() - 1;
-				}
+				if (currentFile > files.size() - 1) currentFile = files.size() - 1;
 				browser_PresetName = fileNames[currentFile];
 				ofLogNotice(__FUNCTION__) << "[>] LOAD" << endl;
 				ofLogNotice(__FUNCTION__) << "Preset Name: " << browser_PresetName;
@@ -1922,8 +1948,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				int i = PRESET_selected;
 				i++;
 
-				if (i > settingsArray.size() - 1)
-					i = settingsArray.size() - 1;
+				if (i > settingsArray.size() - 1) i = settingsArray.size() - 1;
 				PRESET_selected = i;
 			}
 		}
@@ -1935,10 +1960,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			if (MODE_Browser_NewPreset)
 			{
 				currentFile--;
-				if (currentFile < 0)
-				{
-					currentFile = 0;
-				}
+				if (currentFile < 0) currentFile = 0;
 				browser_PresetName = fileNames[currentFile];
 				ofLogNotice(__FUNCTION__) << "[<] LOAD" << endl;
 				ofLogNotice(__FUNCTION__) << "Preset Name: " << browser_PresetName;
@@ -1950,11 +1972,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				int i = PRESET_selected;
 				i--;
-
-				//if (i < 1)
-				//	i = 1;
-				if (i < 0)
-					i = 0;
+				if (i < 0) i = 0;
 				PRESET_selected = i;
 			}
 		}
@@ -1981,7 +1999,6 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 						ofLogNotice(__FUNCTION__) << "[" << k << "][" << i << "]";
 
 						PRESET_selected = k;
-						//PRESET_selected = 1 + k;
 					}
 					return;
 				}
@@ -2267,6 +2284,12 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		//-
 
+		if (name == "PRESET") {
+			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]-------------------------------------------------------------";
+		}
+
+		//-
+
 		if (name == "SAVE" && bSave)
 		{
 			ofLogNotice(__FUNCTION__) << "SAVE: " << e;
@@ -2350,7 +2373,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		{
 			ofLogNotice(__FUNCTION__) << "DICE: " << e;
 			doRandomizeWichSelectedPreset();
-	}
+		}
 #endif
 		else if (name == "RESET DICES" && bResetDices)
 		{
@@ -2377,7 +2400,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			x = ofClamp(Gui_Internal_Position.get().x, 0, ofGetWidth() - 200);
 			y = ofClamp(Gui_Internal_Position.get().y, 0, ofGetHeight() - 20);
 			gui_InternalControl.setPosition(x, y);
-}
+		}
 #endif
 
 #ifdef INCLUDE_GUI_IM_GUI
@@ -2429,10 +2452,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		//PRESET
 
-		if (name == "PRESET") {
-			ofLogNotice(__FUNCTION__) << "\t\t[ " + groups[0].getName() << " ]-------------------------------------------------------------";
-		}
-
 		//-
 
 		//1. selected preset NOT CHANGED
@@ -2442,7 +2461,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESET" && (PRESET_selected == PRESET_selected_PRE))
 		{
-			ofLogNotice(__FUNCTION__) << "\t\t[ " + groups[0].getName() << " ]  PRESET " << e << "  [NOT Changed]";
+			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]  PRESET " << e << "  [NOT Changed]";
 
 			//browser
 #ifdef INCLUDE_GUI_IM_GUI
@@ -2463,7 +2482,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESET" && (PRESET_selected != PRESET_selected_PRE))
 		{
-			ofLogNotice(__FUNCTION__) << "\t\t[ " + groups[0].getName() << " ] PRESET " << PRESET_selected;
+			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] PRESET " << PRESET_selected;
 
 			//-
 
@@ -2553,7 +2572,7 @@ void ofxPresetsManager::load_ControlSettings()
 #ifdef INCLUDE_DEBUG_ERRORS
 	if (!bLoaded)
 	{
-		errorsDEBUG.addError(gui_LabelName + ofToString(__FUNCTION__), "load_ControlSettings()", path);
+		errorsDEBUG.addError(ofToString(__FUNCTION__), gui_LabelName, path);
 	}
 #endif
 
@@ -2760,7 +2779,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef INCLUDE_DEBUG_ERRORS
 		else if (!bLoaded)
 		{
-			errorsDEBUG.addError("ofxPresetsManager " + gui_LabelName, "load_AllKit_ToMemory() - NOT FOUND OR EMPTY XML FILES:", pathComplete);
+			errorsDEBUG.addError(__FUNCTION__, gui_LabelName + ". NOT FOUND OR EMPTY XML FILES:", pathComplete);
 			//TODO:
 			//maybe we should create not found or empty xml presets with an empty preset..
 		}
@@ -2775,7 +2794,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	{
 		for (int i = 0; i < settingsArray.size(); i++)
 		{
-			ofLogNotice(__FUNCTION__) << "settingsArray[" << i << "]\n" << ofToString(settingsArray[i].toString());
+			ofLogNotice(__FUNCTION__) << "settingsArray[" << i << "] " << ofToString(settingsArray[i].toString());
 		}
 	}
 }
@@ -2968,7 +2987,7 @@ void ofxPresetsManager::ImGui_Setup()
 void ofxPresetsManager::ImGui_Draw_WindowBegin()
 {
 #ifndef USE_ofxImGuiSimple
-	this->gui_ImGui.begin();
+	gui_ImGui.begin();
 #else
 	gui_ImGui.begin();
 	ImGui::ShowDemoWindow();
@@ -3000,7 +3019,7 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 	//--
 
 #ifndef USE_ofxImGuiSimple
-	this->gui_ImGui.end();
+	gui_ImGui.end();
 #else
 	gui_ImGui.end();
 #endif
@@ -3013,7 +3032,9 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 	auto mainSettings = ofxImGui::Settings();
 	mainSettings.windowPos = pos;
-	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y));
+
+	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(200, 500), ImGuiCond_FirstUseEver);
 
 	//-
 
@@ -3039,7 +3060,7 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 	if (ofxImGui::BeginTree("BASIC", settings))
 		//if (ImGui::TreeNode("BASIC"))
 	{
-		ofxImGui::AddParameter(this->PRESET_selected);//main preset selector
+		ofxImGui::AddParameter(PRESET_selected);//main preset selector
 
 		//main helpers
 		if (ImGui::Button("CLONE ALL"))
@@ -3063,17 +3084,42 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 		//-
 
 		//ImGui::SetNextItemWidth(_w);
-		ofxImGui::AddParameter(this->autoSave);
-		ofxImGui::AddParameter(this->MODE_MemoryLive);
+		ofxImGui::AddParameter(autoSave);
+		ofxImGui::AddParameter(MODE_MemoryLive);
 
 		//--
 
 		//2. panels toggles
-		ofxImGui::AddParameter(this->SHOW_ClickPanel);
+		ofxImGui::AddParameter(SHOW_ClickPanel);
 
 		if (ImGui::TreeNode("EXTRA")) {
-			ofxImGui::AddParameter(this->SHOW_ImGui);
-			ofxImGui::AddParameter(this->SHOW_Gui_AdvancedControl);
+			ofxImGui::AddParameter(SHOW_ImGui);
+			ofxImGui::AddParameter(SHOW_Gui_AdvancedControl);
+
+			//-
+
+			//2. advanced
+
+			if (SHOW_Gui_AdvancedControl)
+			{
+				//show ALL the addon params! mainly to debug..
+				ofxImGui::AddGroup(params_Control, settings);
+
+				//TODO:
+				//to customize presets folder outside /data of our app...
+				//ie: this will allow to use any folder of our computer, and share the presets between apps...
+				if (ImGui::Button("Set custom folder..."))
+				{
+					auto dialogResult = ofSystemLoadDialog("Set presets folder", true, ofToDataPath(""));
+					if (dialogResult.bSuccess)
+					{
+						path_PresetsFolder_Custom = dialogResult.filePath;
+						bUseCustomPath = true;
+						ofLogNotice(__FUNCTION__) << "path custom: " << path_PresetsFolder_Custom;
+					}
+				}
+			}
+
 			ImGui::TreePop();
 		}
 
@@ -3094,7 +3140,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 		//-
 
 		//new button
-		ofxImGui::AddParameter(this->MODE_Browser_NewPreset);
+		ofxImGui::AddParameter(MODE_Browser_NewPreset);
 
 		//-
 
@@ -3411,11 +3457,11 @@ void ofxPresetsManager::ImGui_Draw_Content(ofxImGui::Settings &settings)
 	ImGui_Draw_Browser(settings);
 
 	//3. advanced params
-	ImGui_Draw_Advanced(settings);
+	ImGui_Draw_Randomizers(settings);
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_Advanced(ofxImGui::Settings &settings)
+void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 {
 
 	//1. randomizers
@@ -3468,29 +3514,29 @@ void ofxPresetsManager::ImGui_Draw_Advanced(ofxImGui::Settings &settings)
 		//ImGui::TreePop();
 	}
 
-	//---
+	////---
 
-	//2. advanced
+	////2. advanced
 
-	if (SHOW_Gui_AdvancedControl)
-	{
-		//show ALL the addon params! mainly to debug..
-		ofxImGui::AddGroup(params_Control, settings);
+	//if (SHOW_Gui_AdvancedControl)
+	//{
+	//	//show ALL the addon params! mainly to debug..
+	//	ofxImGui::AddGroup(params_Control, settings);
 
-		//TODO:
-		//to customize presets folder outside /data of our app...
-		//ie: this will allow to use any folder of our computer, and share the presets between apps...
-		if (ImGui::Button("Set custom folder..."))
-		{
-			auto dialogResult = ofSystemLoadDialog("Set presets folder", true, ofToDataPath(""));
-			if (dialogResult.bSuccess)
-			{
-				path_PresetsFolder_Custom = dialogResult.filePath;
-				bUseCustomPath = true;
-				ofLogNotice(__FUNCTION__) << "path custom: " << path_PresetsFolder_Custom;
-			}
-		}
-	}
+	//	//TODO:
+	//	//to customize presets folder outside /data of our app...
+	//	//ie: this will allow to use any folder of our computer, and share the presets between apps...
+	//	if (ImGui::Button("Set custom folder..."))
+	//	{
+	//		auto dialogResult = ofSystemLoadDialog("Set presets folder", true, ofToDataPath(""));
+	//		if (dialogResult.bSuccess)
+	//		{
+	//			path_PresetsFolder_Custom = dialogResult.filePath;
+	//			bUseCustomPath = true;
+	//			ofLogNotice(__FUNCTION__) << "path custom: " << path_PresetsFolder_Custom;
+	//		}
+	//	}
+	//}
 }
 #endif
 
@@ -3670,5 +3716,41 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	return !bFilesError;//true if ok
 }
 
+#ifdef INCLUDE_ofxUndoSimple
+//--------------------------------------------------------------
+void ofxPresetsManager::storeParams() {
+	//ofLogNotice(__FUNCTION__);
+	xmlParams.clear();
+	ofParameterGroup _group = groups[0];
+	ofSerialize(xmlParams, _group);// fill the xml with the ofParameterGroup
+	undoStringParams = (xmlParams.toString());// fill the ofxUndoSimple with the xml as string
+	undoStringParams.store();
+
+	string str = "";
+	str += "UNDO HISTORY: " + ofToString(undoStringParams.getUndoLength()) + "/";
+	str += ofToString(undoStringParams.getRedoLength());
+	//str += "\n";
+	//str += "DESCRIPTOR\n";
+	//str += undoStringParams.getUndoStateDescriptor() + "\n";
+	ofLogNotice(__FUNCTION__) << str;
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::refreshParams() {
+	//ofLogNotice(__FUNCTION__);
+	xmlParams.clear();
+	xmlParams.parse(undoStringParams);// fill the xml with the string 
+	ofParameterGroup _group = groups[0];
+	ofDeserialize(xmlParams, _group);// load the ofParameterGroup
+
+	string str = "";
+	str += "UNDO HISTORY: " + ofToString(undoStringParams.getUndoLength()) + "/";
+	str += ofToString(undoStringParams.getRedoLength());
+	//str += "\n";
+	//str += "DESCRIPTOR\n";
+	//str += undoStringParams.getUndoStateDescriptor() + "\n";
+	ofLogNotice(__FUNCTION__) << str;
+}
 #endif
 
+#endif
