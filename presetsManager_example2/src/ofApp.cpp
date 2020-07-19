@@ -49,7 +49,7 @@ void ofApp::setup()
 #ifdef MODE_ImGui_EXTERNAL
 	presetsManager.ImGui_FontCustom();
 	gui_ImGui.setup();
-	presetsManager.ImGui_Theme();
+	presetsManager.ImGui_ThemeMoebiusSurfing();
 #endif
 
 	//-------

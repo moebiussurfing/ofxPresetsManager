@@ -2880,6 +2880,7 @@ void ofxPresetsManager::exit()
 
 #ifdef INCLUDE_GUI_IM_GUI
 
+#ifndef USE_ofxImGuiSimple
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_FontCustom() {
 	ofLogNotice(__FUNCTION__);
@@ -2891,11 +2892,10 @@ void ofxPresetsManager::ImGui_FontCustom() {
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Theme()
+void ofxPresetsManager::ImGui_ThemeMoebiusSurfing()
 {
 	ofLogNotice(__FUNCTION__);
 
-#ifndef USE_ofxImGuiSimple
 
 	//must be done after setup the gui
 
@@ -2980,8 +2980,8 @@ void ofxPresetsManager::ImGui_Theme()
 	//   style->ScrollbarSize = 12.0f;
 	//   style->ScrollbarRounding = 0.0f;
 
-#endif
 }
+#endif
 
 #ifndef MODE_ImGui_EXTERNAL
 //--------------------------------------------------------------
@@ -2992,8 +2992,10 @@ void ofxPresetsManager::ImGui_Setup()
 	//--
 
 	//font customize
+#ifndef MODE_ImGui_EXTERNAL
 #ifdef INCLUDE_IMGUI_CUSTOM_FONT
 	ImGui_FontCustom();
+#endif
 #endif
 
 	//--
@@ -3003,7 +3005,11 @@ void ofxPresetsManager::ImGui_Setup()
 	//--
 
 	//theme
-	ImGui_Theme();
+#ifndef MODE_ImGui_EXTERNAL
+	//ImGui_ThemeMoebiusSurfing();
+	ImGui_ThemeModernDark();
+
+	//--
 
 	//mouse over
 	ImGui::GetIO().MouseDrawCursor = false;
@@ -3012,6 +3018,8 @@ void ofxPresetsManager::ImGui_Setup()
 	//ImGui::GetIO().ConfigWindowsResizeFromEdges = true;
 	//ImGui::GetIO().= true;
 	//ImGui::GetIO().
+
+#endif
 
 	//--
 }
