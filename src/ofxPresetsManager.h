@@ -30,10 +30,12 @@
 ///	+		add workflow to not collide manual preset click with randomizer timer
 ///	+		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
 ///	+		could make tween when changing params 
+///	++		add all preset parameters preview inside the ImGui too
+///	++		add multiple groups engine. look into ofxGuiPresets fron #npisanti
 ///
 ///	BUG:	
 ///
-///	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager"
+///	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager" ?
 ///
 ///---
 
@@ -46,9 +48,9 @@
 //
 //#define MODE_ImGui_EXTERNAL			//MODE_ImGui_EXTERNAL. this must be defined here and (not only) in ofApp (too)!!
 #define INCLUDE_GUI_IM_GUI				//ImGui & browser system
-#define INCLUDE_ofxUndoSimple			//undo engine
 #define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
 //#define USE_ofxImGuiSimple			//TEST alternative addon
+#define INCLUDE_ofxUndoSimple			//undo engine to store after randomize preset parameters (& recall)
 //
 //#define TIME_SAMPLE_MEASURES			//measure performance ofxTimeMeasurements
 #define INCLUDE_DEBUG_ERRORS			//debug errors
@@ -60,10 +62,6 @@
 
 #include "ofMain.h"
 
-
-#ifdef INCLUDE_ofxUndoSimple
-#include "ofxUndoSimple.h"
-#endif
 
 //--
 
@@ -85,6 +83,10 @@
 #else
 #include "ofxImGui.h"
 #endif
+#endif
+
+#ifdef INCLUDE_ofxUndoSimple
+#include "ofxUndoSimple.h"
 #endif
 
 //--
@@ -130,8 +132,8 @@ private:
 #ifdef INCLUDE_ofxUndoSimple
 	ofxUndoSimple<std::string> undoStringParams;
 	ofXml xmlParams;
-	void refreshParams();
-	void storeParams();
+	void undoRefreshParams();
+	void undoStoreParams();
 #endif
 
 	//--
@@ -207,7 +209,7 @@ public:
 #ifdef INCLUDE_RANDOMIZER//now cant' be disabled
 public:
 	ofParameter<bool> PLAY_RandomizeTimer;//play randomizer
-	ofParameter<bool> bRandomizeSelect;
+	ofParameter<bool> bRandomizeIndex;
 private:
 	//ofParameterGroup params_Randomizer;
 	ofParameter<bool> MODE_DicesProbs;
@@ -471,7 +473,7 @@ public:
 	//--------------------------------------------------------------
 	void doRandomizePresetFromFavs()//trig randomize and select one of the favs presets
 	{
-		bRandomizeSelect = true;
+		bRandomizeIndex = true;
 	}
 	//--------------------------------------------------------------
 	void doRandomizePresetSelected() {//randomize params of current selected preset
@@ -719,6 +721,7 @@ public:
 	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
 	void ImGui_Draw_Randomizers(ofxImGui::Settings &settings);
+	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
 
 	void ImGui_Theme();
 	void ImGui_FontCustom();
@@ -992,12 +995,46 @@ private:
 
 	//--
 
-	bool show_another_window;
-
-	////toggle ImGui button
+#ifdef INCLUDE_GUI_IM_GUI			
+	//my custom ImGui helpers
 	////https://github.com/ocornut/imgui/issues/1537
 	//--------------------------------------------------------------
-	bool AddBigToggle(ofParameter<bool>& parameter)
+	bool AddBigButton(ofParameter<bool>& parameter, float h)//button but using a bool not void param
+	{
+		auto tmpRef = parameter.get();
+		auto name = ofxImGui::GetUniqueName(parameter);
+
+		float w;
+		w = ImGui::GetWindowWidth()*0.9f;
+
+		ImGuiStyle *style = &ImGui::GetStyle();
+
+		const ImVec4 colorButton = style->Colors[ImGuiCol_Button];//better for my theme
+		const ImVec4 colorHover = style->Colors[ImGuiCol_Button];
+		const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
+		//const ImVec4 colorButton = style->Colors[ImGuiCol_ButtonHovered];//better for default theme
+		//const ImVec4 colorHover = style->Colors[ImGuiCol_ButtonHovered];
+		//const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
+
+		ImGui::PushID(name);
+		ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorHover);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorActive);
+
+		if (ImGui::Button((name), ImVec2(w, h)))
+		{
+			ofLogNotice(__FUNCTION__) << name << ": BANG";
+
+			tmpRef = true;
+			parameter.set(tmpRef);
+		}
+
+		ImGui::PopStyleColor(3);
+		ImGui::PopID();
+	}
+
+	//--------------------------------------------------------------
+	bool AddBigToggle(ofParameter<bool>& parameter, float h)
 	{
 		auto tmpRef = parameter.get();
 		auto name = ofxImGui::GetUniqueName(parameter);
@@ -1012,8 +1049,9 @@ private:
 
 		//button toggle
 
-		float w, h;
-		h = 30;
+		float w;
+		//float h;
+		//h = 30;
 		//w = 200;
 		w = ImGui::GetWindowWidth()*0.9f;
 
@@ -1086,4 +1124,5 @@ private:
 		//ImGui::PopID();
 		//return false;
 	}
+#endif
 };

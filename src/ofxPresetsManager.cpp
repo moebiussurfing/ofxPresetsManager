@@ -277,7 +277,7 @@ void ofxPresetsManager::doRandomizeEditor() {
 	doRandomizeEditorGroup(_group);
 
 #ifdef INCLUDE_ofxUndoSimple
-	storeParams();// store scene
+	undoStoreParams();// store scene
 #endif
 }
 
@@ -467,7 +467,7 @@ void ofxPresetsManager::setupEditor()
 	addGroupToEditor(groups[0]);//enqueue all content params and create a toggle for each one
 
 	//add to group
-	bRandomizeEditor.set("RANDOMIZE", false);
+	bRandomizeEditor.set("RANDOMIZE PRESET", false);
 	bRandomizeEditorPopulateFavs.set("POPULATE FAVS!", false);
 	bRandomizeEditorAll.set("ALL", false);
 	bRandomizeEditorNone.set("NONE", false);
@@ -483,7 +483,7 @@ void ofxPresetsManager::setupEditor()
 	params_Editor.add(bRandomizeEditorNone);
 	params_Editor.add(bRandomizeEditorPopulateFavs);
 
-	params_Editor_Toggles.setName("PARAMETERS");
+	params_Editor_Toggles.setName("PRESET PARAMETERS");
 	for (auto &p : editorPresets) {
 		params_Editor_Toggles.add(p);
 	}
@@ -497,7 +497,7 @@ void ofxPresetsManager::setupRandomizer()
 {
 	//select a random preset (from 1 to 8)
 	//params_Randomizer.setName("Randomizer");
-	bRandomizeSelect.set("RANDOMIZE", false);
+	bRandomizeIndex.set("RANDOMIZE INDEX", false);
 	PLAY_RandomizeTimer.set("PLAY RANDOMIZER", false);
 	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
 	MODE_LatchTrig.set("MODE LATCH", false);
@@ -507,7 +507,7 @@ void ofxPresetsManager::setupRandomizer()
 	//randomizeSpeedF.set("SPEED FACTOR", 1.f, 0.01f, 2.f);
 	bResetDices.set("RESET DICES", false);
 
-	bRandomizeSelect.setSerializable(false);
+	bRandomizeIndex.setSerializable(false);
 	bResetDices.setSerializable(false);
 	//randomizeDuration.setSerializable(false);
 
@@ -534,7 +534,7 @@ void ofxPresetsManager::setupRandomizer()
 
 	params_Randomizer.setName("FAVORITES");
 	params_Randomizer.add(PLAY_RandomizeTimer);
-	params_Randomizer.add(bRandomizeSelect);
+	params_Randomizer.add(bRandomizeIndex);
 	//params_Randomizer.add(randomizeSpeedF);
 	params_Randomizer.add(randomizeDuration);
 	params_Randomizer.add(randomizeDurationShort);
@@ -906,7 +906,7 @@ void ofxPresetsManager::setup()
 	//-------
 
 	startup();
-	}
+}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::startup()
@@ -1011,7 +1011,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 							}
 						}
 						else {
-							bRandomizeSelect = true;
+							bRandomizeIndex = true;
 						}
 					}
 				}
@@ -1026,7 +1026,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 							}
 						}
 						else {
-							bRandomizeSelect = true;
+							bRandomizeIndex = true;
 						}
 					}
 				}
@@ -1094,8 +1094,8 @@ void ofxPresetsManager::update(ofEventArgs & args)
 			//auto save timer
 			timerLast_Autosave = ofGetElapsedTimeMillis();
 		}
-		}
 	}
+}
 
 //---------------------------------------------------------------------
 void ofxPresetsManager::draw(ofEventArgs & args)
@@ -1920,13 +1920,13 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		{
 			ofLogNotice(__FUNCTION__) << "UNDO <-";
 			undoStringParams.undo();
-			refreshParams();
+			undoRefreshParams();
 		}
 		else if (key == 'D')// next
 		{
 			ofLogNotice(__FUNCTION__) << "REDO ->";
 			undoStringParams.redo();
-			refreshParams();
+			undoRefreshParams();
 		}
 		else if (key == 'Q')// clear history
 		{
@@ -2288,6 +2288,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		if ((name != "exclude")
 			&&
+			(name != ImGui_Position.getName()) &&
+			(name != ImGui_Size.getName()) &&
 			//(name != "DICE") &&
 			(name != "PRESET")
 			)
@@ -2341,10 +2343,10 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		{
 			SHOW_ImGui = false;//workflow
 		}
-		else if (name == "RANDOMIZE" && bRandomizeSelect)
+		else if (name == "RANDOMIZE INDEX" && bRandomizeIndex)
 		{
 			//ofLogNotice(__FUNCTION__) << "RANDOMIZE !";
-			bRandomizeSelect = false;
+			bRandomizeIndex = false;
 
 			doRandomizeWichSelectedPreset();
 		}
@@ -2494,10 +2496,10 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				{
 					load(PRESET_selected, 0);
 				}
-				}
+			}
 #endif
 			bMustTrig = true;
-			}
+		}
 
 		//-
 
@@ -2578,8 +2580,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//{
 		//	ofLogError(__FUNCTION__) << "IGNORED PRESETS CHANGE";
 		//}
-		}
 	}
+}
 
 #pragma mark - SETTINGS
 
@@ -2878,13 +2880,10 @@ void ofxPresetsManager::exit()
 
 #ifdef INCLUDE_GUI_IM_GUI
 
-//public
-
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_FontCustom() {
 	ofLogNotice(__FUNCTION__);
 
-	//ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	string _name = "overpass-mono-bold.otf";
 	string _path = "assets/fonts/" + _name;//assets folder
@@ -3001,6 +3000,8 @@ void ofxPresetsManager::ImGui_Setup()
 
 	gui_ImGui.setup();
 
+	//--
+
 	//theme
 	ImGui_Theme();
 
@@ -3090,6 +3091,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	static bool no_move = true;
 	static bool no_scrollbar = false;
 	static bool no_collapse = true;
+	static bool no_close = true;
 	static bool no_menu = true;
 	static bool no_settings = true;
 	static float bg_alpha = -0.01f; // <0: default
@@ -3103,6 +3105,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	//if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
 	//if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
 	//if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
+	if (no_close)  window_flags |= ImGuiWindowFlags_NoCollapse;
 	//if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
 	//if (no_settings) window_flags |= ImGuiWindowFlags_NoSavedSettings;
 
@@ -3133,6 +3136,16 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 #endif
 
 #ifdef INCLUDE_GUI_IM_GUI//ImGui pure content
+//--------------------------------------------------------------
+void ofxPresetsManager::ImGui_Draw_PresetPreview(ofxImGui::Settings &settings)
+{
+	if (ofxImGui::BeginTree("PRESET PARAMETERS", settings))
+	{
+		ofxImGui::AddGroup(groups[0], settings);
+		ofxImGui::EndTree(settings);
+	}
+}
+
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 {
@@ -3166,7 +3179,7 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 		//--
 
 		//big toggle button
-		AddBigToggle(PLAY_RandomizeTimer);
+		AddBigToggle(PLAY_RandomizeTimer, 30);
 
 		//--
 
@@ -3566,6 +3579,9 @@ void ofxPresetsManager::ImGui_Draw_Content(ofxImGui::Settings &settings)
 
 	//3. advanced params
 	ImGui_Draw_Randomizers(settings);
+
+	//4. preset params preview
+	ImGui_Draw_PresetPreview(settings);
 }
 
 //--------------------------------------------------------------
@@ -3574,8 +3590,8 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 
 	//1. randomizers
 
-	bool b = false;
-	settings.windowBlock = true;
+	//bool b = false;
+	//settings.windowBlock = true;
 
 
 	if (ofxImGui::BeginTree("RANDOMIZERS", settings))
@@ -3583,7 +3599,16 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 	{
 		//1. presets randomizers
 
-		//draw progress bar for the randomizer timer
+		ImGuiStyle *style = &ImGui::GetStyle();
+
+		//--
+
+		//1.0.1 play randomizer index
+		AddBigToggle(PLAY_RandomizeTimer, 30);
+
+		//--
+
+		//1.0.2 draw progress bar for the randomizer timer
 		float _prog;
 		////long mode
 		//if (presetsRandomModeShort[PRESET_selected - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
@@ -3606,7 +3631,6 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 		}
 
 		ImGui::PushID("prog");
-		ImGuiStyle *style = &ImGui::GetStyle();
 		const ImVec4 color = style->Colors[ImGuiCol_Button];
 		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, color);
 		ImGui::ProgressBar(_prog);
@@ -3615,7 +3639,43 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 
 		//--
 
+		//1.0.3 bang randomize
+		//AddBigButton(bRandomizeIndex, 25);//index
+		AddBigButton(bRandomizeEditor, 25);//preset
+
+		//float w = ImGui::GetWindowWidth();
+		//style->FramePadding = ImVec2(4, 2);
+		//style->ItemSpacing = ImVec2(6, 4);
+		//style->ItemInnerSpacing = ImVec2(6, 4);
+		//style->IndentSpacing = 6.0f;
+		//style->ItemInnerSpacing = ImVec2(2, 4);
+		//float wHalf = (ImGui::GetWindowWidth() * 0.5f) - ( 4 + 6 + 6 +4);
+		float wHalf = 100;
+
+		if (ImGui::Button("UNDO", ImVec2(wHalf, 20)))
+		{
+			ofLogNotice(__FUNCTION__) << "UNDO <-";
+			undoStringParams.undo();
+			undoRefreshParams();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("REDO", ImVec2(wHalf, 20)))
+		{
+			ofLogNotice(__FUNCTION__) << "REDO ->";
+			undoStringParams.redo();
+			undoRefreshParams();
+		}
+
+		//string str = "";
+		//str += ofToString(undoStringParams.getUndoLength()) + "/";
+		//str += ofToString(undoStringParams.getRedoLength());
+		//ImGui::Text(str.c_str());
+
+		//--
+
 		//1.1 randomizers presets
+		//settings.windowBlock = true;//hides
+		//settings.treeLevel = 0;//hides
 		ofxImGui::AddGroup(params_Randomizer, settings);
 
 #ifdef DEBUG_randomTest
@@ -3640,7 +3700,7 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 	//{
 	//	//show ALL the addon params! mainly to debug..
 	//	ofxImGui::AddGroup(params_Control, settings);
-
+	//
 	//	//TODO:
 	//	//to customize presets folder outside /data of our app...
 	//	//ie: this will allow to use any folder of our computer, and share the presets between apps...
@@ -3836,7 +3896,7 @@ bool ofxPresetsManager::browser_FilesRefresh()
 
 #ifdef INCLUDE_ofxUndoSimple
 //--------------------------------------------------------------
-void ofxPresetsManager::storeParams() {
+void ofxPresetsManager::undoStoreParams() {
 	//ofLogNotice(__FUNCTION__);
 	xmlParams.clear();
 	ofParameterGroup _group = groups[0];
@@ -3854,7 +3914,7 @@ void ofxPresetsManager::storeParams() {
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::refreshParams() {
+void ofxPresetsManager::undoRefreshParams() {
 	//ofLogNotice(__FUNCTION__);
 	xmlParams.clear();
 	xmlParams.parse(undoStringParams);// fill the xml with the string 

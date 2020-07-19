@@ -16,14 +16,14 @@ void ofApp::setup()
 	//--
 
 	//0. our app parameters
-	params.setName("mySettings");//main (target) group
-	params.add(shapeType.set("shape", 1, 1, 2));
-	params.add(numShapes.set("num squares", 1, 1, 24));
+	params.setName("paramsGroup");//main (target) group
+	params.add(shapeType.set("shapeType", 1, 1, 2));
+	params.add(numShapes.set("numShapes", 1, 1, 24));
 	params.add(separation.set("separation", 5, 1, 100));
-	params.add(shapeSide.set("square side", 50, 5, 200));
-	paramsNested.setName("style");//another nested group
+	params.add(shapeSide.set("shapeSide", 50, 5, 200));
+	paramsNested.setName("styleGroup");//another nested group
 	paramsNested.add(fill.set("fill", false));
-	paramsNested.add(color.set("color", ofColor(0, 0), ofColor(0, 0), ofColor(255, 255)));
+	paramsNested.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
 	paramsNested.add(lineWidth.set("lineWidth", 1, 0.1, 10));
 	params.add(paramsNested);//main preset settings container
 
@@ -86,12 +86,6 @@ void ofApp::draw()
 	int pad = 20;
 	int i = 0;
 	{
-		str = "fill      : " + ofToString(fill);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "lineWidth : " + ofToString(lineWidth);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "color     : " + ofToString(color);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 		str = "shapeType : " + ofToString(shapeType);
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 		str = "numShapes : " + ofToString(numShapes);
@@ -99,6 +93,12 @@ void ofApp::draw()
 		str = "separation: " + ofToString(separation);
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 		str = "shapeSide : " + ofToString(shapeSide);
+		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		str = "fill      : " + ofToString(fill);
+		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		str = "color     : " + ofToString(color);
+		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		str = "lineWidth : " + ofToString(lineWidth);
 		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
 	}
 
