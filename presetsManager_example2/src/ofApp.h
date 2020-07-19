@@ -66,11 +66,12 @@ public:
 	ofParameter<int> separation;
     ofParameter<int> shapeSide;
 	
-	////group2
-	//ofParameterGroup paramsNested;
-	//ofParameter<int> numCircles;
-	//ofParameter<int> circleSeparation;
-	//ofParameter<int> circleSide;
+	//TODO:
+	//group2
+	ofParameterGroup params2;
+	ofParameter<int> numShapes2;
+	ofParameter<int> separation2;
+	ofParameter<int> shapeSide2;
 
 	//-
 

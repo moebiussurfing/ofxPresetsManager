@@ -1468,8 +1468,9 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 
 	ofLogNotice(__FUNCTION__) << "added group";
 
-	groups.push_back(params);//each enqued group-param handles all (_num_presets) '8' presets
+	groups.push_back(params);//each enqueued group-param handles all presets of each added paramGroup
 
+	//initializes?
 	lastIndices.push_back(0);//?
 	newIndices.push_back(0);//?
 	presetsOnGroup.push_back(_num_presets);//?
@@ -1516,7 +1517,7 @@ void ofxPresetsManager::add(ofParameterGroup params, initializer_list<int> keysL
 {
 	//adds a ofParameterGroup for preset management with the list of trigger keys
 
-	add(params, keysList.size());
+	add(params, keysList.size());//re add with known size counting passed key triggers
 
 	keys.resize(groups.size());
 	int i = groups.size() - 1;
@@ -3098,7 +3099,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	static bool no_resize = true;
 	static bool no_move = true;
 	static bool no_scrollbar = false;
-	static bool no_collapse = true;
+	//static bool no_collapse = true;
 	static bool no_close = true;
 	static bool no_menu = true;
 	static bool no_settings = true;
