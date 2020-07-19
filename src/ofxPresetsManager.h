@@ -248,7 +248,7 @@ private:
 	vector<ofParameter<bool>> editorPresets;
 	ofParameterGroup params_Editor;
 	ofParameterGroup params_Editor_Toggles;
-	void addGroupToEditor(ofParameterGroup& group);
+	void addGroupToEditor(ofParameterGroup& group);//queue all contained params inside the paramGroup and nested too
 	void Changed_Params_Editor(ofAbstractParameter &e);
 	void doRandomizeEditor();//randomize params of current selected preset
 	void doRandomizeEditorGroup(ofParameterGroup& group);//randomize params of current selected preset
@@ -740,6 +740,7 @@ private:
 #endif
 
 	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. 
+	ofParameter<glm::vec2> ImGui_Size;//ImGui browser panel position. 
 
 	ofParameter<bool> MODE_Browser_NewPreset;
 
@@ -987,5 +988,102 @@ private:
 		{
 			ofLogNotice(__FUNCTION__) << "OK! LOCATED FOLDER: '" << _path << "'";//nothing to do
 		}
+	}
+
+	//--
+
+	bool show_another_window;
+
+	////toggle ImGui button
+	////https://github.com/ocornut/imgui/issues/1537
+	//--------------------------------------------------------------
+	bool AddBigToggle(ofParameter<bool>& parameter)
+	{
+		auto tmpRef = parameter.get();
+		auto name = ofxImGui::GetUniqueName(parameter);
+
+		//static float b = 1.0f;
+		//static float c = 0.5f;
+		//static int i = 3;// hue colors are from 0 to 7
+		//ImVec4 _color1 = (ImVec4)ImColor::HSV(i / 7.0f, b, b);
+		//ImVec4 _color2 = (ImVec4)ImColor::HSV(i / 7.0f, c, c);
+
+		//--
+
+		//button toggle
+
+		float w, h;
+		h = 30;
+		//w = 200;
+		w = ImGui::GetWindowWidth()*0.9f;
+
+		static bool _boolToggle = tmpRef;  // default value, the button is disabled 
+		if (_boolToggle == true)//enabled
+		{
+			ImGuiStyle *style = &ImGui::GetStyle();
+
+			const ImVec4 colorButton = style->Colors[ImGuiCol_Button];//better for my theme
+			const ImVec4 colorHover = style->Colors[ImGuiCol_Button];
+			const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
+			//const ImVec4 colorButton = style->Colors[ImGuiCol_ButtonHovered];//better for default theme
+			//const ImVec4 colorHover = style->Colors[ImGuiCol_ButtonHovered];
+			//const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
+
+			ImGui::PushID(name);
+			ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorHover);
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorActive);
+
+			ImGui::Button(name, ImVec2(w, h));
+			if (ImGui::IsItemClicked(0))
+			{
+				_boolToggle = !_boolToggle;
+				tmpRef = _boolToggle;
+				parameter.set(tmpRef);
+			}
+
+			ImGui::PopStyleColor(3);
+			ImGui::PopID();
+		}
+		else//disabled
+		{
+			ImGuiStyle *style = &ImGui::GetStyle();
+
+			const ImVec4 colorButton = style->Colors[ImGuiCol_Button];//better for my theme
+			const ImVec4 colorHover = style->Colors[ImGuiCol_ButtonHovered];
+			const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
+			//const ImVec4 colorButton = style->Colors[ImGuiCol_ButtonHovered];//better for default theme
+			//const ImVec4 colorHover = style->Colors[ImGuiCol_Button];
+			//const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
+
+			ImGui::PushStyleColor(ImGuiCol_Button, colorHover);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorHover);
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorActive);
+			if (ImGui::Button(name, ImVec2(w, h))) {
+				_boolToggle = true;
+				tmpRef = _boolToggle;
+				parameter.set(tmpRef);
+			}
+			ImGui::PopStyleColor(3);
+		}
+
+		//--
+
+		//checkbox
+		//ImGui::PushID(name);
+		//ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(i / 7.0f, b, b));
+		//ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i / 7.0f, b, b));
+		//ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i / 7.0f, c, c));
+		//if (ImGui::Checkbox(name, (bool *)&tmpRef))
+		//	//if (ImGui::Checkbox(ofxImGui::GetUniqueName(parameter), (bool *)&tmpRef))
+		//{
+		//	parameter.set(tmpRef);
+		//	ImGui::PopStyleColor(3);
+		//	ImGui::PopID();
+		//	return true;
+		//}
+		//ImGui::PopStyleColor(3);
+		//ImGui::PopID();
+		//return false;
 	}
 };

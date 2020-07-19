@@ -156,6 +156,9 @@ void ofxPresetsManager::doResetDices()
 void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 	//editorPresets.clear();//?
 
+	//TODO:
+	//if we want to make nested folders (not all toggles into same and only one level, we need to create subgroups too...)
+
 	for (auto parameter : group)
 	{
 		//group
@@ -166,11 +169,12 @@ void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 			continue;
 		}
 
-		//exclude
+		//exclude params not marked as serializable
 		if (parameter->isSerializable())
 		{
-
 			//parameter, try everything we know how to handle.
+
+			//x,y,z vectors
 #if OF_VERSION_MINOR >= 10
 			auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
 			if (parameterVec2f)
@@ -218,6 +222,7 @@ void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 				//ofxImGui::AddParameter(*parameterOfVec4f);
 				continue;
 			}
+			//colors
 			auto parameterColor = std::dynamic_pointer_cast<ofParameter<ofColor>>(parameter);
 			if (parameterColor)
 			{
@@ -232,6 +237,7 @@ void ofxPresetsManager::addGroupToEditor(ofParameterGroup& group) {
 				editorPresets.push_back(b);
 				continue;
 			}
+			//normal types
 			auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
 			if (parameterFloat)
 			{
@@ -458,7 +464,7 @@ void ofxPresetsManager::setupEditor()
 
 	//int num = groups[0].getGroupHierarchyNames().size();
 	ofParameterGroup group = groups[0];
-	addGroupToEditor(groups[0]);
+	addGroupToEditor(groups[0]);//enqueue all content params and create a toggle for each one
 
 	//add to group
 	bRandomizeEditor.set("RANDOMIZE", false);
@@ -670,6 +676,12 @@ ofxPresetsManager::ofxPresetsManager()
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
+	ImGui_Size.set("GUI ImGui SIZE",
+		glm::vec2(ofGetWidth() * 0.5, 10),//top
+		//glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),//center
+		glm::vec2(0, 0),
+		glm::vec2(ofGetWidth(), ofGetHeight())
+	);
 #endif
 
 	//-
@@ -714,6 +726,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//layout
 #ifdef INCLUDE_GUI_IM_GUI
 	params_Gui.add(ImGui_Position);
+	params_Gui.add(ImGui_Size);
 #endif
 	params_Gui.add(Gui_Internal_Position);
 
@@ -893,7 +906,7 @@ void ofxPresetsManager::setup()
 	//-------
 
 	startup();
-}
+	}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::startup()
@@ -1081,8 +1094,8 @@ void ofxPresetsManager::update(ofEventArgs & args)
 			//auto save timer
 			timerLast_Autosave = ofGetElapsedTimeMillis();
 		}
+		}
 	}
-}
 
 //---------------------------------------------------------------------
 void ofxPresetsManager::draw(ofEventArgs & args)
@@ -2414,6 +2427,16 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			//y = ofClamp(ImGui_Position.get().y, 0, ofGetHeight() - 20);
 			//ImGui_Position = glm::vec2(x, y);
 		}
+		else if (name == "GUI ImGui SIZE")
+		{
+			ofLogVerbose(__FUNCTION__) << "GUI BROWSER SIZE: " << e;
+
+			////clamp inside window
+			//float x, y;
+			//x = ofClamp(ImGui_Position.get().x, 0, ofGetWidth() - 200);
+			//y = ofClamp(ImGui_Position.get().y, 0, ofGetHeight() - 20);
+			//ImGui_Position = glm::vec2(x, y);
+		}
 #endif
 		//--
 
@@ -2471,10 +2494,10 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				{
 					load(PRESET_selected, 0);
 				}
-			}
+				}
 #endif
 			bMustTrig = true;
-		}
+			}
 
 		//-
 
@@ -2555,8 +2578,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//{
 		//	ofLogError(__FUNCTION__) << "IGNORED PRESETS CHANGE";
 		//}
+		}
 	}
-}
 
 #pragma mark - SETTINGS
 
@@ -2861,7 +2884,7 @@ void ofxPresetsManager::exit()
 void ofxPresetsManager::ImGui_FontCustom() {
 	ofLogNotice(__FUNCTION__);
 
-	ImGui::CreateContext();
+	//ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	string _name = "overpass-mono-bold.otf";
 	string _path = "assets/fonts/" + _name;//assets folder
@@ -2966,6 +2989,7 @@ void ofxPresetsManager::ImGui_Theme()
 void ofxPresetsManager::ImGui_Setup()
 {
 	ofLogNotice(__FUNCTION__);
+
 	//--
 
 	//font customize
@@ -2977,8 +3001,16 @@ void ofxPresetsManager::ImGui_Setup()
 
 	gui_ImGui.setup();
 
+	//theme
 	ImGui_Theme();
+
+	//mouse over
+	ImGui::GetIO().MouseDrawCursor = false;
 	bImGui_mouseOver.set("mouseOverGui", false);
+
+	//ImGui::GetIO().ConfigWindowsResizeFromEdges = true;
+	//ImGui::GetIO().= true;
+	//ImGui::GetIO().
 
 	//--
 }
@@ -2986,6 +3018,12 @@ void ofxPresetsManager::ImGui_Setup()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_WindowBegin()
 {
+	//mouse over gui system
+	bMouseOver_Changed = false;
+	bImGui_mouseOver = false;
+
+	//-
+
 #ifndef USE_ofxImGuiSimple
 	gui_ImGui.begin();
 #else
@@ -2996,10 +3034,6 @@ void ofxPresetsManager::ImGui_Draw_WindowBegin()
 #endif
 
 	//-
-
-	//mouse over gui system
-	bMouseOver_Changed = false;
-	bImGui_mouseOver = false;
 }
 
 //--------------------------------------------------------------
@@ -3028,22 +3062,67 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 //--------------------------------------------------------------
 bool ofxPresetsManager::ImGui_Draw_Window()
 {
-	ofVec2f pos(ImGui_Position.get().x, ImGui_Position.get().y);
-
 	auto mainSettings = ofxImGui::Settings();
-	mainSettings.windowPos = pos;
 
-	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2(200, 500), ImGuiCond_FirstUseEver);
+	ofVec2f pos(ImGui_Position.get().x, ImGui_Position.get().y);
+	ofVec2f size(ImGui_Size.get().x, ImGui_Size.get().y);
+	//ofLogNotice(__FUNCTION__) << "ImGui position: " << ofToString(pos);
+	//ofLogNotice(__FUNCTION__) << "ImGui size: " << ofToString(size);
+	mainSettings.windowPos = pos;//required
+	mainSettings.windowSize = size;
 
-	//-
+	auto _mode = ImGuiCond_Always;
+	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), _mode);
+	ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), _mode);
+
+	//--
 
 	string _name = groups[0].getName();
 	bool _collapse = true;
 
-	if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
+	//--
+
+	//set window properties
+	//bool show = true;
+	static bool no_titlebar = false;
+	static bool no_border = true;
+	static bool no_resize = true;
+	static bool no_move = true;
+	static bool no_scrollbar = false;
+	static bool no_collapse = true;
+	static bool no_menu = true;
+	static bool no_settings = true;
+	static float bg_alpha = -0.01f; // <0: default
+
+	// Demonstrate the various window flags. 
+	// Typically you would just use the default.
+	ImGuiWindowFlags window_flags = 0;
+	//if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
+	//if (!no_border)   window_flags |= ImGuiWindowFlags_NoDecoration;
+	//if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
+	//if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
+	//if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
+	//if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
+	//if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
+	//if (no_settings) window_flags |= ImGuiWindowFlags_NoSavedSettings;
+
+	//---
+
+	//A
+
+	if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
 	{
 		ImGui_Draw_Content(mainSettings);
+
+		//-
+
+		//get window position/size: must be inside begin/end
+		pos = ImGui::GetWindowPos();
+		size = ImGui::GetWindowSize();
+		ImGui_Position = glm::vec2(pos.x, pos.y);
+		ImGui_Size = glm::vec2(size.x, size.y);
+		//cout << "pos:" << ofToString(pos) << endl;
+		//cout << "size:" << ofToString(size) << endl;
 	}
 	ofxImGui::EndWindow(mainSettings);
 
@@ -3057,10 +3136,39 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 {
+	//if (ImGui::TreeNode("BASIC"))
 	if (ofxImGui::BeginTree("BASIC", settings))
-		//if (ImGui::TreeNode("BASIC"))
 	{
-		ofxImGui::AddParameter(PRESET_selected);//main preset selector
+		{
+			auto parameter = PRESET_selected;
+			auto tmpRef = PRESET_selected.get();
+			auto name = ofxImGui::GetUniqueName(PRESET_selected);
+
+			//float w, h;
+			//w = ImGui::GetWindowWidth()*0.9f;
+			////w = 200;
+			//h = 30;
+
+			//ImGui::PushID(name);
+			//ImGui::PushItemWidth(w);
+			////ImGui::PushStyleColor(ImGuiCol_Button, color);
+			if (ImGui::SliderInt(ofxImGui::GetUniqueName(parameter), (int *)&tmpRef, parameter.getMin(), parameter.getMax()))
+			{
+				parameter.set(tmpRef);
+			}
+			////ImGui::PopStyleColor();
+			//ImGui::PopItemWidth();
+			//ImGui::PopID();
+		}
+
+		//ofxImGui::AddParameter(PRESET_selected);//main preset selector
+
+		//--
+
+		//big toggle button
+		AddBigToggle(PLAY_RandomizeTimer);
+
+		//--
 
 		//main helpers
 		if (ImGui::Button("CLONE ALL"))
@@ -3467,6 +3575,9 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 	//1. randomizers
 
 	bool b = false;
+	settings.windowBlock = true;
+
+
 	if (ofxImGui::BeginTree("RANDOMIZERS", settings))
 		//if (ImGui::TreeNode("RANDOMIZERS"))
 	{
@@ -3493,7 +3604,14 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 		else {
 			_prog = 0;
 		}
+
+		ImGui::PushID("prog");
+		ImGuiStyle *style = &ImGui::GetStyle();
+		const ImVec4 color = style->Colors[ImGuiCol_Button];
+		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, color);
 		ImGui::ProgressBar(_prog);
+		ImGui::PopStyleColor();
+		ImGui::PopID();
 
 		//--
 
