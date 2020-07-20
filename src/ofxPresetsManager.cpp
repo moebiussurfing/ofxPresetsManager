@@ -3162,6 +3162,10 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 	if (ofxImGui::BeginTree("BASIC", settings))
 	{
 		{
+			//---
+
+			//1. preset selector slider
+
 			auto parameter = PRESET_selected;
 			auto tmpRef = PRESET_selected.get();
 			auto name = ofxImGui::GetUniqueName(PRESET_selected);
@@ -3171,6 +3175,7 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 			////w = 200;
 			//h = 30;
 
+			//TODO: make bigger
 			//ImGui::PushID(name);
 			//ImGui::PushItemWidth(w);
 			////ImGui::PushStyleColor(ImGuiCol_Button, color);
@@ -3181,6 +3186,58 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 			////ImGui::PopStyleColor();
 			//ImGui::PopItemWidth();
 			//ImGui::PopID();
+
+			//---
+
+			//2. prest clicker matrix buttons
+
+			//if (ImGui::TreeNode("Test"))
+			{
+				//preset selector
+				//toggle button matrix
+				ImVec2 button_sz(40, 40);
+				// Manually wrapping
+				// (we should eventually provide this as an automatic layout feature, but for now you can do it manually)
+				//ImGui::Text("PRESET SELECTOR:");
+				ImGuiStyle& style = ImGui::GetStyle();
+				int buttons_count = numPresetsFavorites;
+				float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+
+				for (int n = 0; n < buttons_count; n++)
+				{
+					ImGui::PushID(n);
+					string name = ofToString((char)(keys[0][n]));
+
+					//customize colors
+					{
+						if (PRESET_selected.get() == n)//when selected
+						{
+							const ImVec4 colorActive = style.Colors[ImGuiCol_ButtonHovered];//changes the color
+							ImGui::PushStyleColor(ImGuiCol_Button, colorActive);
+						}
+						else {
+							const ImVec4 colorButton = style.Colors[ImGuiCol_Button];//do not changes the color
+							ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
+						}
+
+						//draw button
+						if (ImGui::Button(name.c_str(), button_sz))
+						{
+							loadPreset(n);//trig load preset
+						}
+
+						//customize colors
+						ImGui::PopStyleColor();
+					}
+
+					float last_button_x2 = ImGui::GetItemRectMax().x;
+					float next_button_x2 = last_button_x2 + style.ItemSpacing.x + button_sz.x; // Expected position if next button was on same line
+					if (n + 1 < buttons_count && next_button_x2 < window_visible_x2)
+						ImGui::SameLine();
+					ImGui::PopID();
+				}
+			}
+			//ImGui::TreePop();
 		}
 
 		//ofxImGui::AddParameter(PRESET_selected);//main preset selector
@@ -3220,10 +3277,10 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 		//--
 
 		//2. panels toggles
-		ofxImGui::AddParameter(SHOW_ClickPanel);
 
 		if (ImGui::TreeNode("EXTRA")) {
 			ofxImGui::AddParameter(SHOW_ImGui);
+			ofxImGui::AddParameter(SHOW_ClickPanel);
 			ofxImGui::AddParameter(SHOW_Gui_AdvancedControl);
 
 			//-
@@ -3640,7 +3697,7 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 		}
 
 		ImGui::PushID("prog");
-		const ImVec4 color = style->Colors[ImGuiCol_Button];
+		const ImVec4 color = style->Colors[ImGuiCol_ButtonHovered];//we can force change this color on theme... only used here
 		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, color);
 		ImGui::ProgressBar(_prog);
 		ImGui::PopStyleColor();
