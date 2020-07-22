@@ -565,7 +565,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//-
 
 	//mainly to measure performance when using hd files vs faster memory vectors
-#ifdef TIME_SAMPLE_MEASURES
+#ifdef INCLUDE_PERFORMANCE_MEASURES
 	//specify a target framerate
 	//TIME_SAMPLE_SET_FRAMERATE(fps);
 	//TIME_SAMPLE_ENABLE();
@@ -804,7 +804,7 @@ void ofxPresetsManager::setup()
 #ifdef INCLUDE_DEBUG_ERRORS
 	if (!bLoaded)
 	{
-		errorsDEBUG.addError(gui_LabelName + " ofxPresetsManager", "setup() myFont", myTTF);
+		errorsDEBUG.addError(gui_LabelName + " " + ofToString(__FUNCTION__), "ttf font", myTTF);
 	}
 #endif
 
@@ -825,7 +825,7 @@ void ofxPresetsManager::setup()
 #ifdef INCLUDE_DEBUG_ERRORS
 	else
 	{
-		errorsDEBUG.addError(gui_LabelName + " ofxPresetsManager", "setup() ofxGui", pathFont);
+		errorsDEBUG.addError(gui_LabelName + " " + ofToString(__FUNCTION__), "ofxGui font", pathFont);
 	}
 #endif
 
@@ -870,6 +870,8 @@ void ofxPresetsManager::setup()
 	//create data folders if they are not presets: 
 	//when you create a new project or added the addon to your existing project
 	//and no /data files are present
+	CheckFolder(path_GLOBAL_Folder);
+
 	string _path;
 	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
 	CheckFolder(_path);
@@ -926,6 +928,8 @@ void ofxPresetsManager::startup()
 	timerLast_Autosave = ofGetElapsedTimeMillis();
 
 	setVisible_GUI_Internal(false);
+	
+	windowResized(ofGetWidth(), ofGetHeight());
 
 	//--
 
@@ -972,7 +976,6 @@ void ofxPresetsManager::windowResized(int w, int h)
 void ofxPresetsManager::update(ofEventArgs & args)
 {
 	if (!DISABLE_CALLBACKS) {
-
 
 		//TODO:
 		if (
@@ -1041,13 +1044,13 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//-
 
 		//plotters
-#ifdef TIME_SAMPLE_MEASURES 
-		TS_START("load1");
-		TS_STOP("load1");
-		TS_START("load2");
-		TS_STOP("load2");
-		TS_START("loadMem");
-		TS_STOP("loadMem");
+#ifdef INCLUDE_PERFORMANCE_MEASURES 
+		TS_START("LOAD 1");
+		TS_STOP("LOAD 1");
+		TS_START("LOAD 2");
+		TS_STOP("LOAD 2");
+		TS_START("LOAD MEM");
+		TS_STOP("LOAD MEM");
 #endif
 
 		//-
@@ -2887,9 +2890,12 @@ void ofxPresetsManager::ImGui_FontCustom() {
 	ofLogNotice(__FUNCTION__);
 
 	ImGuiIO& io = ImGui::GetIO();
-	string _name = "overpass-mono-bold.otf";
+	float _size = 14.f;
+	string _name = "FiraCodeRegular.ttf";
+	//float _size = 13.f;
+	//string _name = "overpass-mono-bold.otf";
 	string _path = "assets/fonts/" + _name;//assets folder
-	io.Fonts->AddFontFromFileTTF(&ofToDataPath(_path)[0], 13.0f);
+	io.Fonts->AddFontFromFileTTF(&ofToDataPath(_path)[0], _size);
 }
 
 //--------------------------------------------------------------
@@ -3232,8 +3238,7 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 
 					float last_button_x2 = ImGui::GetItemRectMax().x;
 					float next_button_x2 = last_button_x2 + style.ItemSpacing.x + button_sz.x; // Expected position if next button was on same line
-					if (n + 1 < buttons_count && next_button_x2 < window_visible_x2)
-						ImGui::SameLine();
+					if (n + 1 < buttons_count && next_button_x2 < window_visible_x2) ImGui::SameLine();
 					ImGui::PopID();
 				}
 			}

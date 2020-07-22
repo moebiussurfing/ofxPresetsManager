@@ -15,23 +15,22 @@
 ///	TODO:
 ///
 ///
+///	++		add multiple groups engine. look into ofxGuiPresets fron #npisanti
+///	+++		lock (by toggle) params that we want to ignore on changing presets
+///				can be done enabling/disabling serializable for each param with a group of toggles
 ///	++		performance: check memory_mode
 ///				check workflow: when playing randomizer disable autosave
 ///				check disable autosave
 ///	+		repair autosave timer. exclude log
 ///	++		preset mini engine. ABC dropdown list for randomizers
-///	+++		lock (by toggle) params that we want to ignore on changid presets
 ///	++		randomize editor preset
 ///				add limit range min/max to randomize
 ///				do nesting toggles to improve view. create a group for related toggles..	
 ///				clone using editor toggles to avoid clone disabled toggle params
 ///				mode state to allow overwrite only enabled toggle params
-///	++		add ofxUndo to randomizers
 ///	+		add workflow to not collide manual preset click with randomizer timer
 ///	+		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
 ///	+		could make tween when changing params 
-///	++		add all preset parameters preview inside the ImGui too
-///	++		add multiple groups engine. look into ofxGuiPresets fron #npisanti
 ///
 ///	BUG:	
 ///
@@ -43,20 +42,20 @@
 #pragma once
 
 //----------------------------------------------
-//
+
 //	DEFINES
-//
+
 //#define MODE_ImGui_EXTERNAL			//MODE_ImGui_EXTERNAL. this must be defined here and (not only) in ofApp (too)!!
 #define INCLUDE_GUI_IM_GUI				//ImGui & browser system
 #define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
 //#define USE_ofxImGuiSimple			//TEST alternative addon
 #define INCLUDE_ofxUndoSimple			//undo engine to store after randomize preset parameters (& recall)
-//
-//#define TIME_SAMPLE_MEASURES			//measure performance ofxTimeMeasurements
+
+//#define INCLUDE_PERFORMANCE_MEASURES	//measure performance ofxTimeMeasurements
 #define INCLUDE_DEBUG_ERRORS			//debug errors
 //#define DEBUG_randomTest				//uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
 //#define DEBUG_BLOCK_SAVE_SETTINGS		//disable save settings//enable this bc sometimes there's crashes on exit
-//
+
 //----------------------------------------------
 
 
@@ -99,7 +98,7 @@
 //--
 
 //optional to debug performance or delay when loading files or presets on hd or memory modes
-#ifdef TIME_SAMPLE_MEASURES
+#ifdef INCLUDE_PERFORMANCE_MEASURES
 #include "ofxTimeMeasurements.h"
 #else
 #define TS_START
@@ -545,7 +544,6 @@ public:
 	//--------------------------------------------------------------
 	void refresh()
 	{
-		windowResized(ofGetWidth(), ofGetHeight());
 
 		////browser
 		//browser_FilesRefresh();
@@ -1194,6 +1192,165 @@ private:
 		colors[ImGuiCol_NavWindowingDimBg] = { 0.80f, 0.80f, 0.80f, 0.20f };
 		colors[ImGuiCol_ModalWindowDimBg] = { 0.11f, 0.13f, 0.13f, 0.35f };
 	}
+
+	//--
+
+	////https://github.com/erickjung/SwiftGUI
+	////ImGui theme
+	//void ImGui_ThemeDarcula()
+	//{
+	//	//		//
+	//	//// Copyright (c) 2020, Erick Jung.
+	//	//// All rights reserved.
+	//	////
+	//	//// This source code is licensed under the MIT-style license found in the
+	//	//// LICENSE file in the root directory of this source tree.
+	//	////
+	//	//
+	//	//		import Foundation
+	//	//
+	//	//			public class DarculaTheme : Theme {
+	//	//
+	//	//			public var colors : [GuiColorProperty:GuiColor]{
+	//	//
+	//	//				return[
+	//	//					.text:.white,
+	//	//					.textDisabled : GuiColor(r : 0.54, g : 0.54, b : 0.54, a : 1),
+	//	//					.windowBg : GuiColor(r : 0.23, g : 0.24, b : 0.25, a : 1),
+	//	//					.childBg : GuiColor(r : 0.23, g : 0.24, b : 0.25, a : 1),
+	//	//					.popupBg : GuiColor(r : 0.23, g : 0.24, b : 0.25, a : 1),
+	//	//					.border : GuiColor(r : 0.36, g : 0.36, b : 0.36, a : 1),
+	//	//					.borderShadow : GuiColor(r : 0.15, g : 0.15, b : 0.15, a : 0),
+	//	//					.frameBg : GuiColor(r : 0.27, g : 0.28, b : 0.29, a : 1),
+	//	//					.frameBgHovered : GuiColor(r : 0.27, g : 0.28, b : 0.29, a : 1),
+	//	//					.frameBgActive : GuiColor(r : 0.47, g : 0.47, b : 0.47, a : 0.67),
+	//	//					.titleBg : GuiColor(r : 0.04, g : 0.04, b : 0.04, a : 1),
+	//	//					.titleBgActive : GuiColor(r : 0, g : 0, b : 0, a : 0.51),
+	//	//					.titleBgCollapsed : GuiColor(r : 0.16, g : 0.29, b : 0.48, a : 1),
+	//	//					.menuBarBg : GuiColor(r : 0.27, g : 0.28, b : 0.29, a : 0.8),
+	//	//					.scrollbarBg : GuiColor(r : 0.39, g : 0.4, b : 0.4, a : 0),
+	//	//					.scrollbarGrab : GuiColor(r : 0.39, g : 0.4, b : 0.4, a : 1),
+	//	//					.scrollbarGrabHovered : GuiColor(r : 0.39, g : 0.4, b : 0.4, a : 1),
+	//	//					.scrollbarGrabActive : GuiColor(r : 0.39, g : 0.4, b : 0.4, a : 1),
+	//	//					.checkMark : GuiColor(r : 0.65, g : 0.65, b : 0.65, a : 1),
+	//	//					.sliderGrab : GuiColor(r : 0.7, g : 0.7, b : 0.7, a : 0.62),
+	//	//					.sliderGrabActive : GuiColor(r : 0.3, g : 0.3, b : 0.3, a : 0.84),
+	//	//					.button : GuiColor(r : 0.29, g : 0.31, b : 0.32, a : 1),
+	//	//					.buttonHovered : GuiColor(r : 0.29, g : 0.31, b : 0.32, a : 1),
+	//	//					.buttonActive : GuiColor(r : 0.21, g : 0.34, b : 0.5, a : 1),
+	//	//					.header : GuiColor(r : 0.32, g : 0.33, b : 0.34, a : 1),
+	//	//					.headerHovered : GuiColor(r : 0.30, g : 0.32, b : 0.32, a : 1),
+	//	//					.headerActive : GuiColor(r : 0.47, g : 0.47, b : 0.47, a : 0.67),
+	//	//					.separator : GuiColor(r : 0.31, g : 0.31, b : 0.31, a : 1),
+	//	//					.separatorHovered : GuiColor(r : 0.31, g : 0.31, b : 0.31, a : 1),
+	//	//					.separatorActive : GuiColor(r : 0.31, g : 0.31, b : 0.31, a : 1),
+	//	//					.resizeGrip : GuiColor(r : 1, g : 1, b : 1, a : 0.85),
+	//	//					.resizeGripHovered : GuiColor(r : 1, g : 1, b : 1, a : 0.6),
+	//	//					.resizeGripActive : GuiColor(r : 0.47, g : 0.47, b : 0.47, a : 0.67),
+	//	//					.tab : GuiColor(r : 0.32, g : 0.33, b : 0.34, a : 1),
+	//	//					.tabHovered : GuiColor(r : 0.21, g : 0.34, b : 0.5, a : 1),
+	//	//					.tabActive : GuiColor(r : 0.21, g : 0.34, b : 0.5, a : 1),
+	//	//					.tabUnfocused : GuiColor(r : 0.06, g : 0.53, b : 0.98, a : 0.8),
+	//	//					.tabUnfocusedActive : GuiColor(r : 0.06, g : 0.53, b : 0.98, a : 0.4),
+	//	//					.plotLines : GuiColor(r : 0.61, g : 0.61, b : 0.61, a : 1),
+	//	//					.plotLinesHovered : GuiColor(r : 1, g : 0.43, b : 0.35, a : 1),
+	//	//					.plotHistogram : GuiColor(r : 0.9, g : 0.7, b : 0, a : 1),
+	//	//					.plotHistogramHovered : GuiColor(r : 1, g : 0.6, b : 0, a : 1),
+	//	//					.textSelectedBg : GuiColor(r : 0.18, g : 0.39, b : 0.79, a : 0.9),
+	//	//					.modalWindowDimBg : GuiColor(r : 0.18, g : 0.39, b : 0.79, a : 1)
+	//	//				]
+	//	//			}
+	//	//
+	//	//				public var windowRounding : Float{
+	//	//					return 5.3
+	//	//					}
+	//	//
+	//	//						public var grabRounding : Float{
+	//	//							return 2.3
+	//	//					}
+	//	//
+	//	//						public var frameRounding : Float{
+	//	//							return 2.3
+	//	//					}
+	//	//
+	//	//						public var scrollbarRounding : Float{
+	//	//							return 5
+	//	//					}
+	//	//
+	//	//						public var frameBorderSize : Float{
+	//	//							return 1
+	//	//					}
+	//	//
+	//	//						public var itemSpacing : GuiPoint{
+	//	//							return GuiPoint(x: 8, y : 6.5)
+	//	//					}
+	//	//
+	//	//						public init() {}
+	//	//		}
+
+	//	auto& style = ImGui::GetStyle();
+	//	style.ChildRounding = 0;
+	//	style.GrabRounding = 0;
+	//	style.FrameRounding = 2;
+	//	style.PopupRounding = 0;
+	//	style.ScrollbarRounding = 0;
+	//	style.TabRounding = 2;
+	//	style.WindowRounding = 0;
+	//	style.FramePadding = { 4, 4 };
+	//	style.WindowTitleAlign = { 0.0, 0.5 };
+	//	style.ColorButtonPosition = ImGuiDir_Left;
+	//	ImVec4* colors = ImGui::GetStyle().Colors;
+	//	colors[ImGuiCol_Text] = { 1.0f, 1.0f, 1.0f, 1.00f };				//
+	//	colors[ImGuiCol_TextDisabled] = { 0.25f, 0.25f, 0.25f, 1.00f };		//
+	//	colors[ImGuiCol_WindowBg] = { 0.09f, 0.09f, 0.09f, 0.94f };			//
+	//	colors[ImGuiCol_ChildBg] = { 0.11f, 0.11f, 0.11f, 1.00f };			//
+	//	colors[ImGuiCol_PopupBg] = { 0.11f, 0.11f, 0.11f, 0.94f };			//
+	//	colors[ImGuiCol_Border] = { 0.07f, 0.08f, 0.08f, 1.00f };
+	//	colors[ImGuiCol_BorderShadow] = { 0.00f, 0.00f, 0.00f, 0.00f };
+	//	colors[ImGuiCol_FrameBg] = { 0.35f, 0.35f, 0.35f, 0.54f };			//
+	//	colors[ImGuiCol_FrameBgHovered] = { 0.31f, 0.29f, 0.27f, 1.00f };
+	//	colors[ImGuiCol_FrameBgActive] = { 0.40f, 0.36f, 0.33f, 0.67f };
+	//	colors[ImGuiCol_TitleBg] = { 0.1f, 0.1f, 0.1f, 1.00f };
+	//	colors[ImGuiCol_TitleBgActive] = { 0.3f, 0.3f, 0.3f, 1.00f };		//
+	//	colors[ImGuiCol_TitleBgCollapsed] = { 0.0f, 0.0f, 0.0f, 0.61f };
+	//	colors[ImGuiCol_MenuBarBg] = { 0.18f, 0.18f, 0.18f, 0.94f };		//
+	//	colors[ImGuiCol_ScrollbarBg] = { 0.00f, 0.00f, 0.00f, 0.16f };
+	//	colors[ImGuiCol_ScrollbarGrab] = { 0.24f, 0.22f, 0.21f, 1.00f };
+	//	colors[ImGuiCol_ScrollbarGrabHovered] = { 0.31f, 0.29f, 0.27f, 1.00f };
+	//	colors[ImGuiCol_ScrollbarGrabActive] = { 0.40f, 0.36f, 0.33f, 1.00f };
+	//	colors[ImGuiCol_CheckMark] = { 0.84f, 0.84f, 0.84f, 1.0f };			//
+	//	colors[ImGuiCol_SliderGrab] = { 0.8f, 0.8f, 0.8f, 1.0f };			//		
+	//	colors[ImGuiCol_SliderGrabActive] = { 0.55f, 0.55f, 0.55f, 1.00f }; //
+	//	colors[ImGuiCol_Button] = { 0.55f, 0.55f, 0.55f, 0.40f };			//
+	//	colors[ImGuiCol_ButtonHovered] = { 0.15f, 0.15f, 0.15f, 0.62f };	//	
+	//	colors[ImGuiCol_ButtonActive] = { 0.60f, 0.60f, 0.60f, 1.00f };		//
+	//	colors[ImGuiCol_Header] = { 0.84f, 0.36f, 0.05f, 0.0f };			//
+	//	colors[ImGuiCol_HeaderHovered] = { 0.25f, 0.25f, 0.25f, 0.80f };	//
+	//	colors[ImGuiCol_HeaderActive] = { 0.42f, 0.42f, 0.42f, 1.00f };
+	//	colors[ImGuiCol_Separator] = { 0.35f, 0.35f, 0.35f, 0.50f };		//
+	//	colors[ImGuiCol_SeparatorHovered] = { 0.31f, 0.29f, 0.27f, 0.78f };
+	//	colors[ImGuiCol_SeparatorActive] = { 0.40f, 0.36f, 0.33f, 1.00f };
+	//	colors[ImGuiCol_ResizeGrip] = { 1.0f, 1.0f, 1.0f, 0.25f };			//
+	//	colors[ImGuiCol_ResizeGripHovered] = { 1.00f, 1.0f, 1.0f, 0.4f };	//
+	//	colors[ImGuiCol_ResizeGripActive] = { 1.00f, 1.00f, 1.0f, 0.95f };	//
+	//	colors[ImGuiCol_Tab] = { 0.18f, 0.18f, 0.18f, 1.0f };				//
+	//	colors[ImGuiCol_TabHovered] = { 0.58f, 0.58f, 0.58f, 0.80f };		//
+	//	colors[ImGuiCol_TabActive] = { 0.6f, 0.60f, 0.60f, 1.00f };
+	//	colors[ImGuiCol_TabUnfocused] = { 0.07f, 0.10f, 0.15f, 0.97f };
+	//	colors[ImGuiCol_TabUnfocusedActive] = { 0.14f, 0.26f, 0.42f, 1.00f };
+	//	colors[ImGuiCol_PlotLines] = { 0.66f, 0.60f, 0.52f, 1.00f };
+	//	colors[ImGuiCol_PlotLinesHovered] = { 0.98f, 0.29f, 0.20f, 1.00f };
+	//	colors[ImGuiCol_PlotHistogram] = { 0.60f, 0.59f, 0.10f, 1.00f };
+	//	colors[ImGuiCol_PlotHistogramHovered] = { 0.72f, 0.73f, 0.15f, 1.00f };
+	//	colors[ImGuiCol_TextSelectedBg] = { 0.27f, 0.52f, 0.53f, 0.35f };
+	//	colors[ImGuiCol_DragDropTarget] = { 0.60f, 0.59f, 0.10f, 0.90f };
+	//	colors[ImGuiCol_NavHighlight] = { 0.51f, 0.65f, 0.60f, 1.00f };
+	//	colors[ImGuiCol_NavWindowingHighlight] = { 1.00f, 1.00f, 1.00f, 0.70f };
+	//	colors[ImGuiCol_NavWindowingDimBg] = { 0.80f, 0.80f, 0.80f, 0.20f };
+	//	colors[ImGuiCol_ModalWindowDimBg] = { 0.11f, 0.13f, 0.13f, 0.35f };
+	//}
+
+//--
 
 	////slider enum
 	//// Using the format string to display a name instead of an integer.
