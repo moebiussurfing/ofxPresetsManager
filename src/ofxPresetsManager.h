@@ -643,14 +643,14 @@ public:
 #pragma mark - SETTINGS
 
 	//--------------------------------------------------------------
+	void setPath_GlobalFolder(string folder);//path for root container folder. must be called befor setup()!
+	void setPath_KitFolder(string folder);//path folder for favorite/live presets
+	void setPath_PresetsFolder(string folder);//path folder for kit for the browser
 	void setPath_ControlSettings(string str)//for the session states settings
 	{
 		ofLogNotice(__FUNCTION__) << str;
 		path_Control = str;
 	}
-	void setPath_KitFolder(string folder);//path folder for favorite/live presets
-	void setPath_PresetsFolder(string folder);//path folder for kit for the browser
-	void setPath_GlobalFolder(string folder);//path for root container folder
 
 	//--------------------------------------------------------------
 	void setModeAutoLoad(bool b)
@@ -1034,6 +1034,8 @@ private:
 
 		ImGui::PopStyleColor(3);
 		ImGui::PopID();
+
+		return true;//not used
 	}
 
 	//--------------------------------------------------------------
@@ -1120,7 +1122,10 @@ private:
 		//ImGui::PopStyleColor(3);
 		//ImGui::PopID();
 		//return false;
+
+		return true;//not used
 	}
+
 	//--------------------------------------------------------------
 	void ImGui_ThemeModernDark()
 	{

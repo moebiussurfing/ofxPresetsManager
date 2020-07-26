@@ -794,8 +794,6 @@ void ofxPresetsManager::setup()
 
 	string str;
 	str = "overpass-mono-bold.otf";
-
-	//myTTF = path_GLOBAL_Folder + "/" + "fonts/" + str;//addon folder
 	myTTF = "assets/fonts/" + str;//assets folder
 
 	sizeTTF = 10;
@@ -812,8 +810,6 @@ void ofxPresetsManager::setup()
 
 	//ofxGui theme
 	str = "overpass-mono-bold.otf";
-
-	//string pathFont = path_GLOBAL_Folder + "/" + "fonts/" + str;//addon folder
 	string pathFont = "assets/fonts/" + str;//assets folder
 
 	//must check this font file is found there
@@ -1058,9 +1054,9 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//TODO: this disables the easycallback feature..
 		if (isDoneLoad())
 		{
-			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] PRESET " << PRESET_selected << " LOADED.";
-			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]-------------------------------------------------------------";
-			ofLogNotice() << endl;
+			ofLogNotice(__FUNCTION__) << groups[0].getName() << " PRESET " << PRESET_selected << " LOADED.";
+			ofLogNotice(__FUNCTION__) << groups[0].getName() << "-------------------------------------------------------------";
+			//ofLogNotice() << endl;
 		}
 
 		//--
@@ -2249,7 +2245,7 @@ void ofxPresetsManager::Changed_Params_Editor(ofAbstractParameter &e)
 	{
 		string name = e.getName();
 
-		ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] " << name << " : " << e;
+		ofLogNotice(__FUNCTION__) << groups[0].getName() << " " << name << " : " << e;
 
 		//-
 
@@ -2298,13 +2294,13 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			(name != "PRESET")
 			)
 		{
-			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] " << name << " : " << e;
+			ofLogNotice(__FUNCTION__) << groups[0].getName()<<" " << name << " : " << e;
 		}
 
 		//-
 
 		if (name == "PRESET") {
-			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]-------------------------------------------------------------";
+			ofLogNotice(__FUNCTION__) << groups[0].getName() << "-------------------------------------------------------------";
 		}
 
 		//-
@@ -2490,7 +2486,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESET" && (PRESET_selected == PRESET_selected_PRE))
 		{
-			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ]  PRESET " << e << "  [NOT Changed]";
+			ofLogNotice(__FUNCTION__) << groups[0].getName() << " PRESET " << e << "  [NOT Changed]";
 
 			//browser
 #ifdef INCLUDE_GUI_IM_GUI
@@ -2511,7 +2507,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESET" && (PRESET_selected != PRESET_selected_PRE))
 		{
-			ofLogNotice(__FUNCTION__) << "[ " + groups[0].getName() << " ] PRESET " << PRESET_selected;
+			ofLogNotice(__FUNCTION__) << groups[0].getName() << " PRESET " << PRESET_selected;
 
 			//-
 
@@ -3087,7 +3083,8 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	mainSettings.windowPos = pos;//required
 	mainSettings.windowSize = size;
 
-	auto _mode = ImGuiCond_Always;
+	auto _mode = ImGuiCond_FirstUseEver;
+	//auto _mode = ImGuiCond_Always;
 	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), _mode);
 	ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), _mode);
 
