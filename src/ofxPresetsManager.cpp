@@ -955,6 +955,9 @@ void ofxPresetsManager::startup()
 
 	//TODO:
 	//refresh();
+
+	//TODO:
+	CheckAllFolder();
 }
 
 //--------------------------------------------------------------
@@ -1055,7 +1058,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		if (isDoneLoad())
 		{
 			ofLogNotice(__FUNCTION__) << groups[0].getName() << " PRESET " << PRESET_selected << " LOADED.";
-			ofLogNotice(__FUNCTION__) << groups[0].getName() << "-------------------------------------------------------------";
+			ofLogNotice(__FUNCTION__) << groups[0].getName() << " -------------------------------------------------------------";
 			//ofLogNotice() << endl;
 		}
 
@@ -2179,6 +2182,9 @@ void ofxPresetsManager::mousePressed(int x, int y)
 void ofxPresetsManager::doCloneRight(int pIndex)
 {
 	ofLogNotice(__FUNCTION__) << "from preset: " << pIndex;
+
+	CheckAllFolder();
+
 	for (int i = pIndex + 1; i < numPresetsFavorites; i++)
 	{
 		save(i, 0);
@@ -2190,6 +2196,9 @@ void ofxPresetsManager::doCloneRight(int pIndex)
 void ofxPresetsManager::doPopulateFavs()
 {
 	ofLogNotice(__FUNCTION__);
+	
+	CheckAllFolder();
+
 	for (int i = 0; i < numPresetsFavorites; i++)
 	{
 		doRandomizeEditor();
@@ -2201,6 +2210,8 @@ void ofxPresetsManager::doPopulateFavs()
 void ofxPresetsManager::doCloneAll()
 {
 	ofLogNotice(__FUNCTION__);
+
+	CheckAllFolder();
 
 	//auto save current preset
 	if (autoSave)
@@ -2300,7 +2311,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//-
 
 		if (name == "PRESET") {
-			ofLogNotice(__FUNCTION__) << groups[0].getName() << "-------------------------------------------------------------";
+			ofLogNotice(__FUNCTION__) << groups[0].getName() << " -------------------------------------------------------------";
 		}
 
 		//-

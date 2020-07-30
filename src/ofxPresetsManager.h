@@ -976,7 +976,13 @@ private:
 	{
 		ofLogNotice(__FUNCTION__) << _path;
 
-		ofDirectory dataDirectory(ofToDataPath(_path, true));
+		////workaround to avoid error when folders are folder/subfolder
+		//auto _fullPath = ofSplitString(_path, "/");
+		//for (int i = 0; i < _fullPath.size(); i++) {
+		//	ofLogNotice(__FUNCTION__) << ofToString(i) << " " << _fullPath[i];
+		//}
+
+		ofDirectory dataDirectory(ofToDataPath(_path, true));// /bin/data/
 
 		//check if folder path exist
 		if (!dataDirectory.isDirectory())
@@ -984,7 +990,9 @@ private:
 			ofLogError(__FUNCTION__) << "FOLDER NOT FOUND! TRYING TO CREATE...";
 
 			//try to create folder
-			bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
+			//bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
+			bool b = dataDirectory.createDirectory(ofToDataPath(_path, true), false, true);
+			//added enable recursive to allow create nested subfolders if required
 
 			//debug if creation has been succeded
 			if (b) ofLogNotice(__FUNCTION__) << "CREATED '" << _path << "'  SUCCESSFULLY!";
@@ -994,6 +1002,19 @@ private:
 		{
 			ofLogNotice(__FUNCTION__) << "OK! LOCATED FOLDER: '" << _path << "'";//nothing to do
 		}
+	}
+	//--------------------------------------------------------------
+	void CheckAllFolder()
+	{
+		CheckFolder(path_GLOBAL_Folder);
+
+		string _path;
+		_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+		CheckFolder(_path);
+		_path = path_GLOBAL_Folder + "/" + path_Kit_Folder;
+		CheckFolder(_path);
+		_path = path_GLOBAL_Folder + "/" + path_Control;
+		CheckFolder(_path);
 	}
 
 	//--
