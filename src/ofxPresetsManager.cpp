@@ -534,9 +534,9 @@ void ofxPresetsManager::setupRandomizer()
 	PLAY_RandomizeTimer.set("PLAY RANDOMIZER", false);
 	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
 	MODE_LatchTrig.set("MODE LATCH", false);
-	randomizeDuration.set("DURATION", 1000, 10, randomize_MAX_DURATION);
-	randomizeDurationShort.set("DUR SHORT", 250, 10, randomize_MAX_DURATION_SHORT);
-	randomizeDurationBpm.set("DUR BPM", 120, 30, 400);
+	randomizeDuration.set("T DURATION", 1000, 10, randomize_MAX_DURATION);
+	randomizeDurationShort.set("T SHORT", 250, 10, randomize_MAX_DURATION_SHORT);
+	randomizeDurationBpm.set("T BPM", 120, 10, 400);
 	randomizedDice.set("DICE", 0, 0, numPresetsFavorites - 1);
 	//randomizeSpeedF.set("SPEED FACTOR", 1.f, 0.01f, 2.f);
 	bResetDices.set("RESET DICES", false);
@@ -1422,7 +1422,7 @@ void ofxPresetsManager::drawPresetClicker()
 			if (bSimpleInfo)
 			{
 				//keys[i][k]
-				info += "[" + ofToString((char)keys[0][0]) + "|";
+				info += "[keys " + ofToString((char)keys[0][0]) + "|";
 				info += ofToString((char)keys[0][keys[0].size() - 1]) + "]";
 			}
 			else
@@ -3163,7 +3163,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	static bool no_resize = true;
 	static bool no_move = true;
 	static bool no_scrollbar = false;
-	//static bool no_collapse = true;
+	static bool no_collapse = true;
 	static bool no_close = true;
 	static bool no_menu = true;
 	static bool no_settings = true;
@@ -3172,13 +3172,14 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	// Demonstrate the various window flags. 
 	// Typically you would just use the default.
 	ImGuiWindowFlags window_flags = 0;
+	window_flags |= ImGuiWindowFlags_NoBackground;
 	//if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
 	//if (!no_border)   window_flags |= ImGuiWindowFlags_NoDecoration;
 	//if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
 	//if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
 	//if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
 	//if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
-	if (no_close)  window_flags |= ImGuiWindowFlags_NoCollapse;
+	//if (no_close)  window_flags |= ImGuiWindowFlags_NoCollapse;
 	//if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
 	//if (no_settings) window_flags |= ImGuiWindowFlags_NoSavedSettings;
 
@@ -3388,7 +3389,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 	if (ofxImGui::BeginTree("FILES BROWSER", settings))
 	{
 		int _numfiles = fileNames.size();
-
+		
 		//-
 
 		//new button
@@ -3398,6 +3399,17 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 
 		//0. send/save current browsed (from "/archive/") preset to current presets on favorites
 
+		//get/copy all favs presets from favs and send/save to browser folder ("archive")
+
+		if (ImGui::Button("FROM FAVS"))
+		{
+			ofLogNotice(__FUNCTION__) << "FROM FAVS";
+			doGetFavsToFilesBrowser();
+		}
+
+		//-
+
+		ImGui::SameLine();
 		if (ImGui::Button("TO FAVS"))
 		{
 			ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE BROWSED PRESET: " << browser_PresetName;
@@ -3409,16 +3421,11 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 			}
 		}
 
-		//-
+		//---
 
-		//get/copy all favs presets from favs and send/save to browser folder ("archive")
-
-		ImGui::SameLine();
-		if (ImGui::Button("FROM FAVS"))
-		{
-			ofLogNotice(__FUNCTION__) << "FROM FAVS";
-			doGetFavsToFilesBrowser();
-		}
+		//label folder
+		string str = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+		ImGui::Text(str.c_str());
 
 		//-
 
@@ -3589,10 +3596,42 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 		if (ImGui::Button("DELETE"))//current preset
 		{
 			ofLogNotice(__FUNCTION__) << "DELETE Preset Name: " << browser_PresetName;
-			ofLogNotice(__FUNCTION__) << "filepath: " << files[currentFile].getAbsolutePath();
+			ofLogNotice(__FUNCTION__) << "file: " << files[currentFile].getAbsolutePath();
 
 			//1. delete file
 			files[currentFile].remove();
+
+			//workflow
+			//2. refresh files
+			bool b = browser_FilesRefresh();
+			if (b)
+			{
+				currentFile = 0;
+				browser_PresetName = fileNames[currentFile];
+				browser_PresetLoad(browser_PresetName);
+			}
+			else
+			{
+				ofLogError(__FUNCTION__) << "Error listing directory!";
+			}
+		}
+
+		//-
+
+		//4.5 clear. delete all!
+
+		ImGui::SameLine();
+		if (ImGui::Button("CLEAR"))//delete all files
+		{
+			ofLogNotice(__FUNCTION__) << "CLEAR Presets folder: " << path_GLOBAL_Folder + "/" + path_PresetsFolder;
+
+			for (int i = 0; i < files.size(); i++) {
+				ofLogWarning(__FUNCTION__) << "DELETE file: " << files[i].getAbsolutePath();
+
+				//1. delete file
+				bool b = files[i].remove();
+				if (!b) ofLogError(__FUNCTION__) << "Can not DELETE file: " << files[i].getAbsolutePath();
+			}
 
 			//workflow
 			//2. refresh files
@@ -3705,14 +3744,14 @@ void ofxPresetsManager::ImGui_Draw_Content(ofxImGui::Settings &settings)
 	//1. basic controls
 	ImGui_Draw_Basic(settings);
 
-	//2. browser params
-	ImGui_Draw_Browser(settings);
+	//4. preset params preview
+	ImGui_Draw_PresetPreview(settings);
 
 	//3. advanced params
 	ImGui_Draw_Randomizers(settings);
 
-	//4. preset params preview
-	ImGui_Draw_PresetPreview(settings);
+	//2. browser params
+	ImGui_Draw_Browser(settings);
 }
 
 //--------------------------------------------------------------
