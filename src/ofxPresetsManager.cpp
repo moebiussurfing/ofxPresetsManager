@@ -131,7 +131,7 @@ int ofxPresetsManager::doRandomizeWichSelectedPresetCheckChanged()
 //--------------------------------------------------------------
 void ofxPresetsManager::doRandomizeWichSelectedPreset()
 {
-	ofLogNotice(__FUNCTION__);
+	//ofLogNotice(__FUNCTION__);
 	ofLogNotice(__FUNCTION__) << "---------------------------------------------------";
 	
 	//we avoid that the random is the same previous preset (TODO:improve). we want force change, not stay in the same. 
