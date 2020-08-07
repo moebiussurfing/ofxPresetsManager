@@ -73,10 +73,13 @@ public:
 	ofParameter<int> separation2;
 	ofParameter<int> shapeSide2;
 
-	//-
+	//--
 
-    //// TODO: 
-	//alternative listener to be trigged when preset loading/saving is done
-    //void Changed_DONE_load(bool &DONE_load);
-    //void Changed_DONE_save(bool &DONE_save);
+	//custom callback (B)
+	ofEventListener listener_PresetManager_DoneLoad;
+	//--------------------------------------------------------------
+	void Changed_PresetManager_DoneLoad() {
+		ofLogWarning(__FUNCTION__) << "[ CustomCallback -> DoneLoad! ]";
+		cout << (__FUNCTION__) << "[ CustomCallback -> DoneLoad! ]" << endl;
+	}
 };

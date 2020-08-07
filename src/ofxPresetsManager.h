@@ -212,15 +212,16 @@ public:
 private:
 	//ofParameterGroup params_Randomizer;
 	ofParameter<bool> MODE_DicesProbs;
-	ofParameter<bool> MODE_LatchTrig;//this mode trigs preset but goes back to preset 1 after duration timer
+	ofParameter<bool> MODE_LatchTrig;//this mode trigs the preset but goes back to preset 0 after duration timer
 	bool bLatchRun = false;
 	ofParameter<bool> bResetDices;
 	ofParameter<int> randomizedDice;//to test
 	//ofParameter<string> _totalDicesStr;
 public:
-	//ofParameter<float> randomizeSpeedF;
+	//ofParameter<float> randomizeSpeedF;//speed scaler. not used
 	ofParameter<int> randomizeDuration;
 	ofParameter<int> randomizeDurationShort;
+	ofParameter<float> randomizeDurationBpm;
 private:
 	int randomizeSpeed;//real time dureation
 	uint32_t randomizerTimer;
@@ -231,6 +232,7 @@ private:
 	vector<int> randomFactorsDices;
 	void setupRandomizer();//engine to get a random between all posible dices (from 0 to numDices) and then select the preset associated to the resulting dice.
 	void doRandomizeWichSelectedPreset();//randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
+	int doRandomizeWichSelectedPresetCheckChanged();
 	void doResetDices();//reset all probs to 0
 	int numDices;//total dices summing the prob of any preset probability (PROB1 + PROB2 + ...)
 
@@ -263,8 +265,8 @@ private:
 private:
 	//TODO:
 	//should use keys[i].size() instead of this:
-	vector<ofXml> settingsArray;
-	//ofXml settingsArray[NUM_OF_PRESETS];//fixed lenght mode..
+	vector<ofXml> presetsXmlArray;
+	//ofXml presetsXmlArray[NUM_OF_PRESETS];//fixed lenght mode..
 
 	//--
 
@@ -470,6 +472,25 @@ public:
 		PLAY_RandomizeTimer = !PLAY_RandomizeTimer;
 	}
 	//--------------------------------------------------------------
+	void setRandomizerDuration(float t)
+	{
+		randomizeDuration = t;
+		randomizeDurationBpm = 60000.f / randomizeDuration;
+	}
+	//--------------------------------------------------------------
+	void setRandomizerDurationShort(float t)
+	{
+		randomizeDurationShort = t;
+	}
+	//--------------------------------------------------------------
+	void setRandomizerBpm(float bpm)
+	{
+		randomizeDurationBpm = bpm;
+		//60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
+		randomizeDuration = 60000.f / bpm;
+		randomizeDurationShort = randomizeDuration / 4.f;
+	}
+	//--------------------------------------------------------------
 	void doRandomizePresetFromFavs()//trig randomize and select one of the favs presets
 	{
 		bRandomizeIndex = true;
@@ -643,7 +664,7 @@ public:
 #pragma mark - SETTINGS
 
 	//--------------------------------------------------------------
-	void setPath_GlobalFolder(string folder);//path for root container folder. must be called befor setup()!
+	void setPath_GlobalFolder(string folder);//path for root container folder. must be called before setup()!
 	void setPath_KitFolder(string folder);//path folder for favorite/live presets
 	void setPath_PresetsFolder(string folder);//path folder for kit for the browser
 	void setPath_ControlSettings(string str)//for the session states settings
@@ -661,6 +682,11 @@ public:
 	void setModeAutoSave(bool b)
 	{
 		autoSave = b;
+	}
+	//--------------------------------------------------------------
+	bool getModeAutoSave()
+	{
+		return autoSave;
 	}
 	//--------------------------------------------------------------
 	void setModeAutoSaveTimer(bool b)

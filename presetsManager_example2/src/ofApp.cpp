@@ -57,6 +57,14 @@ void ofApp::setup()
 
 	//--
 
+	//custom callback (B)
+	listener_PresetManager_DoneLoad = presetsManager.DONE_load.newListener([this](bool &)
+		{
+			this->Changed_PresetManager_DoneLoad();
+		});
+
+	//--
+
 #ifdef MODE_ImGui_EXTERNAL
 	presetsManager.ImGui_FontCustom();
 	gui_ImGui.setup();
@@ -75,10 +83,11 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-	//easy simple callback
+	//easy callback (A)
 	if (presetsManager.isDoneLoad())//just loaded preset it's done
 	{
-		ofLogNotice("ofApp") << "--------------------------------------------------------------[isDoneLoad]";
+		cout << (__FUNCTION__) << "--------------------------------------------------------------[ EasyCallback -> DoneLoad! ]" << endl;
+		ofLogWarning(__FUNCTION__) << "--------------------------------------------------------------[ EasyCallback -> DoneLoad! ]";
 	}
 }
 

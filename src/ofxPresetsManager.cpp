@@ -4,13 +4,12 @@
 
 #ifdef INCLUDE_RANDOMIZER
 //--------------------------------------------------------------
-void ofxPresetsManager::doRandomizeWichSelectedPreset()
+int ofxPresetsManager::doRandomizeWichSelectedPresetCheckChanged()
 {
 	ofLogNotice(__FUNCTION__);
 
 	//-
 
-	//avoid random is the same previuous preset (TODO:improve)
 	int _r = PRESET_selected;
 	//int _numPresets = 8;
 
@@ -20,13 +19,17 @@ void ofxPresetsManager::doRandomizeWichSelectedPreset()
 
 #ifndef DEBUG_randomTest
 		{
-			//get a random between all posible dices (from 0 to numDices) and then select the preset associated to the resulting dice.
+			//get a random between all possible dices (from 0 to numDices) and then select the preset associated to the resulting dice.
+			//each preset has many dices: more dices 0 more probality to be selected by the randomizer
 			randomizedDice = ofRandom(0, numDices);
 
 			ofLogVerbose(__FUNCTION__) << "random: " << randomizedDice.get() << "/" << numDices;
 			//ofLogVerbose(__FUNCTION__) << "numDices:" << numDices;
 		}
 #endif
+
+		//-
+
 		//2. define limits for range dices associated to any preset
 
 		//randomFactorsDices[0] = 0;
@@ -38,6 +41,8 @@ void ofxPresetsManager::doRandomizeWichSelectedPreset()
 			}
 		}
 
+		//-
+
 		//3. check if dice is inside both ranges. to select preset (_rr) associated to dice 
 
 		int _rr = 0;
@@ -48,10 +53,8 @@ void ofxPresetsManager::doRandomizeWichSelectedPreset()
 			int start;
 			int end;
 
-			if (i == 0)
-				start = 0;
-			else
-				start = randomFactorsDices[i - 1];
+			if (i == 0) start = 0;
+			else start = randomFactorsDices[i - 1];
 
 			//TODO:
 			//bug on last preset..
@@ -60,13 +63,10 @@ void ofxPresetsManager::doRandomizeWichSelectedPreset()
 			//	end = presetsRandomFactor.size()-1;
 			//else
 			//	end = randomFactorsDices[i];
-
 			//end = randomFactorsDices[i];
 
-			if (i != presetsRandomFactor.size())
-				end = randomFactorsDices[i];
-			else
-				end = numDices;
+			if (i != presetsRandomFactor.size()) end = randomFactorsDices[i];
+			else end = numDices;
 
 #ifdef DEBUG_randomTest
 			ofLogNotice(__FUNCTION__) << (start == end ? "\t\t\t\t" : "") << "[" << i << "] " << start << "-" << end;
@@ -110,21 +110,54 @@ void ofxPresetsManager::doRandomizeWichSelectedPreset()
 		//	numDices += p.get();
 		//}
 	}
-	else {
-		//avoid jump to same current preset
-		while (_r == PRESET_selected)
-		{
-			_r = (int)ofRandom(0, settingsArray.size());
-			//_r = (int)ofRandom(1, settingsArray.size() + 1);
-		}
+	//else {
+	//	int numTryes = 0;
+	//	//avoid jump to same current preset
+	//	while (PRESET_selected == _r)//if not changed
+	//	{
+	//		ofLogWarning(__FUNCTION__) << "Randomize not changed! Try #" << ofToString(++numTryes);
+	//		ofLogNotice(__FUNCTION__) << "PRESET Previous was : " << ofToString(_r);
+	//		ofLogNotice(__FUNCTION__) << "PRESET New Random is: " << ofToString(PRESET_selected);
+	//		PRESET_selected = (int)ofRandom(0, presetsXmlArray.size());
+	//		
+	//		//if (MODE_MemoryLive) _r = (int)ofRandom(0, presetsXmlArray.size());
+	//		//_r = (int)ofRandom(1, presetsXmlArray.size() + 1);
+	//	}
+	//}
+
+	return _r;
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::doRandomizeWichSelectedPreset()
+{
+	ofLogNotice(__FUNCTION__);
+	ofLogNotice(__FUNCTION__) << "---------------------------------------------------";
+	
+	//we avoid that the random is the same previous preset (TODO:improve). we want force change, not stay in the same. 
+	//bc sometimes the random gets the same current preset.
+
+	int _PRESET_selected_PRE = PRESET_selected;
+
+	int numTryes = 0;
+	int r = doRandomizeWichSelectedPresetCheckChanged();
+	ofLogNotice(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes);
+	ofLogNotice(__FUNCTION__) << "PRESET Random is: " << ofToString(r);
+
+	while (r == _PRESET_selected_PRE) {//while preset index not changed
+		r = doRandomizeWichSelectedPresetCheckChanged();
+		ofLogWarning(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes) << " NOT changed!";
+		ofLogNotice(__FUNCTION__) << "PRESET Previous was : " << ofToString(_PRESET_selected_PRE);
+		ofLogNotice(__FUNCTION__) << "PRESET New Random is: " << ofToString(r);
+		ofLogWarning(__FUNCTION__) << "RETRY !";
 	}
 
 	//--
 
 	//4. apply preset selection
 
-	ofLogNotice(__FUNCTION__) << "PRESET > " << ofToString(_r);
-	loadPreset(_r);
+	ofLogNotice(__FUNCTION__) << "PRESET > " << ofToString(r);
+	loadPreset(r);
 
 	//int __r = (int)ofRandom(1.0f, 9.0f);
 	//ofLogNotice(__FUNCTION__) << "\t > " << ofToString(__r);
@@ -502,7 +535,8 @@ void ofxPresetsManager::setupRandomizer()
 	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
 	MODE_LatchTrig.set("MODE LATCH", false);
 	randomizeDuration.set("DURATION", 1000, 10, randomize_MAX_DURATION);
-	randomizeDurationShort.set("DURATION SHORT", 250, 10, randomize_MAX_DURATION_SHORT);
+	randomizeDurationShort.set("DUR SHORT", 250, 10, randomize_MAX_DURATION_SHORT);
+	randomizeDurationBpm.set("DUR BPM", 120, 30, 400);
 	randomizedDice.set("DICE", 0, 0, numPresetsFavorites - 1);
 	//randomizeSpeedF.set("SPEED FACTOR", 1.f, 0.01f, 2.f);
 	bResetDices.set("RESET DICES", false);
@@ -538,6 +572,7 @@ void ofxPresetsManager::setupRandomizer()
 	//params_Randomizer.add(randomizeSpeedF);
 	params_Randomizer.add(randomizeDuration);
 	params_Randomizer.add(randomizeDurationShort);
+	params_Randomizer.add(randomizeDurationBpm);
 	params_Randomizer.add(MODE_DicesProbs);
 	params_Randomizer.add(MODE_LatchTrig);
 	params_Randomizer.add(_gOdds);
@@ -924,7 +959,7 @@ void ofxPresetsManager::startup()
 	timerLast_Autosave = ofGetElapsedTimeMillis();
 
 	setVisible_GUI_Internal(false);
-	
+
 	windowResized(ofGetWidth(), ofGetHeight());
 
 	//--
@@ -1003,7 +1038,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 			if (PRESET_selected < presetsRandomModeShort.size()) {//avoid out of range
 
 				//A. long mode
-				if (presetsRandomModeShort[PRESET_selected] == false)
+				if (presetsRandomModeShort[PRESET_selected] == false)//get if it's marked as shor or long by default (false)
 				{
 					if (timerRandomizer >= randomizeDuration)
 					{
@@ -1013,7 +1048,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 							}
 						}
 						else {
-							bRandomizeIndex = true;
+							bRandomizeIndex = true;//TODO: can be improved calling directly the method! bc this flag will be readed on update()..
 						}
 					}
 				}
@@ -1357,6 +1392,10 @@ void ofxPresetsManager::drawPresetClicker()
 			if (myFont.isLoaded()) {
 				strW = myFont.getStringBoundingBox(info, 0, 0).width;
 			}
+			else {//no font
+				strW = 100;
+				ySave -= 10;
+			}
 			int xG = -strW - 20;
 			ySave = ySave - 2;//little up
 
@@ -1487,7 +1526,7 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 	//PRESET2_selected.setMax(numPresetsFavorites);
 
 	//TODO:
-	settingsArray.resize(numPresetsFavorites);
+	presetsXmlArray.resize(numPresetsFavorites);
 
 	//-
 
@@ -1542,7 +1581,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
-		&& (presetIndex >= 0) && (presetIndex < settingsArray.size()))
+		&& (presetIndex >= 0) && (presetIndex < presetsXmlArray.size()))
 	{
 		ofLogVerbose(__FUNCTION__) << "DONE_save (1)";
 
@@ -1575,11 +1614,11 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 			//ofLogNotice(__FUNCTION__) << "MEMORY MODE";
 
-			if (presetIndex < settingsArray.size()) {
-				ofSerialize(settingsArray[presetIndex], groups[guiIndex]);
+			if (presetIndex < presetsXmlArray.size()) {
+				ofSerialize(presetsXmlArray[presetIndex], groups[guiIndex]);
 			}
 			else {
-				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
+				ofLogError(__FUNCTION__) << "presetsXmlArray OUT OF RANGE";
 			}
 
 			TS_STOP("SAVE MEM 1");
@@ -1599,7 +1638,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 	int guiIndex = getGuiIndex(gName);
 
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
-		&& (presetIndex >= 0) && (presetIndex < settingsArray.size()))
+		&& (presetIndex >= 0) && (presetIndex < presetsXmlArray.size()))
 	{
 		ofLogVerbose(__FUNCTION__) << "DONE_save (2)";
 
@@ -1630,11 +1669,11 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 		{
 			TS_START("SAVE MEM 2");//for TimeMeasurements only
 
-			if (presetIndex < settingsArray.size()) {
-				ofSerialize(settingsArray[presetIndex], groups[guiIndex]);
+			if (presetIndex < presetsXmlArray.size()) {
+				ofSerialize(presetsXmlArray[presetIndex], groups[guiIndex]);
 			}
 			else {
-				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
+				ofLogError(__FUNCTION__) << "presetsXmlArray OUT OF RANGE";
 			}
 
 			TS_STOP("SAVE MEM 2");//for TimeMeasurements only
@@ -1654,7 +1693,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 
 	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
-		&& (presetIndex >= 0) && (presetIndex < settingsArray.size()))//TODO:
+		&& (presetIndex >= 0) && (presetIndex < presetsXmlArray.size()))//TODO:
 		//&& (presetIndex >= 0) && (presetIndex < lastIndices[0]))//TODO:
 	{
 		if (!MODE_MemoryLive)
@@ -1672,11 +1711,11 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 			//MODE B: direct from memory
 			TS_START("LOAD MEM 1");//for TimeMeasurements only
 			//using xml array
-			if (presetIndex < settingsArray.size()) {
-				ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
+			if (presetIndex < presetsXmlArray.size()) {
+				ofDeserialize(presetsXmlArray[presetIndex], groups[guiIndex]);
 			}
 			else {
-				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
+				ofLogError(__FUNCTION__) << "presetsXmlArray OUT OF RANGE";
 			}
 			TS_STOP("LOAD MEM 1");//for TimeMeasurements only
 		}
@@ -1709,7 +1748,7 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 	int guiIndex = getGuiIndex(gName);
 
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
-		&& (presetIndex >= 0) && (presetIndex < settingsArray.size()))
+		&& (presetIndex >= 0) && (presetIndex < presetsXmlArray.size()))
 	{
 		if (!MODE_MemoryLive)
 		{
@@ -1725,11 +1764,11 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 		{
 			//MODE B: direct from memory
 			TS_START("LOAD MEM 2""LOAD MEM 2");//for TimeMeasurements only
-			if (presetIndex < settingsArray.size()) {
-				ofDeserialize(settingsArray[presetIndex], groups[guiIndex]);
+			if (presetIndex < presetsXmlArray.size()) {
+				ofDeserialize(presetsXmlArray[presetIndex], groups[guiIndex]);
 			}
 			else {
-				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE LOAD";
+				ofLogError(__FUNCTION__) << "presetsXmlArray OUT OF RANGE LOAD";
 			}
 			TS_STOP("LOAD MEM 2");//for TimeMeasurements only
 		}
@@ -1964,7 +2003,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				int i = PRESET_selected;
 				i++;
 
-				if (i > settingsArray.size() - 1) i = settingsArray.size() - 1;
+				if (i > presetsXmlArray.size() - 1) i = presetsXmlArray.size() - 1;
 				PRESET_selected = i;
 			}
 		}
@@ -2196,7 +2235,7 @@ void ofxPresetsManager::doCloneRight(int pIndex)
 void ofxPresetsManager::doPopulateFavs()
 {
 	ofLogNotice(__FUNCTION__);
-	
+
 	CheckAllFolder();
 
 	for (int i = 0; i < numPresetsFavorites; i++)
@@ -2305,7 +2344,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			(name != "PRESET")
 			)
 		{
-			ofLogNotice(__FUNCTION__) << groups[0].getName()<<" " << name << " : " << e;
+			ofLogNotice(__FUNCTION__) << groups[0].getName() << " " << name << " : " << e;
 		}
 
 		//-
@@ -2385,12 +2424,23 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//	randomizeDuration.setMax(randomizeSpeedF * randomize_MAX_DURATION);
 		//	randomizeDurationShort.setMax(randomizeSpeedF * randomize_MAX_DURATION_SHORT);
 		//}
-		else if (name == "DURATION")
+
+		else if (name == randomizeDuration.getName())
 		{
 			ofLogNotice(__FUNCTION__) << "DURATION: " << e;
 
+			randomizeDurationBpm = 60000.f / randomizeDuration;
+
 			//randomizeSpeedF = -((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
 			////randomizeSpeedF = 1 + (randomizeDuration / (float)randomize_MAX_DURATION);
+		}
+		else if (name == randomizeDurationBpm.getName())
+		{
+			ofLogNotice(__FUNCTION__) << "BPM: " << e;
+
+			//60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
+			randomizeDuration = 60000.f / randomizeDurationBpm;
+			randomizeDurationShort = randomizeDuration / 4.f;
 		}
 
 		//TODO:
@@ -2552,7 +2602,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			{
 				if (lastIndices.size() > 0//amount of groups
 					&& yIndex < lastIndices.size()//amount of groups
-					&& xIndex < settingsArray.size())
+					&& xIndex < presetsXmlArray.size())
 				{
 					//mark selector as lastone trigged
 					lastIndices[yIndex] = xIndex;
@@ -2591,8 +2641,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//{
 		//	ofLogError(__FUNCTION__) << "IGNORED PRESETS CHANGE";
 		//}
+		}
 	}
-}
 
 #pragma mark - SETTINGS
 
@@ -2723,7 +2773,7 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 {
 	ofLogVerbose(__FUNCTION__);
 
-	for (int i = 0; i < settingsArray.size(); i++)
+	for (int i = 0; i < presetsXmlArray.size(); i++)
 	{
 		string strFolder;
 		string strFile;
@@ -2733,11 +2783,11 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 		strFile = groupName + path_Prefix + ofToString(i) + ".xml";
 		strPath = strFolder + strFile;
 
-		if (i < settingsArray.size()) {
-			settingsArray[i].save(strPath);
+		if (i < presetsXmlArray.size()) {
+			presetsXmlArray[i].save(strPath);
 		}
 		else {
-			ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
+			ofLogError(__FUNCTION__) << "presetsXmlArray OUT OF RANGE";
 		}
 
 	}
@@ -2746,9 +2796,9 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 	bool bDEBUG = false;
 	if (bDEBUG)
 	{
-		for (int i = 0; i < settingsArray.size(); i++)
+		for (int i = 0; i < presetsXmlArray.size(); i++)
 		{
-			ofLogNotice(__FUNCTION__) << "settingsArray[" << i << "] " << ofToString(settingsArray[i].toString());
+			ofLogNotice(__FUNCTION__) << "presetsXmlArray[" << i << "] " << ofToString(presetsXmlArray[i].toString());
 		}
 	}
 }
@@ -2765,7 +2815,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	//groupsMem.reserve(NUM_OF_PRESETS);
 	//groupsMem.resize(NUM_OF_PRESETS);
 
-	for (int i = 0; i < settingsArray.size(); i++)
+	for (int i = 0; i < presetsXmlArray.size(); i++)
 	{
 		//TODO:
 		//PROBLEM:
@@ -2805,11 +2855,11 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 
 		if (bLoaded)
 		{
-			if (i < settingsArray.size()) {
-				settingsArray[i] = settings;
+			if (i < presetsXmlArray.size()) {
+				presetsXmlArray[i] = settings;
 			}
 			else {
-				ofLogError(__FUNCTION__) << "settingsArray OUT OF RANGE";
+				ofLogError(__FUNCTION__) << "presetsXmlArray OUT OF RANGE";
 			}
 		}
 #ifdef INCLUDE_DEBUG_ERRORS
@@ -2828,9 +2878,9 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	bool bDEBUG = false;
 	if (bDEBUG)
 	{
-		for (int i = 0; i < settingsArray.size(); i++)
+		for (int i = 0; i < presetsXmlArray.size(); i++)
 		{
-			ofLogNotice(__FUNCTION__) << "settingsArray[" << i << "] " << ofToString(settingsArray[i].toString());
+			ofLogNotice(__FUNCTION__) << "presetsXmlArray[" << i << "] " << ofToString(presetsXmlArray[i].toString());
 		}
 	}
 }
@@ -3178,28 +3228,20 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 		{
 			//---
 
-			//1. preset selector slider
+			//0.label
+			ImGui::Text("PRESET");
 
-			auto parameter = PRESET_selected;
-			auto tmpRef = PRESET_selected.get();
-			auto name = ofxImGui::GetUniqueName(PRESET_selected);
+			//---
 
-			//float w, h;
-			//w = ImGui::GetWindowWidth()*0.9f;
-			////w = 200;
-			//h = 30;
+			////1. preset selector slider
 
-			//TODO: make bigger
-			//ImGui::PushID(name);
-			//ImGui::PushItemWidth(w);
-			////ImGui::PushStyleColor(ImGuiCol_Button, color);
-			if (ImGui::SliderInt(ofxImGui::GetUniqueName(parameter), (int *)&tmpRef, parameter.getMin(), parameter.getMax()))
-			{
-				parameter.set(tmpRef);
-			}
-			////ImGui::PopStyleColor();
-			//ImGui::PopItemWidth();
-			//ImGui::PopID();
+			//auto parameter = PRESET_selected;
+			//auto tmpRef = PRESET_selected.get();
+			//auto name = ofxImGui::GetUniqueName(PRESET_selected);
+			//if (ImGui::SliderInt(ofxImGui::GetUniqueName(parameter), (int *)&tmpRef, parameter.getMin(), parameter.getMax()))
+			//{
+			//	parameter.set(tmpRef);
+			//}
 
 			//---
 
@@ -3260,6 +3302,15 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 		//big toggle button
 		AddBigToggle(PLAY_RandomizeTimer, 30);
 
+		//bpm slider
+		auto parameter = randomizeDurationBpm;
+		auto tmpRef = randomizeDurationBpm.get();
+		auto name = ofxImGui::GetUniqueName(randomizeDurationBpm);
+		if (ImGui::SliderFloat(ofxImGui::GetUniqueName(parameter), (float *)&tmpRef, parameter.getMin(), parameter.getMax()))
+		{
+			parameter.set(tmpRef);
+		}
+
 		//--
 
 		//main helpers
@@ -3285,6 +3336,7 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 
 		//ImGui::SetNextItemWidth(_w);
 		ofxImGui::AddParameter(autoSave);
+		ofxImGui::AddParameter(autoLoad);
 		ofxImGui::AddParameter(MODE_MemoryLive);
 
 		//--
