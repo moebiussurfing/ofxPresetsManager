@@ -1946,7 +1946,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//timer to randomize and choice a random preset from the kit
 		else if (key == 'R')
 		{
-			setToggleRandomizerPreset();
+			setTogglePlayRandomizerPreset();
 		}
 		else if (key == 'r')
 		{
@@ -3223,94 +3223,89 @@ void ofxPresetsManager::ImGui_Draw_PresetPreview(ofxImGui::Settings &settings)
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 {
+	{
+		//---
+
+		////0.label
+		//ImGui::Text("PRESET");
+
+		//---
+
+		////1. preset selector slider
+
+		//auto parameter = PRESET_selected;
+		//auto tmpRef = PRESET_selected.get();
+		//auto name = ofxImGui::GetUniqueName(PRESET_selected);
+		//if (ImGui::SliderInt(ofxImGui::GetUniqueName(parameter), (int *)&tmpRef, parameter.getMin(), parameter.getMax()))
+		//{
+		//	parameter.set(tmpRef);
+		//}
+
+		//---
+
+		//2. prest clicker matrix buttons
+
+		//if (ImGui::TreeNode("Test"))
+		{
+			//preset selector
+			//toggle button matrix
+			ImVec2 button_sz(40, 40);
+			// Manually wrapping
+			// (we should eventually provide this as an automatic layout feature, but for now you can do it manually)
+			//ImGui::Text("PRESET SELECTOR:");
+			ImGuiStyle& style = ImGui::GetStyle();
+			int buttons_count = numPresetsFavorites;
+			float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+
+			for (int n = 0; n < buttons_count; n++)
+			{
+				ImGui::PushID(n);
+				string name = ofToString((char)(keys[0][n]));
+
+				//customize colors
+				{
+					if (PRESET_selected.get() == n)//when selected
+					{
+						const ImVec4 colorActive = style.Colors[ImGuiCol_ButtonHovered];//changes the color
+						ImGui::PushStyleColor(ImGuiCol_Button, colorActive);
+					}
+					else {
+						const ImVec4 colorButton = style.Colors[ImGuiCol_Button];//do not changes the color
+						ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
+					}
+
+					//draw button
+					if (ImGui::Button(name.c_str(), button_sz))
+					{
+						loadPreset(n);//trig load preset
+					}
+
+					//customize colors
+					ImGui::PopStyleColor();
+				}
+
+				float last_button_x2 = ImGui::GetItemRectMax().x;
+				float next_button_x2 = last_button_x2 + style.ItemSpacing.x + button_sz.x; // Expected position if next button was on same line
+				if (n + 1 < buttons_count && next_button_x2 < window_visible_x2) ImGui::SameLine();
+				ImGui::PopID();
+			}
+		}
+		//ImGui::TreePop();
+	}
+
+	//ofxImGui::AddParameter(PRESET_selected);//main preset selector
+
+	//--
+
+	//big toggle button
+	AddBigToggle(PLAY_RandomizeTimer, 30);
+
+	//----
+
 	//if (ImGui::TreeNode("BASIC"))
 	if (ofxImGui::BeginTree("BASIC", settings))
 	{
-		{
-			//---
-
-			//0.label
-			ImGui::Text("PRESET");
-
-			//---
-
-			////1. preset selector slider
-
-			//auto parameter = PRESET_selected;
-			//auto tmpRef = PRESET_selected.get();
-			//auto name = ofxImGui::GetUniqueName(PRESET_selected);
-			//if (ImGui::SliderInt(ofxImGui::GetUniqueName(parameter), (int *)&tmpRef, parameter.getMin(), parameter.getMax()))
-			//{
-			//	parameter.set(tmpRef);
-			//}
-
-			//---
-
-			//2. prest clicker matrix buttons
-
-			//if (ImGui::TreeNode("Test"))
-			{
-				//preset selector
-				//toggle button matrix
-				ImVec2 button_sz(40, 40);
-				// Manually wrapping
-				// (we should eventually provide this as an automatic layout feature, but for now you can do it manually)
-				//ImGui::Text("PRESET SELECTOR:");
-				ImGuiStyle& style = ImGui::GetStyle();
-				int buttons_count = numPresetsFavorites;
-				float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
-
-				for (int n = 0; n < buttons_count; n++)
-				{
-					ImGui::PushID(n);
-					string name = ofToString((char)(keys[0][n]));
-
-					//customize colors
-					{
-						if (PRESET_selected.get() == n)//when selected
-						{
-							const ImVec4 colorActive = style.Colors[ImGuiCol_ButtonHovered];//changes the color
-							ImGui::PushStyleColor(ImGuiCol_Button, colorActive);
-						}
-						else {
-							const ImVec4 colorButton = style.Colors[ImGuiCol_Button];//do not changes the color
-							ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
-						}
-
-						//draw button
-						if (ImGui::Button(name.c_str(), button_sz))
-						{
-							loadPreset(n);//trig load preset
-						}
-
-						//customize colors
-						ImGui::PopStyleColor();
-					}
-
-					float last_button_x2 = ImGui::GetItemRectMax().x;
-					float next_button_x2 = last_button_x2 + style.ItemSpacing.x + button_sz.x; // Expected position if next button was on same line
-					if (n + 1 < buttons_count && next_button_x2 < window_visible_x2) ImGui::SameLine();
-					ImGui::PopID();
-				}
-			}
-			//ImGui::TreePop();
-		}
-
-		//ofxImGui::AddParameter(PRESET_selected);//main preset selector
-
-		//--
-
-		//big toggle button
-		AddBigToggle(PLAY_RandomizeTimer, 30);
-
-		//bpm slider
-		auto parameter = randomizeDurationBpm;
-		auto tmpRef = randomizeDurationBpm.get();
-		auto name = ofxImGui::GetUniqueName(randomizeDurationBpm);
-		if (ImGui::SliderFloat(ofxImGui::GetUniqueName(parameter), (float *)&tmpRef, parameter.getMin(), parameter.getMax()))
-		{
-			parameter.set(tmpRef);
-		}
+		
 
 		//--
 
@@ -3775,6 +3770,17 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 
 		//1.0.1 play randomizer index
 		AddBigToggle(PLAY_RandomizeTimer, 30);
+
+		//-
+
+		//1.0.1B bpm slider
+		auto parameter = randomizeDurationBpm;
+		auto tmpRef = randomizeDurationBpm.get();
+		auto name = ofxImGui::GetUniqueName(randomizeDurationBpm);
+		if (ImGui::SliderFloat(ofxImGui::GetUniqueName(parameter), (float *)&tmpRef, parameter.getMin(), parameter.getMax()))
+		{
+			parameter.set(tmpRef);
+		}
 
 		//--
 

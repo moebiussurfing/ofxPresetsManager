@@ -467,7 +467,7 @@ public:
 		PLAY_RandomizeTimer = b;
 	}
 	//--------------------------------------------------------------
-	void setToggleRandomizerPreset()//toggle randomizer timer
+	void setTogglePlayRandomizerPreset()//toggle randomizer timer
 	{
 		PLAY_RandomizeTimer = !PLAY_RandomizeTimer;
 	}
