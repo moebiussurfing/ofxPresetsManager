@@ -1086,7 +1086,7 @@ private:
 	}
 
 	//--------------------------------------------------------------
-	bool AddBigToggle(ofParameter<bool>& parameter, float h)
+	bool AddBigToggle(ofParameter<bool>& parameter, float h)//TODO: seems not working well linked to the param..
 	{
 		auto tmpRef = parameter.get();
 		auto name = ofxImGui::GetUniqueName(parameter);
