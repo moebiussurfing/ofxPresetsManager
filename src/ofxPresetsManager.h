@@ -213,6 +213,7 @@ private:
 	//ofParameterGroup params_Randomizer;
 	ofParameter<bool> MODE_DicesProbs;
 	ofParameter<bool> MODE_LatchTrig;//this mode trigs the preset but goes back to preset 0 after duration timer
+	ofParameter<bool> MODE_AvoidRandomRepeat;//this mode re makes randomize again if new index preset it's the same!
 	bool bLatchRun = false;
 	ofParameter<bool> bResetDices;
 	ofParameter<int> randomizedDice;//to test
@@ -230,11 +231,11 @@ private:
 	vector<ofParameter<int>> presetsRandomFactor;//probability of every preset
 	vector<ofParameter<bool>> presetsRandomModeShort;//mode short for ebvery preset
 	vector<int> randomFactorsDices;
-	void setupRandomizer();//engine to get a random between all posible dices (from 0 to numDices) and then select the preset associated to the resulting dice.
+	void setupRandomizer();//engine to get a random between all posible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
 	void doRandomizeWichSelectedPreset();//randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
 	int doRandomizeWichSelectedPresetCheckChanged();
 	void doResetDices();//reset all probs to 0
-	int numDices;//total dices summing the prob of any preset probability (PROB1 + PROB2 + ...)
+	int dicesTotalAmount;//total dices summing the prob of any preset probability (PROB1 + PROB2 + ...)
 
 	int timerRandomizer;
 #endif
@@ -465,6 +466,7 @@ public:
 	void setPlayRandomizerTimer(bool b)//play randomizer timer
 	{
 		PLAY_RandomizeTimer = b;
+		if (b) doRandomizeWichSelectedPreset();
 	}
 	//--------------------------------------------------------------
 	void setTogglePlayRandomizerPreset()//toggle randomizer timer
@@ -488,7 +490,7 @@ public:
 		randomizeDurationBpm = bpm;
 		//60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
 		randomizeDuration = 60000.f / bpm;
-		randomizeDurationShort = randomizeDuration / 4.f;
+		randomizeDurationShort = randomizeDuration / 2.f;
 	}
 	//--------------------------------------------------------------
 	void doRandomizePresetFromFavs()//trig randomize and select one of the favs presets
@@ -519,10 +521,9 @@ private:
 
 	//used when preset has not changed but we like to retrig
 	bool bMustTrig = false;
-
 public:
 	//--------------------------------------------------------------
-	bool isMustTrig()//trig on select preset or not
+	bool isMustTrig()//trig on select preset or not. this is useful when preset selected not changed, but we want to retrig current preset settings
 	{
 		if (bMustTrig)
 		{
@@ -535,7 +536,7 @@ public:
 		}
 	}
 
-	//-
+	//--
 
 	//browser
 private:
@@ -556,6 +557,18 @@ private:
 
 public:
 
+	//-
+
+	//expose basic controls to allow use on external gui
+	ofParameterGroup params_Controls{ "PRESETS MANAGER CONTROL" };
+	ofParameterGroup getControls() {
+		params_Controls.add(SHOW_ClickPanel);
+		params_Controls.add(PLAY_RandomizeTimer);
+		return params_Controls;
+	}
+
+	//-
+
 	//API
 
 	//BUG: 
@@ -563,9 +576,8 @@ public:
 	//to solve auto load fail because the sorting of xml autoSave after preset selector tag
 	////(optional) on startup: called at the end of your ofApp setup() 
 	//--------------------------------------------------------------
-	void refresh()
+	void refreshStartup()
 	{
-
 		////browser
 		//browser_FilesRefresh();
 
@@ -708,6 +720,14 @@ public:
 	//switch on or off the control with the keys
 	void setToggleKeysControl(bool active);
 
+	//-
+
+public:
+	void saveCurrentPreset() {
+			ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_selected.get();
+			doSave(PRESET_selected);
+	}
+	
 	//-
 
 	//engine
@@ -943,7 +963,7 @@ private:
 	//-
 
 public:
-	ofParameter<bool> SHOW_ClickPanel;
+	ofParameter<bool> SHOW_ClickPanel;//to allow include as toggle parameter into external gui
 
 private:
 	ofParameterGroup params_Control;

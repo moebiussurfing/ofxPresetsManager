@@ -19,12 +19,12 @@ int ofxPresetsManager::doRandomizeWichSelectedPresetCheckChanged()
 
 #ifndef DEBUG_randomTest
 		{
-			//get a random between all possible dices (from 0 to numDices) and then select the preset associated to the resulting dice.
+			//get a random between all possible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
 			//each preset has many dices: more dices 0 more probality to be selected by the randomizer
-			randomizedDice = ofRandom(0, numDices);
+			randomizedDice = ofRandom(0, dicesTotalAmount);
 
-			ofLogVerbose(__FUNCTION__) << "random: " << randomizedDice.get() << "/" << numDices;
-			//ofLogVerbose(__FUNCTION__) << "numDices:" << numDices;
+			ofLogVerbose(__FUNCTION__) << "random: " << randomizedDice.get() << "/" << dicesTotalAmount;
+			//ofLogVerbose(__FUNCTION__) << "dicesTotalAmount:" << dicesTotalAmount;
 		}
 #endif
 
@@ -66,7 +66,7 @@ int ofxPresetsManager::doRandomizeWichSelectedPresetCheckChanged()
 			//end = randomFactorsDices[i];
 
 			if (i != presetsRandomFactor.size()) end = randomFactorsDices[i];
-			else end = numDices;
+			else end = dicesTotalAmount;
 
 #ifdef DEBUG_randomTest
 			ofLogNotice(__FUNCTION__) << (start == end ? "\t\t\t\t" : "") << "[" << i << "] " << start << "-" << end;
@@ -95,7 +95,7 @@ int ofxPresetsManager::doRandomizeWichSelectedPresetCheckChanged()
 		}
 		//last
 #ifdef DEBUG_randomTest
-		ofLogNotice(__FUNCTION__) << "randomFactorsDices: [" << presetsRandomFactor.size() << "] " << numDices;
+		ofLogNotice(__FUNCTION__) << "randomFactorsDices: [" << presetsRandomFactor.size() << "] " << dicesTotalAmount;
 #endif
 
 		//for (int f = 1; f < presetsRandomFactor.size(); f++) {
@@ -107,7 +107,7 @@ int ofxPresetsManager::doRandomizeWichSelectedPresetCheckChanged()
 		//}
 
 		//for (auto &p : presetsRandomFactor) {
-		//	numDices += p.get();
+		//	dicesTotalAmount += p.get();
 		//}
 	}
 	//else {
@@ -133,23 +133,32 @@ void ofxPresetsManager::doRandomizeWichSelectedPreset()
 {
 	//ofLogNotice(__FUNCTION__);
 	ofLogNotice(__FUNCTION__) << "---------------------------------------------------";
-	
+
 	//we avoid that the random is the same previous preset (TODO:improve). we want force change, not stay in the same. 
 	//bc sometimes the random gets the same current preset.
 
 	int _PRESET_selected_PRE = PRESET_selected;
 
-	int numTryes = 0;
 	int r = doRandomizeWichSelectedPresetCheckChanged();
-	ofLogNotice(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes);
-	ofLogNotice(__FUNCTION__) << "PRESET Random is: " << ofToString(r);
 
-	while (r == _PRESET_selected_PRE) {//while preset index not changed
-		r = doRandomizeWichSelectedPresetCheckChanged();
-		ofLogWarning(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes) << " NOT changed!";
-		ofLogNotice(__FUNCTION__) << "PRESET Previous was : " << ofToString(_PRESET_selected_PRE);
-		ofLogNotice(__FUNCTION__) << "PRESET New Random is: " << ofToString(r);
-		ofLogWarning(__FUNCTION__) << "RETRY !";
+	//TODO:
+	//if there's only one posible dice.. cant avoid repetition. so force avoid toggle to false
+	if (MODE_AvoidRandomRepeat && dicesTotalAmount < 2) MODE_AvoidRandomRepeat = false;
+
+	if (MODE_AvoidRandomRepeat)
+	{
+		int numTryes = 0;
+		ofLogNotice(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes);
+		ofLogNotice(__FUNCTION__) << "PRESET Random is: " << ofToString(r);
+
+		while (r == _PRESET_selected_PRE && dicesTotalAmount > 1 && numTryes < 5) //while preset index not changed. TODO: avoid make more than 5 randoms..
+		{
+			r = doRandomizeWichSelectedPresetCheckChanged();
+			ofLogWarning(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes) << " NOT changed!";
+			ofLogNotice(__FUNCTION__) << "PRESET Previous was : " << ofToString(_PRESET_selected_PRE);
+			ofLogNotice(__FUNCTION__) << "PRESET New Random is: " << ofToString(r);
+			ofLogWarning(__FUNCTION__) << "RETRY !";
+		}
 	}
 
 	//--
@@ -179,10 +188,17 @@ void ofxPresetsManager::doResetDices()
 	for (auto &p : presetsRandomFactor) {
 		p = 0;
 	}
-	numDices = 0;
-	randomizedDice.setMax(numDices - 1);
+	if (presetsRandomFactor.size() > 0) {
+		presetsRandomFactor[0] = 1;
+		dicesTotalAmount = 1;
+		randomizedDice = 0;
+	}
+	else {
+		dicesTotalAmount = 0;
+	}
+	randomizedDice.setMax(dicesTotalAmount - 1);
 	randomizeDuration = 1000;
-	randomizeDurationShort = 250;
+	randomizeDurationShort = randomizeDuration * 0.5;
 }
 
 //--------------------------------------------------------------
@@ -534,6 +550,7 @@ void ofxPresetsManager::setupRandomizer()
 	PLAY_RandomizeTimer.set("PLAY RANDOMIZER", false);
 	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
 	MODE_LatchTrig.set("MODE LATCH", false);
+	MODE_AvoidRandomRepeat.set("MODE AVOID REPEAT", false);
 	randomizeDuration.set("T DURATION", 1000, 10, randomize_MAX_DURATION);
 	randomizeDurationShort.set("T SHORT", 250, 10, randomize_MAX_DURATION_SHORT);
 	randomizeDurationBpm.set("T BPM", 120, 10, 400);
@@ -575,6 +592,7 @@ void ofxPresetsManager::setupRandomizer()
 	params_Randomizer.add(randomizeDurationBpm);
 	params_Randomizer.add(MODE_DicesProbs);
 	params_Randomizer.add(MODE_LatchTrig);
+	params_Randomizer.add(MODE_AvoidRandomRepeat);
 	params_Randomizer.add(_gOdds);
 	params_Randomizer.add(_gShort);
 	params_Randomizer.add(bResetDices);
@@ -2627,13 +2645,13 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			if (doDices)
 			{
 				//sum total dices/all probs
-				numDices = 0;
+				dicesTotalAmount = 0;
 				for (auto &p : presetsRandomFactor) {
-					numDices += p.get();
+					dicesTotalAmount += p.get();
 				}
-				randomizedDice.setMax(numDices - 1);
+				randomizedDice.setMax(dicesTotalAmount - 1);
 
-				ofLogNotice(__FUNCTION__) << "numDices:" << numDices;
+				ofLogNotice(__FUNCTION__) << "dicesTotalAmount: " << dicesTotalAmount;
 			}
 		}
 
@@ -2641,8 +2659,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//{
 		//	ofLogError(__FUNCTION__) << "IGNORED PRESETS CHANGE";
 		//}
-		}
 	}
+}
 
 #pragma mark - SETTINGS
 
@@ -3172,16 +3190,15 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	// Demonstrate the various window flags. 
 	// Typically you would just use the default.
 	ImGuiWindowFlags window_flags = 0;
-	window_flags |= ImGuiWindowFlags_NoBackground;
+	//window_flags |= ImGuiWindowFlags_NoBackground;//make background transparent
 	//if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
 	//if (!no_border)   window_flags |= ImGuiWindowFlags_NoDecoration;
 	//if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
 	//if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
 	//if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
 	//if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
-	//if (no_close)  window_flags |= ImGuiWindowFlags_NoCollapse;
 	//if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
-	//if (no_settings) window_flags |= ImGuiWindowFlags_NoSavedSettings;
+	//if (no_settings)	window_flags |= ImGuiWindowFlags_NoSavedSettings;
 
 	//---
 
@@ -3305,7 +3322,7 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 	//if (ImGui::TreeNode("BASIC"))
 	if (ofxImGui::BeginTree("BASIC", settings))
 	{
-		
+
 
 		//--
 
@@ -3384,7 +3401,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 	if (ofxImGui::BeginTree("FILES BROWSER", settings))
 	{
 		int _numfiles = fileNames.size();
-		
+
 		//-
 
 		//new button
