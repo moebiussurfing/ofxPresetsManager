@@ -6,7 +6,7 @@
 //--------------------------------------------------------------
 int ofxPresetsManager::doRandomizeWichSelectedPresetCheckChanged()
 {
-	ofLogNotice(__FUNCTION__);
+	ofLogVerbose(__FUNCTION__);
 
 	//-
 
@@ -85,7 +85,7 @@ int ofxPresetsManager::doRandomizeWichSelectedPresetCheckChanged()
 		//_r = _rr + 1;
 
 		//debug
-		ofLogNotice(__FUNCTION__) << "DEBUG";
+		ofLogVerbose(__FUNCTION__) << "DEBUG";
 		//for (int i = 0; i < presetsRandomFactor.size(); i++) {
 		for (int i = 0; i < presetsRandomFactor.size(); i++) {
 #ifdef DEBUG_randomTest
@@ -548,6 +548,7 @@ void ofxPresetsManager::setupRandomizer()
 	//params_Randomizer.setName("Randomizer");
 	bRandomizeIndex.set("RANDOMIZE INDEX", false);
 	PLAY_RandomizeTimer.set("PLAY RANDOMIZER", false);
+	PLAY_RandomizeTimer.setSerializable(false);
 	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
 	MODE_LatchTrig.set("MODE LATCH", false);
 	MODE_AvoidRandomRepeat.set("MODE AVOID REPEAT", false);
@@ -1111,7 +1112,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		if (isDoneLoad())
 		{
 			ofLogNotice(__FUNCTION__) << groups[0].getName() << " PRESET " << PRESET_selected << " LOADED.";
-			ofLogNotice(__FUNCTION__) << groups[0].getName() << " -------------------------------------------------------------";
+			ofLogVerbose(__FUNCTION__) << groups[0].getName() << " -------------------------------------------------------------";
 			//ofLogNotice() << endl;
 		}
 
@@ -1433,6 +1434,7 @@ void ofxPresetsManager::drawPresetClicker()
 		bool bLateralPosition = true;
 		bool bLeftPosition = true;
 
+		debugClicker = false;
 		if (debugClicker && ENABLE_Keys)
 		{
 			string info = "";
@@ -1595,7 +1597,7 @@ void ofxPresetsManager::add(ofParameterGroup params, initializer_list<int> keysL
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, int guiIndex)
 {
-	ofLogNotice(__FUNCTION__) << "(" << presetIndex << "," << guiIndex << ")";
+	ofLogVerbose(__FUNCTION__) << "(" << presetIndex << "," << guiIndex << ")";
 
 	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
@@ -1707,7 +1709,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, int guiIndex)
 {
-	ofLogNotice(__FUNCTION__) << "(" << presetIndex << "," << guiIndex << ")";
+	ofLogVerbose(__FUNCTION__) << "(" << presetIndex << "," << guiIndex << ")";
 
 	//clamp limiters
 	if (guiIndex >= 0 && guiIndex < (int)groups.size()
@@ -1961,22 +1963,25 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//-
 
 #ifdef INCLUDE_RANDOMIZER
-		//timer to randomize and choice a random preset from the kit
-		else if (key == 'R')
-		{
-			setTogglePlayRandomizerPreset();
-		}
-		else if (key == 'r')
-		{
-			doRandomizeWichSelectedPreset();
-		}
+		bool bEnableKeyRandomizers = false;
+		if (bEnableKeyRandomizers) {
+			//timer to randomize and choice a random preset from the kit
+			if (key == 'R')
+			{
+				setTogglePlayRandomizerPreset();
+			}
+			else if (key == 'r')
+			{
+				doRandomizeWichSelectedPreset();
+			}
 
-		else if (key == 'E')
-		{
-			doRandomizeEditor();
+			else if (key == 'E')
+			{
+				doRandomizeEditor();
+			}
 		}
 #ifdef INCLUDE_ofxUndoSimple
-		else if (key == 'A')// previous
+		if (key == 'A')// previous
 		{
 			ofLogNotice(__FUNCTION__) << "UNDO <-";
 			undoStringParams.undo();
@@ -2000,7 +2005,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//-
 
 		//navigate kit/favorites presets
-		else if (key == OF_KEY_RIGHT && ENABLE_KeysArrowBrowse)
+		if (key == OF_KEY_RIGHT && ENABLE_KeysArrowBrowse)
 		{
 
 			//browse presets
@@ -2368,7 +2373,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//-
 
 		if (name == "PRESET") {
-			ofLogNotice(__FUNCTION__) << groups[0].getName() << " -------------------------------------------------------------";
+			ofLogVerbose(__FUNCTION__) << groups[0].getName() << " -------------------------------------------------------------";
 		}
 
 		//-
@@ -3190,7 +3195,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	// Demonstrate the various window flags. 
 	// Typically you would just use the default.
 	ImGuiWindowFlags window_flags = 0;
-	//window_flags |= ImGuiWindowFlags_NoBackground;//make background transparent
+	window_flags |= ImGuiWindowFlags_NoBackground;//make background transparent
 	//if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
 	//if (!no_border)   window_flags |= ImGuiWindowFlags_NoDecoration;
 	//if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;

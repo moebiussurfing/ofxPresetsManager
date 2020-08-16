@@ -15,6 +15,10 @@
 ///	TODO:
 ///
 ///
+///	+++		set ImGui size at startup for first time
+///	+++		add engine to create all preset files if it's a new project
+///				add setter to enable randomize wich params
+///				call populate. disable debug_display red info
 ///	++		add multiple groups engine. look into ofxGuiPresets fron #npisanti
 ///	+++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
@@ -218,7 +222,11 @@ private:
 	ofParameter<bool> bResetDices;
 	ofParameter<int> randomizedDice;//to test
 	//ofParameter<string> _totalDicesStr;
+
 public:
+	void setModeRandomizeAvoidRepeat(bool b) {
+		MODE_AvoidRandomRepeat = b;
+	}
 	//ofParameter<float> randomizeSpeedF;//speed scaler. not used
 	ofParameter<int> randomizeDuration;
 	ofParameter<int> randomizeDurationShort;
@@ -414,9 +422,9 @@ public:
 	void load_Next()
 	{
 		PRESET_selected++;
-		if (PRESET_selected > numPresetsFavorites)
+		if (PRESET_selected >= numPresetsFavorites-1)
 		{
-			PRESET_selected = numPresetsFavorites;
+			PRESET_selected = numPresetsFavorites-1;
 		}
 	}
 
@@ -424,9 +432,9 @@ public:
 	void load_Previous()
 	{
 		PRESET_selected--;
-		if (PRESET_selected < 1)
+		if (PRESET_selected < 0)
 		{
-			PRESET_selected = 1;
+			PRESET_selected = 0;
 		}
 	}
 
@@ -560,7 +568,7 @@ public:
 	//-
 
 	//expose basic controls to allow use on external gui
-	ofParameterGroup params_Controls{ "PRESETS MANAGER CONTROL" };
+	ofParameterGroup params_Controls{ "Presets Manager" };
 	ofParameterGroup getControls() {
 		params_Controls.add(SHOW_ClickPanel);
 		params_Controls.add(PLAY_RandomizeTimer);
