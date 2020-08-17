@@ -83,12 +83,14 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-	//easy callback (A)
-	if (presetsManager.isDoneLoad())//just loaded preset it's done
-	{
-		cout << (__FUNCTION__) << "--------------------------------------------------------------[ EasyCallback -> DoneLoad! ]" << endl;
-		ofLogWarning(__FUNCTION__) << "--------------------------------------------------------------[ EasyCallback -> DoneLoad! ]";
-	}
+	//presetsManager.update();
+
+	////easy callback (A)
+	//if (presetsManager.isDoneLoad())//just loaded preset it's done
+	//{
+	//	cout << (__FUNCTION__) << "--------------------------------------------------------------[ EasyCallback -> DoneLoad! ]" << endl;
+	//	ofLogWarning(__FUNCTION__) << "--------------------------------------------------------------[ EasyCallback -> DoneLoad! ]";
+	//}
 }
 
 //--------------------------------------------------------------
@@ -106,20 +108,14 @@ void ofApp::draw()
 	int pad = 20;
 	int i = 0;
 	{
-		str = "shapeType : " + ofToString(shapeType);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "numShapes : " + ofToString(numShapes);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "separation: " + ofToString(separation);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "shapeSide : " + ofToString(shapeSide);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "fill      : " + ofToString(fill);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "color     : " + ofToString(color);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "lineWidth : " + ofToString(lineWidth);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
+		str = "";
+		str += "shapeType : " + ofToString(shapeType);
+		str += "numShapes : " + ofToString(numShapes);
+		str += "separation: " + ofToString(separation);
+		str += "shapeSide : " + ofToString(shapeSide);
+		str += "fill      : " + ofToString(fill);
+		str += "color     : " + ofToString(color);
+		str += "lineWidth : " + ofToString(lineWidth);
 	}
 
 	//-

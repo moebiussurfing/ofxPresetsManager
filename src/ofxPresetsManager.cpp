@@ -597,11 +597,10 @@ void ofxPresetsManager::setupRandomizer()
 		_gShort.add(p);
 	}
 
-	params_Randomizer.setName("FAVORITES");
+	params_Randomizer.setName("FAVOURITES");
 	params_Randomizer.clear();//TODO: should split to avoid call again when setted custom path...
 	params_Randomizer.add(PLAY_RandomizeTimer);
 	params_Randomizer.add(bRandomizeIndex);
-	//params_Randomizer.add(randomizeSpeedF);
 	params_Randomizer.add(randomizeDuration);
 	params_Randomizer.add(randomizeDurationShort);
 	params_Randomizer.add(randomizeDurationBpm);
@@ -658,9 +657,9 @@ ofxPresetsManager::ofxPresetsManager()
 	//big browser
 	path_PresetsFolder = "archive";
 
-	//TODO:
-	//default absolute archive presets folder to browse
-	path_PresetsFolder_Custom = "F:\openFrameworks\addons\ofxPresetsManager\2_presetsManager\bin\data\ofxPresetsManager\archive";
+	////TODO:
+	////default absolute archive presets folder to browse
+	//path_PresetsFolder_Custom = "F:\openFrameworks\addons\ofxPresetsManager\2_presetsManager\bin\data\ofxPresetsManager\archive";
 
 	//app settings
 	path_Control = "settings";
@@ -668,6 +667,9 @@ ofxPresetsManager::ofxPresetsManager()
 	//to add to all presets filenames
 	//path_Prefix = "_preset_";
 	path_Prefix = "_";
+
+	filename_ControlSettings = "settingsControl.xml";
+	filename_Randomizers = "settingsRandomizer.xml";
 
 	//--
 
@@ -804,14 +806,12 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Tools.add(bCloneAll);
 	//params_Tools.add(bRandomizeEditorPopulateFavs);
 
-#ifdef INCLUDE_RANDOMIZER
-	params_Tools.add(params_Randomizer);
-
-	//TODO:
-	//there's a problem here bc is dependent of the group params content..
-	params_Tools.add(params_Editor_Toggles);
-
-#endif
+//#ifdef INCLUDE_RANDOMIZER
+//	params_Tools.add(params_Randomizer);
+//	//TODO:
+//	//there's a problem here bc is dependent of the group params content..
+//	params_Tools.add(params_Editor_Toggles);
+//#endif
 
 	//all nested params for callbacks and storage settings
 	params_Control.setName("ofxPresetsManager");
@@ -847,33 +847,25 @@ void ofxPresetsManager::setup(std::string name)///must be called after adding pa
 //--------------------------------------------------------------
 void ofxPresetsManager::setup()
 {
-	DISABLE_CALLBACKS = true;
-
-	//-
-
-	//TODO:
-	bPathDirCustom.set("MODE CUSTOM PATH", false);
-	pathDirCustom.set("PATH", "DEFAULT /bin/data/" + path_GLOBAL_Folder);
-
-	//-
-
-	//#ifdef DEBUG_randomTest
-	//	ofSetLogLevel("ofxPresetsManager", OF_LOG_VERBOSE);
-	//#endif
-
 	ofLogNotice(__FUNCTION__);
 
-	//-
+	DISABLE_CALLBACKS = true;
+
+	//--
+
+#ifdef DEBUG_randomTest
+	ofSetLogLevel("ofxPresetsManager", OF_LOG_VERBOSE);
+#endif
+
+	//--
 
 	//gui font
 
 	string str;
 	str = "overpass-mono-bold.otf";
 	myTTF = "assets/fonts/" + str;//assets folder
-
 	sizeTTF = 10;
 	bool bLoaded = myFont.load(myTTF, sizeTTF, true, true);
-
 #ifdef INCLUDE_DEBUG_ERRORS
 	if (!bLoaded)
 	{
@@ -893,14 +885,14 @@ void ofxPresetsManager::setup()
 	{
 		ofxGuiSetFont(pathFont, 9);
 	}
-#ifdef INCLUDE_DEBUG_ERRORS
 	else
 	{
+#ifdef INCLUDE_DEBUG_ERRORS
 		errorsDEBUG.addError(gui_LabelName + " " + ofToString(__FUNCTION__), "ofxGui font", pathFont);
-	}
 #endif
+	}
 
-	//-
+	//--
 
 	//on this mode we use only a simplified version with ofxGui and without files explorer and ImGui
 #ifndef INCLUDE_GUI_IM_GUI	//this must be check if it works...
@@ -939,18 +931,19 @@ void ofxPresetsManager::setup()
 
 	//--
 
+	//TODO:
+	bPathDirCustom.set("MODE CUSTOM PATH", false);
+	pathDirCustom.set("Path", path_GLOBAL_Folder);
+	params_RandomizerSettings.add(params_Randomizer);
+	params_RandomizerSettings.add(params_Editor);
+
+	//--
+
 	//create data folders if they are not presets: 
 	//when you create a new project or added the addon to your existing project
 	//and no /data files are present
-	CheckFolder(path_GLOBAL_Folder);
-
-	string _path;
-	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
-	CheckFolder(_path);
-	_path = path_GLOBAL_Folder + "/" + path_Kit_Folder;
-	CheckFolder(_path);
-	_path = path_GLOBAL_Folder + "/" + path_Control;
-	CheckFolder(_path);
+	
+	CheckAllFolder();
 
 	//--
 
@@ -965,6 +958,8 @@ void ofxPresetsManager::setup()
 
 	//preset editor tools
 	setupEditor();
+	
+	ofAddListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 
 	//ImGui
 #ifndef MODE_ImGui_EXTERNAL
@@ -994,12 +989,14 @@ void ofxPresetsManager::startup()
 	//all app session settings (not the presets related)
 	load_ControlSettings();
 
+	nameUserKit = path_GLOBAL_Folder;
+
 	//--
 
 	//TODO:
 	//force
-	bPathDirCustom = false;
-	bPathDirCustom = " ";
+	//bPathDirCustom = false;
+	//pathDirCustom = " ";
 
 	//--
 
@@ -1066,13 +1063,12 @@ void ofxPresetsManager::windowResized(int w, int h)
 //--------------------------------------------------------------
 void ofxPresetsManager::update(ofEventArgs & args)
 {
-	if (!DISABLE_CALLBACKS) {
+	if (!DISABLE_CALLBACKS)
+	{
+		//-
 
-		//TODO:
-
-		if (
-			//isDoneLoad() && //don't use this bc will be pulled off after readed!
-			bIsDoneLoad &&
+		//randomizer timer mode latch
+		if (bIsDoneLoad &&
 			MODE_LatchTrig && !PLAY_RandomizeTimer) {
 
 			randomizerTimer = ofGetElapsedTimeMillis();
@@ -1088,7 +1084,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//-
 
 		//randomize timer
-		if (PLAY_RandomizeTimer || MODE_LatchTrig)
+		if (PLAY_RandomizeTimer || MODE_LatchTrig)//?
 		{
 			uint32_t _time = ofGetElapsedTimeMillis();
 			timerRandomizer = _time - randomizerTimer;
@@ -2711,30 +2707,51 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 //--------------------------------------------------------------
 void ofxPresetsManager::load_ControlSettings()
 {
-	ofLogNotice(__FUNCTION__);
+	//ofLogNotice(__FUNCTION__);
 
-	ofXml settings;
-	string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
-	bool bLoaded = settings.load(path);
-
-#ifdef INCLUDE_DEBUG_ERRORS
-	if (!bLoaded)
+	string path = path_Control + "/" + filename_ControlSettings;
+	bool b = ofxSurfingHelpers::loadGroup(params_Control, path);
+	if (!b)
 	{
+#ifdef INCLUDE_DEBUG_ERRORS
 		errorsDEBUG.addError(ofToString(__FUNCTION__), gui_LabelName, path);
-	}
 #endif
-
+		ofLogError(__FUNCTION__) << "FILE '" << path << "' NOT FOUND!";
+	}
 	ofLogNotice(__FUNCTION__) << path;
 	ofLogNotice(__FUNCTION__) << "PRESET " << PRESET_selected;
 
-	if (bLoaded)
-	{
-		ofDeserialize(settings, params_Control);
-	}
-	else
-	{
-		ofLogError(__FUNCTION__) << "FILE '" << path << "' NOT FOUND!";
-	}
+	//-
+
+	//load randomizers settings
+	string path2 = path_GLOBAL_Folder + "/" + path_Control + "/" + filename_Randomizers;
+	bool b2 = ofxSurfingHelpers::loadGroup(params_RandomizerSettings, path2);
+	ofLogNotice(__FUNCTION__) << "Loaded " << path2 << " " << (b2?"DONE":"FAILED");
+
+
+	//	ofXml settings;
+	//	string path = path_Control + "/" + filename_ControlSettings;
+	//	//string path = path_GLOBAL_Folder + "/" + path_Control + "/" + filename_ControlSettings;
+	//	bool bLoaded = settings.load(path);
+	//
+	//#ifdef INCLUDE_DEBUG_ERRORS
+	//	if (!bLoaded)
+	//	{
+	//		errorsDEBUG.addError(ofToString(__FUNCTION__), gui_LabelName, path);
+	//	}
+	//#endif
+	//
+	//	ofLogNotice(__FUNCTION__) << path;
+	//	ofLogNotice(__FUNCTION__) << "PRESET " << PRESET_selected;
+	//
+	//	if (bLoaded)
+	//	{
+	//		ofDeserialize(settings, params_Control);
+	//	}
+	//	else
+	//	{
+	//		ofLogError(__FUNCTION__) << "FILE '" << path << "' NOT FOUND!";
+	//	}
 }
 
 //--------------------------------------------------------------
@@ -2770,27 +2787,44 @@ void ofxPresetsManager::save_ControlSettings()
 	//crashes?
 	try
 	{
+		//save randomizers settings
 		ofLogVerbose(__FUNCTION__) << endl << params_Control.toString() << endl;
-		ofXml settingsControl;
-
-		//TODO: 
-		//crashes here!
-		ofSerialize(settingsControl, params_Control);
-
-		string path = path_GLOBAL_Folder + "/" + path_Control + "/" + "control.xml";
+		string path = path_Control + "/" + filename_ControlSettings;
+		bool b = ofxSurfingHelpers::saveGroup(params_Control, path);
+		if (!b)
+		{
+#ifdef INCLUDE_DEBUG_ERRORS
+			errorsDEBUG.addError(ofToString(__FUNCTION__), gui_LabelName, path);
+#endif
+			ofLogError(__FUNCTION__) << "FILE '" << path << "' NOT FOUND!";
+		}
 		ofLogNotice(__FUNCTION__) << path;
+		ofLogNotice(__FUNCTION__) << "PRESET " << PRESET_selected;
 
-		//TODO: 
-		//crashes here!
-		settingsControl.save(path);
+		//ofXml settingsControl;
+		////TODO: 
+		////crashes here!
+		//ofSerialize(settingsControl, params_Control);
+		//string path = path_Control + "/" + filename_ControlSettings;
+		////string path = path_GLOBAL_Folder + "/" + path_Control + "/" + filename_ControlSettings;
+		//ofLogNotice(__FUNCTION__) << path;
+		////TODO: 
+		////crashes here!
+		//settingsControl.save(path);
+		////ofLogNotice(__FUNCTION__) << settingsControl << endl;
 
-		//ofLogNotice(__FUNCTION__) << settingsControl << endl;
+		//-
+
+		//save randomizers settings
+		string path2 = path_GLOBAL_Folder + "/" + path_Control + "/" + filename_Randomizers;
+		bool b2 = ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path2);
+		ofLogNotice(__FUNCTION__) << "Saved " << path2 << " " << (b2 ? "DONE" : "FAILED");
 	}
 	catch (int n)
 	{
 		ofLogError(__FUNCTION__) << "CATCH ERROR" << endl;
 		throw;
-	}
+}
 
 	//---
 
@@ -2965,6 +2999,7 @@ void ofxPresetsManager::exit()
 	//destroy callbacks
 	removeKeysListeners();
 	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
+	ofRemoveListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 	ofRemoveListener(params_Editor.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Editor);
 
 	//TODO: required?
@@ -3183,7 +3218,7 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 	if (bMouseOver_Changed)
 	{
 		ofLogVerbose(__FUNCTION__) << "bImGui_mouseOver: " << (bImGui_mouseOver ? "INSIDE" : "OUTSIDE");
-	}
+}
 
 	//--
 
@@ -3415,19 +3450,19 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 				//show ALL the addon params! mainly to debug..
 				ofxImGui::AddGroup(params_Control, settings);
 
-				//TODO:
-				//to customize presets folder outside /data of our app...
-				//ie: this will allow to use any folder of our computer, and share the presets between apps...
-				if (ImGui::Button("Set custom folder..."))
-				{
-					auto dialogResult = ofSystemLoadDialog("Set presets folder", true, ofToDataPath(""));
-					if (dialogResult.bSuccess)
-					{
-						path_PresetsFolder_Custom = dialogResult.filePath;
-						bUseCustomPath = true;
-						ofLogNotice(__FUNCTION__) << "path custom: " << path_PresetsFolder_Custom;
-					}
-				}
+				////TODO:
+				////to customize presets folder outside /data of our app...
+				////ie: this will allow to use any folder of our computer, and share the presets between apps...
+				//if (ImGui::Button("Set custom folder..."))
+				//{
+				//	auto dialogResult = ofSystemLoadDialog("Set presets folder", true, ofToDataPath(""));
+				//	if (dialogResult.bSuccess)
+				//	{
+				//		path_PresetsFolder_Custom = dialogResult.filePath;
+				//		bUseCustomPath = true;
+				//		ofLogNotice(__FUNCTION__) << "path custom: " << path_PresetsFolder_Custom;
+				//	}
+				//}
 			}
 
 			ImGui::TreePop();
@@ -3440,9 +3475,8 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 	}
 }
 
-
 //--------------------------------------------------------------
-void ofxPresetsManager::processOpenFileSelection(ofFileDialogResult openFileResult) {
+void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFileResult) {
 
 	ofLogNotice(__FUNCTION__) << ("getName(): " + openFileResult.getName());
 	ofLogNotice(__FUNCTION__) << ("getPath(): " + openFileResult.getPath());
@@ -3450,13 +3484,33 @@ void ofxPresetsManager::processOpenFileSelection(ofFileDialogResult openFileResu
 	bPathDirCustom = true;
 	pathDirCustom = openFileResult.getPath();
 
+	//-
+
+	//save randomizers settings
+	string path2;
+	bool b2;
+	path2 = path_GLOBAL_Folder + "/" + path_Control + "/" + filename_Randomizers;
+	b2 = ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path2);
+	ofLogNotice(__FUNCTION__) << "Saved " << path2 << " " << (b2 ? "DONE" : "FAILED");
+
+	//-
+
 	setPath_GlobalFolder(pathDirCustom);
+
+	nameUserKit = path_GLOBAL_Folder;
 
 	//browser
 	browser_Setup();
 	//setupRandomizer(); 
 	//setupEditor();
 	//startup();
+
+	//-
+
+	//load randomizers settings
+	path2 = path_GLOBAL_Folder + "/" + path_Control + "/" + filename_Randomizers;
+	b2 = ofxSurfingHelpers::loadGroup(params_RandomizerSettings, path2);
+	ofLogNotice(__FUNCTION__) << "Loaded " << path2 << " " << (b2 ? "DONE" : "FAILED");
 }
 
 //--------------------------------------------------------------
@@ -3470,14 +3524,13 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 
 		if (true) {
 			if (ImGui::TreeNode("ABSOLUTE PATH ")) {
-				ImGui::Text("Customize files path");
-				ofxImGui::AddParameter(bPathDirCustom);
-				ofxImGui::AddParameter(pathDirCustom);
+				ImGui::Text("Customize path");
 
 				//customize folder
+
+				//button to Open File Dialog as folder
 				if (ImGui::Button("Select Folder")) {
 
-					//Open the Open File Dialog as folder
 					ofFileDialogResult openFileResult = ofSystemLoadDialog("Select folder", true, ofToDataPath(path_GLOBAL_Folder, true));
 
 					//Check if the user opened a file
@@ -3486,12 +3539,16 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 						ofLogNotice(__FUNCTION__) << ("User selected a folder");
 
 						//We have a file, check it and process it
-						processOpenFileSelection(openFileResult);
+						doFileDialogProcessSelection(openFileResult);
 					}
 					else {
 						ofLogNotice(__FUNCTION__) << ("User hit cancel");
 					}
 				}
+				
+				//ofxImGui::AddParameter(bPathDirCustom);
+				if (bPathDirCustom) ofxImGui::AddParameter(pathDirCustom);
+				
 				ImGui::TreePop();
 			}
 		}
@@ -3869,12 +3926,10 @@ void ofxPresetsManager::ImGui_Draw_Content(ofxImGui::Settings &settings)
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 {
-
 	//1. randomizers
 
 	//bool b = false;
 	//settings.windowBlock = true;
-
 
 	if (ofxImGui::BeginTree("RANDOMIZERS", settings))
 		//if (ImGui::TreeNode("RANDOMIZERS"))
@@ -4016,42 +4071,41 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_PresetSave(string name)//without xml extension nor path
 {
-	ofLogNotice(__FUNCTION__) << "\t\t\t\t" << name << ".xml";
+	ofLogNotice(__FUNCTION__) << name << ".xml";
 
-	ofXml settings;
-	ofSerialize(settings, groups[0]);
 	string _path;
-
-	if (bUseCustomPath) {
-		_path = path_PresetsFolder_Custom.get() + "/" + name + ".xml";
+	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder + "/" + name + ".xml";
+	bool b = ofxSurfingHelpers::saveGroup(groups[0], _path);
+	if (!b)
+	{
+#ifdef INCLUDE_DEBUG_ERRORS
+		errorsDEBUG.addError(ofToString(__FUNCTION__), gui_LabelName, _path);
+#endif
+		ofLogError(__FUNCTION__) << "CAN'T SAVE FILE " << _path << "!";
 	}
 	else {
-		_path = path_GLOBAL_Folder + "/" + path_PresetsFolder + "/" + name + ".xml";
+		ofLogNotice(__FUNCTION__) << "DONE SAVE " << _path;
 	}
-
-	settings.save(_path);
-	ofLogNotice(__FUNCTION__) << "File: " << _path;
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_PresetLoad(string name)//without xml extension nor path
 {
-	ofLogNotice(__FUNCTION__) << "\t\t\t\t" << name << ".xml";
+	ofLogNotice(__FUNCTION__) << name << ".xml";
 
-	ofXml settings;
 	string _path;
-
-	if (bUseCustomPath) {
-		_path = path_PresetsFolder_Custom.get() + "/" + name + ".xml";
+	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder + "/" + name + ".xml";
+	bool b = ofxSurfingHelpers::loadGroup(groups[0], _path);
+	if (!b)
+	{
+#ifdef INCLUDE_DEBUG_ERRORS
+		errorsDEBUG.addError(ofToString(__FUNCTION__), gui_LabelName, _path);
+#endif
+		ofLogError(__FUNCTION__) << "CAN'T LOAD FILE " << _path << "!";
 	}
 	else {
-		_path = path_GLOBAL_Folder + "/" + path_PresetsFolder + "/" + name + ".xml";
+		ofLogNotice(__FUNCTION__) << "DONE LOAD " << _path;
 	}
-
-	settings.load(_path);
-	ofLogNotice(__FUNCTION__) << "File: " << _path;
-
-	ofDeserialize(settings, groups[0]);
 }
 
 //--------------------------------------------------------------
@@ -4075,28 +4129,13 @@ void ofxPresetsManager::browser_Setup()
 //--------------------------------------------------------------
 bool ofxPresetsManager::browser_FilesRefresh()
 {
-	ofLogNotice(__FUNCTION__);
+	//ofLogNotice(__FUNCTION__);
 
 	string _path;
-
-	if (bUseCustomPath) {//TODO:?
-		_path = path_PresetsFolder_Custom.get();
-	}
-	else {
-		_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
-	}
-
+	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
 	CheckFolder(_path);
 
-	//-
-
-	//TODO:
-	//if (!bCustomBrowserPath)
-	//	_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
-	//else
-	//	_path = path_BrowserPathFree;
 	ofLogNotice(__FUNCTION__) << "Path: " << _path;
-
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
 
 	//-
@@ -4113,20 +4152,6 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	}
 
 	//-
-
-	//ofDirectory dataDirectory;
-	//if (!bCustomBrowserPath)
-	//	dataDirectory = ofDirectory(ofToDataPath(_path, true));
-	//else
-	//{
-	//	ofDisableDataPath();
-	//	dataDirectory = ofDirectory(path_BrowserPathFree);
-	//	ofEnableDataPath();
-	//	//[error] ofDirectory: listDir:() source directory does not exist : ""&"F:\openFrameworks\addons\ofxPresetsManager\2_presetsManager\bin\data\ofxPresetsManager\presets&"\""
-	//	
-	//	//"F:\openFrameworks\addons\ofxPresetsManager\2_presetsManager\bin\data\ofxPresetsManager\presets"
-	//	//dataDirectory = ofDirectory("F:\openFrameworks\addons\ofxPresetsManager\2_presetsManager\bin\data\ofxPresetsManager\presets");
-	//}
 
 	//clear files and filenames vectors
 	files.clear();
@@ -4221,5 +4246,4 @@ void ofxPresetsManager::undoRefreshParams() {
 	ofLogNotice(__FUNCTION__) << str;
 }
 #endif
-
 #endif

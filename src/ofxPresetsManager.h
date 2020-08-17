@@ -102,6 +102,8 @@
 #include "ofxDEBUG_errors.h"
 #endif
 
+#include "ofxSurfingHelpers.h"
+
 //--
 
 //optional to debug performance or delay when loading files or presets on hd or memory modes
@@ -130,15 +132,8 @@
 
 //---
 
-class ofxPresetsManager : public ofBaseApp//TODO: remove ofBaseApp?
+class ofxPresetsManager : public ofBaseApp//TODO: remove ofBaseApp? it's for auto update?
 {
-	//TODO:
-	//custom path
-public:
-	string pathGlobal = "ofxLitSphere";
-	ofParameter<bool> bPathDirCustom;
-	ofParameter<string> pathDirCustom;
-
 	//--
 
 private:
@@ -166,12 +161,18 @@ private:
 
 	//all folder names must go without '/'
 	std::string path_GLOBAL_Folder;//top parent folder for all other subfolders
-	std::string path_Control;//path for app state session settings
 	std::string path_Kit_Folder;//path for kit of favorite presets. live kit
 	std::string path_PresetsFolder;//path for browse other presets. archive kit
 
-	ofParameter<std::string> path_PresetsFolder_Custom;//path for browse other presets. archive kit
-	ofParameter<bool> bUseCustomPath{ "bUseCustomPath", false };
+	std::string path_Control;//path for app state session settings
+	std::string path_Root;
+	std::string nameUserKit;
+
+	std::string filename_ControlSettings;
+	std::string filename_Randomizers;//path for randomizers settings
+
+	//ofParameter<std::string> path_PresetsFolder_Custom;//path for browse other presets. archive kit
+	//ofParameter<bool> bUseCustomPath{ "bUseCustomPath", false };
 	std::string path_Prefix;//to add to file names
 
 	//TODO:
@@ -220,11 +221,11 @@ public:
 
 	//randomizer
 #ifdef INCLUDE_RANDOMIZER//now cant' be disabled
+	ofParameterGroup params_RandomizerSettings{"Randomizers"};
 public:
 	ofParameter<bool> PLAY_RandomizeTimer;//play randomizer
 	ofParameter<bool> bRandomizeIndex;
 private:
-	//ofParameterGroup params_Randomizer;
 	ofParameter<bool> MODE_DicesProbs;
 	ofParameter<bool> MODE_LatchTrig;//this mode trigs the preset but goes back to preset 0 after duration timer
 	ofParameter<bool> MODE_AvoidRandomRepeat;//this mode re makes randomize again if new index preset it's the same!
@@ -702,6 +703,11 @@ public:
 		ofLogNotice(__FUNCTION__) << str;
 		path_Control = str;
 	}
+	void setPath_Root(string str)
+	{
+		ofLogNotice(__FUNCTION__) << str;
+		path_Root = str;
+	}
 
 	//--------------------------------------------------------------
 	void setModeAutoLoad(bool b)
@@ -785,7 +791,7 @@ public:
 	void ImGui_Draw_Randomizers(ofxImGui::Settings &settings);
 	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
 
-	void processOpenFileSelection(ofFileDialogResult openFileResult);
+	void doFileDialogProcessSelection(ofFileDialogResult openFileResult);
 
 	//--
 
@@ -1013,6 +1019,11 @@ private:
 
 	ofParameter<glm::vec2> Gui_Internal_Position;
 	ofParameter<bool> ENABLE_Keys;
+	
+	//TODO:
+	//custom path
+	ofParameter<bool> bPathDirCustom;
+	ofParameter<string> pathDirCustom;
 
 	//--
 
@@ -1040,46 +1051,22 @@ private:
 	//--------------------------------------------------------------
 	void CheckFolder(string _path)
 	{
-		ofLogNotice(__FUNCTION__) << _path;
-
-		////workaround to avoid error when folders are folder/subfolder
-		//auto _fullPath = ofSplitString(_path, "/");
-		//for (int i = 0; i < _fullPath.size(); i++) {
-		//	ofLogNotice(__FUNCTION__) << ofToString(i) << " " << _fullPath[i];
-		//}
-
-		ofDirectory dataDirectory(ofToDataPath(_path, true));// /bin/data/
-
-		//check if folder path exist
-		if (!dataDirectory.isDirectory())
-		{
-			ofLogError(__FUNCTION__) << "FOLDER NOT FOUND! TRYING TO CREATE...";
-
-			//try to create folder
-			//bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
-			bool b = dataDirectory.createDirectory(ofToDataPath(_path, true), false, true);
-			//added enable recursive to allow create nested subfolders if required
-
-			//debug if creation has been succeded
-			if (b) ofLogNotice(__FUNCTION__) << "CREATED '" << _path << "'  SUCCESSFULLY!";
-			else ofLogError(__FUNCTION__) << "UNABLE TO CREATE '" << _path << "' FOLDER!";
-		}
-		else
-		{
-			ofLogNotice(__FUNCTION__) << "OK! LOCATED FOLDER: '" << _path << "'";//nothing to do
-		}
+		ofxSurfingHelpers::CheckFolder(_path);
 	}
+
 	//--------------------------------------------------------------
 	void CheckAllFolder()//check that folders exist and create them if not
 	{
+		CheckFolder(path_Root);
 		CheckFolder(path_GLOBAL_Folder);
-
 		string _path;
-		_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+		_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;//current kit-presets presets folder
 		CheckFolder(_path);
-		_path = path_GLOBAL_Folder + "/" + path_Kit_Folder;
+		_path = path_GLOBAL_Folder + "/" + path_Kit_Folder;//current kit-presets standalone presets folder
 		CheckFolder(_path);
-		_path = path_GLOBAL_Folder + "/" + path_Control;
+		_path = path_GLOBAL_Folder + "/" + path_Control;//for randomizer settings (into his own kit-preset folder)
+		CheckFolder(_path);
+		_path = path_Control;//app settings (shared from all kit-presets)
 		CheckFolder(_path);
 	}
 

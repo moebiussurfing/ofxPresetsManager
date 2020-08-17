@@ -3,9 +3,7 @@
 #include "ofMain.h"
 
 ///
-///
 //#define MODE_ImGui_EXTERNAL		//MUST be defined at the addon class (or in both places: here too)
-///
 ///
 
 #include "ofxPresetsManager.h"
@@ -15,7 +13,6 @@
 #include "ofxWindowApp.h"
 #endif
 #include "ofxGui.h"
-
 #ifdef MODE_ImGui_EXTERNAL
 #include "ofxImGui.h"
 #endif
@@ -60,7 +57,7 @@ public:
     ofParameterGroup paramsNested;
 	ofParameter<bool> fill;
 	ofParameter<float> lineWidth;
-	ofParameter<ofColor> color;
+	ofParameter<ofFloatColor> color;//ofColor not implemented on ImGui yet
 	ofParameter<int> shapeType;
 	ofParameter<int> numShapes;
 	ofParameter<int> separation;
@@ -79,7 +76,7 @@ public:
 	ofEventListener listener_PresetManager_DoneLoad;
 	//--------------------------------------------------------------
 	void Changed_PresetManager_DoneLoad() {
-		ofLogWarning(__FUNCTION__) << "[ CustomCallback -> DoneLoad! ]";
-		cout << (__FUNCTION__) << "[ CustomCallback -> DoneLoad! ]" << endl;
+		//ofLogWarning(__FUNCTION__) << "[ CustomCallback -> DoneLoad! ]";
+		//cout << (__FUNCTION__) << "[ CustomCallback -> DoneLoad! ]" << endl;
 	}
 };
