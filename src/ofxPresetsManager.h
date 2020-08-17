@@ -14,32 +14,33 @@
 //
 //	TODO:
 //
-///
-///	+++		custom select folder of presets. this enables multiple kits...
+///	+++		put all presets into a main parent folder. split out the session settings on root folder and a single file.
+///	++		randomize editor preset
+///				preset mini engine. ABC dropdown list for randomizers
 ///				could add also several randomizer settings presets. selectable by dropdown list..
+///				add limit range min/max to randomize
+///				do nesting toggles to improve view. create a group for related toggles..	
+///				clone using editor toggles to avoid clone disabled toggle params
+///				mode state to allow overwrite only enabled toggle params
 ///	+++		add engine to create all preset files if it's a new empty project
 ///				add setter to enable randomize wich params
 ///				call populate. disable debug_display red info
-///	++		add multiple groups engine. look into ofxGuiPresets fron #npisanti
 //
+///	++		add ofColor to ImGui helpers
+///	++		add multiple groups engine. look into ofxGuiPresets fron #npisanti
 ///	+++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
 ///	++		performance: check memory_mode
 ///				check workflow: when playing randomizer disable autosave
 ///				check disable autosave
 ///	+		repair autosave timer. exclude log
-///	++		preset mini engine. ABC dropdown list for randomizers
-///	++		randomize editor preset
-///				add limit range min/max to randomize
-///				do nesting toggles to improve view. create a group for related toggles..	
-///				clone using editor toggles to avoid clone disabled toggle params
-///				mode state to allow overwrite only enabled toggle params
 ///	+		add workflow to not collide manual preset click with randomizer timer
 ///	+		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
-///	+		could make tween when changing params 
-///
+///	+		could make tween when changing params using lerp...
+//
 //	BUG:	
 //
+//	?		repair play randomizer
 //	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager" ?
 //
 //---

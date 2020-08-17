@@ -994,9 +994,12 @@ void ofxPresetsManager::startup()
 	//all app session settings (not the presets related)
 	load_ControlSettings();
 
+	//--
+
 	//TODO:
 	//force
 	bPathDirCustom = false;
+	bPathDirCustom = " ";
 
 	//--
 
