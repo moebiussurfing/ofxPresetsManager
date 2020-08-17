@@ -10,16 +10,18 @@
 /// all modifications and new features by moebiussurfing
 /// my idea is to allow use ofParameterGroup's as managed content instead of ofxPanel
 
-///---
+//---
+//
+//	TODO:
+//
 ///
-///	TODO:
-///
-///
-///	+++		set ImGui size at startup for first time
-///	+++		add engine to create all preset files if it's a new project
+///	+++		custom select folder of presets. this enables multiple kits...
+///				could add also several randomizer settings presets. selectable by dropdown list..
+///	+++		add engine to create all preset files if it's a new empty project
 ///				add setter to enable randomize wich params
 ///				call populate. disable debug_display red info
 ///	++		add multiple groups engine. look into ofxGuiPresets fron #npisanti
+//
 ///	+++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
 ///	++		performance: check memory_mode
@@ -36,11 +38,11 @@
 ///	+		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
 ///	+		could make tween when changing params 
 ///
-///	BUG:	
-///
-///	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager" ?
-///
-///---
+//	BUG:	
+//
+//	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager" ?
+//
+//---
 
 
 #pragma once
@@ -129,6 +131,11 @@
 
 class ofxPresetsManager : public ofBaseApp
 {
+public:
+	string pathGlobal = "ofxLitSphere";
+	ofParameter<bool> bPathDirCustom;
+	ofParameter<string> pathDirCustom;
+
 	//--
 
 private:
@@ -774,6 +781,8 @@ public:
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
 	void ImGui_Draw_Randomizers(ofxImGui::Settings &settings);
 	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
+
+	void processOpenFileSelection(ofFileDialogResult openFileResult);
 
 	//--
 

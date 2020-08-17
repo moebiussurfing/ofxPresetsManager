@@ -731,8 +731,7 @@ ofxPresetsManager::ofxPresetsManager()
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
 	ImGui_Size.set("GUI ImGui SIZE",
-		glm::vec2(ofGetWidth() * 0.5, 10),//top
-		//glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),//center
+		glm::vec2(ofGetWidth() * 0.2, ofGetHeight()*0.5),
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
@@ -833,6 +832,9 @@ void ofxPresetsManager::setup(std::string name)///must be called after adding pa
 void ofxPresetsManager::setup()
 {
 	DISABLE_CALLBACKS = true;
+	
+	bPathDirCustom.set("MODE CUSTOM PATH", false);
+	pathDirCustom.set("PATH", "-1");
 
 	//-
 
@@ -1031,6 +1033,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 	if (!DISABLE_CALLBACKS) {
 
 		//TODO:
+
 		if (
 			//isDoneLoad() && //don't use this bc will be pulled off after readed!
 			bIsDoneLoad &&
@@ -2769,6 +2772,9 @@ void ofxPresetsManager::setPath_GlobalFolder(string folder)
 	ofLogNotice(__FUNCTION__) << folder;
 	path_GLOBAL_Folder = folder;
 	CheckFolder(folder);
+
+	pathDirCustom = ofToDataPath(path_GLOBAL_Folder, true);
+
 }
 
 //--------------------------------------------------------------
@@ -3195,7 +3201,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	// Demonstrate the various window flags. 
 	// Typically you would just use the default.
 	ImGuiWindowFlags window_flags = 0;
-	window_flags |= ImGuiWindowFlags_NoBackground;//make background transparent
+	//window_flags |= ImGuiWindowFlags_NoBackground;//make background transparent
 	//if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
 	//if (!no_border)   window_flags |= ImGuiWindowFlags_NoDecoration;
 	//if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
@@ -3354,6 +3360,7 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 
 		//ImGui::SetNextItemWidth(_w);
 		ofxImGui::AddParameter(autoSave);
+		ImGui::SameLine();
 		ofxImGui::AddParameter(autoLoad);
 		ofxImGui::AddParameter(MODE_MemoryLive);
 
@@ -3400,6 +3407,19 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 	}
 }
 
+
+//--------------------------------------------------------------
+void ofxPresetsManager::processOpenFileSelection(ofFileDialogResult openFileResult) {
+
+	ofLogNotice(__FUNCTION__) << ("getName(): " + openFileResult.getName());
+	ofLogNotice(__FUNCTION__) << ("getPath(): " + openFileResult.getPath());
+
+	bPathDirCustom = true;
+	pathDirCustom = openFileResult.getPath();
+
+	//refreshFiles();
+}
+
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 {
@@ -3408,6 +3428,36 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 		int _numfiles = fileNames.size();
 
 		//-
+
+		if (false) {
+			if (ImGui::TreeNode("ABSOLUTE PATH ")) {
+				ImGui::Text("Customize files path");
+				ofxImGui::AddParameter(bPathDirCustom);
+				ofxImGui::AddParameter(pathDirCustom);
+
+				//customize folder
+				if (ImGui::Button("Select Folder")) {
+
+					//Open the Open File Dialog as folder
+					ofFileDialogResult openFileResult = ofSystemLoadDialog("Select folder", true, ofToDataPath(path_GLOBAL_Folder, true));
+
+					//Check if the user opened a file
+					if (openFileResult.bSuccess) {
+
+						ofLogNotice(__FUNCTION__) << ("User selected a folder");
+
+						//We have a file, check it and process it
+						processOpenFileSelection(openFileResult);
+					}
+					else {
+						ofLogNotice(__FUNCTION__) << ("User hit cancel");
+					}
+				}
+				ImGui::TreePop();
+			}
+		}
+
+		//--
 
 		//new button
 		ofxImGui::AddParameter(MODE_Browser_NewPreset);
@@ -3863,7 +3913,6 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 			undoStringParams.redo();
 			undoRefreshParams();
 		}
-
 		//string str = "";
 		//str += ofToString(undoStringParams.getUndoLength()) + "/";
 		//str += ofToString(undoStringParams.getRedoLength());
@@ -3872,8 +3921,10 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 		//--
 
 		//1.1 randomizers presets
-		//settings.windowBlock = true;//hides
-		//settings.treeLevel = 0;//hides
+		//const bool b = true;
+		//settings.windowBlock = false;//-> this hides next group
+		//ImGui::SetNextWindowCollapsed(true, ImGuiCond_Appearing);//not working..
+		//ImGui::SetNextWindowCollapsed(true, ImGuiCond_Always);
 		ofxImGui::AddGroup(params_Randomizer, settings);
 
 #ifdef DEBUG_randomTest
