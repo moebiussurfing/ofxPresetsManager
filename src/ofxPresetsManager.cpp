@@ -533,6 +533,7 @@ void ofxPresetsManager::setupEditor()
 	params_Editor.add(bRandomizeEditorPopulateFavs);
 
 	params_Editor_Toggles.setName("PRESET PARAMETERS");
+	params_Editor_Toggles.clear();
 	for (auto &p : editorPresets) {
 		params_Editor_Toggles.add(p);
 	}
@@ -559,25 +560,37 @@ void ofxPresetsManager::setupRandomizer()
 	//randomizeSpeedF.set("SPEED FACTOR", 1.f, 0.01f, 2.f);
 	bResetDices.set("RESET DICES", false);
 
+	//exclude
 	bRandomizeIndex.setSerializable(false);
 	bResetDices.setSerializable(false);
 	//randomizeDuration.setSerializable(false);
 
+	//erase
+	presetsRandomFactor.clear();
+	presetsRandomModeShort.clear();
+	randomFactorsDices.clear();
+
+	//resize
 	presetsRandomFactor.resize(numPresetsFavorites);
 	presetsRandomModeShort.resize(numPresetsFavorites);
 	randomFactorsDices.resize(numPresetsFavorites);
+
 	int i;
+
 	//ints as probability for every preset
 	i = 0;
 	ofParameterGroup _gOdds{ "PRESETS PROBS" };
+	_gOdds.clear();
 	for (auto &p : presetsRandomFactor) {
 		string n = "PROB " + ofToString(i++);
 		p.set(n, 5, 0, 10);
 		_gOdds.add(p);
 	}
+
 	//toggles to enable short duration mode
 	i = 0;
 	ofParameterGroup _gShort{ "MODE DURATION SHORT" };
+	_gShort.clear();
 	for (auto &p : presetsRandomModeShort) {
 		string n = "SHORT " + ofToString(i++);
 		p.set(n, false);
@@ -585,6 +598,7 @@ void ofxPresetsManager::setupRandomizer()
 	}
 
 	params_Randomizer.setName("FAVORITES");
+	params_Randomizer.clear();//TODO: should split to avoid call again when setted custom path...
 	params_Randomizer.add(PLAY_RandomizeTimer);
 	params_Randomizer.add(bRandomizeIndex);
 	//params_Randomizer.add(randomizeSpeedF);
@@ -806,11 +820,13 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Control.add(params_Gui);
 	params_Control.add(params_Tools);
 
-	////custom path
-	//params_Custom.setName("CUSTOM PATH");
+	//custom path
+	params_Custom.setName("CUSTOM PATH");
+	params_Custom.add(bPathDirCustom);
+	params_Custom.add(pathDirCustom);
 	//params_Custom.add(bUseCustomPath);
 	//params_Custom.add(path_PresetsFolder_Custom);
-	//params_Control.add(params_Control);
+	params_Control.add(params_Custom);
 
 	ofAddListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 }
@@ -832,9 +848,12 @@ void ofxPresetsManager::setup(std::string name)///must be called after adding pa
 void ofxPresetsManager::setup()
 {
 	DISABLE_CALLBACKS = true;
-	
+
+	//-
+
+	//TODO:
 	bPathDirCustom.set("MODE CUSTOM PATH", false);
-	pathDirCustom.set("PATH", "-1");
+	pathDirCustom.set("PATH", "DEFAULT /bin/data/" + path_GLOBAL_Folder);
 
 	//-
 
@@ -883,8 +902,9 @@ void ofxPresetsManager::setup()
 
 	//-
 
-	//colors
+	//on this mode we use only a simplified version with ofxGui and without files explorer and ImGui
 #ifndef INCLUDE_GUI_IM_GUI	//this must be check if it works...
+	//theme
 	ofxGuiSetDefaultHeight(20);
 	ofxGuiSetBorderColor(32);
 	ofxGuiSetFillColor(ofColor(48));
@@ -974,6 +994,10 @@ void ofxPresetsManager::startup()
 	//all app session settings (not the presets related)
 	load_ControlSettings();
 
+	//TODO:
+	//force
+	bPathDirCustom = false;
+
 	//--
 
 	//timer auto save
@@ -991,16 +1015,25 @@ void ofxPresetsManager::startup()
 	//TODO:
 	//PRESET_selected_PRE = -1;
 
+	//--
+
+	////TODO: 
 	//workflow
-	////TODO: enable all params toggles to the editor so rando affects all params by default
+	//if there are some toggles/params enabled to allow random, we do not do nothing
+	//if there's no toggle/params enabled, we enable all params toggles to the editor 
+	//so random will affect to all params by default
+
 	//workflow
 	bool someFalse = false;
 	for (auto &p : editorPresets) {
 		if (!p.get()) someFalse = true;
 	}
+
 	//if all toggles are disabled after loaded settings, 
 	//then put all to true to allow populate, and random make something
 	if (!someFalse) bRandomizeEditorAll = true;//not some false
+
+	//--
 
 	////TODO
 	////moved from add
@@ -2772,9 +2805,6 @@ void ofxPresetsManager::setPath_GlobalFolder(string folder)
 	ofLogNotice(__FUNCTION__) << folder;
 	path_GLOBAL_Folder = folder;
 	CheckFolder(folder);
-
-	pathDirCustom = ofToDataPath(path_GLOBAL_Folder, true);
-
 }
 
 //--------------------------------------------------------------
@@ -3417,7 +3447,13 @@ void ofxPresetsManager::processOpenFileSelection(ofFileDialogResult openFileResu
 	bPathDirCustom = true;
 	pathDirCustom = openFileResult.getPath();
 
-	//refreshFiles();
+	setPath_GlobalFolder(pathDirCustom);
+
+	//browser
+	browser_Setup();
+	//setupRandomizer(); 
+	//setupEditor();
+	//startup();
 }
 
 //--------------------------------------------------------------
@@ -3427,9 +3463,9 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 	{
 		int _numfiles = fileNames.size();
 
-		//-
+		//--
 
-		if (false) {
+		if (true) {
 			if (ImGui::TreeNode("ABSOLUTE PATH ")) {
 				ImGui::Text("Customize files path");
 				ofxImGui::AddParameter(bPathDirCustom);
@@ -3459,345 +3495,351 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 
 		//--
 
-		//new button
-		ofxImGui::AddParameter(MODE_Browser_NewPreset);
-
-		//-
-
-		//0. send/save current browsed (from "/archive/") preset to current presets on favorites
-
-		//get/copy all favs presets from favs and send/save to browser folder ("archive")
-
-		if (ImGui::Button("FROM FAVS"))
-		{
-			ofLogNotice(__FUNCTION__) << "FROM FAVS";
-			doGetFavsToFilesBrowser();
-		}
-
-		//-
-
-		ImGui::SameLine();
-		if (ImGui::Button("TO FAVS"))
-		{
-			ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE BROWSED PRESET: " << browser_PresetName;
-			ofLogNotice(__FUNCTION__) << "TO FAVORITES PRESET: [" << PRESET_selected << "]";
-
-			if (MODE_Browser_NewPreset)
-			{
-				save(PRESET_selected, 0);
-			}
-		}
-
-		//---
-
-		//label folder
-		string str = path_GLOBAL_Folder + "/" + path_PresetsFolder;
-		ImGui::Text(str.c_str());
-
-		//-
-
-		//blink error when no files detected on folder
-
-		if (_numfiles == 0)
-		{
-			int n = 30;
-			float a = ofMap(ofGetFrameNum() % n, 0, n, 0.f, 1.f);
-			ImGui::PushID(1);
-			ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
-			ImGui::Text("DIR OR FILES NOT FOUND!");
-			string browser_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
-			const char *array = browser_path.c_str();
-			ImGui::Text(array);
-			ImGui::PopStyleColor(1);
-			ImGui::PopID();
-		}
-
-		else if (_numfiles > 0)
-		{
-			//1. arrow buttons
-
-			static int counter = currentFile;
-			float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
-			ImGui::PushButtonRepeat(true);
-
-			//--
-
-			//1.1 prev file
-
-			if (ImGui::ArrowButton("##left", ImGuiDir_Left))
-			{
-				if (counter > 0)
-				{
-					counter--;
-					currentFile = counter;
-					if (currentFile < files.size())
-					{
-						browser_PresetName = fileNames[currentFile];
-						ofLogNotice(__FUNCTION__) << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
-						//if (MODE_Browser_NewPreset)
-						ofLogNotice(__FUNCTION__) << "LOAD" << endl;
-						ofLogNotice(__FUNCTION__) << "PRESET NAME: " << browser_PresetName;
-						browser_PresetLoad(browser_PresetName);
-					}
-				}
-			}
-
-			//--
-
-			//1.2 next file
-
-			ImGui::SameLine(0.0f, spacing);
-			if (ImGui::ArrowButton("##right", ImGuiDir_Right))
-			{
-				if (counter < files.size() - 1)
-				{
-					counter++;
-					currentFile = counter;
-					if (currentFile < files.size())
-					{
-						browser_PresetName = fileNames[currentFile];
-						ofLogNotice(__FUNCTION__) << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
-
-						//if (MODE_Browser_NewPreset)
-						ofLogNotice(__FUNCTION__) << "LOAD PRESET NAME: " << browser_PresetName;
-						browser_PresetLoad(browser_PresetName);
-					}
-				}
-			}
-			ImGui::PopButtonRepeat();
-
-			//--
-
-			//1.3 text preview current preset index to total amount.
-
-			ImGui::SameLine();
-			ImGui::Text("%d/%d", currentFile, _numfiles - 1);
-		}
-
-		//--
-
-		//3. scrollable filenames list
-
-		if (!fileNames.empty())
-		{
-			ImGui::SetNextItemWidth(140);
-
-			int currentFileIndex = currentFile;
-			if (ofxImGui::VectorCombo(" ", &currentFileIndex, fileNames))
-			{
-				ofLogNotice(__FUNCTION__) << "Preset Index: " << ofToString(currentFileIndex);
-				if (currentFileIndex < fileNames.size())
-				{
-					currentFile = currentFileIndex;
-					browser_PresetName = fileNames[currentFile];
-
-					ofLogNotice(__FUNCTION__) << "LOAD Preset Name: " << browser_PresetName;
-					browser_PresetLoad(browser_PresetName);
-				}
-			}
-		}
-
-		//--
-
-		//4.2 update
-
-		if (ImGui::Button("UPDATE"))
-		{
-			//browser_PresetName = textInput_temp;
-			//ofLogNotice(__FUNCTION__) << "UPDATE PRESET NAME: " << browser_PresetName << endl;
-
-			//0. get filename of selected
-			string _currName = files[currentFile].getBaseName();
-			ofLogNotice(__FUNCTION__) << "UPDATE Preset Name: " << _currName;
-
-			//1. delete old file
-			files[currentFile].remove();
-
-			//2. save "ovewrite"
-			browser_PresetSave(_currName);
-
-			//workflow
-			//3. refresh files
-			browser_FilesRefresh();
-
-			//4. reselect last save preset (bc directory sorting changes)
-			ofLogNotice(__FUNCTION__) << "Reload last updated preset:";
-			int iNew = -1;//search index for filename
-			for (size_t i = 0; i < files.size(); i++)
-			{
-				string n = files[i].getBaseName();
-				if (n == _currName)
-				{
-					iNew = i;
-				}
-			}
-			if (iNew != -1)
-			{
-				ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << files[iNew].getBaseName();
-				currentFile = iNew;
-				browser_PresetName = fileNames[currentFile];
-				browser_PresetLoad(browser_PresetName);
-			}
-			else
-			{
-				ofLogError(__FUNCTION__) << "Not found! Bad Index [" << iNew << "]";
-			}
-		}
-
-		//-
-
-		//4.3 reload
-
-		ImGui::SameLine();
-		if (ImGui::Button("RELOAD"))
-		{
-			ofLogNotice(__FUNCTION__) << "RELOAD Preset Name: " << browser_PresetName;
-			browser_PresetLoad(browser_PresetName);
-		}
-
-		//-
-
-		//4.4 delete
-
-		ImGui::SameLine();
-		if (ImGui::Button("DELETE"))//current preset
-		{
-			ofLogNotice(__FUNCTION__) << "DELETE Preset Name: " << browser_PresetName;
-			ofLogNotice(__FUNCTION__) << "file: " << files[currentFile].getAbsolutePath();
-
-			//1. delete file
-			files[currentFile].remove();
-
-			//workflow
-			//2. refresh files
-			bool b = browser_FilesRefresh();
-			if (b)
-			{
-				currentFile = 0;
-				browser_PresetName = fileNames[currentFile];
-				browser_PresetLoad(browser_PresetName);
-			}
-			else
-			{
-				ofLogError(__FUNCTION__) << "Error listing directory!";
-			}
-		}
-
-		//-
-
-		//4.5 clear. delete all!
-
-		ImGui::SameLine();
-		if (ImGui::Button("CLEAR"))//delete all files
-		{
-			ofLogNotice(__FUNCTION__) << "CLEAR Presets folder: " << path_GLOBAL_Folder + "/" + path_PresetsFolder;
-
-			for (int i = 0; i < files.size(); i++) {
-				ofLogWarning(__FUNCTION__) << "DELETE file: " << files[i].getAbsolutePath();
-
-				//1. delete file
-				bool b = files[i].remove();
-				if (!b) ofLogError(__FUNCTION__) << "Can not DELETE file: " << files[i].getAbsolutePath();
-			}
-
-			//workflow
-			//2. refresh files
-			bool b = browser_FilesRefresh();
-			if (b)
-			{
-				currentFile = 0;
-				browser_PresetName = fileNames[currentFile];
-				browser_PresetLoad(browser_PresetName);
-			}
-			else
-			{
-				ofLogError(__FUNCTION__) << "Error listing directory!";
-			}
-		}
-
-		//----
-
-		//mode new preset enabled
-
-		//5. second panel
-
-		if (MODE_Browser_NewPreset)
-		{
-			//5.1 new preset name
-
-			//ImGui::Text("NEW PRESET:");
+		if (ImGui::TreeNode("STANDALONE PRESET")) {
+			//new button
+			ofxImGui::AddParameter(MODE_Browser_NewPreset);
 
 			//-
 
-			//5.2 user input text
+			//0. send/save current browsed (from "/archive/") preset to current presets on favorites
 
-			//loaded string into char array
-			char tab[32];
-			strncpy(tab, textInput_New.c_str(), sizeof(tab));
-			tab[sizeof(tab) - 1] = 0;
+			//get/copy all favs presets from favs and send/save to browser folder ("archive")
 
-			if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
+			if (ImGui::Button("FROM FAVS"))
 			{
-				ofLogNotice(__FUNCTION__) << "InputText [tab]:" << ofToString(tab) << endl;
-				textInput_New = ofToString(tab);
-				ofLogNotice(__FUNCTION__) << "textInput_New:" << textInput_New << endl;
+				ofLogNotice(__FUNCTION__) << "FROM FAVS";
+				doGetFavsToFilesBrowser();
+			}
 
-				//bBlink = true;//not workind. we like to blink when mouse_on_text_input
+			//-
+
+			ImGui::SameLine();
+			if (ImGui::Button("TO FAVS"))
+			{
+				ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE BROWSED PRESET: " << browser_PresetName;
+				ofLogNotice(__FUNCTION__) << "TO FAVORITES PRESET: [" << PRESET_selected << "]";
+
+				if (MODE_Browser_NewPreset)
+				{
+					save(PRESET_selected, 0);
+				}
+			}
+
+			//---
+
+			//label folder
+			string str;
+			if (!bPathDirCustom) str += "bin/data/";
+			str += path_GLOBAL_Folder + "/" + path_PresetsFolder;
+			ImGui::Text(str.c_str());
+
+			//-
+
+			//blink error when no files detected on folder
+
+			if (_numfiles == 0)
+			{
+				int n = 30;
+				float a = ofMap(ofGetFrameNum() % n, 0, n, 0.f, 1.f);
+				ImGui::PushID(1);
+				ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+				ImGui::Text("DIR OR FILES NOT FOUND!");
+				string browser_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+				const char *array = browser_path.c_str();
+				ImGui::Text(array);
+				ImGui::PopStyleColor(1);
+				ImGui::PopID();
+			}
+
+			else if (_numfiles > 0)
+			{
+				//1. arrow buttons
+
+				static int counter = currentFile;
+				float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+				ImGui::PushButtonRepeat(true);
+
+				//--
+
+				//1.1 prev file
+
+				if (ImGui::ArrowButton("##left", ImGuiDir_Left))
+				{
+					if (counter > 0)
+					{
+						counter--;
+						currentFile = counter;
+						if (currentFile < files.size())
+						{
+							browser_PresetName = fileNames[currentFile];
+							ofLogNotice(__FUNCTION__) << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
+							//if (MODE_Browser_NewPreset)
+							ofLogNotice(__FUNCTION__) << "LOAD" << endl;
+							ofLogNotice(__FUNCTION__) << "PRESET NAME: " << browser_PresetName;
+							browser_PresetLoad(browser_PresetName);
+						}
+					}
+				}
+
+				//--
+
+				//1.2 next file
+
+				ImGui::SameLine(0.0f, spacing);
+				if (ImGui::ArrowButton("##right", ImGuiDir_Right))
+				{
+					if (counter < files.size() - 1)
+					{
+						counter++;
+						currentFile = counter;
+						if (currentFile < files.size())
+						{
+							browser_PresetName = fileNames[currentFile];
+							ofLogNotice(__FUNCTION__) << "ARROW: browser_PresetName: [" + ofToString(currentFile) + "] " << browser_PresetName;
+
+							//if (MODE_Browser_NewPreset)
+							ofLogNotice(__FUNCTION__) << "LOAD PRESET NAME: " << browser_PresetName;
+							browser_PresetLoad(browser_PresetName);
+						}
+					}
+				}
+				ImGui::PopButtonRepeat();
+
+				//--
+
+				//1.3 text preview current preset index to total amount.
+
+				ImGui::SameLine();
+				ImGui::Text("%d/%d", currentFile, _numfiles - 1);
 			}
 
 			//--
 
-			//5.3 save new
+			//3. scrollable filenames list
 
-			//workflow
-			//TODO:
-			//blink when it's editing a new preset..
-			bool bBlink;
-			bBlink = true;
-			if (bBlink)
+			if (!fileNames.empty())
 			{
-				//ImGui::PushID(1);
-				int n = 30;
-				float a = ofMap(ofGetFrameNum() % n, 0, n, 0.2f, 0.5f);
-				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+				ImGui::SetNextItemWidth(140);
+
+				int currentFileIndex = currentFile;
+				if (ofxImGui::VectorCombo(" ", &currentFileIndex, fileNames))
+				{
+					ofLogNotice(__FUNCTION__) << "Preset Index: " << ofToString(currentFileIndex);
+					if (currentFileIndex < fileNames.size())
+					{
+						currentFile = currentFileIndex;
+						browser_PresetName = fileNames[currentFile];
+
+						ofLogNotice(__FUNCTION__) << "LOAD Preset Name: " << browser_PresetName;
+						browser_PresetLoad(browser_PresetName);
+					}
+				}
 			}
 
-			if (ImGui::Button("SAVE"))
-			{
-				ofLogNotice(__FUNCTION__) << "textInput_New: " << textInput_New << endl;
+			//--
 
-				//1. save
-				browser_PresetSave(textInput_New);
+			//4.2 update
+
+			if (ImGui::Button("UPDATE"))
+			{
+				//browser_PresetName = textInput_temp;
+				//ofLogNotice(__FUNCTION__) << "UPDATE PRESET NAME: " << browser_PresetName << endl;
+
+				//0. get filename of selected
+				string _currName = files[currentFile].getBaseName();
+				ofLogNotice(__FUNCTION__) << "UPDATE Preset Name: " << _currName;
+
+				//1. delete old file
+				files[currentFile].remove();
+
+				//2. save "ovewrite"
+				browser_PresetSave(_currName);
 
 				//workflow
-				//2. disable new preset mode
-				MODE_Browser_NewPreset = false;
-
 				//3. refresh files
 				browser_FilesRefresh();
 
 				//4. reselect last save preset (bc directory sorting changes)
-				ofLogNotice(__FUNCTION__) << "Reload last saved preset:";
-				int iNew = -1;
+				ofLogNotice(__FUNCTION__) << "Reload last updated preset:";
+				int iNew = -1;//search index for filename
 				for (size_t i = 0; i < files.size(); i++)
 				{
 					string n = files[i].getBaseName();
-					if (n == textInput_New)
+					if (n == _currName)
 					{
 						iNew = i;
 					}
 				}
-				ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << files[iNew].getBaseName();
-				currentFile = iNew;
-				browser_PresetLoad(textInput_New);
+				if (iNew != -1)
+				{
+					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << files[iNew].getBaseName();
+					currentFile = iNew;
+					browser_PresetName = fileNames[currentFile];
+					browser_PresetLoad(browser_PresetName);
+				}
+				else
+				{
+					ofLogError(__FUNCTION__) << "Not found! Bad Index [" << iNew << "]";
+				}
 			}
 
-			if (bBlink)
+			//-
+
+			//4.3 reload
+
+			ImGui::SameLine();
+			if (ImGui::Button("RELOAD"))
 			{
-				ImGui::PopStyleColor(1);
+				ofLogNotice(__FUNCTION__) << "RELOAD Preset Name: " << browser_PresetName;
+				browser_PresetLoad(browser_PresetName);
 			}
+
+			//-
+
+			//4.4 delete
+
+			ImGui::SameLine();
+			if (ImGui::Button("DELETE"))//current preset
+			{
+				ofLogNotice(__FUNCTION__) << "DELETE Preset Name: " << browser_PresetName;
+				ofLogNotice(__FUNCTION__) << "file: " << files[currentFile].getAbsolutePath();
+
+				//1. delete file
+				files[currentFile].remove();
+
+				//workflow
+				//2. refresh files
+				bool b = browser_FilesRefresh();
+				if (b)
+				{
+					currentFile = 0;
+					browser_PresetName = fileNames[currentFile];
+					browser_PresetLoad(browser_PresetName);
+				}
+				else
+				{
+					ofLogError(__FUNCTION__) << "Error listing directory!";
+				}
+			}
+
+			//-
+
+			//4.5 clear. delete all!
+
+			ImGui::SameLine();
+			if (ImGui::Button("CLEAR"))//delete all files
+			{
+				ofLogNotice(__FUNCTION__) << "CLEAR Presets folder: " << path_GLOBAL_Folder + "/" + path_PresetsFolder;
+
+				for (int i = 0; i < files.size(); i++) {
+					ofLogWarning(__FUNCTION__) << "DELETE file: " << files[i].getAbsolutePath();
+
+					//1. delete file
+					bool b = files[i].remove();
+					if (!b) ofLogError(__FUNCTION__) << "Can not DELETE file: " << files[i].getAbsolutePath();
+				}
+
+				//workflow
+				//2. refresh files
+				bool b = browser_FilesRefresh();
+				if (b)
+				{
+					currentFile = 0;
+					browser_PresetName = fileNames[currentFile];
+					browser_PresetLoad(browser_PresetName);
+				}
+				else
+				{
+					ofLogError(__FUNCTION__) << "Error listing directory!";
+				}
+			}
+
+			//----
+
+			//mode new preset enabled
+
+			//5. second panel
+
+			if (MODE_Browser_NewPreset)
+			{
+				//5.1 new preset name
+
+				//ImGui::Text("NEW PRESET:");
+
+				//-
+
+				//5.2 user input text
+
+				//loaded string into char array
+				char tab[32];
+				strncpy(tab, textInput_New.c_str(), sizeof(tab));
+				tab[sizeof(tab) - 1] = 0;
+
+				if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
+				{
+					ofLogNotice(__FUNCTION__) << "InputText [tab]:" << ofToString(tab) << endl;
+					textInput_New = ofToString(tab);
+					ofLogNotice(__FUNCTION__) << "textInput_New:" << textInput_New << endl;
+
+					//bBlink = true;//not workind. we like to blink when mouse_on_text_input
+				}
+
+				//--
+
+				//5.3 save new
+
+				//workflow
+				//TODO:
+				//blink when it's editing a new preset..
+				bool bBlink;
+				bBlink = true;
+				if (bBlink)
+				{
+					//ImGui::PushID(1);
+					int n = 30;
+					float a = ofMap(ofGetFrameNum() % n, 0, n, 0.2f, 0.5f);
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+				}
+
+				if (ImGui::Button("SAVE"))
+				{
+					ofLogNotice(__FUNCTION__) << "textInput_New: " << textInput_New << endl;
+
+					//1. save
+					browser_PresetSave(textInput_New);
+
+					//workflow
+					//2. disable new preset mode
+					MODE_Browser_NewPreset = false;
+
+					//3. refresh files
+					browser_FilesRefresh();
+
+					//4. reselect last save preset (bc directory sorting changes)
+					ofLogNotice(__FUNCTION__) << "Reload last saved preset:";
+					int iNew = -1;
+					for (size_t i = 0; i < files.size(); i++)
+					{
+						string n = files[i].getBaseName();
+						if (n == textInput_New)
+						{
+							iNew = i;
+						}
+					}
+					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << files[iNew].getBaseName();
+					currentFile = iNew;
+					browser_PresetLoad(textInput_New);
+				}
+
+				if (bBlink)
+				{
+					ImGui::PopStyleColor(1);
+				}
+			}
+			ofxImGui::EndTree(settings);
 		}
-		ofxImGui::EndTree(settings);
+
+		ImGui::TreePop();
 	}
 }
 
@@ -4034,7 +4076,7 @@ bool ofxPresetsManager::browser_FilesRefresh()
 
 	string _path;
 
-	if (bUseCustomPath) {
+	if (bUseCustomPath) {//TODO:?
 		_path = path_PresetsFolder_Custom.get();
 	}
 	else {
@@ -4063,11 +4105,8 @@ bool ofxPresetsManager::browser_FilesRefresh()
 	{
 		ofLogError(__FUNCTION__) << "FOLDER DOES NOT EXIST!";
 		bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
-		if (b)
-			ofLogNotice(__FUNCTION__) << "CREATED FOLDER: " << _path;
-		else
-			ofLogError(__FUNCTION__) << "UNABLE TO CREATE FOLDER: " << _path;
-
+		if (b) ofLogNotice(__FUNCTION__) << "CREATED FOLDER: " << _path;
+		else ofLogError(__FUNCTION__) << "UNABLE TO CREATE FOLDER: " << _path;
 	}
 
 	//-

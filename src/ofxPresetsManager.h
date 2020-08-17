@@ -129,8 +129,10 @@
 
 //---
 
-class ofxPresetsManager : public ofBaseApp
+class ofxPresetsManager : public ofBaseApp//TODO: remove ofBaseApp?
 {
+	//TODO:
+	//custom path
 public:
 	string pathGlobal = "ofxLitSphere";
 	ofParameter<bool> bPathDirCustom;
@@ -1067,7 +1069,7 @@ private:
 		}
 	}
 	//--------------------------------------------------------------
-	void CheckAllFolder()
+	void CheckAllFolder()//check that folders exist and create them if not
 	{
 		CheckFolder(path_GLOBAL_Folder);
 
