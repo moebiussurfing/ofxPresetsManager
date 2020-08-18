@@ -33,7 +33,7 @@ void ofApp::setup()
 	//params2.add(shapeSide2.set("shapeSide2", 1, 1, 2));
 	//params2.add(numShapes2.set("numShapes2", 1, 1, 24));
 	//params2.add(separation2.set("separation2", 5, 1, 100));
-	
+
 	//--
 
 	//1. (optional) customize path folders at first
@@ -43,7 +43,7 @@ void ofApp::setup()
 	//also define wich key triggers are associated to each preset. 
 	//the amount of keys will be also the amount of favorites/clickable presets
 	presetsManager.add(params, { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
-	
+
 	////TODO:
 	////group2
 	//presetsManager.add(params2, { 'a', 's', 'd', 'e' });
@@ -102,21 +102,16 @@ void ofApp::draw()
 
 	//debug object linked to grouped parameters
 	string str;
-
 	int x = gui.getPosition().x + 15;
 	int y = gui.getPosition().y + gui.getHeight() + 30;
-	int pad = 20;
-	int i = 0;
-	{
-		str = "";
-		str += "shapeType : " + ofToString(shapeType);
-		str += "numShapes : " + ofToString(numShapes);
-		str += "separation: " + ofToString(separation);
-		str += "shapeSide : " + ofToString(shapeSide);
-		str += "fill      : " + ofToString(fill);
-		str += "color     : " + ofToString(color);
-		str += "lineWidth : " + ofToString(lineWidth);
-	}
+	str = "";
+	str += "shapeType : " + ofToString(shapeType);
+	str += "numShapes : " + ofToString(numShapes);
+	str += "separation: " + ofToString(separation);
+	str += "shapeSide : " + ofToString(shapeSide);
+	str += "fill      : " + ofToString(fill);
+	str += "color     : " + ofToString(color);
+	str += "lineWidth : " + ofToString(lineWidth);
 
 	//-
 
@@ -175,7 +170,7 @@ void ofApp::drawImGui()
 		bool _collapse = true;
 		if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
 		{
-			presetsManager.ImGui_Draw_Content(mainSettings);
+			presetsManager.ImGui_Draw_WindowContent(mainSettings);
 		}
 		ofxImGui::EndWindow(mainSettings);
 

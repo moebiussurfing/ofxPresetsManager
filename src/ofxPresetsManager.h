@@ -48,26 +48,25 @@
 
 #pragma once
 
-//----------------------------------------------
-
+//--------------------------------------
+//
 //	DEFINES
-
+//
 //#define MODE_ImGui_EXTERNAL			//MODE_ImGui_EXTERNAL. this must be defined here and (not only) in ofApp (too)!!
 #define INCLUDE_GUI_IM_GUI				//ImGui & browser system
 #define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
-//#define USE_ofxImGuiSimple			//TEST alternative addon
 #define INCLUDE_ofxUndoSimple			//undo engine to store after randomize preset parameters (& recall)
-
-//#define INCLUDE_PERFORMANCE_MEASURES	//measure performance ofxTimeMeasurements
+//#define USE_ofxImGuiSimple			//TEST alternative addon
+//
 #define INCLUDE_DEBUG_ERRORS			//debug errors
+//#define INCLUDE_PERFORMANCE_MEASURES	//measure performance ofxTimeMeasurements
 //#define DEBUG_randomTest				//uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
 //#define DEBUG_BLOCK_SAVE_SETTINGS		//disable save settings//enable this bc sometimes there's crashes on exit
-
-//----------------------------------------------
+//
+//--------------------------------------
 
 
 #include "ofMain.h"
-
 
 //--
 
@@ -95,16 +94,13 @@
 #include "ofxUndoSimple.h"
 #endif
 
-//--
-
 //optional to debug not located files or others
 #ifdef INCLUDE_DEBUG_ERRORS
 #include "ofxDEBUG_errors.h"
 #endif
 
 #include "ofxSurfingHelpers.h"
-
-//--
+//#include "ofxFilikaUtils.h"
 
 //optional to debug performance or delay when loading files or presets on hd or memory modes
 #ifdef INCLUDE_PERFORMANCE_MEASURES
@@ -128,7 +124,7 @@
 //#define NUM_OF_PRESETS 8//delete this
 
 //only one it's implemented! can't add more than one parameter group!
-#define NUM_MAX_GUIS 1
+#define NUM_MAX_GROUPS 1
 
 //---
 
@@ -144,6 +140,9 @@ private:
 	void undoStoreParams();
 #endif
 
+	//TODO:
+	//bool bStartupForcePopulate = false;
+	
 	//--
 
 private:
@@ -155,45 +154,30 @@ private:
 	//-
 
 	//settings paths
-	std::string groupName;//get from ofParameterGroup name
-	//TODO:
-	//std::string groupName2;//get from ofParameterGroup name
 
 	//all folder names must go without '/'
-	std::string path_GLOBAL_Folder;//top parent folder for all other subfolders
-	std::string path_Kit_Folder;//path for kit of favorite presets. live kit
-	std::string path_PresetsFolder;//path for browse other presets. archive kit
-
-	std::string path_Control;//path for app state session settings
+	std::string path_GLOBAL_Folder;//User-Kit folder for both other subfolders
+	std::string path_PresetsFavourites;//path for kit of favourite presets. live kit
+	std::string path_PresetsStandalone;//path for browse other presets. archive kit
+	std::string path_ControlSettings;//path for app state session settings
 	std::string path_Root;
-	std::string nameUserKit;
 
 	std::string filename_ControlSettings;
 	std::string filename_Randomizers;//path for randomizers settings
-
-	//ofParameter<std::string> path_PresetsFolder_Custom;//path for browse other presets. archive kit
-	//ofParameter<bool> bUseCustomPath{ "bUseCustomPath", false };
-	std::string path_Prefix;//to add to file names
-
-	//TODO:
-	//must store settings
-	//customize browser path-free (out of global path)
-	bool bCustomBrowserPath = false;
-	std::string path_BrowserPathFree = "";
-
+	std::string filenamesPresetsPrefix;//to add to file names to split names with index
+	std::string nameUserKit;
 	std::string browser_PresetName;
 
+	std::string groupName;//get from ofParameterGroup name
+	//TODO:
+	//std::string groupName2;//get from ofParameterGroup name
 	std::string gui_LabelName = "NO_NAME";//default gui panel name
 
 	//-
 
 private:
-
 	//app settings
-
-	//this loads selected preset, autosave/autoload...gui states
 	void load_ControlSettings();
-	//public://TEST crash?
 	void save_ControlSettings();
 
 	//-
@@ -229,10 +213,10 @@ private:
 	ofParameter<bool> MODE_DicesProbs;
 	ofParameter<bool> MODE_LatchTrig;//this mode trigs the preset but goes back to preset 0 after duration timer
 	ofParameter<bool> MODE_AvoidRandomRepeat;//this mode re makes randomize again if new index preset it's the same!
-	bool bLatchRun = false;
 	ofParameter<bool> bResetDices;
 	ofParameter<int> randomizedDice;//to test
 	//ofParameter<string> _totalDicesStr;
+	bool bLatchRun = false;
 
 public:
 	void setModeRandomizeAvoidRepeat(bool b) {
@@ -242,6 +226,7 @@ public:
 	ofParameter<int> randomizeDuration;
 	ofParameter<int> randomizeDurationShort;
 	ofParameter<float> randomizeDurationBpm;
+
 private:
 	int randomizeSpeed;//real time dureation
 	uint32_t randomizerTimer;
@@ -258,16 +243,17 @@ private:
 
 	int timerRandomizer;
 #endif
+
 public:
 	ofParameter<bool> bRandomizeEditor;
-private:
-	ofParameter<bool> bRandomizeEditorAll;
-	ofParameter<bool> bRandomizeEditorNone;
-	ofParameter<bool> bRandomizeEditorPopulateFavs;
 
-	//TODO:
+private:
+	ofParameter<bool> bRandomizeEditorAll;//put all toggles/params to true. a randomize will act over all params
+	ofParameter<bool> bRandomizeEditorNone;//put to disabled all toggles
+	ofParameter<bool> bRandomizeEditorPopulateFavs;//create all presets
+
 	//system to select what params of current selected preset to: clone, randomize etc
-	void setupEditor();
+	void setupRandomizerEditor();
 	vector<ofParameter<bool>> editorPresets;
 	ofParameterGroup params_Editor;
 	ofParameterGroup params_Editor_Toggles;
@@ -281,9 +267,9 @@ private:
 	//void addGroup_TARGET(ofParameterGroup &g);	
 	//vector<ofParameterGroup> groupsMem;
 
-	//data
 private:
 	//TODO:
+	//data
 	//should use keys[i].size() instead of this:
 	vector<ofXml> presetsXmlArray;
 	//ofXml presetsXmlArray[NUM_OF_PRESETS];//fixed lenght mode..
@@ -480,6 +466,7 @@ public:
 	//--
 
 	//randomizer helpers
+
 public:
 	//--------------------------------------------------------------
 	void setPlayRandomizerTimer(bool b)//play randomizer timer
@@ -520,12 +507,10 @@ public:
 	void doRandomizePresetSelected() {//randomize params of current selected preset
 		doRandomizeEditor();
 	}
-	////--------------------------------------------------------------
-	//void populateFavs()//create 
-	//{
-	//	doPopulateFavs();
-	//}
 
+	//--
+
+	//helper tools
 	void doCloneRight(int pIndex);//clone from selected preset to all others to the right
 	void doCloneAll();//clone all presets from the current selected
 	void doPopulateFavs();//fast populate random presets around all favs
@@ -538,6 +523,7 @@ private:
 
 	//--
 
+	//easy callback
 	//used when preset has not changed but we like to retrig
 	bool bMustTrig = false;
 public:
@@ -557,7 +543,7 @@ public:
 
 	//--
 
-	//browser
+	//browser for standalone presets
 private:
 #ifdef INCLUDE_GUI_IM_GUI
 	//load presets from preset folder, not from favorites presets folders
@@ -566,6 +552,9 @@ private:
 	bool browser_FilesRefresh();
 	void browser_Setup();
 	float _w;
+	
+	void doCheckPresetsFolderIsEmpty();
+
 #endif
 
 	//-
@@ -613,7 +602,6 @@ public:
 	{
 		debugClicker = b;
 	}
-
 #ifdef INCLUDE_GUI_IM_GUI
 	//--------------------------------------------------------------
 	void setPosition_GUI_ImGui(int x, int y)
@@ -636,7 +624,6 @@ public:
 		return SHOW_ImGui;
 	}
 #endif
-
 #ifndef INCLUDE_GUI_IM_GUI
 	//--------------------------------------------------------------
 	void setPosition_GUI_InternalControl(int x, int y)
@@ -645,7 +632,6 @@ public:
 		gui_InternalControl.setPosition(guiPos_InternalControl.x, guiPos_InternalControl.y);
 	}
 #endif
-
 	//--------------------------------------------------------------
 	void setVisible_GUI_Internal(bool visible)
 	{
@@ -661,7 +647,6 @@ public:
 	{
 		SHOW_Gui_AdvancedControl = !SHOW_Gui_AdvancedControl;
 	}
-
 	//--------------------------------------------------------------
 	void setPosition_PresetClicker(int x, int y, int _cellSize)
 	{
@@ -696,12 +681,12 @@ public:
 
 	//--------------------------------------------------------------
 	void setPath_GlobalFolder(string folder);//path for root container folder. must be called before setup()!
-	void setPath_KitFolder(string folder);//path folder for favorite/live presets
-	void setPath_PresetsFolder(string folder);//path folder for kit for the browser
+	void setPath_PresetsFavourites(string folder);//path folder for favorite/live presets
+	void setPath_PresetsStandalone(string folder);//path folder for kit for the browser
 	void setPath_ControlSettings(string str)//for the session states settings
 	{
 		ofLogNotice(__FUNCTION__) << str;
-		path_Control = str;
+		path_ControlSettings = str;
 	}
 	void setPath_Root(string str)
 	{
@@ -752,9 +737,9 @@ public:
 			doSave(PRESET_selected);
 	}
 	
-	//-
+	//--
 
-	//engine
+	//core engine
 private:
 
 	//save to a preset
@@ -785,13 +770,15 @@ private:
 
 	//ImGui pure content
 public:
-	void ImGui_Draw_Content(ofxImGui::Settings &settings);
+	void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
 	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
 	void ImGui_Draw_Randomizers(ofxImGui::Settings &settings);
 	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
 
+	//set custom path
 	void doFileDialogProcessSelection(ofFileDialogResult openFileResult);
+	void doLoadUserKit();
 
 	//--
 
@@ -878,10 +865,9 @@ public:
 
 		//browser path
 		string browser_path;
-		browser_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;
+		browser_path = path_GLOBAL_Folder + "/" + path_PresetsStandalone;
 
 		//browser number of files
-
 		//iterate all presets
 		for (int i = 0; i < numPresetsFavorites; i++)
 		{
@@ -1002,25 +988,20 @@ public:
 private:
 	ofParameter<bool> bSave;
 	//ofParameter<bool> bLoad;
-
 	ofParameter<bool> autoSave;
 	ofParameter<bool> autoLoad;
-
 	ofParameter<bool> bCloneRight;
 	ofParameter<bool> bCloneAll;
-
 	//internal groups
-	ofParameterGroup params_Favorites;
+	ofParameterGroup params_Favourites;
 	ofParameterGroup params_Gui;
 	ofParameterGroup params_Options;
-	ofParameterGroup params_Tools;
+	ofParameterGroup params_HelperTools;
 	ofParameterGroup params_Randomizer;
 	ofParameterGroup params_Custom;
-
 	ofParameter<glm::vec2> Gui_Internal_Position;
 	ofParameter<bool> ENABLE_Keys;
 	
-	//TODO:
 	//custom path
 	ofParameter<bool> bPathDirCustom;
 	ofParameter<string> pathDirCustom;
@@ -1057,16 +1038,18 @@ private:
 	//--------------------------------------------------------------
 	void CheckAllFolder()//check that folders exist and create them if not
 	{
-		CheckFolder(path_Root);
-		CheckFolder(path_GLOBAL_Folder);
+		//CheckFolder(path_Root);//TODO: use a container for all User-Kit together...
+
 		string _path;
-		_path = path_GLOBAL_Folder + "/" + path_PresetsFolder;//current kit-presets presets folder
+		_path = path_GLOBAL_Folder;//current kit-preset main folder
 		CheckFolder(_path);
-		_path = path_GLOBAL_Folder + "/" + path_Kit_Folder;//current kit-presets standalone presets folder
+		_path = path_GLOBAL_Folder + "/" + path_PresetsStandalone;//current kit-presets presets folder
 		CheckFolder(_path);
-		_path = path_GLOBAL_Folder + "/" + path_Control;//for randomizer settings (into his own kit-preset folder)
+		_path = path_GLOBAL_Folder + "/" + path_PresetsFavourites;//current kit-presets standalone presets folder
 		CheckFolder(_path);
-		_path = path_Control;//app settings (shared from all kit-presets)
+		_path = path_GLOBAL_Folder + "/" + path_ControlSettings;//for randomizer settings (into his own kit-preset folder)
+		CheckFolder(_path);
+		_path = path_ControlSettings;//app settings (shared from all kit-presets)
 		CheckFolder(_path);
 	}
 
