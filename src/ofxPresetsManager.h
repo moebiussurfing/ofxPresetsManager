@@ -41,7 +41,7 @@
 //	BUG:	
 //
 //	?		repair play randomizer
-//	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager" ?
+//	?		there's a problem when CheckFolder or setPath_UserKit_Folder are something like "myApp/ofxPresetsManager" ?
 //
 //---
 
@@ -142,7 +142,7 @@ private:
 
 	//TODO:
 	//bool bStartupForcePopulate = false;
-	
+
 	//--
 
 private:
@@ -156,7 +156,7 @@ private:
 	//settings paths
 
 	//all folder names must go without '/'
-	std::string path_GLOBAL_Folder;//User-Kit folder for both other subfolders
+	std::string path_UserKit_Folder;//User-Kit folder for both other subfolders
 	std::string path_PresetsFavourites;//path for kit of favourite presets. live kit
 	std::string path_PresetsStandalone;//path for browse other presets. archive kit
 	std::string path_ControlSettings;//path for app state session settings
@@ -205,7 +205,7 @@ public:
 
 	//randomizer
 #ifdef INCLUDE_RANDOMIZER//now cant' be disabled
-	ofParameterGroup params_RandomizerSettings{"Randomizers"};
+	ofParameterGroup params_RandomizerSettings{ "Randomizers" };
 public:
 	ofParameter<bool> PLAY_RandomizeTimer;//play randomizer
 	ofParameter<bool> bRandomizeIndex;
@@ -231,7 +231,7 @@ private:
 	int randomizeSpeed;//real time dureation
 	uint32_t randomizerTimer;
 	int randomize_MAX_DURATION = 6000;
-	int randomize_MAX_DURATION_SHORT = 6000/2.;
+	int randomize_MAX_DURATION_SHORT = 6000 / 2.;
 	vector<ofParameter<int>> presetsRandomFactor;//probability of every preset
 	vector<ofParameter<bool>> presetsRandomModeShort;//mode short for ebvery preset
 	vector<int> randomFactorsDices;
@@ -419,9 +419,9 @@ public:
 	void load_Next()
 	{
 		PRESET_selected++;
-		if (PRESET_selected >= numPresetsFavorites-1)
+		if (PRESET_selected >= numPresetsFavorites - 1)
 		{
-			PRESET_selected = numPresetsFavorites-1;
+			PRESET_selected = numPresetsFavorites - 1;
 		}
 	}
 
@@ -552,7 +552,7 @@ private:
 	bool browser_FilesRefresh();
 	void browser_Setup();
 	float _w;
-	
+
 	void doCheckPresetsFolderIsEmpty();
 
 #endif
@@ -680,7 +680,7 @@ public:
 #pragma mark - SETTINGS
 
 	//--------------------------------------------------------------
-	void setPath_GlobalFolder(string folder);//path for root container folder. must be called before setup()!
+	void setPath_UserKit_Folder(string folder);//path for root container folder. must be called before setup()!
 	void setPath_PresetsFavourites(string folder);//path folder for favorite/live presets
 	void setPath_PresetsStandalone(string folder);//path folder for kit for the browser
 	void setPath_ControlSettings(string str)//for the session states settings
@@ -733,10 +733,10 @@ public:
 
 public:
 	void saveCurrentPreset() {
-			ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_selected.get();
-			doSave(PRESET_selected);
+		ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_selected.get();
+		doSave(PRESET_selected);
 	}
-	
+
 	//--
 
 	//core engine
@@ -865,7 +865,7 @@ public:
 
 		//browser path
 		string browser_path;
-		browser_path = path_GLOBAL_Folder + "/" + path_PresetsStandalone;
+		browser_path = path_UserKit_Folder + "/" + path_PresetsStandalone;
 
 		//browser number of files
 		//iterate all presets
@@ -1001,7 +1001,7 @@ private:
 	ofParameterGroup params_Custom;
 	ofParameter<glm::vec2> Gui_Internal_Position;
 	ofParameter<bool> ENABLE_Keys;
-	
+
 	//custom path
 	ofParameter<bool> bPathDirCustom;
 	ofParameter<string> pathDirCustom;
@@ -1041,14 +1041,15 @@ private:
 		//CheckFolder(path_Root);//TODO: use a container for all User-Kit together...
 
 		string _path;
-		_path = path_GLOBAL_Folder;//current kit-preset main folder
+		_path = path_UserKit_Folder;//current kit-preset main folder
 		CheckFolder(_path);
-		_path = path_GLOBAL_Folder + "/" + path_PresetsStandalone;//current kit-presets presets folder
+		_path = path_UserKit_Folder + "/" + path_PresetsStandalone;//current kit-presets presets folder
 		CheckFolder(_path);
-		_path = path_GLOBAL_Folder + "/" + path_PresetsFavourites;//current kit-presets standalone presets folder
+		_path = path_UserKit_Folder + "/" + path_PresetsFavourites;//current kit-presets standalone presets folder
 		CheckFolder(_path);
-		_path = path_GLOBAL_Folder + "/" + path_ControlSettings;//for randomizer settings (into his own kit-preset folder)
-		CheckFolder(_path);
+		//_path = path_UserKit_Folder;//for randomizer settings (into his own kit-preset folder)
+		//_path = path_UserKit_Folder + "/" + path_ControlSettings;//for randomizer settings (into his own kit-preset folder)
+		//CheckFolder(_path);
 		_path = path_ControlSettings;//app settings (shared from all kit-presets)
 		CheckFolder(_path);
 	}
