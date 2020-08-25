@@ -650,7 +650,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//root
 
 	//default User-Kit folder
-	path_GLOBAL_Folder = "ofxPresetsManager";
+	path_UserKit_Folder = "ofxPresetsManager";
 
 	//default kit folder for live/favorites presets
 	path_PresetsFavourites = "presets";
@@ -862,7 +862,7 @@ void ofxPresetsManager::setup()
 	//must check this font file is found there
 	ofFile file(pathFont);
 	if (file.exists()) ofxGuiSetFont(pathFont, 9);
-	else 
+	else
 	{
 #ifdef INCLUDE_DEBUG_ERRORS
 		errorsDEBUG.addError(gui_LabelName + " " + ofToString(__FUNCTION__), "ofxGui font", pathFont);
@@ -908,7 +908,7 @@ void ofxPresetsManager::setup()
 
 	//custom path:
 	bPathDirCustom.set("MODE CUSTOM PATH", false);
-	pathDirCustom.set("Path", path_GLOBAL_Folder);
+	pathDirCustom.set("Path", path_UserKit_Folder);
 
 	//randomizer settings
 	params_RandomizerSettings.add(params_Randomizer);
@@ -975,9 +975,9 @@ void ofxPresetsManager::startup()
 	//--
 
 	//reduce to name only
-	string str = path_GLOBAL_Folder;
+	string str = path_UserKit_Folder;
 	std::string temp = R"(\)";//use '\' as splitter...should use '/' too bc Windows/macOS compatibility..
-	auto ss = ofSplitString(path_GLOBAL_Folder, temp);
+	auto ss = ofSplitString(path_UserKit_Folder, temp);
 	nameUserKit = ss[ss.size() - 1];
 
 	//-
@@ -1171,8 +1171,8 @@ void ofxPresetsManager::update(ofEventArgs & args)
 			//auto save timer
 			timerLast_Autosave = ofGetElapsedTimeMillis();
 		}
-		}
 	}
+}
 
 //---------------------------------------------------------------------
 void ofxPresetsManager::draw(ofEventArgs & args)
@@ -1534,7 +1534,7 @@ string ofxPresetsManager::getPresetName(string gName, int presetIndex)
 	string strFile;
 	string strPath;
 
-	strFolder = path_GLOBAL_Folder + "/" + path_PresetsFavourites + "/";
+	strFolder = path_UserKit_Folder + "/" + path_PresetsFavourites + "/";
 	strFile = groupName + filenamesPresetsPrefix + ofToString(presetIndex) + ".xml";
 	strPath = strFolder + strFile;
 
@@ -1585,8 +1585,10 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 	//temporary name only to debug purposes
 	//final label name to gui display will be setted if setup("name") is called 
 	gui_LabelName = groups[0].getName();
-	//TODO: 
-	//one group only
+
+	//root path for addon settings
+	path_Root = path_UserKit_Folder + "/" + groupName;
+	//path_Root = groupName;
 
 	//-
 
@@ -1667,7 +1669,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 	}
 	else
 	{
-		ofLogError(__FUNCTION__) << "OUT OF RANGE SAVE";
+		ofLogError(__FUNCTION__) << "OUT OF RANGE SAVE" << " presetIndex: " << ofToString(presetIndex) << " guiIndex: " << ofToString(guiIndex);
 	}
 }
 
@@ -1722,7 +1724,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 	}
 	else
 	{
-		ofLogError(__FUNCTION__) << "OUT OF RANGE SAVE";
+		ofLogError(__FUNCTION__) << "OUT OF RANGE SAVE" << " presetIndex: " << ofToString(presetIndex) << " guiIndex: " << ofToString(guiIndex);
 	}
 
 }
@@ -1777,7 +1779,9 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	}
 	else
 	{
-		ofLogError(__FUNCTION__) << "OUT OF RANGE LOAD";
+
+		ofLogError(__FUNCTION__) << "OUT OF RANGE LOAD" << " presetIndex: " << ofToString(presetIndex) << " guiIndex: " << ofToString(guiIndex);
+
 	}
 }
 
@@ -1829,8 +1833,8 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 		bIsDoneLoad = true;
 	}
 	else
-	{
-		ofLogError(__FUNCTION__) << "OUT OF RANGE LOAD";
+	{	
+		ofLogError(__FUNCTION__) << "OUT OF RANGE LOAD" << " presetIndex: " << ofToString(presetIndex) << " guiIndex: " << ofToString(guiIndex);
 	}
 }
 
@@ -2656,7 +2660,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 					ofLogError(__FUNCTION__) << "lastIndices has 0 size!";
 				}
 			}
-	}
+		}
 
 		//--
 
@@ -2685,7 +2689,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//{
 		//	ofLogError(__FUNCTION__) << "IGNORED PRESETS CHANGE";
 		//}
-}
+	}
 }
 
 #pragma mark - SETTINGS
@@ -2709,7 +2713,7 @@ void ofxPresetsManager::load_ControlSettings()
 	//-
 
 	//load randomizers settings
-	string path2 = path_GLOBAL_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
+	string path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
 	bool b2 = ofxSurfingHelpers::loadGroup(params_RandomizerSettings, path2);
 	ofLogNotice(__FUNCTION__) << "Loaded " << path2 << " " << (b2 ? "DONE" : "FAILED");
 	if (!b2)
@@ -2773,7 +2777,7 @@ void ofxPresetsManager::save_ControlSettings()
 		////crashes here!
 		//ofSerialize(settingsControl, params_Control);
 		//string path = path_ControlSettings + "/" + filename_ControlSettings;
-		////string path = path_GLOBAL_Folder + "/" + path_ControlSettings + "/" + filename_ControlSettings;
+		////string path = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_ControlSettings;
 		//ofLogNotice(__FUNCTION__) << path;
 		////TODO: 
 		////crashes here!
@@ -2783,7 +2787,7 @@ void ofxPresetsManager::save_ControlSettings()
 		//-
 
 		//save randomizers settings
-		string path2 = path_GLOBAL_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
+		string path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
 		bool b2 = ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path2);
 		ofLogNotice(__FUNCTION__) << "Saved " << path2 << " " << (b2 ? "DONE" : "FAILED");
 	}
@@ -2799,7 +2803,7 @@ void ofxPresetsManager::save_ControlSettings()
 #else
 	ofLogNotice(__FUNCTION__) << "[DEBUG] BLOCKED save_ControlSettings()";
 #endif
-	}
+}
 
 //--
 
@@ -2807,7 +2811,7 @@ void ofxPresetsManager::save_ControlSettings()
 void ofxPresetsManager::setPath_GlobalFolder(string folder)
 {
 	ofLogNotice(__FUNCTION__) << folder;
-	path_GLOBAL_Folder = folder;
+	path_UserKit_Folder = folder;
 	CheckFolder(folder);
 }
 
@@ -2816,7 +2820,7 @@ void ofxPresetsManager::setPath_PresetsFavourites(string folder)
 {
 	ofLogNotice(__FUNCTION__) << folder;
 	path_PresetsFavourites = folder;
-	CheckFolder(path_GLOBAL_Folder + "/" + path_PresetsFavourites);
+	CheckFolder(path_UserKit_Folder + "/" + path_PresetsFavourites);
 }
 
 //--------------------------------------------------------------
@@ -2824,7 +2828,7 @@ void ofxPresetsManager::setPath_PresetsStandalone(string folder)
 {
 	ofLogNotice(__FUNCTION__) << folder;
 	path_PresetsStandalone = folder;
-	CheckFolder(path_GLOBAL_Folder + "/" + path_PresetsStandalone);
+	CheckFolder(path_UserKit_Folder + "/" + path_PresetsStandalone);
 }
 
 //--
@@ -2842,7 +2846,7 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 		string strFile;
 		string strPath;
 
-		strFolder = path_GLOBAL_Folder + "/" + path_PresetsFavourites + "/";
+		strFolder = path_UserKit_Folder + "/" + path_PresetsFavourites + "/";
 		strFile = groupName + filenamesPresetsPrefix + ofToString(i) + ".xml";
 		strPath = strFolder + strFile;
 
@@ -2893,7 +2897,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 		string pathFolder;
 		string pathFilename;
 		string pathComplete;
-		pathFolder = path_GLOBAL_Folder + "/" + path_PresetsFavourites + "/";
+		pathFolder = path_UserKit_Folder + "/" + path_PresetsFavourites + "/";
 		pathFilename = groupName + filenamesPresetsPrefix + ofToString(i) + ".xml";
 		pathComplete = pathFolder + pathFilename;
 
@@ -3194,7 +3198,7 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 #else
 	gui_ImGui.end();
 #endif
-	}
+}
 
 //--------------------------------------------------------------
 bool ofxPresetsManager::ImGui_Draw_Window()
@@ -3431,7 +3435,7 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::doLoadUserKit(){
+void ofxPresetsManager::doLoadUserKit() {
 
 	//-
 
@@ -3440,9 +3444,9 @@ void ofxPresetsManager::doLoadUserKit(){
 	//-
 
 	//reduce to name only
-	string str = path_GLOBAL_Folder;
+	string str = path_UserKit_Folder;
 	std::string temp = R"(\)";//use '\' as splitter...should use '/' too bc Windows/macOS compatibility..
-	auto ss = ofSplitString(path_GLOBAL_Folder, temp);
+	auto ss = ofSplitString(path_UserKit_Folder, temp);
 	nameUserKit = ss[ss.size() - 1];//get last word and use as name
 
 	//-
@@ -3458,7 +3462,7 @@ void ofxPresetsManager::doLoadUserKit(){
 	//load randomizers settings
 	string path2;
 	bool b2;
-	path2 = path_GLOBAL_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
+	path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
 	b2 = ofxSurfingHelpers::loadGroup(params_RandomizerSettings, path2);
 	ofLogNotice(__FUNCTION__) << "Loaded " << path2 << " " << (b2 ? "DONE" : "FAILED");
 }
@@ -3477,7 +3481,7 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 	//save randomizers settings
 	string path2;
 	bool b2;
-	path2 = path_GLOBAL_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
+	path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
 	b2 = ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path2);
 	ofLogNotice(__FUNCTION__) << "Saved " << path2 << " " << (b2 ? "DONE" : "FAILED");
 
@@ -3502,7 +3506,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 				//button to Open File Dialog as folder
 				if (ImGui::Button("Select folder")) {
 
-					ofFileDialogResult openFileResult = ofSystemLoadDialog("Select User-Kit folder", true, ofToDataPath(path_GLOBAL_Folder, true));
+					ofFileDialogResult openFileResult = ofSystemLoadDialog("Select User-Kit folder", true, ofToDataPath(path_UserKit_Folder, true));
 
 					//Check if the user opened a file
 					if (openFileResult.bSuccess) {
@@ -3562,7 +3566,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 			//label for User-Kit folder
 			string str = "";
 			//if (!bPathDirCustom) str += "bin/data/";
-			str += path_GLOBAL_Folder;// +"/" + path_PresetsStandalone;
+			str += path_UserKit_Folder;// +"/" + path_PresetsStandalone;
 			ImGui::Text(str.c_str());
 
 			//-
@@ -3576,7 +3580,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 				ImGui::PushID(1);
 				ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
 				ImGui::Text("DIR OR FILES NOT FOUND!");
-				string browser_path = path_GLOBAL_Folder + "/" + path_PresetsStandalone;
+				string browser_path = path_UserKit_Folder + "/" + path_PresetsStandalone;
 				const char *array = browser_path.c_str();
 				ImGui::Text(array);
 				ImGui::PopStyleColor(1);
@@ -3761,7 +3765,7 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 			ImGui::SameLine();
 			if (ImGui::Button("CLEAR"))//delete all files
 			{
-				ofLogNotice(__FUNCTION__) << "CLEAR Presets folder: " << path_GLOBAL_Folder + "/" + path_PresetsStandalone;
+				ofLogNotice(__FUNCTION__) << "CLEAR Presets folder: " << path_UserKit_Folder + "/" + path_PresetsStandalone;
 
 				for (int i = 0; i < files.size(); i++) {
 					ofLogWarning(__FUNCTION__) << "DELETE file: " << files[i].getAbsolutePath();
@@ -4022,7 +4026,7 @@ void ofxPresetsManager::browser_PresetSave(string name)//without xml extension n
 	ofLogNotice(__FUNCTION__) << name << ".xml";
 
 	string _path;
-	_path = path_GLOBAL_Folder + "/" + path_PresetsStandalone + "/" + name + ".xml";
+	_path = path_UserKit_Folder + "/" + path_PresetsStandalone + "/" + name + ".xml";
 	bool b = ofxSurfingHelpers::saveGroup(groups[0], _path);
 	if (!b)
 	{
@@ -4042,7 +4046,7 @@ void ofxPresetsManager::browser_PresetLoad(string name)//without xml extension n
 	ofLogNotice(__FUNCTION__) << name << ".xml";
 
 	string _path;
-	_path = path_GLOBAL_Folder + "/" + path_PresetsStandalone + "/" + name + ".xml";
+	_path = path_UserKit_Folder + "/" + path_PresetsStandalone + "/" + name + ".xml";
 	bool b = ofxSurfingHelpers::loadGroup(groups[0], _path);
 	if (!b)
 	{
@@ -4058,7 +4062,7 @@ void ofxPresetsManager::browser_PresetLoad(string name)//without xml extension n
 
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_Setup()
-{	
+{
 	//load files structure directory
 	bool bLoaded = browser_FilesRefresh();
 
@@ -4078,7 +4082,7 @@ void ofxPresetsManager::browser_Setup()
 //--------------------------------------------------------------
 void ofxPresetsManager::doCheckPresetsFolderIsEmpty()
 {
-	string _path = path_GLOBAL_Folder + "/" + path_PresetsFavourites;
+	string _path = path_UserKit_Folder + "/" + path_PresetsFavourites;
 	ofLogNotice(__FUNCTION__) << "Check that not empty folder at path: " << _path;
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
 
@@ -4107,7 +4111,7 @@ bool ofxPresetsManager::browser_FilesRefresh()
 {
 	//ofLogNotice(__FUNCTION__);
 
-	string _path = path_GLOBAL_Folder + "/" + path_PresetsStandalone;
+	string _path = path_UserKit_Folder + "/" + path_PresetsStandalone;
 	CheckFolder(_path);
 
 	ofLogNotice(__FUNCTION__) << "Path: " << _path;

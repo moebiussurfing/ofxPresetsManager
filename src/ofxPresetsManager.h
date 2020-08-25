@@ -156,7 +156,7 @@ private:
 	//settings paths
 
 	//all folder names must go without '/'
-	std::string path_GLOBAL_Folder;//User-Kit folder for both other subfolders
+	std::string path_UserKit_Folder;//User-Kit folder for both other subfolders. 
 	std::string path_PresetsFavourites;//path for kit of favourite presets. live kit
 	std::string path_PresetsStandalone;//path for browse other presets. archive kit
 	std::string path_ControlSettings;//path for app state session settings
@@ -865,7 +865,7 @@ public:
 
 		//browser path
 		string browser_path;
-		browser_path = path_GLOBAL_Folder + "/" + path_PresetsStandalone;
+		browser_path = path_UserKit_Folder + "/" + path_PresetsStandalone;
 
 		//browser number of files
 		//iterate all presets
@@ -1041,13 +1041,13 @@ private:
 		//CheckFolder(path_Root);//TODO: use a container for all User-Kit together...
 
 		string _path;
-		_path = path_GLOBAL_Folder;//current kit-preset main folder
+		_path = path_UserKit_Folder;//current kit-preset main folder
 		CheckFolder(_path);
-		_path = path_GLOBAL_Folder + "/" + path_PresetsStandalone;//current kit-presets presets folder
+		_path = path_UserKit_Folder + "/" + path_PresetsStandalone;//current kit-presets presets folder
 		CheckFolder(_path);
-		_path = path_GLOBAL_Folder + "/" + path_PresetsFavourites;//current kit-presets standalone presets folder
+		_path = path_UserKit_Folder + "/" + path_PresetsFavourites;//current kit-presets standalone presets folder
 		CheckFolder(_path);
-		_path = path_GLOBAL_Folder + "/" + path_ControlSettings;//for randomizer settings (into his own kit-preset folder)
+		_path = path_UserKit_Folder + "/" + path_ControlSettings;//for randomizer settings (into his own kit-preset folder)
 		CheckFolder(_path);
 		_path = path_ControlSettings;//app settings (shared from all kit-presets)
 		CheckFolder(_path);
