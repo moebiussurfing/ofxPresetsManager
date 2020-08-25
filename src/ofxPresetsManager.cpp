@@ -4192,10 +4192,10 @@ bool ofxPresetsManager::browser_FilesRefresh()
 //--------------------------------------------------------------
 void ofxPresetsManager::undoStoreParams() {
 	//ofLogNotice(__FUNCTION__);
-	xmlParams.clear();
+	undoXmlParams.clear();
 	ofParameterGroup _group = groups[0];
-	ofSerialize(xmlParams, _group);// fill the xml with the ofParameterGroup
-	undoStringParams = (xmlParams.toString());// fill the ofxUndoSimple with the xml as string
+	ofSerialize(undoXmlParams, _group);// fill the xml with the ofParameterGroup
+	undoStringParams = (undoXmlParams.toString());// fill the ofxUndoSimple with the xml as string
 	undoStringParams.store();
 
 	string str = "";
@@ -4210,10 +4210,10 @@ void ofxPresetsManager::undoStoreParams() {
 //--------------------------------------------------------------
 void ofxPresetsManager::undoRefreshParams() {
 	//ofLogNotice(__FUNCTION__);
-	xmlParams.clear();
-	xmlParams.parse(undoStringParams);// fill the xml with the string 
+	undoXmlParams.clear();
+	undoXmlParams.parse(undoStringParams);// fill the xml with the string 
 	ofParameterGroup _group = groups[0];
-	ofDeserialize(xmlParams, _group);// load the ofParameterGroup
+	ofDeserialize(undoXmlParams, _group);// load the ofParameterGroup
 
 	string str = "";
 	str += "UNDO HISTORY: " + ofToString(undoStringParams.getUndoLength()) + "/";

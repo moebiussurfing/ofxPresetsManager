@@ -135,7 +135,7 @@ class ofxPresetsManager : public ofBaseApp//TODO: remove ofBaseApp? it's for aut
 private:
 #ifdef INCLUDE_ofxUndoSimple
 	ofxUndoSimple<std::string> undoStringParams;
-	ofXml xmlParams;
+	ofXml undoXmlParams;
 	void undoRefreshParams();
 	void undoStoreParams();
 #endif
