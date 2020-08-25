@@ -100,7 +100,6 @@
 #endif
 
 #include "ofxSurfingHelpers.h"
-//#include "ofxFilikaUtils.h"
 
 //optional to debug performance or delay when loading files or presets on hd or memory modes
 #ifdef INCLUDE_PERFORMANCE_MEASURES
@@ -112,16 +111,11 @@
 #define TSGL_STOP
 #endif
 
-//--
-
 //-------------------------------
 
 #pragma mark - DEFINE_DATA_TYPES
 
 //-
-
-//TODO
-//#define NUM_OF_PRESETS 8//delete this
 
 //only one it's implemented! can't add more than one parameter group!
 #define NUM_MAX_GROUPS 1
@@ -140,9 +134,6 @@ private:
 	void undoStoreParams();
 #endif
 
-	//TODO:
-	//bool bStartupForcePopulate = false;
-	
 	//--
 
 private:
@@ -191,11 +182,11 @@ private:
 
 	//improve performance loading from memory nor xml files
 private:
+	ofParameter<bool> MODE_MemoryLive;//when enabled all presets are handled from a memory vector to avoid lag of loading xml files
 	ofParameter<bool> loadToMemory;
 	ofParameter<bool> saveFromMemory;
 	void load_AllKit_ToMemory();
 	void save_AllKit_FromMemory();
-	ofParameter<bool> MODE_MemoryLive;//when enabled all presets are handled from a memory vector to avoid lag of loading xml files
 public:
 	void setModeMemoryPerformance(bool b) {
 		MODE_MemoryLive = b;
@@ -215,7 +206,6 @@ private:
 	ofParameter<bool> MODE_AvoidRandomRepeat;//this mode re makes randomize again if new index preset it's the same!
 	ofParameter<bool> bResetDices;
 	ofParameter<int> randomizedDice;//to test
-	//ofParameter<string> _totalDicesStr;
 	bool bLatchRun = false;
 
 public:
@@ -246,7 +236,6 @@ private:
 
 public:
 	ofParameter<bool> bRandomizeEditor;
-
 private:
 	ofParameter<bool> bRandomizeEditorAll;//put all toggles/params to true. a randomize will act over all params
 	ofParameter<bool> bRandomizeEditorNone;//put to disabled all toggles
@@ -262,17 +251,10 @@ private:
 	void doRandomizeEditor();//randomize params of current selected preset
 	void doRandomizeEditorGroup(ofParameterGroup& group);//randomize params of current selected preset
 
-	////TODO:
-	//ofParameterGroup group_TARGET;
-	//void addGroup_TARGET(ofParameterGroup &g);	
-	//vector<ofParameterGroup> groupsMem;
-
 private:
 	//TODO:
-	//data
 	//should use keys[i].size() instead of this:
 	vector<ofXml> presetsXmlArray;
-	//ofXml presetsXmlArray[NUM_OF_PRESETS];//fixed lenght mode..
 
 	//--
 
@@ -316,12 +298,12 @@ public:
 private:
 	//TODO:
 	//BUG:
-	//not working
+	//not working. must use below add method
 	void add(ofParameterGroup params, int numPresets = 8);//add a param group for preset saving and how many presets on favs
-
 public:
-
 	void add(ofParameterGroup params, initializer_list<int> keysList);//adds and define keys to trig presets too
+
+	//-
 
 	void setup();//must be called after params group has been added!
 	void setup(std::string name);//optional to set gui panel name header label
@@ -329,7 +311,7 @@ public:
 
 	//-
 
-	//easy callback to get from ofApp if required
+	//callback to get when saved/loaded done from ofApp if desired
 public:
 	ofParameter<bool> DONE_load;//easy callback to know (in ofApp) that preset LOAD is done 
 	ofParameter<bool> DONE_save;//easy callback to know (in ofApp) that preset SAVE is done
@@ -385,6 +367,7 @@ public:
 
 	//-
 
+	//--------------------------------------------------------------
 	void setModeKeySave(int key);//set the key you have to hold for saving, default is OF_KEY_CONTROL
 	void setModeKeySwap(int key);//set the key you have to hold for swap, default is OF_KEY_ALT
 
@@ -551,22 +534,13 @@ private:
 	void browser_PresetSave(string name);
 	bool browser_FilesRefresh();
 	void browser_Setup();
-	float _w;
-	
+	//float _w;
 	void doCheckPresetsFolderIsEmpty();
-
 #endif
 
 	//-
 
-#pragma mark - GUI
-
-	//-
-
 public:
-
-	//-
-
 	//expose basic controls to allow use on external gui
 	ofParameterGroup params_Controls{ "Presets Manager" };
 	ofParameterGroup getControls() {
@@ -579,6 +553,7 @@ public:
 
 	//API
 
+public:
 	//BUG: 
 	//workflow 
 	//to solve auto load fail because the sorting of xml autoSave after preset selector tag
@@ -684,16 +659,17 @@ public:
 	void setPath_PresetsFavourites(string folder);//path folder for favorite/live presets
 	void setPath_PresetsStandalone(string folder);//path folder for kit for the browser
 	void setPath_ControlSettings(string str)//for the session states settings
+	//--------------------------------------------------------------
 	{
 		ofLogNotice(__FUNCTION__) << str;
 		path_ControlSettings = str;
 	}
+	//--------------------------------------------------------------
 	void setPath_Root(string str)
 	{
 		ofLogNotice(__FUNCTION__) << str;
 		path_Root = str;
 	}
-
 	//--------------------------------------------------------------
 	void setModeAutoLoad(bool b)
 	{
@@ -732,6 +708,7 @@ public:
 	//-
 
 public:
+	//--------------------------------------------------------------
 	void saveCurrentPreset() {
 			ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_selected.get();
 			doSave(PRESET_selected);
@@ -767,8 +744,6 @@ private:
 
 	//ImGui
 #ifdef INCLUDE_GUI_IM_GUI
-
-	//ImGui pure content
 public:
 	void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
 	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
@@ -816,7 +791,7 @@ private:
 	bool bImGui_mouseOver_PRE;
 	bool bMouseOver_Changed = false;
 
-public:
+//public:
 	////--------------------------------------------------------------
 	//bool isMouseOver()
 	//{
@@ -825,7 +800,7 @@ public:
 	//	else b = bImGui_mouseOver;
 	//	return b;
 	//}
-
+	////--------------------------------------------------------------
 	//bool isMouseOver_Changed()
 	//{
 	//	if (bMouseOver_Changed)
@@ -916,7 +891,7 @@ private:
 
 	//--
 
-	std::vector<int> lastIndices;//? seems to be the size of any group or:
+	std::vector<int> lastIndices;//? seems to be the size (last index of data vector) of any group or:
 	//? this seems to be the last selected of any group(?)
 	//TODO:
 	//lastIndices it's the gui box clicked only, not important.. ?
@@ -992,6 +967,7 @@ private:
 	ofParameter<bool> autoLoad;
 	ofParameter<bool> bCloneRight;
 	ofParameter<bool> bCloneAll;
+
 	//internal groups
 	ofParameterGroup params_Favourites;
 	ofParameterGroup params_Gui;

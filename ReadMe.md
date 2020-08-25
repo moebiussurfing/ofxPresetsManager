@@ -1,27 +1,58 @@
-dependencies:
-ofxSerializer
+ofxPresetsManager
+=============================
 
-description:
+# Overview
+**ofxPresetsManager** is an **openFrameworks** addon template for MYSELF.
 
-The addon auto creates a json file that is auto saved and loaded.
-\data\ofxWindowApp\AppWindow.json
+## Screenshot
+![image](/readme_images/Capture1.PNG?raw=true "image")
 
-position
-size: height, width
-window_mode
+## Features
+- Customize gui.
+- Basic parameters and app modes.
+- Store/Recall settings.
+- 
 
 
-usage:
+## Usage
+ 
+### ofApp.h
+```.cpp
+#include "ofxPresetsManager.h"
+ofxPresetsManager myAddon;
+```
 
-ofApp.h:
+### ofApp.cpp
+```.cpp
+ofApp::setup(){
+	ofxPresetsManager.setup();
+}
 
-#include "ofxWindowApp.h"
+ofApp::update(){
+	ofxPresetsManager.update();
+}
 
-class ofApp : public ofBaseApp
-{
+ofApp::draw(){
+	ofxPresetsManager.draw();
+	ofxPresetsManager.drawGui();
+}
+```
 
-public:
+## Dependencies
+- 
 
-	ofxWindowApp WindowApp;
-	
-	..
+## Tested systems
+- **Windows10** / **VS2017** / **OF 0.11**
+
+### TODO/IDEAS
+* 
+
+### Notes
+*
+
+## Author
+Addon by **@moebiusSurfing**  
+*(ManuMolina). 2020.*
+
+## License
+*MIT License.*
