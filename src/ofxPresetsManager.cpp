@@ -863,7 +863,7 @@ void ofxPresetsManager::setup()
 	//must check this font file is found there
 	ofFile file(pathFont);
 	if (file.exists()) ofxGuiSetFont(pathFont, 9);
-	else 
+	else
 	{
 #ifdef INCLUDE_DEBUG_ERRORS
 		errorsDEBUG.addError(gui_LabelName + " " + ofToString(__FUNCTION__), "ofxGui font", pathFont);
@@ -1177,8 +1177,8 @@ void ofxPresetsManager::update(ofEventArgs & args)
 			//auto save timer
 			timerLast_Autosave = ofGetElapsedTimeMillis();
 		}
-		}
 	}
+}
 
 //---------------------------------------------------------------------
 void ofxPresetsManager::draw(ofEventArgs & args)
@@ -1588,9 +1588,10 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 	//temporary name only to debug purposes
 	//final label name to gui display will be setted if setup("name") is called 
 	gui_LabelName = groups[0].getName();
-	
+
 	//root path for addon settings
-	path_Root = groupName;
+	path_Root = path_UserKit_Folder + "/" + groupName;
+	//path_Root = groupName;
 
 	//-
 
@@ -1671,7 +1672,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 	}
 	else
 	{
-		ofLogError(__FUNCTION__) << "OUT OF RANGE SAVE";
+		ofLogError(__FUNCTION__) << "OUT OF RANGE SAVE" << " presetIndex: " << ofToString(presetIndex) << " guiIndex: " << ofToString(guiIndex);
 	}
 }
 
@@ -1726,7 +1727,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 	}
 	else
 	{
-		ofLogError(__FUNCTION__) << "OUT OF RANGE SAVE";
+		ofLogError(__FUNCTION__) << "OUT OF RANGE SAVE" << " presetIndex: " << ofToString(presetIndex) << " guiIndex: " << ofToString(guiIndex);
 	}
 
 }
@@ -1781,7 +1782,9 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	}
 	else
 	{
-		ofLogError(__FUNCTION__) << "OUT OF RANGE LOAD";
+
+		ofLogError(__FUNCTION__) << "OUT OF RANGE LOAD" << " presetIndex: " << ofToString(presetIndex) << " guiIndex: " << ofToString(guiIndex);
+
 	}
 }
 
@@ -1833,8 +1836,8 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 		bIsDoneLoad = true;
 	}
 	else
-	{
-		ofLogError(__FUNCTION__) << "OUT OF RANGE LOAD";
+	{	
+		ofLogError(__FUNCTION__) << "OUT OF RANGE LOAD" << " presetIndex: " << ofToString(presetIndex) << " guiIndex: " << ofToString(guiIndex);
 	}
 }
 
@@ -2660,7 +2663,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 					ofLogError(__FUNCTION__) << "lastIndices has 0 size!";
 				}
 			}
-	}
+		}
 
 		//--
 
@@ -2689,7 +2692,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//{
 		//	ofLogError(__FUNCTION__) << "IGNORED PRESETS CHANGE";
 		//}
-}
+	}
 }
 
 #pragma mark - SETTINGS
@@ -2806,7 +2809,7 @@ void ofxPresetsManager::save_ControlSettings()
 #else
 	ofLogNotice(__FUNCTION__) << "[DEBUG] BLOCKED save_ControlSettings()";
 #endif
-	}
+}
 
 //--
 
@@ -3201,7 +3204,7 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 #else
 	gui_ImGui.end();
 #endif
-	}
+}
 
 //--------------------------------------------------------------
 bool ofxPresetsManager::ImGui_Draw_Window()
@@ -3438,7 +3441,7 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::doLoadUserKit(){
+void ofxPresetsManager::doLoadUserKit() {
 
 	//-
 
@@ -4065,7 +4068,7 @@ void ofxPresetsManager::browser_PresetLoad(string name)//without xml extension n
 
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_Setup()
-{	
+{
 	//load files structure directory
 	bool bLoaded = browser_FilesRefresh();
 

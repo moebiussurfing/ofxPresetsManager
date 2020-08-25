@@ -1,5 +1,5 @@
-ofxGui
 ofxDEBUG_errors
+ofxGui
 ofxImGui
 ofxPresetsManager
 ofxSurfingHelpers
