@@ -40,6 +40,7 @@
 //
 //	BUG:	
 //
+//	?		doCheckPresetsFolderIsEmpty fails and overwrite all presets in some situations...
 //	?		repair play randomizer
 //	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager" ?
 //
@@ -655,7 +656,7 @@ public:
 #pragma mark - SETTINGS
 
 	//--------------------------------------------------------------
-	void setPath_GlobalFolder(string folder);//path for root container folder. must be called before setup()!
+	void setPath_UserKit_Folder(string folder);//path for root container folder. must be called before setup()!
 	void setPath_PresetsFavourites(string folder);//path folder for favorite/live presets
 	void setPath_PresetsStandalone(string folder);//path folder for kit for the browser
 	void setPath_ControlSettings(string str)//for the session states settings

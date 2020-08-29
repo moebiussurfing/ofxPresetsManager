@@ -1027,7 +1027,8 @@ void ofxPresetsManager::startup()
 
 	//workflow
 	//check if presets folders is empty. then populate all elements if not
-	doCheckPresetsFolderIsEmpty();
+	////TODO:
+	//doCheckPresetsFolderIsEmpty();
 
 	//--
 
@@ -1833,7 +1834,7 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 		bIsDoneLoad = true;
 	}
 	else
-	{	
+	{
 		ofLogError(__FUNCTION__) << "OUT OF RANGE LOAD" << " presetIndex: " << ofToString(presetIndex) << " guiIndex: " << ofToString(guiIndex);
 	}
 }
@@ -2808,7 +2809,7 @@ void ofxPresetsManager::save_ControlSettings()
 //--
 
 //--------------------------------------------------------------
-void ofxPresetsManager::setPath_GlobalFolder(string folder)
+void ofxPresetsManager::setPath_UserKit_Folder(string folder)
 {
 	ofLogNotice(__FUNCTION__) << folder;
 	path_UserKit_Folder = folder;
@@ -3207,19 +3208,17 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 	ofVec2f pos(ImGui_Position.get().x, ImGui_Position.get().y);
 	ofVec2f size(ImGui_Size.get().x, ImGui_Size.get().y);
-	//ofLogNotice(__FUNCTION__) << "ImGui position: " << ofToString(pos);
-	//ofLogNotice(__FUNCTION__) << "ImGui size: " << ofToString(size);
 	mainSettings.windowPos = pos;//required
 	mainSettings.windowSize = size;
-
-	auto _mode = ImGuiCond_FirstUseEver;
-	//auto _mode = ImGuiCond_Always;
+	//ofLogNotice(__FUNCTION__) << "ImGui position: " << ofToString(pos);
+	//ofLogNotice(__FUNCTION__) << "ImGui size: " << ofToString(size);
+	auto _mode = ImGuiCond_FirstUseEver;//ImGuiCond_Always;
 	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), _mode);
 	ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), _mode);
 
 	//--
 
-	string _name = groups[0].getName();
+	string _name = groups[0].getName() + " ofxPresetsManager";
 	bool _collapse = true;
 
 	//--
@@ -3269,6 +3268,25 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		//cout << "size:" << ofToString(size) << endl;
 	}
 	ofxImGui::EndWindow(mainSettings);
+
+	//--
+
+	//TODO:
+	//splitted window for parameters
+	pos = pos - ofVec2f(400, 0);
+	mainSettings.windowPos = pos;//required
+	_mode = ImGuiCond_FirstUseEver;//ImGuiCond_Always;
+	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), _mode);
+	ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), _mode);
+	_name = groups[0].getName();
+	if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
+	{
+		//2. preset params preview
+		ImGui_Draw_PresetPreview(mainSettings);
+	}
+	ofxImGui::EndWindow(mainSettings);
+
+	//--
 
 	return mainSettings.mouseOverGui;
 }
@@ -3439,7 +3457,7 @@ void ofxPresetsManager::doLoadUserKit() {
 
 	//-
 
-	setPath_GlobalFolder(pathDirCustom);
+	setPath_UserKit_Folder(pathDirCustom);
 
 	//-
 
@@ -3889,8 +3907,8 @@ void ofxPresetsManager::ImGui_Draw_WindowContent(ofxImGui::Settings &settings)
 	//1. basic controls
 	ImGui_Draw_Basic(settings);
 
-	//2. preset params preview
-	ImGui_Draw_PresetPreview(settings);
+	////2. preset params preview
+	//ImGui_Draw_PresetPreview(settings);
 
 	//3. advanced params
 	ImGui_Draw_Randomizers(settings);
