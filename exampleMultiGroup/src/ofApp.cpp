@@ -35,7 +35,7 @@ void ofApp::setup()
 	//--
 
 	//1. (optional) customize path folders at first
-	presetsManager.setPath_GlobalFolder("presetsManager");	//main container folder where all other files will be
+	presetsManager.setPath_UserKit_Folder("presetsManager");	//main container folder where all other files will be
 
 	//2. add our ofParameterGroup to the preset manager 
 	//also define wich key triggers are associated to each preset. 

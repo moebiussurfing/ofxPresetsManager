@@ -812,6 +812,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Custom.add(bPathDirCustom);
 	params_Custom.add(pathDirCustom);
 	params_Control.add(params_Custom);
+	params_Control.add(SHOW_PresetParams);
 
 	ofAddListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 }
@@ -903,6 +904,8 @@ void ofxPresetsManager::setup()
 	//gOptions.maximize();
 	gPanel.getGroup("HELPER TOOLS").minimize();
 #endif
+
+	SHOW_PresetParams.set("SHOW PARAMS", false);
 
 	//--
 
@@ -1003,7 +1006,9 @@ void ofxPresetsManager::startup()
 	//PRESET_selected_PRE = -1;
 
 	//TODO:
-	//refresh();
+	//refreshStartup();
+	load(PRESET_selected, 0);
+	//loadPreset(PRESET_selected);
 
 	//--
 
@@ -1025,9 +1030,9 @@ void ofxPresetsManager::startup()
 
 	//--
 
+	////TODO:
 	//workflow
 	//check if presets folders is empty. then populate all elements if not
-	////TODO:
 	//doCheckPresetsFolderIsEmpty();
 
 	//--
@@ -2996,7 +3001,7 @@ void ofxPresetsManager::exit()
 	//--
 
 	//app settings
-	save_ControlSettings();//crashes?
+	save_ControlSettings();
 
 	//--
 
@@ -3273,18 +3278,20 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 	//TODO:
 	//splitted window for parameters
-	pos = pos - ofVec2f(400, 0);
-	mainSettings.windowPos = pos;//required
-	_mode = ImGuiCond_FirstUseEver;//ImGuiCond_Always;
-	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), _mode);
-	ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), _mode);
-	_name = groups[0].getName();
-	if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
-	{
-		//2. preset params preview
-		ImGui_Draw_PresetPreview(mainSettings);
+	if (SHOW_PresetParams) {
+		pos = pos - ofVec2f(600, 0);
+		mainSettings.windowPos = pos;//required
+		_mode = ImGuiCond_FirstUseEver;//ImGuiCond_Always;
+		ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), _mode);
+		ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), _mode);
+		_name = groups[0].getName();
+		if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
+		{
+			//2. preset params preview
+			ImGui_Draw_PresetPreview(mainSettings);
+		}
+		ofxImGui::EndWindow(mainSettings);
 	}
-	ofxImGui::EndWindow(mainSettings);
 
 	//--
 
@@ -3421,6 +3428,8 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 		ofxImGui::AddParameter(autoSave);
 		ImGui::SameLine();
 		ofxImGui::AddParameter(autoLoad);
+		ofxImGui::AddParameter(SHOW_PresetParams);
+		ImGui::SameLine();
 		ofxImGui::AddParameter(MODE_MemoryLive);
 
 		//--

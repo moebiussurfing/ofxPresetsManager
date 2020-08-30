@@ -751,6 +751,7 @@ public:
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
 	void ImGui_Draw_Randomizers(ofxImGui::Settings &settings);
 	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
+	ofParameter<bool> SHOW_PresetParams;
 
 	//set custom path
 	void doFileDialogProcessSelection(ofFileDialogResult openFileResult);
