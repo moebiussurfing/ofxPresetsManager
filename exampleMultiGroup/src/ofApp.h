@@ -43,12 +43,12 @@ public:
 	ofParameter<int> separation;
     ofParameter<int> shapeSide;
 	
-	////TODO:
-	//ofxPanel gui2;
-    //void drawScene2();
-	////group2
-	//ofParameterGroup params2;
-	//ofParameter<int> numShapes2;
-	//ofParameter<int> separation2;
-	//ofParameter<int> shapeSide2;
+	//TODO:
+	ofxPanel gui2;
+    void drawScene2();
+	//group2
+	ofParameterGroup params2;
+	ofParameter<int> numShapes2;
+	ofParameter<int> separation2;
+	ofParameter<int> shapeSide2;
 };

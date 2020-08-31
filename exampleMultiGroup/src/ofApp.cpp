@@ -25,12 +25,12 @@ void ofApp::setup()
 	paramsNested.add(lineWidth.set("lineWidth", 1, 0.1, 10));
 	params.add(paramsNested);//main preset settings container
 
-	////TODO:
-	////group2
-	//params2.setName("paramsGroup2");
-	//params2.add(shapeSide2.set("shapeSide2", 50, 5, 200));
-	//params2.add(numShapes2.set("numShapes2", 10, 1, 24));
-	//params2.add(separation2.set("separation2", 15, 1, 100));
+	//TODO:
+	//group2
+	params2.setName("paramsGroup2");
+	params2.add(shapeSide2.set("shapeSide2", 50, 5, 200));
+	params2.add(numShapes2.set("numShapes2", 10, 1, 24));
+	params2.add(separation2.set("separation2", 15, 1, 100));
 
 	//--
 
@@ -44,7 +44,7 @@ void ofApp::setup()
 
 	//TODO:
 	//group2
-	//presetsManager.add(params2, { 'a', 's', 'd', 'e' });
+	presetsManager.add(params2, { 'a', 's', 'd', 'e' });
 
 	//3. call setup after adding ofParameterGroup
 	presetsManager.setup();
@@ -52,7 +52,7 @@ void ofApp::setup()
 	//4. (optional) customize gui positions
 	presetsManager.setVisible_PresetClicker(true);//user panel clicker
 	presetsManager.setPosition_PresetClicker(200, 100, 50);
-	
+
 	//-------
 
 	//local ofApp gui to show/edit our settings/parameters
@@ -61,9 +61,9 @@ void ofApp::setup()
 	gui.add(params);
 	gui.setPosition(50, 300);
 
-	//gui2.setup("ofApp2");
-	//gui2.add(params2);
-	//gui2.setPosition(700, 300);
+	gui2.setup("ofApp2");
+	gui2.add(params2);
+	gui2.setPosition(270, 300);
 }
 
 //--------------------------------------------------------------
@@ -74,21 +74,22 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::drawScene1()
 {
-	//debug object linked to grouped parameters
-	string str;
-	int x = gui.getPosition().x + 15;
-	int y = gui.getPosition().y + gui.getHeight() + 30;
-	str = "";
-	str += "shapeType : " + ofToString(shapeType);
-	str += "numShapes : " + ofToString(numShapes);
-	str += "separation: " + ofToString(separation);
-	str += "shapeSide : " + ofToString(shapeSide);
-	str += "fill      : " + ofToString(fill);
-	str += "color     : " + ofToString(color);
-	str += "lineWidth : " + ofToString(lineWidth);
-
 	ofPushStyle();
 	ofPushMatrix();
+
+	//debug object linked to grouped parameters
+	string str;
+	int x = gui.getPosition().x + 30;
+	int y = gui.getPosition().y + gui.getHeight() + 30;
+	str = "";
+	str += "shapeType : " + ofToString(shapeType); str += "\n";
+	str += "numShapes : " + ofToString(numShapes); str += "\n";
+	str += "separation: " + ofToString(separation); str += "\n";
+	str += "shapeSide : " + ofToString(shapeSide); str += "\n";
+	str += "fill      : " + ofToString(fill); str += "\n";
+	str += "color     : " + ofToString(color); str += "\n";
+	str += "lineWidth : " + ofToString(lineWidth);
+	ofDrawBitmapStringHighlight(str, gui.getShape().x, gui.getShape().y + gui.getHeight() + 25);
 
 	ofTranslate(300, 50);
 	ofSetColor(color.get());
@@ -109,34 +110,35 @@ void ofApp::drawScene1()
 	ofPopStyle();
 }
 
-////--------------------------------------------------------------
-//void ofApp::drawScene2()
-//{
-//	//debug object linked to grouped parameters
-//	string str;
-//	int x = gui2.getPosition().x + 15;
-//	int y = gui2.getPosition().y + gui2.getHeight() + 30;
-//	str = "";
-//	str += "numShapes2 : " + ofToString(numShapes2);
-//	str += "separation2: " + ofToString(separation2);
-//	str += "shapeSide2 : " + ofToString(shapeSide2);
-//
-//	ofPushStyle();
-//	ofPushMatrix();
-//
-//	ofTranslate(x + 200, 50);
-//	ofSetColor(0);
-//	ofFill();
-//
-//	for (int i = 0; i < numShapes2; ++i)
-//	{
-//		ofDrawCircle(0, 0, shapeSide2);
-//		ofTranslate(-separation2, separation2);
-//	}
-//
-//	ofPopMatrix();
-//	ofPopStyle();
-//}
+//--------------------------------------------------------------
+void ofApp::drawScene2()
+{
+	ofPushStyle();
+	ofPushMatrix();
+
+	//debug object linked to grouped parameters
+	string str;
+	int x = gui2.getPosition().x + 30;
+	int y = gui2.getPosition().y + gui2.getHeight() + 30;
+	str = "";
+	str += "numShapes2 : " + ofToString(numShapes2); str += "\n";
+	str += "separation2: " + ofToString(separation2); str += "\n";
+	str += "shapeSide2 : " + ofToString(shapeSide2);
+	ofDrawBitmapStringHighlight(str, gui2.getShape().x, gui2.getShape().y + gui2.getHeight() + 25);
+
+	ofTranslate(x + 600, 50);
+	ofSetColor(0);
+	ofFill();
+
+	for (int i = 0; i < numShapes2; ++i)
+	{
+		ofDrawCircle(0, 0, shapeSide2);
+		ofTranslate(-separation2, separation2);
+	}
+
+	ofPopMatrix();
+	ofPopStyle();
+}
 
 //--------------------------------------------------------------
 void ofApp::draw()
@@ -145,11 +147,11 @@ void ofApp::draw()
 
 	//scene draw object linked to grouped parameters
 	drawScene1();
-	//drawScene2();
+	drawScene2();
 
 	//local gui parameters
 	gui.draw();
-	//gui2.draw();
+	gui2.draw();
 }
 
 //--------------------------------------------------------------

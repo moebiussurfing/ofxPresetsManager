@@ -1554,7 +1554,7 @@ void ofxPresetsManager::add(ofParameterGroup params, int _num_presets)//main add
 {
 	//main adder of a ofParameterGroup for preset management
 
-	ofLogNotice(__FUNCTION__) << "added group";
+	ofLogNotice(__FUNCTION__) << "Added group " << params.getName() << ". Amount presets: " << _num_presets;
 
 	groups.push_back(params);//each enqueued group-param handles all presets of each added paramGroup
 
@@ -1611,14 +1611,13 @@ void ofxPresetsManager::add(ofParameterGroup params, initializer_list<int> keysL
 
 	keys.resize(groups.size());
 	int i = groups.size() - 1;
-
 	keys[i].reserve(keysList.size());
 
-	for (const int &key : keysList)
+	for (const int &key : keysList) {
 		keys[i].push_back(key);
+	}
 
-	if (keysNotActivated)
-		addKeysListeners();
+	if (keysNotActivated) addKeysListeners();
 }
 
 //-
@@ -2162,17 +2161,17 @@ void ofxPresetsManager::mousePressed(int x, int y)
 	yIndex = (y > 0) ? yIndex : -1;
 
 	//debug mouse out of click cells
-	if (xIndex != -1 && yIndex != -1)
-		ofLogVerbose(__FUNCTION__) << "(" << xIndex << "," << yIndex << ")";
+	if (xIndex != -1 && yIndex != -1) ofLogNotice(__FUNCTION__) << "(" << xIndex << "," << yIndex << ")";
 
 	//-
 
 	//1. key presets buttons & save button
+
+	//click is iniside allowed presets/groups
 	if (yIndex >= 0 && yIndex < (int)groups.size())// + 1)//+1 for extra gui button
 	{
 		//avoid outer panel logs. only into the group row levels
-		if (xIndex != -1 && yIndex != -1)
-			ofLogVerbose(__FUNCTION__) << "(" << xIndex << "," << yIndex << ")";
+		if (xIndex != -1 && yIndex != -1) ofLogNotice(__FUNCTION__) << "(" << xIndex << "," << yIndex << ")";
 
 		//-
 
