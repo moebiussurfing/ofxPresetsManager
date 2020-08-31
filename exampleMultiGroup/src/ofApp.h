@@ -24,16 +24,14 @@ public:
 	ofxWindowApp WindowApp;
 #endif
 
-	ofxPanel gui;
-    void drawScene1();
+    void drawDebug1();
+    void drawDebug2();
 
     //presetsManager
     ofxPresetsManager presetsManager;
 
-    // group
-
 	//group1
-    ofParameterGroup params;
+    ofParameterGroup params1;
     ofParameterGroup paramsNested;
 	ofParameter<bool> fill;
 	ofParameter<float> lineWidth;
@@ -42,13 +40,22 @@ public:
 	ofParameter<int> numShapes;
 	ofParameter<int> separation;
     ofParameter<int> shapeSide;
+    void drawScene1();
+	ofxPanel gui1;
 	
-	//TODO:
-	ofxPanel gui2;
-    void drawScene2();
 	//group2
 	ofParameterGroup params2;
 	ofParameter<int> numShapes2;
 	ofParameter<int> separation2;
 	ofParameter<int> shapeSide2;
+	ofxPanel gui2;
+    void drawScene2();
+	
+	//group3
+	ofParameterGroup params3;
+	ofxPanel gui3;
+	
+	//group4
+	ofParameterGroup params4;
+	ofxPanel gui4;
 };

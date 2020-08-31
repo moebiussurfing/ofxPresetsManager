@@ -14,7 +14,8 @@
 //
 //	TODO:
 //
-///	+++		put all presets into a main parent folder. split out the session settings on root folder and a single file.
+///	+++		put all presets into a main parent folder. 
+///				split out the session settings on root folder and a single file.
 ///	++		randomize editor preset
 ///				preset mini engine. ABC dropdown list for randomizers
 ///				could add also several randomizer settings presets. selectable by dropdown list..
@@ -26,8 +27,7 @@
 ///				add setter to enable randomize wich params
 ///				call populate. disable debug_display red info
 //
-///	++		add ofColor to ImGui helpers
-///	++		add multiple groups engine. look into ofxGuiPresets fron #npisanti
+///	++		add ofColor to ImGui helpers vs ofFloatColor
 ///	+++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
 ///	++		performance: check memory_mode
@@ -36,11 +36,14 @@
 ///	+		repair autosave timer. exclude log
 ///	+		add workflow to not collide manual preset click with randomizer timer
 ///	+		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
+///				or add simpler class but compatible with preset files kits
 ///	+		could make tween when changing params using lerp...
 //
 //	BUG:	
 //
+//	?		fix end index rare limiter..
 //	?		doCheckPresetsFolderIsEmpty fails and overwrite all presets in some situations...
+//				it seems that it's when user-kit folder is customized, not the default one
 //	?		repair play randomizer
 //	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager" ?
 //
@@ -160,7 +163,7 @@ private:
 	std::string nameUserKit;
 	std::string browser_PresetName;
 
-	std::string groupName;//get from ofParameterGroup name
+	std::string nameMainGroup;//get from ofParameterGroup name
 	//TODO:
 	//std::string groupName2;//get from ofParameterGroup name
 	std::string gui_LabelName = "NO_NAME";//default gui panel name
@@ -255,7 +258,7 @@ private:
 private:
 	//TODO:
 	//should use keys[i].size() instead of this:
-	vector<ofXml> presetsXmlArray;
+	vector<ofXml> presetsFavouritesXmls;
 
 	//--
 
@@ -353,17 +356,17 @@ public:
 	//--------------------------------------------------------------
 	float getPresetClicker_Width()
 	{
-		return clicker_cellSize * (keys[0].size() + 2);
+		return cellSize * (keys[0].size() + 2);
 	}
 	//--------------------------------------------------------------
 	float getPresetClicker_BoxSize()
 	{
-		return clicker_cellSize;
+		return cellSize;
 	}
 	//--------------------------------------------------------------
 	float getPresetClicker_Height()
 	{
-		return clicker_cellSize;
+		return cellSize;
 	}
 
 	//-
@@ -403,9 +406,9 @@ public:
 	void load_Next()
 	{
 		PRESET_selected++;
-		if (PRESET_selected >= numPresetsFavorites-1)
+		if (PRESET_selected >= numPresetsFavourites-1)
 		{
-			PRESET_selected = numPresetsFavorites-1;
+			PRESET_selected = numPresetsFavourites-1;
 		}
 	}
 
@@ -424,7 +427,7 @@ public:
 	//--------------------------------------------------------------
 	int getNumPresets()
 	{
-		return numPresetsFavorites;
+		return numPresetsFavourites;
 	}
 
 	//--------------------------------------------------------------
@@ -628,7 +631,7 @@ public:
 	{
 		clicker_Pos.x = x;
 		clicker_Pos.y = y;
-		clicker_cellSize = _cellSize;
+		cellSize = _cellSize;
 	}
 	//--------------------------------------------------------------
 	void setVisible_PresetClicker(bool visible)
@@ -846,7 +849,7 @@ public:
 
 		//browser number of files
 		//iterate all presets
-		for (int i = 0; i < numPresetsFavorites; i++)
+		for (int i = 0; i < numPresetsFavourites; i++)
 		{
 			std::string pathSrc;
 			std::string pathDst;
@@ -880,7 +883,7 @@ private:
 
 	//layout
 	ofVec2f guiPos_InternalControl = ofVec2f(500, 500);
-	int clicker_cellSize = 80;
+	int cellSize = 80;
 	ofVec2f clicker_Pos = ofVec2f(500, 500);
 
 	//--
@@ -893,12 +896,12 @@ private:
 
 	//--
 
-	std::vector<int> lastIndices;//? seems to be the size (last index of data vector) of any group or:
+	std::vector<int> selected_Indices;//? seems to be the size (last index of data vector) of any group or:
 	//? this seems to be the last selected of any group(?)
 	//TODO:
-	//lastIndices it's the gui box clicked only, not important.. ?
+	//selected_Indices it's the gui box clicked only, not important.. ?
 
-	std::vector<int> presetsOnGroup;//?? this seems to be the number of presets of each added group(?)
+	std::vector<int> presetsAmtOnGroups;//this is the number of presets of each added group
 
 	//--
 
@@ -910,8 +913,8 @@ private:
 	void addKeysListeners();
 	void removeKeysListeners();
 
-	bool bKeys;//enabled keys
 	vector<vector<int>> keys;//queued trigger keys for each group ? (all presets) (size of)
+	bool bKeys;//enabled keys
 	bool keysNotActivated;
 
 	//save
@@ -925,9 +928,9 @@ private:
 	void mousePressed(int x, int y);
 	bool lastMouseButtonState;
 
-	std::vector<int> newIndices;//? this seems to be the number of the groups(? )
+	//std::vector<int> newIndices;//? this seems to be the number of the groups(? )
 
-	int numPresetsFavorites;//amount of box-clickable handled presets on current favorites/kit [8]
+	int numPresetsFavourites;//amount of box-clickable handled presets on current favorites/kit [8]
 
 	//---
 
