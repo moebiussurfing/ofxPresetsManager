@@ -119,10 +119,7 @@
 
 #pragma mark - DEFINE_DATA_TYPES
 
-//-
-
-//only one it's implemented! can't add more than one parameter group!
-#define NUM_MAX_GROUPS 1
+#define NUM_MAX_GROUPS 10
 
 //---
 
@@ -159,13 +156,10 @@ private:
 
 	std::string filename_ControlSettings;
 	std::string filename_Randomizers;//path for randomizers settings
-	std::string filenamesPresetsPrefix;//to add to file names to split names with index
+	std::string filenamesPrefix;//to add to file names to split names with index
 	std::string nameUserKit;
 	std::string browser_PresetName;
 
-	std::string nameMainGroup;//get from ofParameterGroup name
-	//TODO:
-	//std::string groupName2;//get from ofParameterGroup name
 	std::string gui_LabelName = "NO_NAME";//default gui panel name
 
 	//-
@@ -302,8 +296,9 @@ public:
 private:
 	//TODO:
 	//BUG:
-	//not working. must use below add method
+	//not working. must use below add method. maybe can add a correlative keys list
 	void add(ofParameterGroup params, int numPresets = 8);//add a param group for preset saving and how many presets on favs
+
 public:
 	void add(ofParameterGroup params, initializer_list<int> keysList);//adds and define keys to trig presets too
 
@@ -333,7 +328,6 @@ public:
 		}
 		return false;
 	}
-
 	////to check in update() as callback
 	//bool isDoneLoad()
 	//{
@@ -403,37 +397,37 @@ public:
 	//-
 
 	//--------------------------------------------------------------
-	void load_Next()
+	void load_Next()//for main group
 	{
-		PRESET_selected++;
-		if (PRESET_selected >= numPresetsFavourites-1)
+		PRESET_selected_IndexMain++;
+		if (PRESET_selected_IndexMain >= mainGroupAmtPresetsFav-1)
 		{
-			PRESET_selected = numPresetsFavourites-1;
+			PRESET_selected_IndexMain = mainGroupAmtPresetsFav-1;
 		}
 	}
 
 	//--------------------------------------------------------------
-	void load_Previous()
+	void load_Previous()//for main group
 	{
-		PRESET_selected--;
-		if (PRESET_selected < 0)
+		PRESET_selected_IndexMain--;
+		if (PRESET_selected_IndexMain < 0)
 		{
-			PRESET_selected = 0;
+			PRESET_selected_IndexMain = 0;
 		}
 	}
 
-	void loadPreset(int p);//load preset by code from ofApp
+	void loadPreset(int p);//load preset for the main group by code from ofApp
 
 	//--------------------------------------------------------------
-	int getNumPresets()
+	int getNumPresets()//get main group amount of presets
 	{
-		return numPresetsFavourites;
+		return mainGroupAmtPresetsFav;
 	}
 
 	//--------------------------------------------------------------
 	int getCurrentPreset()//get index of selected preset
 	{
-		return PRESET_selected;
+		return PRESET_selected_IndexMain;
 	}
 
 	//-
@@ -444,11 +438,11 @@ public:
 		SHOW_GroupName = b;
 	}
 
-	//--------------------------------------------------------------
-	std::string getGroupName()//get the paramGroup being managed here. Useful when using more than one ofxPresetsManager instances
-	{
-		return groups[0].getName();
-	}
+	////--------------------------------------------------------------
+	//std::string getGroupName()//get the paramGroup being managed here. Useful when using more than one ofxPresetsManager instances
+	//{
+	//	return groups[0].getName();
+	//}
 
 	//--
 
@@ -501,6 +495,7 @@ public:
 	void doCloneRight(int pIndex);//clone from selected preset to all others to the right
 	void doCloneAll();//clone all presets from the current selected
 	void doPopulateFavs();//fast populate random presets around all favs
+	void doSwap(int groupIndex, int fromIndex, int toIndex);
 
 	//--
 
@@ -538,7 +533,6 @@ private:
 	void browser_PresetSave(string name);
 	bool browser_FilesRefresh();
 	void browser_Setup();
-	//float _w;
 	void doCheckPresetsFolderIsEmpty();
 #endif
 
@@ -571,9 +565,9 @@ public:
 		//-
 
 		ofLogNotice(__FUNCTION__);
-		PRESET_selected_PRE = -1;
-		PRESET_selected = PRESET_selected;
-		ofLogNotice(__FUNCTION__) << "Preset " << PRESET_selected;
+		PRESET_selected_IndexMain_PRE = -1;
+		PRESET_selected_IndexMain = PRESET_selected_IndexMain;
+		ofLogNotice(__FUNCTION__) << "Preset " << PRESET_selected_IndexMain;
 	}
 
 	//--------------------------------------------------------------
@@ -698,10 +692,11 @@ public:
 	//--
 
 public:
-	ofParameter<int> PRESET_selected;//main current preset selector
+	ofParameter<int> PRESET_selected_IndexMain;//main group preset selector (current)
+	vector<ofParameter<int>> PRESET_selected_Index;//extra groups preset selector (current)
 
 private:
-	int PRESET_selected_PRE = -1;//used as callback
+	int PRESET_selected_IndexMain_PRE = -1;//used as callback
 
 	//--
 
@@ -714,8 +709,8 @@ public:
 public:
 	//--------------------------------------------------------------
 	void saveCurrentPreset() {
-			ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_selected.get();
-			doSave(PRESET_selected);
+			ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_selected_IndexMain.get();
+			doSave(PRESET_selected_IndexMain);
 	}
 	
 	//--
@@ -735,8 +730,8 @@ private:
 	int getPresetIndex(int guiIndex) const;
 	int getPresetIndex(string guiName) const;
 
-	int getGuiIndex(string name) const;
-	string getPresetName(string guiName, int presetIndex);
+	int getGuiIndex(string name) const;//get index for a name of group
+	string getPresetPath(string guiName, int presetIndex);//get path of a preset of a group
 
 	//--
 
@@ -754,7 +749,7 @@ public:
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
 	void ImGui_Draw_Randomizers(ofxImGui::Settings &settings);
 	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
-	ofParameter<bool> SHOW_PresetParams;
+	ofParameter<bool> SHOW_ImGui_PresetsParams;
 
 	//set custom path
 	void doFileDialogProcessSelection(ofFileDialogResult openFileResult);
@@ -849,12 +844,12 @@ public:
 
 		//browser number of files
 		//iterate all presets
-		for (int i = 0; i < numPresetsFavourites; i++)
+		for (int i = 0; i < mainGroupAmtPresetsFav; i++)
 		{
 			std::string pathSrc;
 			std::string pathDst;
 
-			pathSrc = getPresetName(groups[0].getName(), i);
+			pathSrc = getPresetPath(groups[0].getName(), i);
 			boost::filesystem::path bPath(pathSrc);
 
 			//string pathFolder = ofToString(bPath.parent_path());
@@ -896,12 +891,11 @@ private:
 
 	//--
 
-	std::vector<int> selected_Indices;//? seems to be the size (last index of data vector) of any group or:
-	//? this seems to be the last selected of any group(?)
-	//TODO:
-	//selected_Indices it's the gui box clicked only, not important.. ?
+	std::vector<ofParameter<int>> PRESETS_Selected_Index;//? seems to be the size (last index of data vector) of any group or:
+	ofParameterGroup params_PRESETS_Selected{ "Preset Selectors" };
+	//void Changed_Params_PRESETS_Selected(ofAbstractParameter &e);
 
-	std::vector<int> presetsAmtOnGroups;//this is the number of presets of each added group
+	std::vector<int> groupsSizes;//this is the number of presets of each added group
 
 	//--
 
@@ -928,9 +922,7 @@ private:
 	void mousePressed(int x, int y);
 	bool lastMouseButtonState;
 
-	//std::vector<int> newIndices;//? this seems to be the number of the groups(? )
-
-	int numPresetsFavourites;//amount of box-clickable handled presets on current favorites/kit [8]
+	int mainGroupAmtPresetsFav;//amount of box-clickable handled presets on current favorites/kit [8]
 
 	//---
 
@@ -974,7 +966,7 @@ private:
 	ofParameter<bool> bCloneAll;
 
 	//internal groups
-	ofParameterGroup params_Favourites;
+	ofParameterGroup params_UserFav;
 	ofParameterGroup params_Gui;
 	ofParameterGroup params_Options;
 	ofParameterGroup params_HelperTools;
@@ -1033,387 +1025,4 @@ private:
 		_path = path_ControlSettings;//app settings (shared from all kit-presets)
 		CheckFolder(_path);
 	}
-
-	//--
-
-#ifdef INCLUDE_GUI_IM_GUI			
-	//my custom ImGui helpers
-	////https://github.com/ocornut/imgui/issues/1537
-	//--------------------------------------------------------------
-	bool AddBigButton(ofParameter<bool>& parameter, float h)//button but using a bool not void param
-	{
-		auto tmpRef = parameter.get();
-		auto name = ofxImGui::GetUniqueName(parameter);
-
-		float w;
-		w = ImGui::GetWindowWidth()*0.9f;
-
-		ImGuiStyle *style = &ImGui::GetStyle();
-
-		const ImVec4 colorButton = style->Colors[ImGuiCol_Button];//better for my theme
-		const ImVec4 colorHover = style->Colors[ImGuiCol_Button];
-		const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
-		//const ImVec4 colorButton = style->Colors[ImGuiCol_ButtonHovered];//better for default theme
-		//const ImVec4 colorHover = style->Colors[ImGuiCol_ButtonHovered];
-		//const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
-
-		ImGui::PushID(name);
-		ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorHover);
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorActive);
-
-		if (ImGui::Button((name), ImVec2(w, h)))
-		{
-			ofLogNotice(__FUNCTION__) << name << ": BANG";
-
-			tmpRef = true;
-			parameter.set(tmpRef);
-		}
-
-		ImGui::PopStyleColor(3);
-		ImGui::PopID();
-
-		return true;//not used
-	}
-
-	//--------------------------------------------------------------
-	bool AddBigToggle(ofParameter<bool>& parameter, float h)//TODO: seems not working well linked to the param..
-	{
-		auto tmpRef = parameter.get();
-		auto name = ofxImGui::GetUniqueName(parameter);
-
-		//--
-
-		//how to set colors
-		//static float b = 1.0f;
-		//static float c = 0.5f;
-		//static int i = 3;// hue colors are from 0 to 7
-		//ImVec4 _color1 = (ImVec4)ImColor::HSV(i / 7.0f, b, b);
-		//ImVec4 _color2 = (ImVec4)ImColor::HSV(i / 7.0f, c, c);
-
-		//--
-
-		//button toggle
-
-		float w;
-		//float h;
-		//h = 30;
-		//w = 200;
-		w = ImGui::GetWindowWidth()*0.9f;
-
-		static bool _boolToggle = tmpRef;  // default value, the button is disabled 
-		if (_boolToggle == true)//enabled
-		{
-			ImGuiStyle *style = &ImGui::GetStyle();
-			const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
-			const ImVec4 colorButton = style->Colors[ImGuiCol_ButtonHovered];
-			const ImVec4 colorHover = style->Colors[ImGuiCol_ButtonHovered];
-			ImGui::PushID(name);
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorActive);
-			ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorHover);
-
-			ImGui::Button(name, ImVec2(w, h));
-			if (ImGui::IsItemClicked(0))
-			{
-				_boolToggle = !_boolToggle;
-				tmpRef = _boolToggle;
-				parameter.set(tmpRef);
-			}
-
-			ImGui::PopStyleColor(3);
-			ImGui::PopID();
-		}
-		else//disabled
-		{
-			ImGuiStyle *style = &ImGui::GetStyle();
-			const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
-			const ImVec4 colorHover = style->Colors[ImGuiCol_Button];
-			const ImVec4 colorButton = style->Colors[ImGuiCol_Button];//better for my theme
-			//const ImVec4 colorButton = style->Colors[ImGuiCol_ButtonHovered];//better for default theme
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorActive);
-			ImGui::PushStyleColor(ImGuiCol_Button, colorHover);
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorHover);
-			if (ImGui::Button(name, ImVec2(w, h))) {
-				_boolToggle = true;
-				tmpRef = _boolToggle;
-				parameter.set(tmpRef);
-			}
-			ImGui::PopStyleColor(3);
-		}
-
-		//--
-
-		//checkbox
-		//ImGui::PushID(name);
-		//ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(i / 7.0f, b, b));
-		//ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i / 7.0f, b, b));
-		//ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i / 7.0f, c, c));
-		//if (ImGui::Checkbox(name, (bool *)&tmpRef))
-		//	//if (ImGui::Checkbox(ofxImGui::GetUniqueName(parameter), (bool *)&tmpRef))
-		//{
-		//	parameter.set(tmpRef);
-		//	ImGui::PopStyleColor(3);
-		//	ImGui::PopID();
-		//	return true;
-		//}
-		//ImGui::PopStyleColor(3);
-		//ImGui::PopID();
-		//return false;
-
-		return true;//not used
-	}
-
-	//--------------------------------------------------------------
-	void ImGui_ThemeModernDark()
-	{
-		ofLogNotice(__FUNCTION__);
-
-		auto& style = ImGui::GetStyle();
-		style.ChildRounding = 0;
-		style.GrabRounding = 0;
-		style.FrameRounding = 2;
-		style.PopupRounding = 0;
-		style.ScrollbarRounding = 0;
-		style.TabRounding = 2;
-		style.WindowRounding = 0;
-		style.FramePadding = { 4, 4 };
-
-		style.WindowTitleAlign = { 0.0, 0.5 };
-		style.ColorButtonPosition = ImGuiDir_Left;
-
-		ImVec4* colors = ImGui::GetStyle().Colors;
-		colors[ImGuiCol_Text] = { 1.0f, 1.0f, 1.0f, 1.00f };				//
-		colors[ImGuiCol_TextDisabled] = { 0.25f, 0.25f, 0.25f, 1.00f };		//
-		colors[ImGuiCol_WindowBg] = { 0.09f, 0.09f, 0.09f, 0.94f };			//
-		colors[ImGuiCol_ChildBg] = { 0.11f, 0.11f, 0.11f, 1.00f };			//
-		colors[ImGuiCol_PopupBg] = { 0.11f, 0.11f, 0.11f, 0.94f };			//
-		colors[ImGuiCol_Border] = { 0.07f, 0.08f, 0.08f, 1.00f };
-		colors[ImGuiCol_BorderShadow] = { 0.00f, 0.00f, 0.00f, 0.00f };
-		colors[ImGuiCol_FrameBg] = { 0.35f, 0.35f, 0.35f, 0.54f };			//
-		colors[ImGuiCol_FrameBgHovered] = { 0.3f, 0.3f, 0.3f, 1.00f };
-		//colors[ImGuiCol_FrameBgHovered] = { 0.31f, 0.29f, 0.27f, 1.00f };
-		colors[ImGuiCol_FrameBgActive] = { 0.40f, 0.36f, 0.33f, 0.67f };
-		colors[ImGuiCol_TitleBg] = { 0.1f, 0.1f, 0.1f, 1.00f };
-		colors[ImGuiCol_TitleBgActive] = { 0.3f, 0.3f, 0.3f, 1.00f };		//
-		colors[ImGuiCol_TitleBgCollapsed] = { 0.0f, 0.0f, 0.0f, 0.61f };
-		colors[ImGuiCol_MenuBarBg] = { 0.18f, 0.18f, 0.18f, 0.94f };		//
-		colors[ImGuiCol_ScrollbarBg] = { 0.00f, 0.00f, 0.00f, 0.16f };
-		colors[ImGuiCol_ScrollbarGrab] = { 0.24f, 0.22f, 0.21f, 1.00f };
-		colors[ImGuiCol_ScrollbarGrabHovered] = { 0.3f, 0.3f, 0.3f, 1.00f };
-		colors[ImGuiCol_ScrollbarGrabActive] = { 0.40f, 0.36f, 0.33f, 1.00f };
-		colors[ImGuiCol_CheckMark] = { 0.84f, 0.84f, 0.84f, 1.0f };			//
-		colors[ImGuiCol_SliderGrab] = { 0.4f, 0.4f, 0.4f, 1.0f };			//		
-		//colors[ImGuiCol_SliderGrab] = { 0.8f, 0.8f, 0.8f, 1.0f };			//		
-		colors[ImGuiCol_SliderGrabActive] = { 0.35f, 0.35f, 0.35f, 1.00f }; //
-		//colors[ImGuiCol_SliderGrabActive] = { 0.55f, 0.55f, 0.55f, 1.00f }; //
-		colors[ImGuiCol_Button] = { 0.55f, 0.55f, 0.55f, 0.40f };			//
-		colors[ImGuiCol_ButtonHovered] = { 0.15f, 0.15f, 0.15f, 0.62f };	//	
-		colors[ImGuiCol_ButtonActive] = { 0.60f, 0.60f, 0.60f, 1.00f };		//
-		colors[ImGuiCol_Header] = { 0.84f, 0.36f, 0.05f, 0.0f };			//
-		colors[ImGuiCol_HeaderHovered] = { 0.25f, 0.25f, 0.25f, 0.80f };	//
-		colors[ImGuiCol_HeaderActive] = { 0.42f, 0.42f, 0.42f, 1.00f };
-		colors[ImGuiCol_Separator] = { 0.35f, 0.35f, 0.35f, 0.50f };		//
-		colors[ImGuiCol_SeparatorHovered] = { 0.3f, 0.3f, 0.3f, 0.78f };
-		colors[ImGuiCol_SeparatorActive] = { 0.40f, 0.36f, 0.33f, 1.00f };
-		colors[ImGuiCol_ResizeGrip] = { 1.0f, 1.0f, 1.0f, 0.25f };			//
-		colors[ImGuiCol_ResizeGripHovered] = { 1.00f, 1.0f, 1.0f, 0.4f };	//
-		colors[ImGuiCol_ResizeGripActive] = { 1.00f, 1.00f, 1.0f, 0.95f };	//
-		colors[ImGuiCol_Tab] = { 0.18f, 0.18f, 0.18f, 1.0f };				//
-		colors[ImGuiCol_TabHovered] = { 0.58f, 0.58f, 0.58f, 0.80f };		//
-		colors[ImGuiCol_TabActive] = { 0.6f, 0.60f, 0.60f, 1.00f };
-		colors[ImGuiCol_TabUnfocused] = { 0.07f, 0.10f, 0.15f, 0.97f };
-		colors[ImGuiCol_TabUnfocusedActive] = { 0.14f, 0.26f, 0.42f, 1.00f };
-		colors[ImGuiCol_PlotLines] = { 0.66f, 0.60f, 0.52f, 1.00f };
-		colors[ImGuiCol_PlotLinesHovered] = { 0.98f, 0.29f, 0.20f, 1.00f };
-		colors[ImGuiCol_PlotHistogram] = { 0.60f, 0.59f, 0.10f, 1.00f };
-		colors[ImGuiCol_PlotHistogramHovered] = { 0.72f, 0.73f, 0.15f, 1.00f };
-		colors[ImGuiCol_TextSelectedBg] = { 0.27f, 0.52f, 0.53f, 0.35f };
-		colors[ImGuiCol_DragDropTarget] = { 0.60f, 0.59f, 0.10f, 0.90f };
-		colors[ImGuiCol_NavHighlight] = { 0.51f, 0.65f, 0.60f, 1.00f };
-		colors[ImGuiCol_NavWindowingHighlight] = { 1.00f, 1.00f, 1.00f, 0.70f };
-		colors[ImGuiCol_NavWindowingDimBg] = { 0.80f, 0.80f, 0.80f, 0.20f };
-		colors[ImGuiCol_ModalWindowDimBg] = { 0.11f, 0.13f, 0.13f, 0.35f };
-	}
-
-	//--
-
-	////https://github.com/erickjung/SwiftGUI
-	////ImGui theme
-	//void ImGui_ThemeDarcula()
-	//{
-	//	//		//
-	//	//// Copyright (c) 2020, Erick Jung.
-	//	//// All rights reserved.
-	//	////
-	//	//// This source code is licensed under the MIT-style license found in the
-	//	//// LICENSE file in the root directory of this source tree.
-	//	////
-	//	//
-	//	//		import Foundation
-	//	//
-	//	//			public class DarculaTheme : Theme {
-	//	//
-	//	//			public var colors : [GuiColorProperty:GuiColor]{
-	//	//
-	//	//				return[
-	//	//					.text:.white,
-	//	//					.textDisabled : GuiColor(r : 0.54, g : 0.54, b : 0.54, a : 1),
-	//	//					.windowBg : GuiColor(r : 0.23, g : 0.24, b : 0.25, a : 1),
-	//	//					.childBg : GuiColor(r : 0.23, g : 0.24, b : 0.25, a : 1),
-	//	//					.popupBg : GuiColor(r : 0.23, g : 0.24, b : 0.25, a : 1),
-	//	//					.border : GuiColor(r : 0.36, g : 0.36, b : 0.36, a : 1),
-	//	//					.borderShadow : GuiColor(r : 0.15, g : 0.15, b : 0.15, a : 0),
-	//	//					.frameBg : GuiColor(r : 0.27, g : 0.28, b : 0.29, a : 1),
-	//	//					.frameBgHovered : GuiColor(r : 0.27, g : 0.28, b : 0.29, a : 1),
-	//	//					.frameBgActive : GuiColor(r : 0.47, g : 0.47, b : 0.47, a : 0.67),
-	//	//					.titleBg : GuiColor(r : 0.04, g : 0.04, b : 0.04, a : 1),
-	//	//					.titleBgActive : GuiColor(r : 0, g : 0, b : 0, a : 0.51),
-	//	//					.titleBgCollapsed : GuiColor(r : 0.16, g : 0.29, b : 0.48, a : 1),
-	//	//					.menuBarBg : GuiColor(r : 0.27, g : 0.28, b : 0.29, a : 0.8),
-	//	//					.scrollbarBg : GuiColor(r : 0.39, g : 0.4, b : 0.4, a : 0),
-	//	//					.scrollbarGrab : GuiColor(r : 0.39, g : 0.4, b : 0.4, a : 1),
-	//	//					.scrollbarGrabHovered : GuiColor(r : 0.39, g : 0.4, b : 0.4, a : 1),
-	//	//					.scrollbarGrabActive : GuiColor(r : 0.39, g : 0.4, b : 0.4, a : 1),
-	//	//					.checkMark : GuiColor(r : 0.65, g : 0.65, b : 0.65, a : 1),
-	//	//					.sliderGrab : GuiColor(r : 0.7, g : 0.7, b : 0.7, a : 0.62),
-	//	//					.sliderGrabActive : GuiColor(r : 0.3, g : 0.3, b : 0.3, a : 0.84),
-	//	//					.button : GuiColor(r : 0.29, g : 0.31, b : 0.32, a : 1),
-	//	//					.buttonHovered : GuiColor(r : 0.29, g : 0.31, b : 0.32, a : 1),
-	//	//					.buttonActive : GuiColor(r : 0.21, g : 0.34, b : 0.5, a : 1),
-	//	//					.header : GuiColor(r : 0.32, g : 0.33, b : 0.34, a : 1),
-	//	//					.headerHovered : GuiColor(r : 0.30, g : 0.32, b : 0.32, a : 1),
-	//	//					.headerActive : GuiColor(r : 0.47, g : 0.47, b : 0.47, a : 0.67),
-	//	//					.separator : GuiColor(r : 0.31, g : 0.31, b : 0.31, a : 1),
-	//	//					.separatorHovered : GuiColor(r : 0.31, g : 0.31, b : 0.31, a : 1),
-	//	//					.separatorActive : GuiColor(r : 0.31, g : 0.31, b : 0.31, a : 1),
-	//	//					.resizeGrip : GuiColor(r : 1, g : 1, b : 1, a : 0.85),
-	//	//					.resizeGripHovered : GuiColor(r : 1, g : 1, b : 1, a : 0.6),
-	//	//					.resizeGripActive : GuiColor(r : 0.47, g : 0.47, b : 0.47, a : 0.67),
-	//	//					.tab : GuiColor(r : 0.32, g : 0.33, b : 0.34, a : 1),
-	//	//					.tabHovered : GuiColor(r : 0.21, g : 0.34, b : 0.5, a : 1),
-	//	//					.tabActive : GuiColor(r : 0.21, g : 0.34, b : 0.5, a : 1),
-	//	//					.tabUnfocused : GuiColor(r : 0.06, g : 0.53, b : 0.98, a : 0.8),
-	//	//					.tabUnfocusedActive : GuiColor(r : 0.06, g : 0.53, b : 0.98, a : 0.4),
-	//	//					.plotLines : GuiColor(r : 0.61, g : 0.61, b : 0.61, a : 1),
-	//	//					.plotLinesHovered : GuiColor(r : 1, g : 0.43, b : 0.35, a : 1),
-	//	//					.plotHistogram : GuiColor(r : 0.9, g : 0.7, b : 0, a : 1),
-	//	//					.plotHistogramHovered : GuiColor(r : 1, g : 0.6, b : 0, a : 1),
-	//	//					.textSelectedBg : GuiColor(r : 0.18, g : 0.39, b : 0.79, a : 0.9),
-	//	//					.modalWindowDimBg : GuiColor(r : 0.18, g : 0.39, b : 0.79, a : 1)
-	//	//				]
-	//	//			}
-	//	//
-	//	//				public var windowRounding : Float{
-	//	//					return 5.3
-	//	//					}
-	//	//
-	//	//						public var grabRounding : Float{
-	//	//							return 2.3
-	//	//					}
-	//	//
-	//	//						public var frameRounding : Float{
-	//	//							return 2.3
-	//	//					}
-	//	//
-	//	//						public var scrollbarRounding : Float{
-	//	//							return 5
-	//	//					}
-	//	//
-	//	//						public var frameBorderSize : Float{
-	//	//							return 1
-	//	//					}
-	//	//
-	//	//						public var itemSpacing : GuiPoint{
-	//	//							return GuiPoint(x: 8, y : 6.5)
-	//	//					}
-	//	//
-	//	//						public init() {}
-	//	//		}
-
-	//	auto& style = ImGui::GetStyle();
-	//	style.ChildRounding = 0;
-	//	style.GrabRounding = 0;
-	//	style.FrameRounding = 2;
-	//	style.PopupRounding = 0;
-	//	style.ScrollbarRounding = 0;
-	//	style.TabRounding = 2;
-	//	style.WindowRounding = 0;
-	//	style.FramePadding = { 4, 4 };
-	//	style.WindowTitleAlign = { 0.0, 0.5 };
-	//	style.ColorButtonPosition = ImGuiDir_Left;
-	//	ImVec4* colors = ImGui::GetStyle().Colors;
-	//	colors[ImGuiCol_Text] = { 1.0f, 1.0f, 1.0f, 1.00f };				//
-	//	colors[ImGuiCol_TextDisabled] = { 0.25f, 0.25f, 0.25f, 1.00f };		//
-	//	colors[ImGuiCol_WindowBg] = { 0.09f, 0.09f, 0.09f, 0.94f };			//
-	//	colors[ImGuiCol_ChildBg] = { 0.11f, 0.11f, 0.11f, 1.00f };			//
-	//	colors[ImGuiCol_PopupBg] = { 0.11f, 0.11f, 0.11f, 0.94f };			//
-	//	colors[ImGuiCol_Border] = { 0.07f, 0.08f, 0.08f, 1.00f };
-	//	colors[ImGuiCol_BorderShadow] = { 0.00f, 0.00f, 0.00f, 0.00f };
-	//	colors[ImGuiCol_FrameBg] = { 0.35f, 0.35f, 0.35f, 0.54f };			//
-	//	colors[ImGuiCol_FrameBgHovered] = { 0.31f, 0.29f, 0.27f, 1.00f };
-	//	colors[ImGuiCol_FrameBgActive] = { 0.40f, 0.36f, 0.33f, 0.67f };
-	//	colors[ImGuiCol_TitleBg] = { 0.1f, 0.1f, 0.1f, 1.00f };
-	//	colors[ImGuiCol_TitleBgActive] = { 0.3f, 0.3f, 0.3f, 1.00f };		//
-	//	colors[ImGuiCol_TitleBgCollapsed] = { 0.0f, 0.0f, 0.0f, 0.61f };
-	//	colors[ImGuiCol_MenuBarBg] = { 0.18f, 0.18f, 0.18f, 0.94f };		//
-	//	colors[ImGuiCol_ScrollbarBg] = { 0.00f, 0.00f, 0.00f, 0.16f };
-	//	colors[ImGuiCol_ScrollbarGrab] = { 0.24f, 0.22f, 0.21f, 1.00f };
-	//	colors[ImGuiCol_ScrollbarGrabHovered] = { 0.31f, 0.29f, 0.27f, 1.00f };
-	//	colors[ImGuiCol_ScrollbarGrabActive] = { 0.40f, 0.36f, 0.33f, 1.00f };
-	//	colors[ImGuiCol_CheckMark] = { 0.84f, 0.84f, 0.84f, 1.0f };			//
-	//	colors[ImGuiCol_SliderGrab] = { 0.8f, 0.8f, 0.8f, 1.0f };			//		
-	//	colors[ImGuiCol_SliderGrabActive] = { 0.55f, 0.55f, 0.55f, 1.00f }; //
-	//	colors[ImGuiCol_Button] = { 0.55f, 0.55f, 0.55f, 0.40f };			//
-	//	colors[ImGuiCol_ButtonHovered] = { 0.15f, 0.15f, 0.15f, 0.62f };	//	
-	//	colors[ImGuiCol_ButtonActive] = { 0.60f, 0.60f, 0.60f, 1.00f };		//
-	//	colors[ImGuiCol_Header] = { 0.84f, 0.36f, 0.05f, 0.0f };			//
-	//	colors[ImGuiCol_HeaderHovered] = { 0.25f, 0.25f, 0.25f, 0.80f };	//
-	//	colors[ImGuiCol_HeaderActive] = { 0.42f, 0.42f, 0.42f, 1.00f };
-	//	colors[ImGuiCol_Separator] = { 0.35f, 0.35f, 0.35f, 0.50f };		//
-	//	colors[ImGuiCol_SeparatorHovered] = { 0.31f, 0.29f, 0.27f, 0.78f };
-	//	colors[ImGuiCol_SeparatorActive] = { 0.40f, 0.36f, 0.33f, 1.00f };
-	//	colors[ImGuiCol_ResizeGrip] = { 1.0f, 1.0f, 1.0f, 0.25f };			//
-	//	colors[ImGuiCol_ResizeGripHovered] = { 1.00f, 1.0f, 1.0f, 0.4f };	//
-	//	colors[ImGuiCol_ResizeGripActive] = { 1.00f, 1.00f, 1.0f, 0.95f };	//
-	//	colors[ImGuiCol_Tab] = { 0.18f, 0.18f, 0.18f, 1.0f };				//
-	//	colors[ImGuiCol_TabHovered] = { 0.58f, 0.58f, 0.58f, 0.80f };		//
-	//	colors[ImGuiCol_TabActive] = { 0.6f, 0.60f, 0.60f, 1.00f };
-	//	colors[ImGuiCol_TabUnfocused] = { 0.07f, 0.10f, 0.15f, 0.97f };
-	//	colors[ImGuiCol_TabUnfocusedActive] = { 0.14f, 0.26f, 0.42f, 1.00f };
-	//	colors[ImGuiCol_PlotLines] = { 0.66f, 0.60f, 0.52f, 1.00f };
-	//	colors[ImGuiCol_PlotLinesHovered] = { 0.98f, 0.29f, 0.20f, 1.00f };
-	//	colors[ImGuiCol_PlotHistogram] = { 0.60f, 0.59f, 0.10f, 1.00f };
-	//	colors[ImGuiCol_PlotHistogramHovered] = { 0.72f, 0.73f, 0.15f, 1.00f };
-	//	colors[ImGuiCol_TextSelectedBg] = { 0.27f, 0.52f, 0.53f, 0.35f };
-	//	colors[ImGuiCol_DragDropTarget] = { 0.60f, 0.59f, 0.10f, 0.90f };
-	//	colors[ImGuiCol_NavHighlight] = { 0.51f, 0.65f, 0.60f, 1.00f };
-	//	colors[ImGuiCol_NavWindowingHighlight] = { 1.00f, 1.00f, 1.00f, 0.70f };
-	//	colors[ImGuiCol_NavWindowingDimBg] = { 0.80f, 0.80f, 0.80f, 0.20f };
-	//	colors[ImGuiCol_ModalWindowDimBg] = { 0.11f, 0.13f, 0.13f, 0.35f };
-	//}
-
-//--
-
-	////slider enum
-	//// Using the format string to display a name instead of an integer.
-	//// Here we completely omit '%d' from the format string, so it'll only display a name.
-	//// This technique can also be used with DragInt().
-	////DemoCode_("Widgets/Basic/Inputs/Slider Enum");
-	//enum Element { Element_Fire, Element_Earth, Element_Air, Element_Water, Element_COUNT };
-	//static int elem = Element_Fire;
-	//const char* elems_names[Element_COUNT] = { "Fire", "Earth", "Air", "Water" };
-	//const char* elem_name = (elem >= 0 && elem < Element_COUNT) ? elems_names[elem] : "Unknown";
-	//ImGui::SliderInt("slider enum", &elem, 0, Element_COUNT - 1, elem_name);
-	////ImGui::SameLine(); 
-	////HelpMarker("Using the format string parameter to display a name instead of the underlying integer.");
-
-	////drop list
-	//// Using the _simplified_ one-liner Combo() api here
-	//// See "Combo" section for examples of how to use the more complete BeginCombo()/EndCombo() api.
-	//const char* items[] = { "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIIIIII", "JJJJ", "KKKKKKK" };
-	//static int item_current = 0;
-	//ImGui::Combo("combo", &item_current, items, IM_ARRAYSIZE(items));
-
-#endif
 };

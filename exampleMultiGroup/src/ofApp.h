@@ -8,12 +8,14 @@
 #ifdef USE_WindowApp
 #include "ofxWindowApp.h"
 #endif
+#include "ofxSurfingHelpers.h"
 #include "ofxGui.h"
 
 class ofApp : public ofBaseApp
 {
 public:
     void setup();
+    void setupParameters();
     void update();
     void draw();
     void exit();

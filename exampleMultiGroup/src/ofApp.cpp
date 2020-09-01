@@ -10,10 +10,50 @@ void ofApp::setup()
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
 #endif
+	ofxSurfingHelpers::setTheme_ofxGui();
 
 	//--
 
-	//0. our group of parameters
+	//0. parameters
+	setupParameters();
+
+	//--
+
+	//1. (optional) customize path folders at first
+	presetsManager.setPath_UserKit_Folder("presetsManager");
+	//main container folder where all other files will be
+
+	//--
+
+	//2. add our ofParameterGroup to the preset manager 
+	//also define wich key triggers are associated to each preset. 
+	//the amount of keys will be also the amount of favorites/clickable presets
+
+	//group1
+	presetsManager.add(params1, { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+
+	//group2
+	presetsManager.add(params2, { 'q', 'w', 'e', 'r', 't' });
+
+	//group3
+	presetsManager.add(params3, { 'a', 's', 'd', 'f' });
+
+	//group4
+	presetsManager.add(params4, { 'z', 'x', 'c', 'v', 'b' });
+
+	//--
+
+	//3. call setup after adding ofParameterGroup
+	presetsManager.setup();
+
+	//4. (optional) customize gui positions
+	presetsManager.setVisible_PresetClicker(true);//user panel clicker
+}
+
+//--------------------------------------------------------------
+void ofApp::setupParameters()
+{
+	//0. ofParameterGroups
 
 	//group1
 	params1.setName("paramsGroup1");//main (target) group
@@ -47,38 +87,7 @@ void ofApp::setup()
 
 	//--
 
-	//1. (optional) customize path folders at first
-	presetsManager.setPath_UserKit_Folder("presetsManager");
-	//main container folder where all other files will be
-
-	//-
-
-	//2. add our ofParameterGroup to the preset manager 
-	//also define wich key triggers are associated to each preset. 
-	//the amount of keys will be also the amount of favorites/clickable presets
-
-	//group1
-	presetsManager.add(params1, { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
-
-	//group2
-	presetsManager.add(params2, { 'a', 's', 'd', 'e', 'r' });
-
-	//group3
-	presetsManager.add(params3, { 'z', 'x', 'c', 'v' });
-
-	//group4
-	presetsManager.add(params4, { 'g', 'h', 'j', 'k', 'l' });
-
-	//-
-
-	//3. call setup after adding ofParameterGroup
-	presetsManager.setup();
-
-	//4. (optional) customize gui positions
-	presetsManager.setVisible_PresetClicker(true);//user panel clicker
-	//presetsManager.setPosition_PresetClicker(200, 100, 50);
-
-	//-------
+	//1. guis
 
 	//local ofApp gui to show/edit our settings/parameters
 	//to show how our params/settings changes when using the presets manager
@@ -88,11 +97,11 @@ void ofApp::setup()
 
 	gui2.setup("ofApp2");
 	gui2.add(params2);
-	gui2.setPosition(5 + 5 + 200, 10);
+	gui2.setPosition(5 + 1 * (5 + 200), 10);
 
 	gui3.setup("ofApp3");
 	gui3.add(params3);
-	gui3.setPosition(5 + 2*(5 + 200), 10);
+	gui3.setPosition(5 + 2 * (5 + 200), 10);
 
 	gui4.setup("ofApp4");
 	gui4.add(params4);
@@ -111,10 +120,11 @@ void ofApp::draw()
 
 	//scene draw object linked to grouped parameters
 	drawScene1();
-	drawDebug1();
 	drawScene2();
-	drawDebug2();
 
+	//drawDebug1();
+	//drawDebug2();
+	
 	//local gui parameters
 	gui1.draw();
 	gui2.draw();
