@@ -57,7 +57,6 @@
 //	DEFINES
 //
 //#define MODE_ImGui_EXTERNAL			//MODE_ImGui_EXTERNAL. this must be defined here and (not only) in ofApp (too)!!
-#define INCLUDE_GUI_IM_GUI				//ImGui & browser system
 #define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
 #define INCLUDE_ofxUndoSimple			//undo engine to store after randomize preset parameters (& recall)
 //#define USE_ofxImGuiSimple			//TEST alternative addon
@@ -74,9 +73,7 @@
 
 //--
 
-#ifdef INCLUDE_GUI_IM_GUI
 #define INCLUDE_RANDOMIZER
-#endif
 //BUG: seems to make exceptions when multiple ImGui/ofxPresetsManager instances...
 
 //internal control
@@ -85,13 +82,11 @@
 //--
 
 //browser system
-#ifdef INCLUDE_GUI_IM_GUI
 #ifdef USE_ofxImGuiSimple
 #include "ofxImGuiSimple.h"
 #include "Helpers.h"
 #else
 #include "ofxImGui.h"
-#endif
 #endif
 
 #ifdef INCLUDE_ofxUndoSimple
@@ -171,13 +166,6 @@ private:
 
 	//-
 
-private:
-#ifndef INCLUDE_GUI_IM_GUI
-	ofxPanel gui_InternalControl;
-#endif
-
-	//-
-
 	//improve performance loading from memory nor xml files
 private:
 	ofParameter<bool> MODE_MemoryLive;//when enabled all presets are handled from a memory vector to avoid lag of loading xml files
@@ -252,7 +240,7 @@ private:
 private:
 	//TODO:
 	//should use keys[i].size() instead of this:
-	vector<ofXml> presetsFavouritesXmls;
+	vector<ofXml> mainGroupPresetsXmls;
 
 	//--
 
@@ -527,14 +515,12 @@ public:
 
 	//browser for standalone presets
 private:
-#ifdef INCLUDE_GUI_IM_GUI
 	//load presets from preset folder, not from favorites presets folders
 	void browser_PresetLoad(string name);
 	void browser_PresetSave(string name);
 	bool browser_FilesRefresh();
 	void browser_Setup();
 	void doCheckPresetsFolderIsEmpty();
-#endif
 
 	//-
 
@@ -575,7 +561,6 @@ public:
 	{
 		debugClicker = b;
 	}
-#ifdef INCLUDE_GUI_IM_GUI
 	//--------------------------------------------------------------
 	void setPosition_GUI_ImGui(int x, int y)
 	{
@@ -596,15 +581,6 @@ public:
 	{
 		return SHOW_ImGui;
 	}
-#endif
-#ifndef INCLUDE_GUI_IM_GUI
-	//--------------------------------------------------------------
-	void setPosition_GUI_InternalControl(int x, int y)
-	{
-		guiPos_InternalControl = ofVec2f(x, y);
-		gui_InternalControl.setPosition(guiPos_InternalControl.x, guiPos_InternalControl.y);
-	}
-#endif
 	//--------------------------------------------------------------
 	void setVisible_GUI_Internal(bool visible)
 	{
@@ -742,7 +718,6 @@ private:
 	//-
 
 	//ImGui
-#ifdef INCLUDE_GUI_IM_GUI
 public:
 	void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
 	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
@@ -776,7 +751,6 @@ private:
 	void ImGui_Draw_WindowBegin();
 	void ImGui_Draw_WindowEnd();
 	bool ImGui_Draw_Window();
-#endif
 #endif
 
 	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. 
@@ -891,9 +865,10 @@ private:
 
 	//--
 
+	//selectors
 	std::vector<ofParameter<int>> PRESETS_Selected_Index;//? seems to be the size (last index of data vector) of any group or:
 	ofParameterGroup params_PRESETS_Selected{ "Preset Selectors" };
-	//void Changed_Params_PRESETS_Selected(ofAbstractParameter &e);
+	ofParameter<int> mainSelector;
 
 	std::vector<int> groupsSizes;//this is the number of presets of each added group
 
@@ -952,10 +927,8 @@ public:
 private:
 	ofParameterGroup params_Control;
 
-#ifdef INCLUDE_GUI_IM_GUI
 public:
 	ofParameter<bool> SHOW_ImGui;
-#endif
 
 private:
 	ofParameter<bool> bSave;

@@ -117,10 +117,10 @@ int ofxPresetsManager::doRandomizeWichSelectedPresetCheckChanged()
 	//		ofLogWarning(__FUNCTION__) << "Randomize not changed! Try #" << ofToString(++numTryes);
 	//		ofLogNotice(__FUNCTION__) << "PRESET Previous was : " << ofToString(_r);
 	//		ofLogNotice(__FUNCTION__) << "PRESET New Random is: " << ofToString(PRESET_selected_IndexMain);
-	//		PRESET_selected_IndexMain = (int)ofRandom(0, presetsFavouritesXmls.size());
+	//		PRESET_selected_IndexMain = (int)ofRandom(0, mainGroupPresetsXmls.size());
 	//		
-	//		//if (MODE_MemoryLive) _r = (int)ofRandom(0, presetsFavouritesXmls.size());
-	//		//_r = (int)ofRandom(1, presetsFavouritesXmls.size() + 1);
+	//		//if (MODE_MemoryLive) _r = (int)ofRandom(0, mainGroupPresetsXmls.size());
+	//		//_r = (int)ofRandom(1, mainGroupPresetsXmls.size() + 1);
 	//	}
 	//}
 
@@ -795,6 +795,14 @@ ofxPresetsManager::ofxPresetsManager()
 //	params_HelperTools.add(params_Editor_Toggles);
 //#endif
 
+	//-
+
+	//main selector
+	mainSelector.set("Main selector", 0, 0, 7);
+	params_PRESETS_Selected.add(mainSelector);
+
+	//-
+
 	//user
 	params_UserFav.setName("USER");
 	params_UserFav.add(PRESET_selected_IndexMain);
@@ -862,53 +870,18 @@ void ofxPresetsManager::setup()
 
 	//--
 
-	//ofxGui theme
-	str = "overpass-mono-bold.otf";
-	string pathFont = "assets/fonts/" + str;//assets folder
-	//must check this font file is found there
-	ofFile file(pathFont);
-	if (file.exists()) ofxGuiSetFont(pathFont, 9);
-	else
-	{
-#ifdef INCLUDE_DEBUG_ERRORS
-		errorsDEBUG.addError(gui_LabelName + " " + ofToString(__FUNCTION__), "ofxGui font", pathFont);
-#endif
-	}
-
-	//--
-
-	//on this mode we use only a simplified version with ofxGui and without files explorer and ImGui
-#ifndef INCLUDE_GUI_IM_GUI	//this must be check if it works...
-	//theme
-	ofxGuiSetDefaultHeight(20);
-	ofxGuiSetBorderColor(32);
-	ofxGuiSetFillColor(ofColor(48));
-	ofxGuiSetTextColor(ofColor::white);
-	ofxGuiSetHeaderColor(ofColor(24));
-
-	//control gui
-	gui_InternalControl.setup(gui_LabelName);
-	gui_InternalControl.add(params_Control);
-	gui_InternalControl.setPosition(ofGetWidth() - 210, 10);//default
-
-	//collapse
-	//gui_InternalControl.getGroup("ofxPresetsManager").minimize();
-	auto &gPanel = gui_InternalControl.getGroup("ofxPresetsManager");
-	auto &gGui = gPanel.getGroup("GUI");
-	gGui.minimize();
-	auto &gGuiPos = gGui.getGroup("GUI INTERNAL POSITION");
-	gGuiPos.minimize();
-#ifdef INCLUDE_GUI_IM_GUI
-	auto &gGuiPos1 = gGui.getGroup("GUI ImGui POSITION");
-	gGuiPos1.minimize();
-	auto &gGuiPos2 = gGui.getGroup("GUI BROWSER SIZE");
-	gGuiPos2.minimize();
-#endif
-	auto &gOptions = gPanel.getGroup("OPTIONS");
-	//gOptions.minimize();
-	//gOptions.maximize();
-	gPanel.getGroup("HELPER TOOLS").minimize();
-#endif
+//	//ofxGui theme
+//	str = "overpass-mono-bold.otf";
+//	string pathFont = "assets/fonts/" + str;//assets folder
+//	//must check this font file is found there
+//	ofFile file(pathFont);
+//	if (file.exists()) ofxGuiSetFont(pathFont, 9);
+//	else
+//	{
+//#ifdef INCLUDE_DEBUG_ERRORS
+//		errorsDEBUG.addError(gui_LabelName + " " + ofToString(__FUNCTION__), "ofxGui font", pathFont);
+//#endif
+//	}
 
 	//--
 
@@ -922,6 +895,13 @@ void ofxPresetsManager::setup()
 
 	//--
 
+	//main selector
+	//will combine all group
+#define NUM_MAIN_SELECTOR_PRESETS 8
+	mainSelector.setMax(NUM_MAIN_SELECTOR_PRESETS);
+
+	//--
+
 	//create data folders if they are not presets: 
 	//when you create a new project or added the addon to your existing project
 	//and no /data files are present
@@ -930,7 +910,6 @@ void ofxPresetsManager::setup()
 
 	//--
 
-#ifdef INCLUDE_GUI_IM_GUI
 	//browser
 	browser_Setup();
 
@@ -950,10 +929,9 @@ void ofxPresetsManager::setup()
 #ifndef MODE_ImGui_EXTERNAL
 	ImGui_Setup();
 #endif
-#endif
 
 #ifdef INCLUDE_ofxUndoSimple
-	undoStringParams = groups[0].toString();
+	undoStringParams = groups[0].toString();//TODO: main group only
 #endif
 
 	//-------
@@ -1013,29 +991,26 @@ void ofxPresetsManager::startup()
 	load(PRESET_selected_IndexMain, 0);
 	//loadPreset(PRESET_selected_IndexMain);
 
-	//-
-
-	//extra groups presets selector
-	//ofAddListener(params_PRESETS_Selected.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_PRESETS_Selected);
-
 	//--
 
 	////TODO: 
 	//workflow
-	//if there are some toggles/params enabled to allow random, we do not do nothing
-	//if there's no toggle/params enabled, we enable all params toggles to the editor 
-	//so random will affect to all params by default
-
-	//workflow
-	bool someFalse = false;//none is false
-	for (auto &p : editorPresets)
 	{
-		if (!p.get()) someFalse = true;//some is false
-	}
+		//if there are some toggles/params enabled to allow random, we do not do nothing
+		//if there's no toggle/params enabled, we enable all params toggles to the editor 
+		//so random will affect to all params by default
 
-	//if all toggles are disabled after loaded settings, 
-	//then put all to true to allow populate, and random make something
-	if (!someFalse) bRandomizeEditorAll = true;//someone is true
+		//workflow
+		bool someFalse = false;//none is false
+		for (auto &p : editorPresets)
+		{
+			if (!p.get()) someFalse = true;//some is false
+		}
+
+		//if all toggles are disabled after loaded settings, 
+		//then put all to true to allow populate, and random make something
+		if (!someFalse) bRandomizeEditorAll = true;//someone is true
+	}
 
 	//--
 
@@ -1153,11 +1128,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 
 		//autosave
 		//&& autoLoad? 
-#ifndef INCLUDE_GUI_IM_GUI
-		if (autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
-#else
 		if (!MODE_Browser_NewPreset && autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
-#endif
 		{
 			ofLogNotice(__FUNCTION__) << "[AUTOSAVE]";
 
@@ -1198,16 +1169,6 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 
 	//----
 
-#ifndef INCLUDE_GUI_IM_GUI
-//internal ofxGui panel
-	if (SHOW_Gui_AdvancedControl)
-	{
-		gui_InternalControl.draw();
-	}
-#endif
-
-	//----
-
 	//user clicker boxes preset selector 
 	//(from live kit/favorites)
 	if (SHOW_ClickPanel)
@@ -1219,7 +1180,6 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 
 	//gui
 
-#ifdef INCLUDE_GUI_IM_GUI
 #ifndef MODE_ImGui_EXTERNAL
 	//draw ImGui
 	if (SHOW_ImGui)
@@ -1234,7 +1194,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 #else
 	bImGui_mouseOver = false;
 #endif
-#endif
+
 }
 
 
@@ -1571,7 +1531,7 @@ void ofxPresetsManager::add(ofParameterGroup _params, int _amt_presets)//main ad
 		mainGroupAmtPresetsFav = _amt_presets;
 		PRESET_selected_IndexMain.setMax(mainGroupAmtPresetsFav - 1);
 
-		presetsFavouritesXmls.resize(mainGroupAmtPresetsFav);
+		mainGroupPresetsXmls.resize(mainGroupAmtPresetsFav);
 
 		//-
 
@@ -1626,14 +1586,14 @@ void ofxPresetsManager::add(ofParameterGroup _params, initializer_list<int> _key
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, int guiIndex)
 {
-	ofLogVerbose(__FUNCTION__) << "(" << presetIndex << "," << guiIndex << ")";
+	ofLogVerbose(__FUNCTION__) << "group: " << guiIndex << " preset: " << presetIndex;
 
 	//check clamp limiters
 	if ((guiIndex >= 0) && (guiIndex < (int)groups.size()))
 	{
 		//A. main group
 		if ((guiIndex == 0) &&
-			(presetIndex >= 0) && (presetIndex < presetsFavouritesXmls.size()))
+			(presetIndex >= 0) && (presetIndex < mainGroupPresetsXmls.size()))
 		{
 			ofLogVerbose(__FUNCTION__) << "DONE_save (by index)";
 
@@ -1657,13 +1617,13 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 			{
 				ofLogNotice(__FUNCTION__) << "MEMORY MODE";
 				TS_START("SAVE MEM 1");
-				if ((presetIndex >= 0) && (presetIndex < presetsFavouritesXmls.size()))
+				if ((presetIndex >= 0) && (presetIndex < mainGroupPresetsXmls.size()))
 				{
-					ofSerialize(presetsFavouritesXmls[presetIndex], groups[guiIndex]);
+					ofSerialize(mainGroupPresetsXmls[presetIndex], groups[guiIndex]);
 				}
 				else
 				{
-					ofLogError(__FUNCTION__) << "presetsFavouritesXmls OUT OF RANGE";
+					ofLogError(__FUNCTION__) << "mainGroupPresetsXmls OUT OF RANGE";
 				}
 				TS_STOP("SAVE MEM 1");
 			}
@@ -1700,7 +1660,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 	{
 		//A. main group
 		if ((guiIndex == 0) &&
-			(presetIndex >= 0) && (presetIndex < presetsFavouritesXmls.size()))
+			(presetIndex >= 0) && (presetIndex < mainGroupPresetsXmls.size()))
 		{
 			ofLogVerbose(__FUNCTION__) << "DONE_save (by name)";
 
@@ -1723,11 +1683,11 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 			{
 				TS_START("SAVE MEM 2");//for TimeMeasurements only
 
-				if (presetIndex < presetsFavouritesXmls.size()) {
-					ofSerialize(presetsFavouritesXmls[presetIndex], groups[guiIndex]);
+				if (presetIndex < mainGroupPresetsXmls.size()) {
+					ofSerialize(mainGroupPresetsXmls[presetIndex], groups[guiIndex]);
 				}
 				else {
-					ofLogError(__FUNCTION__) << "presetsFavouritesXmls OUT OF RANGE";
+					ofLogError(__FUNCTION__) << "mainGroupPresetsXmls OUT OF RANGE";
 				}
 
 				TS_STOP("SAVE MEM 2");//for TimeMeasurements only
@@ -1741,7 +1701,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 		//B. extra groups guiIndex != 0
 		else if ((presetIndex >= 0) && (presetIndex < groupsSizes[presetIndex]))
 		{
-			ofSerialize(presetsFavouritesXmls[presetIndex], groups[guiIndex]);
+			ofSerialize(mainGroupPresetsXmls[presetIndex], groups[guiIndex]);
 			ofLogNotice(__FUNCTION__) << "Serialized: " << groups[guiIndex].getName();
 		}
 	}
@@ -1761,7 +1721,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	{
 		//A. main group
 		if ((guiIndex == 0) &&
-			(presetIndex >= 0) && (presetIndex < presetsFavouritesXmls.size()))
+			(presetIndex >= 0) && (presetIndex < mainGroupPresetsXmls.size()))
 		{
 			if (!MODE_MemoryLive)
 			{
@@ -1778,13 +1738,13 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 				//MODE B: direct from memory
 				TS_START("LOAD MEM 1");//for TimeMeasurements only
 				//using xml array
-				if (presetIndex < presetsFavouritesXmls.size())
+				if (presetIndex < mainGroupPresetsXmls.size())
 				{
-					ofDeserialize(presetsFavouritesXmls[presetIndex], groups[guiIndex]);
+					ofDeserialize(mainGroupPresetsXmls[presetIndex], groups[guiIndex]);
 				}
 				else
 				{
-					ofLogError(__FUNCTION__) << "presetsFavouritesXmls OUT OF RANGE";
+					ofLogError(__FUNCTION__) << "mainGroupPresetsXmls OUT OF RANGE";
 				}
 				TS_STOP("LOAD MEM 1");//for TimeMeasurements only
 			}
@@ -1834,7 +1794,7 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 	{
 		//A. main group
 		if ((guiIndex == 0) &&
-			(presetIndex >= 0) && (presetIndex < presetsFavouritesXmls.size()))
+			(presetIndex >= 0) && (presetIndex < mainGroupPresetsXmls.size()))
 		{
 			if (!MODE_MemoryLive)
 			{
@@ -1850,11 +1810,11 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 			{
 				//MODE B: direct from memory
 				TS_START("LOAD MEM 2""LOAD MEM 2");//for TimeMeasurements only
-				if (presetIndex < presetsFavouritesXmls.size()) {
-					ofDeserialize(presetsFavouritesXmls[presetIndex], groups[guiIndex]);
+				if (presetIndex < mainGroupPresetsXmls.size()) {
+					ofDeserialize(mainGroupPresetsXmls[presetIndex], groups[guiIndex]);
 				}
 				else {
-					ofLogError(__FUNCTION__) << "presetsFavouritesXmls OUT OF RANGE LOAD";
+					ofLogError(__FUNCTION__) << "mainGroupPresetsXmls OUT OF RANGE LOAD";
 				}
 				TS_STOP("LOAD MEM 2");//for TimeMeasurements only
 			}
@@ -1991,11 +1951,7 @@ void ofxPresetsManager::setModeKeySwap(int key)
 //----------------------------------------------------------------
 void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 {
-#ifndef INCLUDE_GUI_IM_GUI
-	if (bKeys && ENABLE_Keys)
-#else
 	if (bKeys && ENABLE_Keys && !bImGui_mouseOver)//disable keys when mouse over gui
-#endif
 	{
 		const int &key = eventArgs.key;
 
@@ -2085,7 +2041,6 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		{
 
 			//browse presets
-#ifdef INCLUDE_GUI_IM_GUI
 			if (MODE_Browser_NewPreset)
 			{
 				currentFile++;
@@ -2096,13 +2051,12 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				browser_PresetLoad(browser_PresetName);
 			}
 			else
-#endif
 				//browse favorites
 			{
 				int i = PRESET_selected_IndexMain;
 				i++;
 
-				if (i > presetsFavouritesXmls.size() - 1) i = presetsFavouritesXmls.size() - 1;
+				if (i > mainGroupPresetsXmls.size() - 1) i = mainGroupPresetsXmls.size() - 1;
 				PRESET_selected_IndexMain = i;
 			}
 		}
@@ -2110,7 +2064,6 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		else if (key == OF_KEY_LEFT && ENABLE_KeysArrowBrowse)
 		{
 			//browse presets
-#ifdef INCLUDE_GUI_IM_GUI
 			if (MODE_Browser_NewPreset)
 			{
 				currentFile--;
@@ -2121,7 +2074,6 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				browser_PresetLoad(browser_PresetName);
 			}
 			else
-#endif
 				//browse favorites
 			{
 				int i = PRESET_selected_IndexMain;
@@ -2283,9 +2235,10 @@ void ofxPresetsManager::mousePressed(int x, int y)
 		//2. last button (save button)
 		else if (xIndex == groupsSizes[yIndex])
 		{
-			//if (!autoSave)//TODO: hide save buttons if autoSave 
+			//TODO: hide save buttons if autoSave 
+			//if (!autoSave)
 			{
-				ofLogNotice(__FUNCTION__) << "saveButton: [group:" << yIndex << "]";
+				ofLogNotice(__FUNCTION__) << "saveButton group:" << yIndex;
 				if (yIndex == 0)
 				{
 					doSave(PRESETS_Selected_Index[yIndex]);
@@ -2471,37 +2424,6 @@ void ofxPresetsManager::Changed_Params_Editor(ofAbstractParameter &e)
 	}
 }
 
-////--------------------------------------------------------------
-//void ofxPresetsManager::Changed_Params_PRESETS_Selected(ofAbstractParameter &e)
-//{
-//	if (!DISABLE_CALLBACKS)
-//	{
-//		string name = e.getName();
-//
-//		if ((name != "exclude"))
-//		{
-//			ofLogNotice(__FUNCTION__) << name << " : " << e;
-//		}
-//
-//		//-
-//
-//		////exclude group 0
-//		//for (int g = 0; g < groups.size(); g++)//iterate each group
-//		//{
-//		//	for (int p = 0; p < groupsSizes[g]; p++)//save each preset on each group
-//		//	{
-//		//		string _namePreset = PRESETS_Selected_Index[p].getName();
-//
-//		//		if (name == _namePreset)
-//		//		{
-//		//			ofLogNotice(__FUNCTION__) << "preset: " << p << " group: " << g;
-//		//			//load(p, g);
-//		//		}
-//		//	}
-//		//}
-//	}
-//}
-
 //--------------------------------------------------------------
 void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 {
@@ -2516,7 +2438,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			//(name != "PRESET")
 			)
 		{
-			ofLogNotice(__FUNCTION__) << groups[0].getName() << " " << name << " : " << e;
+			ofLogNotice(__FUNCTION__) << name << " : " << e;
 		}
 
 		if (false) {}
@@ -2556,7 +2478,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//--
 
 		//randomizer
-#ifdef INCLUDE_GUI_IM_GUI
 		else if (name == "SHOW CLICK PANEL" && !SHOW_ClickPanel.get())
 		{
 			SHOW_ImGui = false;//workflow
@@ -2625,7 +2546,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			doResetDices();
 			bResetDices = false;
 		}
-#endif
 
 		//--
 
@@ -2634,18 +2554,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//}
 
 		//--
-
-#ifndef INCLUDE_GUI_IM_GUI
-		else if (name == "GUI INTERNAL POSITION")
-		{
-			ofLogVerbose(__FUNCTION__) << "GUI POSITION: " << e;
-			//clamp inside window
-			float x, y;
-			x = ofClamp(Gui_Internal_Position.get().x, 0, ofGetWidth() - 200);
-			y = ofClamp(Gui_Internal_Position.get().y, 0, ofGetHeight() - 20);
-			gui_InternalControl.setPosition(x, y);
-		}
-#endif
 
 		//#ifdef INCLUDE_GUI_IM_GUI
 		//		else if (name == "GUI ImGui POSITION")
@@ -2669,7 +2577,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//			//ImGui_Position = glm::vec2(x, y);
 		//		}
 		//#endif
-				//--
+				
+		//--
 
 		else if (name == "LOAD TO MEMORY" && loadToMemory)
 		{
@@ -2721,7 +2630,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				ofLogNotice(__FUNCTION__) << groups[0].getName() << " PRESET " << e << "  [NOT Changed]";
 
 				//browser
-#ifdef INCLUDE_GUI_IM_GUI
 				if (MODE_Browser_NewPreset)
 				{
 					if (autoLoad)
@@ -2729,7 +2637,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 						load(PRESET_selected_IndexMain, 0);
 					}
 				}
-#endif
 				bMustTrig = true;
 			}
 
@@ -2773,7 +2680,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				//{
 				//	if (PRESETS_Selected_Index.size() > 0//amount of groups
 				//		&& yIndex < PRESETS_Selected_Index.size()//amount of groups
-				//		&& xIndex < presetsFavouritesXmls.size())
+				//		&& xIndex < mainGroupPresetsXmls.size())
 				//	{
 				//		//mark selector as lastone trigged
 				//		PRESETS_Selected_Index[yIndex] = xIndex;
@@ -2888,20 +2795,6 @@ void ofxPresetsManager::save_ControlSettings()
 
 	DISABLE_CALLBACKS = true;
 
-	//-
-
-	//TODO: 
-	//crashes sometimes?
-#ifndef INCLUDE_GUI_IM_GUI
-	//get gui position from panel to update the position param
-	Gui_Internal_Position = glm::vec2(gui_InternalControl.getPosition());
-
-	//float x, y;
-	//x = gui_InternalControl.getPosition().x;
-	//y = gui_InternalControl.getPosition().y;
-	//Gui_Internal_Position = glm::vec2(x, y);
-#endif
-
 	//---
 
 	//TODO: 
@@ -2990,7 +2883,7 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 {
 	ofLogVerbose(__FUNCTION__);
 
-	for (int i = 0; i < presetsFavouritesXmls.size(); i++)
+	for (int i = 0; i < mainGroupPresetsXmls.size(); i++)
 	{
 		string strFolder;
 		string strFile;
@@ -3000,11 +2893,11 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 		strFile = groups[0].getName() + filenamesPrefix + ofToString(i) + ".xml";
 		strPath = strFolder + strFile;
 
-		if (i < presetsFavouritesXmls.size()) {
-			presetsFavouritesXmls[i].save(strPath);
+		if (i < mainGroupPresetsXmls.size()) {
+			mainGroupPresetsXmls[i].save(strPath);
 		}
 		else {
-			ofLogError(__FUNCTION__) << "presetsFavouritesXmls OUT OF RANGE";
+			ofLogError(__FUNCTION__) << "mainGroupPresetsXmls OUT OF RANGE";
 		}
 
 	}
@@ -3012,9 +2905,9 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 	//debug params
 	if (true)
 	{
-		for (int i = 0; i < presetsFavouritesXmls.size(); i++)
+		for (int i = 0; i < mainGroupPresetsXmls.size(); i++)
 		{
-			ofLogNotice(__FUNCTION__) << "presetsFavouritesXmls[" << i << "] " << ofToString(presetsFavouritesXmls[i].toString());
+			ofLogNotice(__FUNCTION__) << "mainGroupPresetsXmls[" << i << "] " << ofToString(mainGroupPresetsXmls[i].toString());
 		}
 	}
 }
@@ -3029,7 +2922,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	//groupsMem.reserve(NUM_OF_PRESETS);
 	//groupsMem.resize(NUM_OF_PRESETS);
 
-	for (int i = 0; i < presetsFavouritesXmls.size(); i++)
+	for (int i = 0; i < mainGroupPresetsXmls.size(); i++)
 	{
 		//TODO:
 		//PROBLEM:
@@ -3069,11 +2962,11 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 
 		if (bLoaded)
 		{
-			if (i < presetsFavouritesXmls.size()) {
-				presetsFavouritesXmls[i] = settings;
+			if (i < mainGroupPresetsXmls.size()) {
+				mainGroupPresetsXmls[i] = settings;
 			}
 			else {
-				ofLogError(__FUNCTION__) << "presetsFavouritesXmls OUT OF RANGE";
+				ofLogError(__FUNCTION__) << "mainGroupPresetsXmls OUT OF RANGE";
 			}
 		}
 #ifdef INCLUDE_DEBUG_ERRORS
@@ -3091,9 +2984,9 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	//debug params
 	if (false)
 	{
-		for (int i = 0; i < presetsFavouritesXmls.size(); i++)
+		for (int i = 0; i < mainGroupPresetsXmls.size(); i++)
 		{
-			ofLogNotice(__FUNCTION__) << "presetsFavouritesXmls[" << i << "] " << ofToString(presetsFavouritesXmls[i].toString());
+			ofLogNotice(__FUNCTION__) << "mainGroupPresetsXmls[" << i << "] " << ofToString(mainGroupPresetsXmls[i].toString());
 		}
 	}
 }
@@ -3118,7 +3011,6 @@ void ofxPresetsManager::exit()
 	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 	ofRemoveListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 	ofRemoveListener(params_Editor.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Editor);
-	//ofRemoveListener(params_PRESETS_Selected.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_PRESETS_Selected);
 
 	//TODO: required?
 	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
@@ -3172,8 +3064,6 @@ void ofxPresetsManager::exit()
 //--
 
 #pragma mark - IM_GUI
-
-#ifdef INCLUDE_GUI_IM_GUI
 
 #ifndef USE_ofxImGuiSimple
 //--------------------------------------------------------------
@@ -3459,9 +3349,8 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 }
 
 #endif
-#endif
 
-#ifdef INCLUDE_GUI_IM_GUI//ImGui pure content
+//ImGui pure content
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_PresetPreview(ofxImGui::Settings &settings)
 {
@@ -4209,9 +4098,8 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 		//ImGui::TreePop();
 	}
 }
-#endif
 
-#ifdef INCLUDE_GUI_IM_GUI//browser
+//browser
 //--------------------------------------------------------------
 void ofxPresetsManager::browser_PresetSave(string name)//without xml extension nor path
 {
@@ -4415,5 +4303,4 @@ void ofxPresetsManager::undoRefreshParams() {
 	//str += undoStringParams.getUndoStateDescriptor() + "\n";
 	ofLogNotice(__FUNCTION__) << str;
 }
-#endif
 #endif
