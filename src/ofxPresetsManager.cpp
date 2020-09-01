@@ -2511,9 +2511,9 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		if ((name != "exclude") &&
 			(name != ImGui_Position.getName()) &&
-			(name != ImGui_Size.getName()) &&
+			(name != ImGui_Size.getName())// &&
 			//(name != "DICE") &&
-			(name != "PRESET")
+			//(name != "PRESET")
 			)
 		{
 			ofLogNotice(__FUNCTION__) << groups[0].getName() << " " << name << " : " << e;
@@ -2523,13 +2523,13 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		//-
 
+		//save load
 		else if (name == "SAVE" && bSave)
 		{
 			ofLogNotice(__FUNCTION__) << "SAVE: " << e;
 			bSave = false;
 			doSave(PRESET_selected_IndexMain);
 		}
-
 		//else if (name == "LOAD" && bLoad)
 		//{
 		//	ofLogNotice(__FUNCTION__) << "LOAD: " << e;
@@ -2568,7 +2568,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 			doRandomizeWichSelectedPreset();
 		}
-		else if (name == PLAY_RandomizeTimer.getName())//"PLAY RANDOMIZER"
+		//"PLAY RANDOMIZER"
+		else if (name == PLAY_RandomizeTimer.getName())
 		{
 			ofLogNotice(__FUNCTION__) << "MODE TIMER: " << e;
 			if (PLAY_RandomizeTimer) {
@@ -2742,12 +2743,9 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 				//-
 
-#ifndef INCLUDE_GUI_IM_GUI
-				if (autoSave)// && autoLoad)
-#else
-				//workflow: browser mode bypasses autosave
+				//workflow
+				//browser mode bypasses autosave
 				if (autoSave && !MODE_Browser_NewPreset)
-#endif
 				{
 					save(PRESET_selected_IndexMain_PRE, 0);
 				}
@@ -2768,7 +2766,9 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				{
 					load(xIndex, yIndex);
 				}
-				//TODO: BUG: this must be main groun index vector...
+
+				//TODO: 
+				//BUG: this must be main groun index vector...
 				//else
 				//{
 				//	if (PRESETS_Selected_Index.size() > 0//amount of groups
@@ -2788,46 +2788,54 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		//--
 
-		//TODO: ? why always ?
+		//TODO: 
+		//all other widgets/params
 		else
 		{
+			//--
+
 			//check if changed prob sliders
-			bool doDices = false;
-			for (int i = 0; i < presetsRandomFactor.size(); i++)
 			{
-				if (name == "PROB " + ofToString(i)) {
-					doDices = true;
+				bool doDices = false;
+				for (int i = 0; i < presetsRandomFactor.size(); i++)
+				{
+					if (name == "PROB " + ofToString(i)) {
+						doDices = true;
+					}
+				}
+				if (doDices)
+				{
+					//sum total dices/all probs
+					dicesTotalAmount = 0;
+					for (auto &p : presetsRandomFactor) {
+						dicesTotalAmount += p.get();
+					}
+					randomizedDice.setMax(dicesTotalAmount - 1);
+
+					ofLogNotice(__FUNCTION__) << "dicesTotalAmount: " << dicesTotalAmount;
 				}
 			}
-			if (doDices)
-			{
-				//sum total dices/all probs
-				dicesTotalAmount = 0;
-				for (auto &p : presetsRandomFactor) {
-					dicesTotalAmount += p.get();
-				}
-				randomizedDice.setMax(dicesTotalAmount - 1);
-
-				ofLogNotice(__FUNCTION__) << "dicesTotalAmount: " << dicesTotalAmount;
-			}
-
 
 			//--
 
-			////TODO:
-			////exclude group 0
-			//for (int g = 0; g < groups.size(); g++)//iterate each group
-			//{
-			//	for (int p = 0; p < groupsSizes[g]; p++)//save each preset on each group
-			//	{
-			//		if (name == PRESETS_Selected_Index[p].getName())
-			//		{
-			//			ofLogNotice(__FUNCTION__) << "preset: " << p << " group: " << g;
-			//			//load(p, g);
-			//		}
-			//	}
-			//}
+			//TODO:
+			//presets selectors
+			{
+				////exclude group 0
+				//for (int g = 0; g < groups.size(); g++)//iterate each group
+				//{
+				//	for (int p = 0; p < groupsSizes[g]; p++)//save each preset on each group
+				//	{
+				//		if (name == PRESETS_Selected_Index[p].getName())
+				//		{
+				//			ofLogNotice(__FUNCTION__) << "preset: " << p << " group: " << g;
+				//			//load(p, g);
+				//		}
+				//	}
+				//}
+			}
 
+			//--
 		}
 
 		//--
