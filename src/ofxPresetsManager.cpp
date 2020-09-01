@@ -3065,112 +3065,6 @@ void ofxPresetsManager::exit()
 
 #pragma mark - IM_GUI
 
-#ifndef USE_ofxImGuiSimple
-//--------------------------------------------------------------
-void ofxPresetsManager::ImGui_FontCustom() {
-	ofLogNotice(__FUNCTION__);
-
-	ImGuiIO& io = ImGui::GetIO();
-	float _size = 14.f;
-	string _name = "FiraCodeRegular.ttf";
-	//float _size = 13.f;
-	//string _name = "overpass-mono-bold.otf";
-	string _path = "assets/fonts/" + _name;//assets folder
-	io.Fonts->AddFontFromFileTTF(&ofToDataPath(_path)[0], _size);
-}
-
-//--------------------------------------------------------------
-void ofxPresetsManager::ImGui_ThemeMoebiusSurfing()
-{
-	ofLogNotice(__FUNCTION__);
-
-
-	//must be done after setup the gui
-
-	ImGuiStyle *style = &ImGui::GetStyle();
-
-	style->FramePadding = ImVec2(4, 2);
-	//style->WindowMinSize = ImVec2(160, 65);
-	//style->ItemSpacing = ImVec2(6, 2);
-	style->ItemSpacing = ImVec2(6, 4);
-	style->ItemInnerSpacing = ImVec2(6, 4);
-	style->Alpha = 1.0f;
-	style->WindowRounding = 0.0f;
-	style->FrameRounding = 0.0f;
-	style->IndentSpacing = 6.0f;
-	style->ItemInnerSpacing = ImVec2(2, 4);
-	style->ColumnsMinSpacing = 50.0f;
-	style->GrabMinSize = 14.0f;
-	style->GrabRounding = 0.0f;
-	style->ScrollbarSize = 12.0f;
-	style->ScrollbarRounding = 0.0f;
-
-	//my dark theme
-
-	//ImVec4* colors = ImGui::GetStyle().Colors;
-	style->Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-	style->Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-	style->Colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
-	style->Colors[ImGuiCol_ChildBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.00f);
-	style->Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
-	style->Colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.50f);
-	style->Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	style->Colors[ImGuiCol_FrameBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.54f);
-	style->Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.26f, 0.26f, 0.26f, 0.68f);
-	style->Colors[ImGuiCol_FrameBgActive] = ImVec4(0.25f, 0.25f, 0.25f, 0.67f);
-	style->Colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
-	style->Colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-	style->Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
-	style->Colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-	style->Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
-	style->Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.11f, 0.11f, 1.00f);
-	style->Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
-	style->Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
-	style->Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-	style->Colors[ImGuiCol_SliderGrab] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
-	style->Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.74f, 0.75f, 0.77f, 0.79f);
-	style->Colors[ImGuiCol_Button] = ImVec4(0.28f, 0.28f, 0.28f, 1.00f);
-	style->Colors[ImGuiCol_ButtonHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.79f);
-	style->Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.00f, 0.00f, 0.70f);
-	style->Colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.31f);
-	style->Colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-	style->Colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.26f, 0.26f, 1.00f);
-	style->Colors[ImGuiCol_Separator] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
-	style->Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.29f, 0.29f, 0.29f, 0.78f);
-	style->Colors[ImGuiCol_SeparatorActive] = ImVec4(0.37f, 0.37f, 0.37f, 1.00f);
-	style->Colors[ImGuiCol_ResizeGrip] = ImVec4(0.44f, 0.44f, 0.44f, 0.25f);
-	style->Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.68f, 0.68f, 0.68f, 0.67f);
-	style->Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.68f, 0.68f, 0.68f, 0.95f);
-	style->Colors[ImGuiCol_PlotLines] = ImVec4(0.81f, 0.79f, 0.79f, 1.00f);
-	style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.58f, 0.58f, 0.58f, 1.00f);
-	style->Colors[ImGuiCol_PlotHistogram] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-	style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-	style->Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.35f);
-	style->Colors[ImGuiCol_DragDropTarget] = ImVec4(0.50f, 0.50f, 0.50f, 0.90f);
-	style->Colors[ImGuiCol_NavHighlight] = ImVec4(0.79f, 0.79f, 0.79f, 1.00f);
-	style->Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
-	style->Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-	style->Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
-
-	//   //2. defaut dark theme exported
-	//   style->WindowMinSize = ImVec2(160, 65);
-	//   style->FramePadding = ImVec2(4, 2);
-	//   style->ItemSpacing = ImVec2(6, 2);
-	//   style->ItemInnerSpacing = ImVec2(6, 4);
-	//   style->Alpha = 1.0f;
-	//   style->WindowRounding = 0.0f;
-	//   style->FrameRounding = 0.0f;
-	//   style->IndentSpacing = 6.0f;
-	//   style->ItemInnerSpacing = ImVec2(2, 4);
-	//   style->ColumnsMinSpacing = 50.0f;
-	//   style->GrabMinSize = 14.0f;
-	//   style->GrabRounding = 0.0f;
-	//   style->ScrollbarSize = 12.0f;
-	//   style->ScrollbarRounding = 0.0f;
-
-}
-#endif
-
 #ifndef MODE_ImGui_EXTERNAL
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Setup()
@@ -3182,7 +3076,7 @@ void ofxPresetsManager::ImGui_Setup()
 	//font customize
 #ifndef MODE_ImGui_EXTERNAL
 #ifdef INCLUDE_IMGUI_CUSTOM_FONT
-	ImGui_FontCustom();
+	ofxSurfingHelpers::ImGui_FontCustom();
 #endif
 #endif
 
@@ -3194,8 +3088,8 @@ void ofxPresetsManager::ImGui_Setup()
 
 	//theme
 #ifndef MODE_ImGui_EXTERNAL
-	//ofxSurfingHelpers::ImGui_ThemeMoebiusSurfing();
-	ofxSurfingHelpers::ImGui_ThemeModernDark();
+	ofxSurfingHelpers::ImGui_ThemeMoebiusSurfing();
+	//ofxSurfingHelpers::ImGui_ThemeModernDark();
 
 	//--
 
@@ -3205,8 +3099,6 @@ void ofxPresetsManager::ImGui_Setup()
 
 	//ImGui::GetIO().ConfigWindowsResizeFromEdges = true;
 	//ImGui::GetIO().= true;
-	//ImGui::GetIO().
-
 #endif
 
 	//--
