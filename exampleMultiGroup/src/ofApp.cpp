@@ -29,18 +29,19 @@ void ofApp::setup()
 	//also define wich key triggers are associated to each preset. 
 	//the amount of keys will be also the amount of favorites/clickable presets
 
+
 	//group1
-	presetsManager.add(params1, { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+	presetsManager.add(params1, { 'q', 'w', 'e', 'r', 't' });
 
 	//group2
-	presetsManager.add(params2, { 'q', 'w', 'e', 'r', 't' });
+	presetsManager.add(params2, { 'a', 's', 'd', 'f' });
 
 	//group3
-	presetsManager.add(params3, { 'a', 's', 'd', 'f' });
+	presetsManager.add(params3, { 'z', 'x', 'c' });
 
 	//group4
-	presetsManager.add(params4, { 'z', 'x', 'c', 'v', 'b' });
-
+	presetsManager.add(params4, { 'b', 'n', 'm', ',', '.' });
+	
 	//--
 
 	//3. call setup after adding ofParameterGroup
@@ -142,7 +143,11 @@ void ofApp::windowResized(int w, int h)
 {
 	//optional adapt to layout
 	int _cellSize = 50;
-	presetsManager.setPosition_PresetClicker(0.5* ofGetWidth() - (9 * _cellSize*0.5f), ofGetHeight() - 5 * _cellSize, _cellSize);//position and boxes sizes
+	int _groupsAmt = presetsManager.getGroupSize();
+	presetsManager.setPosition_PresetClicker(
+		0.5 * ofGetWidth() - (0 * _cellSize * 0.5f), 
+		ofGetHeight() - _groupsAmt * _cellSize - 10, 
+		_cellSize);//position and boxes sizes
 }
 
 //--------------------------------------------------------------

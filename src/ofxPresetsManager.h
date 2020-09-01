@@ -76,9 +76,6 @@
 #define INCLUDE_RANDOMIZER
 //BUG: seems to make exceptions when multiple ImGui/ofxPresetsManager instances...
 
-//internal control
-#include "ofxGui.h"
-
 //--
 
 //browser system
@@ -413,6 +410,12 @@ public:
 	}
 
 	//--------------------------------------------------------------
+	int getGroupSize()
+	{
+		return groups.size();
+	}
+
+	//--------------------------------------------------------------
 	int getCurrentPreset()//get index of selected preset
 	{
 		return PRESET_selected_IndexMain;
@@ -425,12 +428,6 @@ public:
 	{
 		SHOW_GroupName = b;
 	}
-
-	////--------------------------------------------------------------
-	//std::string getGroupName()//get the paramGroup being managed here. Useful when using more than one ofxPresetsManager instances
-	//{
-	//	return groups[0].getName();
-	//}
 
 	//--
 
@@ -732,14 +729,6 @@ public:
 
 	//--
 
-#ifndef USE_ofxImGuiSimple
-	//ImGui theme
-	void ImGui_FontCustom();
-	void ImGui_ThemeMoebiusSurfing();
-#endif
-
-	//-
-
 private:
 #ifdef USE_ofxImGuiSimple
 	ofxImGuiSimple gui_ImGui;
@@ -868,7 +857,7 @@ private:
 	//selectors
 	std::vector<ofParameter<int>> PRESETS_Selected_Index;//? seems to be the size (last index of data vector) of any group or:
 	ofParameterGroup params_PRESETS_Selected{ "Preset Selectors" };
-	ofParameter<int> mainSelector;
+	//ofParameter<int> mainSelector;
 
 	std::vector<int> groupsSizes;//this is the number of presets of each added group
 

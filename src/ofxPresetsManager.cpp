@@ -552,9 +552,9 @@ void ofxPresetsManager::setupRandomizer()
 	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
 	MODE_LatchTrig.set("MODE LATCH", false);
 	MODE_AvoidRandomRepeat.set("MODE AVOID REPEAT", false);
-	randomizeDuration.set("T DURATION", 1000, 10, randomize_MAX_DURATION);
-	randomizeDurationShort.set("T SHORT", 250, 10, randomize_MAX_DURATION_SHORT);
-	randomizeDurationBpm.set("T BPM", 120, 10, 400);
+	randomizeDuration.set("t DURATION", 1000, 10, randomize_MAX_DURATION);
+	randomizeDurationShort.set("t SHORT", 250, 10, randomize_MAX_DURATION_SHORT);
+	randomizeDurationBpm.set("t BPM", 120, 10, 400);
 	randomizedDice.set("DICE", 0, 0, mainGroupAmtPresetsFav - 1);
 	//randomizeSpeedF.set("SPEED FACTOR", 1.f, 0.01f, 2.f);
 	bResetDices.set("RESET DICES", false);
@@ -701,12 +701,10 @@ ofxPresetsManager::ofxPresetsManager()
 	//control parameters
 
 	PRESET_selected_IndexMain.set("PRESET", 0, 0, mainGroupAmtPresetsFav - 1);
-#ifdef INCLUDE_GUI_IM_GUI
 	SHOW_ImGui.set("SHOW ImGui", false);
 	SHOW_ImGui_PresetsParams.set("SHOW PARAMETERS", false);
 	MODE_Browser_NewPreset.set("NEW!", false);
 	browser_PresetName = "NO_NAME_PRESET";//browser loaded preset name
-#endif
 	bSave.set("SAVE", false);
 	//bLoad.set("LOAD", false);
 	MODE_MemoryLive.set("MODE MEMORY", false);
@@ -730,7 +728,6 @@ ofxPresetsManager::ofxPresetsManager()
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
 
-#ifdef INCLUDE_GUI_IM_GUI
 	ImGui_Position.set("GUI ImGui POSITION",
 		glm::vec2(ofGetWidth() * 0.5, 10),//top
 		glm::vec2(0, 0),
@@ -741,7 +738,6 @@ ofxPresetsManager::ofxPresetsManager()
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
-#endif
 
 	//-
 
@@ -770,17 +766,13 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.setName("GUI");
 	params_Gui.add(SHOW_Gui_AdvancedControl);
 	params_Gui.add(SHOW_ClickPanel);
-#ifdef INCLUDE_GUI_IM_GUI
 	params_Gui.add(SHOW_ImGui);
 	params_Gui.add(SHOW_ImGui_PresetsParams);
-#endif
 	params_Gui.add(ENABLE_Keys);
 
 	//layout
-#ifdef INCLUDE_GUI_IM_GUI
 	params_Gui.add(ImGui_Position);
 	params_Gui.add(ImGui_Size);
-#endif
 	params_Gui.add(Gui_Internal_Position);
 
 	params_HelperTools.setName("HELPER TOOLS");
@@ -798,8 +790,8 @@ ofxPresetsManager::ofxPresetsManager()
 	//-
 
 	//main selector
-	mainSelector.set("Main selector", 0, 0, 7);
-	params_PRESETS_Selected.add(mainSelector);
+	//mainSelector.set("Main selector", 0, 0, 1);
+	//params_PRESETS_Selected.add(mainSelector);
 
 	//-
 
@@ -897,8 +889,15 @@ void ofxPresetsManager::setup()
 
 	//main selector
 	//will combine all group
-#define NUM_MAIN_SELECTOR_PRESETS 8
-	mainSelector.setMax(NUM_MAIN_SELECTOR_PRESETS);
+//#define NUM_MAIN_SELECTOR_PRESETS 8
+//	mainSelector.setMax(NUM_MAIN_SELECTOR_PRESETS);
+	ofParameterGroup params_MainSelector{ "Main Selector" };
+	for (int i = 0; i < PRESETS_Selected_Index.size(); i++)
+	{
+		params_MainSelector.add(PRESETS_Selected_Index[i]);
+	}
+	//create the extra main selector
+	add(params_MainSelector, { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
 
 	//--
 
@@ -1020,9 +1019,6 @@ void ofxPresetsManager::startup()
 	//doCheckPresetsFolderIsEmpty();
 
 	//--
-
-	////TODO: bug on mixerBlend.. in load_AllKit_ToMemory...
-	////gui_LabelName = groups[0].getName();//TODO: one group only
 }
 
 //--------------------------------------------------------------
@@ -2555,7 +2551,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		//--
 
-		//#ifdef INCLUDE_GUI_IM_GUI
 		//		else if (name == "GUI ImGui POSITION")
 		//		{
 		//			ofLogVerbose(__FUNCTION__) << "GUI BROWSER POSITION: " << e;
@@ -2576,7 +2571,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//			//y = ofClamp(ImGui_Position.get().y, 0, ofGetHeight() - 20);
 		//			//ImGui_Position = glm::vec2(x, y);
 		//		}
-		//#endif
 				
 		//--
 
@@ -2675,7 +2669,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				}
 
 				//TODO: 
-				//BUG: this must be main groun index vector...
+				//BUG: this must be main group index vector...
 				//else
 				//{
 				//	if (PRESETS_Selected_Index.size() > 0//amount of groups
@@ -2728,18 +2722,18 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			//TODO:
 			//presets selectors
 			{
-				////exclude group 0
-				//for (int g = 0; g < groups.size(); g++)//iterate each group
-				//{
-				//	for (int p = 0; p < groupsSizes[g]; p++)//save each preset on each group
-				//	{
-				//		if (name == PRESETS_Selected_Index[p].getName())
-				//		{
-				//			ofLogNotice(__FUNCTION__) << "preset: " << p << " group: " << g;
+				//exclude group 0
+				for (int g = 0; g < groups.size(); g++)//iterate each group
+				{
+					for (int p = 0; p < groupsSizes[g]; p++)//save each preset on each group
+					{
+						//if (name == PRESETS_Selected_Index[p].getName())//?
+						{
+							ofLogNotice(__FUNCTION__) << "group: " << g << " preset: " << p ;
 				//			//load(p, g);
-				//		}
-				//	}
-				//}
+						}
+					}
+				}
 			}
 
 			//--
@@ -3088,17 +3082,15 @@ void ofxPresetsManager::ImGui_Setup()
 
 	//theme
 #ifndef MODE_ImGui_EXTERNAL
-	ofxSurfingHelpers::ImGui_ThemeMoebiusSurfing();
-	//ofxSurfingHelpers::ImGui_ThemeModernDark();
+	ofxSurfingHelpers::ImGui_ThemeModernDark();
+	//ofxSurfingHelpers::ImGui_ThemeMoebiusSurfing();
 
 	//--
 
 	//mouse over
 	ImGui::GetIO().MouseDrawCursor = false;
 	bImGui_mouseOver.set("mouseOverGui", false);
-
 	//ImGui::GetIO().ConfigWindowsResizeFromEdges = true;
-	//ImGui::GetIO().= true;
 #endif
 
 	//--
