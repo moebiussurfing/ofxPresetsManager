@@ -143,7 +143,7 @@ void ofApp::windowResized(int w, int h)
 {
 	//optional adapt to layout
 	int _cellSize = 50;
-	int _groupsAmt = presetsManager.getGroupSize();
+	int _groupsAmt = presetsManager.getAmountGroups();
 	presetsManager.setPosition_PresetClicker(
 		0.5 * ofGetWidth() - (0 * _cellSize * 0.5f), 
 		ofGetHeight() - _groupsAmt * _cellSize - 10, 

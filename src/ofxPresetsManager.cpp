@@ -862,21 +862,6 @@ void ofxPresetsManager::setup()
 
 	//--
 
-//	//ofxGui theme
-//	str = "overpass-mono-bold.otf";
-//	string pathFont = "assets/fonts/" + str;//assets folder
-//	//must check this font file is found there
-//	ofFile file(pathFont);
-//	if (file.exists()) ofxGuiSetFont(pathFont, 9);
-//	else
-//	{
-//#ifdef INCLUDE_DEBUG_ERRORS
-//		errorsDEBUG.addError(gui_LabelName + " " + ofToString(__FUNCTION__), "ofxGui font", pathFont);
-//#endif
-//	}
-
-	//--
-
 	//custom path:
 	bPathDirCustom.set("MODE CUSTOM PATH", false);
 	pathDirCustom.set("Path", path_UserKit_Folder);
@@ -1093,7 +1078,31 @@ void ofxPresetsManager::update(ofEventArgs & args)
 			}
 		}
 
-		//-
+		//--
+
+		//1.0.2 draw progress bar for the randomizer timer
+		////long mode
+		//if (presetsRandomModeShort[PRESET_selected_IndexMain - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
+		////short mode
+		//else _prog = timerRandomizer / (float)randomizeDurationShort;
+		//bar relative only to long
+		if (PLAY_RandomizeTimer) {
+			randomizerProgress = 100 * timerRandomizer / (float)randomizeDuration;
+		}
+		else if (MODE_LatchTrig) {
+			if (bLatchRun) {
+				randomizerProgress = 100 * timerRandomizer / (float)randomizeDuration;
+			}
+			else {
+				randomizerProgress = 0;
+			}
+		}
+		else {
+			randomizerProgress = 0;
+		}
+		_prog = randomizerProgress / 100.f;
+
+		//--
 
 		//TODO:
 		//_totalDicesStr = "/ " + ofToString(randomizedDice.getMax());
@@ -1493,9 +1502,33 @@ string ofxPresetsManager::getPresetPath(string _gName, int _presetIndex)
 	_pathFile = _gName + filenamesPrefix + ofToString(_presetIndex) + ".xml";
 	_path = _pathFolder + _pathFile;
 
-	ofLogVerbose(__FUNCTION__) << "name: " << _gName << " path: " << _path;
+	ofLogVerbose(__FUNCTION__) << "group name: " << _gName << " path: " << _path;
 
 	return _path;
+}
+
+//--------------------------------------------------------------
+string ofxPresetsManager::getGroupPath(string _gName)
+{
+	string _pathFolder;
+
+	_pathFolder = path_UserKit_Folder + "/" + path_PresetsFavourites + "/";
+
+	ofLogVerbose(__FUNCTION__) << "group name: " << _gName << " path: " << _pathFolder;
+
+	return _pathFolder;
+}
+
+//--------------------------------------------------------------
+string ofxPresetsManager::getGroupPath(int index)
+{
+	string _pathFolder;
+	if (index < groups.size()) _pathFolder = getGroupPath(groups[index].getName());
+	else return "UNKNOWN";
+
+	ofLogVerbose(__FUNCTION__) << "group path: " << _pathFolder;
+
+	return _pathFolder;
 }
 
 //--
@@ -1630,11 +1663,11 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 		//TODO:
 		//B. extra groups guiIndex != 0
-		else if ((presetIndex >= 0) && (presetIndex < groupsSizes[presetIndex]))
+		else if ((presetIndex >= 0) && (presetIndex < groupsSizes[guiIndex]))
 		{
 			std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
 			bool b = ofxSurfingHelpers::saveGroup(groups[guiIndex], _path);
-			if (b) ofLogNotice(__FUNCTION__) << "Saved: " << groups[guiIndex].getName() << " at " << _path;
+			if (b) ofLogNotice(__FUNCTION__) << "Saved: " << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
 			else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " at " << _path;
 		}
 	}
@@ -1669,7 +1702,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 				TS_START("SAVE FILE 2");//for TimeMeasurements only
 				std::string _path = getPresetPath(gName, presetIndex);
 				bool b = ofxSurfingHelpers::saveGroup(groups[guiIndex], _path);
-				if (b) ofLogNotice(__FUNCTION__) << "Saved: " << groups[guiIndex].getName() << " at " << _path;
+				if (b) ofLogNotice(__FUNCTION__) << "Saved: " << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
 				else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " at " << _path;
 				TS_STOP("SAVE FILE 2");//for TimeMeasurements only
 			}
@@ -1695,7 +1728,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 
 		//TODO:
 		//B. extra groups guiIndex != 0
-		else if ((presetIndex >= 0) && (presetIndex < groupsSizes[presetIndex]))
+		else if ((presetIndex >= 0) && (presetIndex < groupsSizes[guiIndex]))
 		{
 			ofSerialize(mainGroupPresetsXmls[presetIndex], groups[guiIndex]);
 			ofLogNotice(__FUNCTION__) << "Serialized: " << groups[guiIndex].getName();
@@ -1710,9 +1743,9 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, int guiIndex)
 {
-	ofLogVerbose(__FUNCTION__) << "group: " << guiIndex << " preset: " << presetIndex;
+	ofLogVerbose(__FUNCTION__) << "group: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex;
 
-	//check clamp limiters
+	//check groups range clamp limiters
 	if ((guiIndex >= 0) && (guiIndex < (int)groups.size()))
 	{
 		//A. main group
@@ -1763,10 +1796,16 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 
 		//TODO:
 		//B. extra groups guiIndex != 0
-		else if ((presetIndex >= 0) && (presetIndex < groupsSizes[presetIndex]))
+		else if ((presetIndex >= 0) && (presetIndex < groupsSizes[guiIndex]))
 		{
 			std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
 			bool b = ofxSurfingHelpers::loadGroup(groups[guiIndex], _path);
+			if (!b) {
+				ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
+
+				//file not found so create one file instead
+				save(presetIndex, guiIndex);
+			}
 
 			//mark selected
 			PRESETS_Selected_Index[guiIndex] = presetIndex;
@@ -1832,13 +1871,20 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 
 		//TODO:
 		//B. extra groups guiIndex != 0
-		else if ((presetIndex >= 0) && (presetIndex < groupsSizes[presetIndex]))
+		else if ((presetIndex >= 0) && (presetIndex < groupsSizes[guiIndex]))
 		{
 			std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
 			bool b = ofxSurfingHelpers::loadGroup(groups[guiIndex], _path);
+			if (!b) {
+				ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
+
+				//file not found so create one file instead
+				save(presetIndex, guiIndex);
+			}
 
 			//mark selected
 			PRESETS_Selected_Index[guiIndex] = presetIndex;
+			//TODO: take car bc this will re-trig the callback too (if load it's "called from the callback")
 		}
 	}
 	else
@@ -1886,13 +1932,36 @@ void ofxPresetsManager::loadPreset(int p)
 	}
 }
 
+
+//--------------------------------------------------------------
+void ofxPresetsManager::savePreset(int presetIndex, int groupIndex)
+{
+	//if (!DISABLE_CALLBACKS)
+	{
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
+
+		save(presetIndex, groupIndex);
+	}
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::loadPreset(int presetIndex, int groupIndex)
+{
+	//if (!DISABLE_CALLBACKS)
+	{
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
+
+		load(presetIndex, groupIndex);
+	}
+}
+
 //--
 
 //engine helpers
 //--------------------------------------------------------------
 int ofxPresetsManager::getPresetIndex(int guiIndex) const
 {
-	if (guiIndex > 0 && guiIndex < (int)groups.size())
+	if (guiIndex >= 0 && guiIndex < (int)groups.size())
 	{
 		return PRESETS_Selected_Index[guiIndex];
 	}
@@ -1907,7 +1976,7 @@ int ofxPresetsManager::getPresetIndex(string gName) const
 {
 	int guiIndex = getGuiIndex(gName);
 
-	if (guiIndex > 0 && guiIndex < (int)groups.size())
+	if (guiIndex >= 0 && guiIndex < (int)groups.size())
 	{
 		return PRESETS_Selected_Index[guiIndex];
 	}
@@ -1968,7 +2037,6 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			ofLogVerbose(__FUNCTION__) << "modKeySwap TRUE" << endl;
 			return;
 		}
-
 
 		//-
 
@@ -2084,31 +2152,31 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//main shortcuts:
 		//preset selector (like from 1 to 8)
 
-		for (int i = 0; i < keys.size(); ++i)//i=witch group. only performs i=0 bc there's only one implemented group!
+		for (int g = 0; g < keys.size(); g++)//i=witch group. only performs i=0 bc there's only one implemented group!
 		{
-			for (int k = 0; k < keys[i].size(); ++k)//performs all registered keys: one for each [8] preset
+			for (int k = 0; k < keys[g].size(); k++)//performs all registered keys: one for each [8] preset
 			{
-				if (key == keys[i][k])
+				if (key == keys[g][k])
 				{
 					ofLogNotice(__FUNCTION__) << "key: " << (char)key;
 
 					if (bKeySave)
 					{
-						save(k, i);
+						save(k, g);
 					}
 					else
 					{
-						ofLogNotice(__FUNCTION__) << "group: " << i << " preset: " << k;
+						ofLogNotice(__FUNCTION__) << groups[g].getName() << " group: " << g << " preset: " << k;
 
-						if (i == 0)//main group
+						if (g == 0)//main group
 						{
 							PRESET_selected_IndexMain = k;
 						}
 						else//extra groups
 						{
-							if (autoSave) save(PRESETS_Selected_Index[k], k);
+							if (autoSave) save(PRESETS_Selected_Index[g], g);
 
-							load(k, i);
+							load(k, g);
 						}
 					}
 
@@ -2175,7 +2243,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 		if ((xIndex != -1) && (yIndex != -1) &&//valid preset. to the left of panels
 			(xIndex >= 0) && (xIndex < groupsSizes[yIndex]))//valid group. to the right of panels
 
-			ofLogNotice(__FUNCTION__) << "group: " << yIndex << " preset: " << xIndex;
+			ofLogNotice(__FUNCTION__) << groups[yIndex].getName() << " group: " << yIndex << " preset: " << xIndex;
 
 		//-
 
@@ -2184,6 +2252,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 			//1. mod save controlled by modeKeySave
 			if (bKeySave)
 			{
+				ofLogNotice(__FUNCTION__) << "SAVE";
 				if (yIndex == 0)//main group
 				{
 					//save "memory" to the clicked Index
@@ -2195,14 +2264,21 @@ void ofxPresetsManager::mousePressed(int x, int y)
 				else//extra groups
 				{
 					save(xIndex, yIndex);
+
+					//will auto load and set clicked
+					if (yIndex < PRESET_selected_Index.size())
+						PRESET_selected_Index[yIndex] = xIndex;
+					//workflow
+					load(xIndex, yIndex);
 				}
 			}
 
 			//-
 
-			//2. mod swap controlled by modKeySwap.
+			//2. mod swap controlled by modKeySwap
 			else if (bKeySwap)
 			{
+				ofLogNotice(__FUNCTION__) << "SWAP";
 				if (yIndex == 0) doSwap(0, PRESET_selected_IndexMain, xIndex);
 				else doSwap(yIndex, PRESETS_Selected_Index[yIndex], xIndex);
 			}
@@ -2212,6 +2288,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 			//3. no mod keys: normal load (not any key modifier pressed)
 			else
 			{
+				ofLogNotice(__FUNCTION__) << "LOAD";
 				if (yIndex == 0)
 				{
 					//will trig autoload callback on change, calling load(p, 0);
@@ -2220,7 +2297,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 				else
 				{
 					if (autoSave) save(PRESETS_Selected_Index[yIndex], yIndex);
-
+					//workflow
 					load(xIndex, yIndex);
 				}
 			}
@@ -2249,10 +2326,10 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 	//-
 
-	//3. toggle show gui
+	//3. toggle show gui (on main group only)
 	int _offset = 1;
 	//int _offset = (autoSave ? 0 : 1);//TODO: hide save button on autosave mode...
-	if ((yIndex == 0) && (xIndex == groupsSizes[yIndex] + _offset))
+	if ((yIndex == 0) && (xIndex == groupsSizes[0] + _offset))
 	{
 		SHOW_ImGui = !SHOW_ImGui;
 		ofLogNotice(__FUNCTION__) << "SHOW_ImGui : " << (SHOW_ImGui ? "TRUE" : "FALSE");
@@ -2480,9 +2557,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		}
 		else if (name == "RANDOMIZE INDEX" && bRandomizeIndex)
 		{
-			//ofLogNotice(__FUNCTION__) << "RANDOMIZE !";
+			ofLogNotice(__FUNCTION__) << "RANDOMIZE !";
 			bRandomizeIndex = false;
-
 			doRandomizeWichSelectedPreset();
 		}
 		//"PLAY RANDOMIZER"
@@ -2496,7 +2572,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		else if (name == "MODE LATCH")
 		{
 			ofLogNotice(__FUNCTION__) << "MODE LATCH: " << e;
-
 			if (MODE_LatchTrig) {
 				PLAY_RandomizeTimer = false;
 			}
@@ -2504,13 +2579,10 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//else if (name == "SPEED FACTOR")
 		//{
 		//	ofLogNotice(__FUNCTION__) << "SPEED FACTOR: " << e;
-		//
 		//	//randomizeDuration = randomize_MAX_DURATION * (1.f - randomizeSpeedF);
-		//
 		//	randomizeDuration.setMax(randomizeSpeedF * randomize_MAX_DURATION);
 		//	randomizeDurationShort.setMax(randomizeSpeedF * randomize_MAX_DURATION_SHORT);
 		//}
-
 		else if (name == randomizeDuration.getName())
 		{
 			ofLogNotice(__FUNCTION__) << "DURATION: " << e;
@@ -2528,7 +2600,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			randomizeDuration = 60000.f / randomizeDurationBpm;
 			randomizeDurationShort = randomizeDuration / 4.f;
 		}
-
 #ifdef DEBUG_randomTest
 		else if (name == "DICE")//when debug enabled: set dice by user to test
 		{
@@ -2571,7 +2642,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//			//y = ofClamp(ImGui_Position.get().y, 0, ofGetHeight() - 20);
 		//			//ImGui_Position = glm::vec2(x, y);
 		//		}
-				
+
 		//--
 
 		else if (name == "LOAD TO MEMORY" && loadToMemory)
@@ -2580,14 +2651,12 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			loadToMemory = false;
 			load_AllKit_ToMemory();
 		}
-
 		else if (name == "SAVE FROM MEMORY" && saveFromMemory)
 		{
 			ofLogNotice(__FUNCTION__) << "saveFromMemory:" << e;
 			saveFromMemory = false;
 			save_AllKit_FromMemory();
 		}
-
 		else if (name == "MODE MEMORY")
 		{
 			ofLogNotice(__FUNCTION__) << "MODE MEMORY: " << e;
@@ -2617,6 +2686,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		else if (name == "PRESET")
 		{
+			ofLogNotice(__FUNCTION__) << "--------------------------------------------------------------";
+		
 			//1. main group selected preset NOT CHANGED
 
 			if (PRESET_selected_IndexMain == PRESET_selected_IndexMain_PRE)
@@ -2663,33 +2734,12 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 				//-
 
-				if (autoLoad)
-				{
-					load(xIndex, yIndex);
-				}
-
-				//TODO: 
-				//BUG: this must be main group index vector...
-				//else
-				//{
-				//	if (PRESETS_Selected_Index.size() > 0//amount of groups
-				//		&& yIndex < PRESETS_Selected_Index.size()//amount of groups
-				//		&& xIndex < mainGroupPresetsXmls.size())
-				//	{
-				//		//mark selector as lastone trigged
-				//		PRESETS_Selected_Index[yIndex] = xIndex;
-				//	}
-				//	else
-				//	{
-				//		ofLogError(__FUNCTION__) << "PRESETS_Selected_Index has 0 size!";
-				//	}
-				//}
+				if (autoLoad) load(xIndex, yIndex);
 			}
 		}
 
 		//--
 
-		//TODO: 
 		//all other widgets/params
 		else
 		{
@@ -2701,7 +2751,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				for (int i = 0; i < presetsRandomFactor.size(); i++)
 				{
 					if (name == "PROB " + ofToString(i)) {
-						doDices = true;
+						doDices = true;//TODO: would be faster making return on first 'true'
 					}
 				}
 				if (doDices)
@@ -2719,18 +2769,31 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 			//--
 
-			//TODO:
 			//presets selectors
+			if (!DISABLE_CALLBACKS_SELECTORS)
 			{
 				//exclude group 0
 				for (int g = 0; g < groups.size(); g++)//iterate each group
 				{
-					for (int p = 0; p < groupsSizes[g]; p++)//save each preset on each group
+					for (int p = 0; p < groupsSizes[g]; p++)//iterate each preset on each group
 					{
-						//if (name == PRESETS_Selected_Index[p].getName())//?
+						if (name == PRESETS_Selected_Index[g].getName() && PRESETS_Selected_Index[g].get() == p)
 						{
-							ofLogNotice(__FUNCTION__) << "group: " << g << " preset: " << p ;
-				//			//load(p, g);
+							ofLogNotice(__FUNCTION__) << "--------------------------------------------------------------";
+							ofLogNotice(__FUNCTION__) << groups[g].getName() << " group: " << g << " preset: " << p;
+
+							//TODO: to use this we should store the PRE values too like on main group
+							////workflow
+							//if (autoSave)
+							//{
+							//	save(PRESET_selected_IndexMain_PRE, 0);
+							//}
+
+							if (autoLoad) {
+								//DISABLE_CALLBACKS_SELECTORS = true;
+								load(p, g);
+								//DISABLE_CALLBACKS_SELECTORS = false;
+							}
 						}
 					}
 				}
@@ -2840,7 +2903,7 @@ void ofxPresetsManager::save_ControlSettings()
 #else
 	ofLogNotice(__FUNCTION__) << "[DEBUG] BLOCKED save_ControlSettings()";
 #endif
-}
+	}
 
 //--
 
@@ -3138,7 +3201,7 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 #else
 	gui_ImGui.end();
 #endif
-}
+	}
 
 //--------------------------------------------------------------
 bool ofxPresetsManager::ImGui_Draw_Window()
@@ -3897,34 +3960,16 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 
 		//--
 
-		//1.0.2 draw progress bar for the randomizer timer
-		float _prog;
-		////long mode
-		//if (presetsRandomModeShort[PRESET_selected_IndexMain - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
-		////short mode
-		//else _prog = timerRandomizer / (float)randomizeDurationShort;
-		//bar relative only to long
-		if (PLAY_RandomizeTimer) {
-			_prog = timerRandomizer / (float)randomizeDuration;
-		}
-		else if (MODE_LatchTrig) {
-			if (bLatchRun) {
-				_prog = timerRandomizer / (float)randomizeDuration;
-			}
-			else {
-				_prog = 0;
-			}
-		}
-		else {
-			_prog = 0;
-		}
+		////1.0.2 draw progress bar for the randomizer timer
 
 		ImGui::PushID("prog");
 		const ImVec4 color = style->Colors[ImGuiCol_ButtonHovered];//we can force change this color on theme... only used here
 		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, color);
+		//ImGui::ProgressBar(randomizerProgress.get());
 		ImGui::ProgressBar(_prog);
 		ImGui::PopStyleColor();
 		ImGui::PopID();
+		cout << _prog << endl;
 
 		//--
 

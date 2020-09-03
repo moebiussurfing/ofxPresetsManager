@@ -14,8 +14,13 @@
 //
 //	TODO:
 //
-///	+++		put all presets into a main parent folder. 
-///				split out the session settings on root folder and a single file.
+///	++++		change file format from xml to json
+///	++++		add big toggle to edit/live modes: enables undo, autosave, memory mode..etc
+///	++++		open/save dialog to project session single file.
+///	++++		select wich group is the target to randomizer/main group extras
+///					or allowed to all the groups?
+///	++++		add draggable rectangle to move/resize clicker
+//
 ///	++		randomize editor preset
 ///				preset mini engine. ABC dropdown list for randomizers
 ///				could add also several randomizer settings presets. selectable by dropdown list..
@@ -28,19 +33,23 @@
 ///				call populate. disable debug_display red info
 //
 ///	++		add ofColor to ImGui helpers vs ofFloatColor
-///	+++		lock (by toggle) params that we want to ignore on changing presets
+///	++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
-///	++		performance: check memory_mode
+///	++		performance: 
+///				check memory_mode. memory mode to extra groups too
 ///				check workflow: when playing randomizer disable autosave
 ///				check disable autosave
 ///	+		repair autosave timer. exclude log
 ///	+		add workflow to not collide manual preset click with randomizer timer
 ///	+		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
 ///				or add simpler class but compatible with preset files kits
-///	+		could make tween when changing params using lerp...
+///	+		could make tween when changing params using lerp or ofxKeyTween...
+///	+		add undo to all the groups
 //
 //	BUG:	
 //
+//	?		startup bug not loading presets well...
+//	?		on multy group, files browse folder has all xml presets mixed. so only works on 1st group.
 //	?		fix end index rare limiter..
 //	?		doCheckPresetsFolderIsEmpty fails and overwrite all presets in some situations...
 //				it seems that it's when user-kit folder is customized, not the default one
@@ -179,7 +188,7 @@ public:
 
 	//randomizer
 #ifdef INCLUDE_RANDOMIZER//now cant' be disabled
-	ofParameterGroup params_RandomizerSettings{"Randomizers"};
+	ofParameterGroup params_RandomizerSettings{ "Randomizers" };
 public:
 	ofParameter<bool> PLAY_RandomizeTimer;//play randomizer
 	ofParameter<bool> bRandomizeIndex;
@@ -204,7 +213,7 @@ private:
 	int randomizeSpeed;//real time dureation
 	uint32_t randomizerTimer;
 	int randomize_MAX_DURATION = 6000;
-	int randomize_MAX_DURATION_SHORT = 6000/2.;
+	int randomize_MAX_DURATION_SHORT = 6000 / 2.f;
 	vector<ofParameter<int>> presetsRandomFactor;//probability of every preset
 	vector<ofParameter<bool>> presetsRandomModeShort;//mode short for ebvery preset
 	vector<int> randomFactorsDices;
@@ -243,6 +252,7 @@ private:
 
 #pragma mark - CALLBACKS
 private:
+	bool DISABLE_CALLBACKS_SELECTORS = false;//to avoid multiple calls on multiple presets selector engine
 
 	bool DISABLE_CALLBACKS = true;//to avoid startup crashes and objects are not initialized properly
 	//updating some params before save will trigs also the group callbacks
@@ -385,9 +395,9 @@ public:
 	void load_Next()//for main group
 	{
 		PRESET_selected_IndexMain++;
-		if (PRESET_selected_IndexMain >= mainGroupAmtPresetsFav-1)
+		if (PRESET_selected_IndexMain >= mainGroupAmtPresetsFav - 1)
 		{
-			PRESET_selected_IndexMain = mainGroupAmtPresetsFav-1;
+			PRESET_selected_IndexMain = mainGroupAmtPresetsFav - 1;
 		}
 	}
 
@@ -401,24 +411,82 @@ public:
 		}
 	}
 
+	//--------------------------------------------------------------
 	void loadPreset(int p);//load preset for the main group by code from ofApp
+	void loadPreset(int p, int _indexGroup);//load preset for extra groups by code from ofApp
+	void savePreset(int p, int _indexGroup);//save preset for extra groups by code from ofApp
 
 	//--------------------------------------------------------------
-	int getNumPresets()//get main group amount of presets
+	int getAmoutPresetsMain()//get main group amount of presets
 	{
 		return mainGroupAmtPresetsFav;
 	}
 
+	//helpers main for external layout or other workflow purposes
 	//--------------------------------------------------------------
-	int getGroupSize()
+	int getAmountGroups()
 	{
 		return groups.size();
 	}
 
 	//--------------------------------------------------------------
+	int getAmountPresetsOfGroup(int g)
+	{
+		int _size = -1;
+		if (g < groups.size()) _size = groupsSizes[g];
+		return _size;
+	}
+
+	//--------------------------------------------------------------
+	string getGroupName(int i)
+	{
+		string _name = "ERROR UNKNOWN";
+		if (i < groups.size()) _name = groups[i];
+		return _name;
+	}
+
+	//--------------------------------------------------------------
+	string getGroupsNames()
+	{
+		string _names = "";
+		for (int i = 0; i < groups.size(); i++)
+		{
+			_names += groups[i].getName();
+			_names += "\n";
+		}
+		return _names;
+	}
+
+	//--------------------------------------------------------------
+	string getGroupsPaths()
+	{
+		string _names = "";
+		for (int i = 0; i < groups.size(); i++)
+		{
+			_names += getGroupPath(i);
+			_names += "\n";
+		}
+		return _names;
+	}
+
+	//--------------------------------------------------------------
+	string getGroupsPath()
+	{
+		string _names = "";
+		_names = getGroupPath(0);//simpler: get first group bc all are in the same folder
+		return _names;
+	}
+	//--------------------------------------------------------------
 	int getCurrentPreset()//get index of selected preset
 	{
 		return PRESET_selected_IndexMain;
+	}
+	//--------------------------------------------------------------
+	int getCurrentPreset(int _group)//get index of selected preset on the group
+	{
+		int _presetIndex = -1;
+		if (_group < groups.size()) _presetIndex = PRESET_selected_Index[_group];
+		return _presetIndex;
 	}
 
 	//-
@@ -432,8 +500,10 @@ public:
 	//--
 
 	//randomizer helpers
-
 public:
+	ofParameter<int> randomizerProgress{ "%", 0, 0, 100 };
+	float _prog;
+
 	//--------------------------------------------------------------
 	void setPlayRandomizerTimer(bool b)//play randomizer timer
 	{
@@ -682,10 +752,10 @@ public:
 public:
 	//--------------------------------------------------------------
 	void saveCurrentPreset() {
-			ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_selected_IndexMain.get();
-			doSave(PRESET_selected_IndexMain);
+		ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_selected_IndexMain.get();
+		doSave(PRESET_selected_IndexMain);
 	}
-	
+
 	//--
 
 	//core engine
@@ -705,6 +775,8 @@ private:
 
 	int getGuiIndex(string name) const;//get index for a name of group
 	string getPresetPath(string guiName, int presetIndex);//get path of a preset of a group
+	string getGroupPath(string guiName);//get path of a group
+	string getGroupPath(int index);//get path of a group
 
 	//--
 
@@ -754,26 +826,26 @@ private:
 	bool bImGui_mouseOver_PRE;
 	bool bMouseOver_Changed = false;
 
-//public:
-	////--------------------------------------------------------------
-	//bool isMouseOver()
-	//{
-	//	bool b;
-	//	if (!SHOW_ImGui) b = false;
-	//	else b = bImGui_mouseOver;
-	//	return b;
-	//}
-	////--------------------------------------------------------------
-	//bool isMouseOver_Changed()
-	//{
-	//	if (bMouseOver_Changed)
-	//	{
-	//		//bMouseOver_Changed = false;//reset
-	//		return true;
-	//	}
-	//}
+	//public:
+		////--------------------------------------------------------------
+		//bool isMouseOver()
+		//{
+		//	bool b;
+		//	if (!SHOW_ImGui) b = false;
+		//	else b = bImGui_mouseOver;
+		//	return b;
+		//}
+		////--------------------------------------------------------------
+		//bool isMouseOver_Changed()
+		//{
+		//	if (bMouseOver_Changed)
+		//	{
+		//		//bMouseOver_Changed = false;//reset
+		//		return true;
+		//	}
+		//}
 
-	//--
+		//--
 
 public:
 	ofParameterGroup params_randomizer;
@@ -936,7 +1008,7 @@ private:
 	ofParameterGroup params_Custom;
 	ofParameter<glm::vec2> Gui_Internal_Position;
 	ofParameter<bool> ENABLE_Keys;
-	
+
 	//custom path
 	ofParameter<bool> bPathDirCustom;
 	ofParameter<string> pathDirCustom;
