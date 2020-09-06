@@ -30,17 +30,17 @@ void ofApp::setup()
 	//the amount of keys will be also the amount of favorites/clickable presets
 
 
+	//group0
+	presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' });
+
 	//group1
-	presetsManager.add(params1, { 'q', 'w', 'e', 'r', 't' });
+	presetsManager.add(params1, { 'a', 's', 'd', 'f' });
 
 	//group2
-	presetsManager.add(params2, { 'a', 's', 'd', 'f' });
+	presetsManager.add(params2, { 'z', 'x', 'c' });
 
 	//group3
-	presetsManager.add(params3, { 'z', 'x', 'c' });
-
-	//group4
-	presetsManager.add(params4, { 'b', 'n', 'm', ',', '.' });
+	presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
 	
 	//--
 
@@ -48,43 +48,43 @@ void ofApp::setup()
 	presetsManager.setup();
 
 	//4. (optional) customize gui positions
-	presetsManager.setVisible_PresetClicker(true);//user panel clicker
+	//presetsManager.setVisible_PresetClicker(true);//user panel clicker
 }
 
 //--------------------------------------------------------------
 void ofApp::setupParameters()
 {
-	//0. ofParameterGroups
+	//0. ofParameterGroup's
 
-	//group1
-	params1.setName("paramsGroup1");//main (target) group
-	params1.add(shapeType.set("shapeType", 1, 1, 2));
-	params1.add(numShapes.set("numShapes", 1, 1, 24));
-	params1.add(separation.set("separation", 5, 1, 100));
-	params1.add(shapeSide.set("shapeSide", 50, 5, 200));
+	//group0
+	params0.setName("paramsGroup0");
+	params0.add(shapeType.set("shapeType", 1, 1, 2));
+	params0.add(numShapes.set("numShapes", 1, 1, 24));
+	params0.add(separation.set("separation", 5, 1, 100));
+	params0.add(shapeSide.set("shapeSide", 50, 5, 200));
 	paramsNested.setName("styleGroup");//another nested group
 	paramsNested.add(fill.set("fill", false));
 	paramsNested.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
 	paramsNested.add(lineWidth.set("lineWidth", 1, 0.1, 10));
-	params1.add(paramsNested);//main preset settings container
+	params0.add(paramsNested);//main preset settings container
+
+	//group1
+	params1.setName("paramsGroup1");
+	params1.add(shapeSide1.set("shapeSide1", 50, 5, 200));
+	params1.add(numShapes1.set("numShapes1", 10, 1, 24));
+	params1.add(separation1.set("separation1", 15, 1, 100));
 
 	//group2
 	params2.setName("paramsGroup2");
-	params2.add(shapeSide2.set("shapeSide2", 50, 5, 200));
-	params2.add(numShapes2.set("numShapes2", 10, 1, 24));
-	params2.add(separation2.set("separation2", 15, 1, 100));
+	params2.add(fill2.set("fill2", false));
+	params2.add(color2.set("color2", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
 
 	//group3
 	params3.setName("paramsGroup3");
-	params3.add(color);
-	params3.add(fill);
-
-	//group4
-	params4.setName("paramsGroup4");
-	params4.add(numShapes);
-	params4.add(separation);
-	params4.add(shapeType);
-	params4.add(fill);
+	params3.add(numTriangles.set("numTriangles", 1, 1, 10));
+	params3.add(sizeTriangles.set("sizeTriangles", 5, 1, 50));
+	params3.add(separationTriangles.set("separationTriangles", 50, 5, 100));
+	params3.add(color3.set("color3", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
 
 	//--
 
@@ -92,21 +92,21 @@ void ofApp::setupParameters()
 
 	//local ofApp gui to show/edit our settings/parameters
 	//to show how our params/settings changes when using the presets manager
+	gui0.setup("ofApp0");
+	gui0.add(params0);
+	gui0.setPosition(5, 10);
+
 	gui1.setup("ofApp1");
 	gui1.add(params1);
-	gui1.setPosition(5, 10);
+	gui1.setPosition(5 + 1 * (5 + 200), 10);
 
 	gui2.setup("ofApp2");
 	gui2.add(params2);
-	gui2.setPosition(5 + 1 * (5 + 200), 10);
+	gui2.setPosition(5 + 2 * (5 + 200), 10);
 
 	gui3.setup("ofApp3");
 	gui3.add(params3);
-	gui3.setPosition(5 + 2 * (5 + 200), 10);
-
-	gui4.setup("ofApp4");
-	gui4.add(params4);
-	gui4.setPosition(5 + 3 * (5 + 200), 10);
+	gui3.setPosition(5 + 3 * (5 + 200), 10);
 }
 
 //--------------------------------------------------------------
@@ -122,15 +122,13 @@ void ofApp::draw()
 	//scene draw object linked to grouped parameters
 	drawScene1();
 	drawScene2();
-
-	//drawDebug1();
-	//drawDebug2();
+	drawScene3();
 	
 	//local gui parameters
+	gui0.draw();
 	gui1.draw();
 	gui2.draw();
 	gui3.draw();
-	gui4.draw();
 }
 
 //--------------------------------------------------------------
@@ -142,11 +140,12 @@ void ofApp::keyPressed(int key)
 void ofApp::windowResized(int w, int h)
 {
 	//optional adapt to layout
-	int _cellSize = 50;
+	int _cellSize = 75;
 	int _groupsAmt = presetsManager.getAmountGroups();
+	int _widder = presetsManager.getAmountPresetsOfGroup(presetsManager.getAmountGroups()-1);
 	presetsManager.setPosition_PresetClicker(
-		0.5 * ofGetWidth() - (0 * _cellSize * 0.5f), 
-		ofGetHeight() - _groupsAmt * _cellSize - 10, 
+		0.5 * ofGetWidth() - (_widder * _cellSize * 0.5f),
+		ofGetHeight() - _groupsAmt * _cellSize - 20, 
 		_cellSize);//position and boxes sizes
 }
 
@@ -163,7 +162,7 @@ void ofApp::drawScene1()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(300, 500);
+	ofTranslate(200, 500);
 	ofSetColor(color.get());
 	ofSetLineWidth(lineWidth);
 	if (fill) ofFill();
@@ -172,28 +171,9 @@ void ofApp::drawScene1()
 	{
 		if (shapeType == 1) ofDrawRectangle(0, 0, shapeSide, shapeSide);
 		else if (shapeType == 2) ofDrawCircle(0, 0, shapeSide);
-		ofTranslate(separation, separation);
+		ofTranslate(separation, 0);
 	}
 	ofPopMatrix();
-	ofPopStyle();
-}
-
-//--------------------------------------------------------------
-void ofApp::drawDebug1()
-{
-	ofPushStyle();
-	string str;
-	int x = gui1.getPosition().x + 30;
-	int y = gui1.getPosition().y + gui1.getHeight() + 30;
-	str = "";
-	str += "shapeType : " + ofToString(shapeType); str += "\n";
-	str += "numShapes : " + ofToString(numShapes); str += "\n";
-	str += "separation: " + ofToString(separation); str += "\n";
-	str += "shapeSide : " + ofToString(shapeSide); str += "\n";
-	str += "fill      : " + ofToString(fill); str += "\n";
-	str += "color     : " + ofToString(color); str += "\n";
-	str += "lineWidth : " + ofToString(lineWidth);
-	ofDrawBitmapStringHighlight(str, gui1.getShape().x + 5, gui1.getShape().y + gui1.getHeight() + 30);
 	ofPopStyle();
 }
 
@@ -202,29 +182,34 @@ void ofApp::drawScene2()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(700, 500);
-	ofSetColor(0);
-	ofFill();
-	for (int i = 0; i < numShapes2; ++i)
+	ofTranslate(200, 500);
+	ofSetColor(color2.get());
+	if (fill2) ofFill();
+	else ofNoFill(); 
+	for (int i = 0; i < numShapes1; ++i)
 	{
-		ofDrawCircle(0, 0, shapeSide2);
-		ofTranslate(-separation2, separation2);
+		ofDrawCircle(0, 0, shapeSide1);
+		ofTranslate(-separation1, separation1);
 	}
 	ofPopMatrix();
 	ofPopStyle();
 }
 
 //--------------------------------------------------------------
-void ofApp::drawDebug2()
+void ofApp::drawScene3()
 {
 	ofPushStyle();
-	string str;
-	int x = gui2.getPosition().x + 30;
-	int y = gui2.getPosition().y + gui2.getHeight() + 30;
-	str = "";
-	str += "numShapes2 : " + ofToString(numShapes2); str += "\n";
-	str += "separation2: " + ofToString(separation2); str += "\n";
-	str += "shapeSide2 : " + ofToString(shapeSide2);
-	ofDrawBitmapStringHighlight(str, gui2.getShape().x + 5, gui2.getShape().y + gui2.getHeight() + 30);
+	ofPushMatrix();
+	ofTranslate(200, 200);
+	ofSetLineWidth(2);
+	ofSetColor(color3.get());
+	for (int i = 0; i < numTriangles; ++i)
+	{
+		ofDrawLine(0, 0, 0, sizeTriangles);
+		ofDrawLine(0, sizeTriangles, sizeTriangles/2, sizeTriangles/2);
+		ofDrawLine(sizeTriangles/2, sizeTriangles/2, 0, 0);
+		ofTranslate(separationTriangles/2, separationTriangles/4);
+	}
+	ofPopMatrix();
 	ofPopStyle();
 }

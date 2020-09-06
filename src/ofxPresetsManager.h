@@ -22,6 +22,7 @@
 ///	++++		add draggable rectangle to move/resize clicker
 //
 ///	++		randomize editor preset
+///				make for multigroup
 ///				preset mini engine. ABC dropdown list for randomizers
 ///				could add also several randomizer settings presets. selectable by dropdown list..
 ///				add limit range min/max to randomize
@@ -49,11 +50,8 @@
 //	BUG:	
 //
 //	?		startup bug not loading presets well...
-//	?		on multy group, files browse folder has all xml presets mixed. so only works on 1st group.
-//	?		fix end index rare limiter..
-//	?		doCheckPresetsFolderIsEmpty fails and overwrite all presets in some situations...
+//	?		startup doCheckPresetsFolderIsEmpty fails and overwrite all presets in some situations...
 //				it seems that it's when user-kit folder is customized, not the default one
-//	?		repair play randomizer
 //	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager" ?
 //
 //---
@@ -142,8 +140,12 @@ private:
 
 private:
 
+	ofParameter<bool> bSplitGroupFolders{ "MODE SPLIT FOLDERS", true };//on this mode we split every group on his own sub folder
+	
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };
 	ofParameter<bool> bThemDark{ "THEME DARK", true };
+	
+	string helpInfo;
 
 #ifdef INCLUDE_DEBUG_ERRORS
 	ofxDEBUG_errors errorsDEBUG;
@@ -399,20 +401,20 @@ public:
 	//--------------------------------------------------------------
 	void load_Next()//for main group
 	{
-		PRESET_selected_IndexMain++;
-		if (PRESET_selected_IndexMain >= mainGroupAmtPresetsFav - 1)
+		PRESET_Selected_IndexMain++;
+		if (PRESET_Selected_IndexMain >= mainGroupAmtPresetsFav - 1)
 		{
-			PRESET_selected_IndexMain = mainGroupAmtPresetsFav - 1;
+			PRESET_Selected_IndexMain = mainGroupAmtPresetsFav - 1;
 		}
 	}
 
 	//--------------------------------------------------------------
 	void load_Previous()//for main group
 	{
-		PRESET_selected_IndexMain--;
-		if (PRESET_selected_IndexMain < 0)
+		PRESET_Selected_IndexMain--;
+		if (PRESET_Selected_IndexMain < 0)
 		{
-			PRESET_selected_IndexMain = 0;
+			PRESET_Selected_IndexMain = 0;
 		}
 	}
 
@@ -484,13 +486,13 @@ public:
 	//--------------------------------------------------------------
 	int getCurrentPreset()//get index of selected preset
 	{
-		return PRESET_selected_IndexMain;
+		return PRESET_Selected_IndexMain;
 	}
 	//--------------------------------------------------------------
 	int getCurrentPreset(int _group)//get index of selected preset on the group
 	{
 		int _presetIndex = -1;
-		if (_group < groups.size()) _presetIndex = PRESET_selected_Index[_group];
+		if (_group < groups.size()) _presetIndex = PRESETS_Selected_Index[_group];
 		return _presetIndex;
 	}
 
@@ -623,9 +625,10 @@ public:
 		//-
 
 		ofLogNotice(__FUNCTION__);
-		PRESET_selected_IndexMain_PRE = -1;
-		PRESET_selected_IndexMain = PRESET_selected_IndexMain;
-		ofLogNotice(__FUNCTION__) << "Preset " << PRESET_selected_IndexMain;
+		PRESET_Selected_IndexMain_PRE = -1;
+
+		PRESET_Selected_IndexMain = PRESET_Selected_IndexMain;//just for refresh callback
+		ofLogNotice(__FUNCTION__) << "Preset " << PRESET_Selected_IndexMain;
 	}
 
 	//--------------------------------------------------------------
@@ -740,11 +743,11 @@ public:
 	//--
 
 public:
-	ofParameter<int> PRESET_selected_IndexMain;//main group preset selector (current)
-	vector<ofParameter<int>> PRESET_selected_Index;//extra groups preset selector (current)
+	ofParameter<int> PRESET_Selected_IndexMain;//main group preset selector (current)
+	//vector<ofParameter<int>> PRESETS_Selected_Index;//extra groups preset selector (current)
 
 private:
-	int PRESET_selected_IndexMain_PRE = -1;//used as callback
+	int PRESET_Selected_IndexMain_PRE = -1;//used as callback
 
 	//--
 
@@ -757,8 +760,9 @@ public:
 public:
 	//--------------------------------------------------------------
 	void saveCurrentPreset() {
-		ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_selected_IndexMain.get();
-		doSave(PRESET_selected_IndexMain);
+		ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_Selected_IndexMain.get();
+		save(PRESET_Selected_IndexMain, 0);
+		//doSave(PRESET_Selected_IndexMain);
 	}
 
 	//--
@@ -780,8 +784,9 @@ private:
 
 	int getGuiIndex(string name) const;//get index for a name of group
 	string getPresetPath(string guiName, int presetIndex);//get path of a preset of a group
-	string getGroupPath(string guiName);//get path of a group
-	string getGroupPath(int index);//get path of a group
+
+	string getGroupPath(string guiName);//get path of a group. for external monitor only
+	string getGroupPath(int index);//get path of a group. for external monitor only
 
 	//--
 
@@ -794,6 +799,7 @@ private:
 	//ImGui
 public:
 	void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
+	void ImGui_Draw_MainPanel(ofxImGui::Settings &settings);
 	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
 	void ImGui_Draw_Selectors(ofxImGui::Settings &settings);
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
@@ -936,6 +942,7 @@ private:
 
 	//selectors
 	std::vector<ofParameter<int>> PRESETS_Selected_Index;//? seems to be the size (last index of data vector) of any group or:
+	std::vector<int> PRESETS_Selected_Index_PRE;
 	ofParameterGroup params_PRESETS_Selected{ "Preset Selectors" };
 	//ofParameter<int> mainSelector;
 
@@ -971,8 +978,8 @@ private:
 	//---
 
 private:
-	void doLoad(int pIndex);//engine loader. not used? bc bug on bLoad trigger..
-	void doSave(int pIndex);//engine saver starting at 0
+	//void doLoad(int pIndex);//engine loader. not used? bc bug on bLoad trigger..
+	//void doSave(int pIndex);//engine saver starting at 0
 
 	//-
 
@@ -1051,20 +1058,33 @@ private:
 	}
 
 	//--------------------------------------------------------------
-	void CheckAllFolder()//check that folders exist and create them if not
+	void CheckAllFolders()//check that folders exist and create them if not
 	{
 		//CheckFolder(path_Root);//TODO: use a container for all User-Kit together...
 
 		string _path;
 		_path = path_UserKit_Folder;//current kit-preset main folder
 		CheckFolder(_path);
-		_path = path_UserKit_Folder + "/" + path_PresetsStandalone;//current kit-presets presets folder
+		_path = path_UserKit_Folder + "/" + path_PresetsStandalone;//current kit-presets standalone presets folder
 		CheckFolder(_path);
-		_path = path_UserKit_Folder + "/" + path_PresetsFavourites;//current kit-presets standalone presets folder
+		
+		_path = path_UserKit_Folder + "/" + path_PresetsFavourites;//current kit-presets presets folder
 		CheckFolder(_path);
+
 		_path = path_UserKit_Folder + "/" + path_ControlSettings;//for randomizer settings (into his own kit-preset folder)
 		CheckFolder(_path);
 		_path = path_ControlSettings;//app settings (shared from all kit-presets)
 		CheckFolder(_path);
+
+		//create the folders of each group into main presets folder 
+		if (bSplitGroupFolders.get()) 
+		{
+			for (int i = 0; i < groups.size(); i++) 
+			{
+				_path = path_UserKit_Folder + "/" + path_PresetsFavourites;//current kit-presets presets folder
+				_path += "/" + groups[i].getName();
+				CheckFolder(_path);
+			}
+		}
 	}
 };
