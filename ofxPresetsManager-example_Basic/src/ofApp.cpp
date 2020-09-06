@@ -27,26 +27,15 @@ void ofApp::setup()
 	paramsNested.add(lineWidth.set("lineWidth", 1, 0.1, 10));
 	params.add(paramsNested);//main preset settings container
 
-	////TODO:
-	////group2
-	//params2.setName("paramsGroup2");
-	//params2.add(shapeSide2.set("shapeSide2", 1, 1, 2));
-	//params2.add(numShapes2.set("numShapes2", 1, 1, 24));
-	//params2.add(separation2.set("separation2", 5, 1, 100));
-
 	//--
 
 	//1. (optional) customize path folders at first
-	presetsManager.setPath_GlobalFolder("presetsManager");	//main container folder where all other files will be
+	presetsManager.setPath_UserKit_Folder("presetsManager");	//main container folder where all other files will be
 
 	//2. add our ofParameterGroup to the preset manager 
 	//also define wich key triggers are associated to each preset. 
 	//the amount of keys will be also the amount of favorites/clickable presets
 	presetsManager.add(params, { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
-
-	////TODO:
-	////group2
-	//presetsManager.add(params2, { 'a', 's', 'd', 'e' });
 
 	//3. call setup after adding ofParameterGroup
 	presetsManager.setup();

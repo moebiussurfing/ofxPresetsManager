@@ -45,7 +45,7 @@ void ofApp::setup()
 	//--
 
 	//3. call setup after adding ofParameterGroup
-	presetsManager.setup();
+	presetsManager.setup(false);
 
 	//4. (optional) customize gui positions
 	presetsManager.setVisible_PresetClicker(true);//user panel clicker

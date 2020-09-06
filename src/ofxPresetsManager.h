@@ -136,9 +136,14 @@ private:
 	void undoStoreParams();
 #endif
 
+	bool bBuildGroupSelector = true;//to allow auto build a group selector to combine all the added groups to the presets manager
+
 	//--
 
 private:
+
+	ofParameter<bool> MODE_Editor;
+
 
 #ifdef INCLUDE_DEBUG_ERRORS
 	ofxDEBUG_errors errorsDEBUG;
@@ -299,8 +304,8 @@ public:
 
 	//-
 
-	void setup();//must be called after params group has been added!
-	void setup(std::string name);//optional to set gui panel name header label
+	void setup(bool buildGroupSelector = true);//must be called after params group has been added!
+	void setup(std::string name, bool buildGroupSelector = true);//optional to set gui panel name header label
 	void startup();//must be called after setup to se initial states
 
 	//-

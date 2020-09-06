@@ -825,20 +825,22 @@ void ofxPresetsManager::setPosition_DEBUG(int x, int y)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::setup(std::string name)///must be called after adding params group
+void ofxPresetsManager::setup(std::string name, bool buildGroupSelector)///must be called after adding params group
 {
 	gui_LabelName = name;
-	setup();
+	setup(buildGroupSelector);
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::setup()
+void ofxPresetsManager::setup(bool buildGroupSelector)
 {
 	ofLogNotice(__FUNCTION__);
 
 	DISABLE_CALLBACKS = true;
 
 	//--
+
+	bBuildGroupSelector = buildGroupSelector;
 
 #ifdef DEBUG_randomTest
 	ofSetLogLevel("ofxPresetsManager", OF_LOG_VERBOSE);
@@ -872,17 +874,20 @@ void ofxPresetsManager::setup()
 
 	//--
 
-	//main selector
-	//will combine all group
-//#define NUM_MAIN_SELECTOR_PRESETS 8
-//	mainSelector.setMax(NUM_MAIN_SELECTOR_PRESETS);
-	ofParameterGroup params_MainSelector{ "Main Selector" };
-	for (int i = 0; i < PRESETS_Selected_Index.size(); i++)
-	{
-		params_MainSelector.add(PRESETS_Selected_Index[i]);
+	//group selector
+
+	if (bBuildGroupSelector) {
+		//will combine all group
+	//#define NUM_MAIN_SELECTOR_PRESETS 8
+	//	mainSelector.setMax(NUM_MAIN_SELECTOR_PRESETS);
+		ofParameterGroup params_MainSelector{ "GROUP" };
+		for (int i = 0; i < PRESETS_Selected_Index.size(); i++)
+		{
+			params_MainSelector.add(PRESETS_Selected_Index[i]);
+		}
+		//create the extra main selector
+		add(params_MainSelector, { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
 	}
-	//create the extra main selector
-	add(params_MainSelector, { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
 
 	//--
 
@@ -1224,8 +1229,22 @@ void ofxPresetsManager::drawPresetClicker()
 
 	string _label;
 	float _round = 3.0f;
-	float _pad = 4.0f;
-	int _color = 200;
+	float _pad = 3.0f;
+
+	bool bThemDark = false;
+	ofColor _color1;//lines and text colors
+	ofColor _color2;//lines and text colors
+	ofColor _cBg;//background color
+	if (bThemDark) {//dark
+		_color1 = ofColor(0, 255);
+		_color2 = ofColor(8, 128);
+		_cBg = ofColor(0, 64);
+	}
+	else {//light
+		_color1 = ofColor(255, 200);
+		_color2 = ofColor(128, 150);
+		_cBg = ofColor(0, 128);
+	}
 
 	//----
 
@@ -1234,7 +1253,7 @@ void ofxPresetsManager::drawPresetClicker()
 	{
 		//0. bg box of all boxes background
 		ofFill();
-		ofSetColor(0, 128);
+		ofSetColor(_cBg);
 		int _extraButs;
 		_extraButs = (i == 0 ? 2 : 1);//only main group has gui toggle button
 		ofDrawRectangle(0, i * cellSize, cellSize * (keys[i].size() + _extraButs), cellSize);
@@ -1243,14 +1262,41 @@ void ofxPresetsManager::drawPresetClicker()
 		//-
 
 		//1. draw each preset box button
+		ofSetColor(_color1);
 		ofNoFill();
-		ofSetColor(ofColor::white);
 
 		size_t k = 0;//iterate keys
 		for (; k < keys[i].size(); ++k)
 		{
 			//1.1 outbox border container
 			ofDrawRectangle(cellSize * k, cellSize * i, cellSize, cellSize);
+
+			//--
+
+			//2. inner box. double mark current selected preset
+			if (PRESETS_Selected_Index[i] == k)//it is selected
+			{
+				ofPushStyle();
+
+				//filled
+				ofSetColor(_color2);
+				ofFill();
+				ofDrawRectRounded(
+					cellSize * k + _pad, cellSize * i + _pad,
+					cellSize - 2 * _pad, cellSize - 2 * _pad,
+					_round);
+				ofNoFill();
+
+				//border only
+				ofSetColor(_color1);
+				ofNoFill();
+				ofDrawRectRounded(
+					cellSize * k + _pad, cellSize * i + _pad,
+					cellSize - 2 * _pad, cellSize - 2 * _pad,
+					_round);
+
+				ofPopStyle();
+			}
 
 			//--
 
@@ -1266,37 +1312,6 @@ void ofxPresetsManager::drawPresetClicker()
 				myFont.drawString(ofToString((char)keys[i][k]),
 					cellSize * k + (0.5 * cellSize - 0.25 * sizeTTF),
 					cellSize * i + (0.5 * cellSize + 0.5 * sizeTTF));
-			}
-
-			//--
-
-			//2. inner box. double mark current selected preset
-			if (PRESETS_Selected_Index[i] == k)//it is selected
-			{
-				ofPushStyle();
-				ofSetColor(_color, 164);
-
-				//-
-
-				//border only
-				ofNoFill();
-				ofDrawRectRounded(
-					cellSize * k + _pad, cellSize * i + _pad,
-					cellSize - 2 * _pad, cellSize - 2 * _pad,
-					_round);
-
-				//-
-
-				//filled
-				ofFill();
-				ofSetColor(_color, 64);
-				ofDrawRectRounded(
-					cellSize * k + _pad, cellSize * i + _pad,
-					cellSize - 2 * _pad, cellSize - 2 * _pad,
-					_round);
-				ofNoFill();
-
-				ofPopStyle();
 			}
 		}
 
@@ -1350,32 +1365,33 @@ void ofxPresetsManager::drawPresetClicker()
 
 			_label = "GUI";
 
+			//mark if gui visible
+			if (SHOW_ImGui)
+			{
+				//border only
+				//ofNoFill();
+				//ofSetColor(_color1);
+
+				//filled
+				ofSetColor(_color2);
+				ofFill();
+
+				ofDrawRectRounded(cellSize * k + _pad, cellSize * i + _pad,
+					cellSize - 2 * _pad, cellSize - 2 * _pad,
+					_round);
+			}
+
 			if (!myFont.isLoaded())//without ttf font
 			{
 				ofDrawBitmapString(_label, cellSize * k + 8, cellSize * i + 18);
 			}
 			else//custom font 
 			{
+				ofSetColor(_color1);
 				float wx = 0.5f * myFont.getStringBoundingBox(_label, 0, 0).width;
 				myFont.drawString(_label,
 					cellSize * k + 0.5 * cellSize - wx,
 					ySave);
-			}
-
-			//mark if gui visible
-			if (SHOW_ImGui)
-			{
-				//border only
-				//ofNoFill();
-				//ofSetColor(_color, 164);
-
-				//filled
-				ofFill();
-				ofSetColor(_color, 64);
-
-				ofDrawRectRounded(cellSize * k + _pad, cellSize * i + _pad,
-					cellSize - 2 * _pad, cellSize - 2 * _pad,
-					_round);
 			}
 		}
 
@@ -1401,11 +1417,11 @@ void ofxPresetsManager::drawPresetClicker()
 			int xG = -strW - 20;
 			ySave = ySave - 2;//little up
 
-			ofSetColor(ofColor::black);//shadow
+			ofSetColor(_color2);//shadow
 			if (myFont.isLoaded()) myFont.drawString(info, xG + gap, ySave + gap);
 			else ofDrawBitmapString(info, xG + gap, ySave + gap);
 
-			ofSetColor(ofColor::white);//white
+			ofSetColor(_color1);//white
 			if (myFont.isLoaded()) myFont.drawString(info, xG, ySave);
 			else ofDrawBitmapString(info, xG, ySave);
 		}
@@ -1465,11 +1481,11 @@ void ofxPresetsManager::drawPresetClicker()
 				}
 
 				//double font to improve different background colors
-				ofSetColor(ofColor::black);//shadow
+				ofSetColor(_color2);//shadow
 				if (myFont.isLoaded()) myFont.drawString(info, x + gap, y + gap);
 				else ofDrawBitmapString(info, x + gap, y + gap);
 
-				ofSetColor(ofColor::white);//white
+				ofSetColor(_color1);
 				if (myFont.isLoaded()) myFont.drawString(info, x, y);
 				else ofDrawBitmapString(info, x, y);
 			}
@@ -2687,7 +2703,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		else if (name == "PRESET")
 		{
 			ofLogNotice(__FUNCTION__) << "--------------------------------------------------------------";
-		
+
 			//1. main group selected preset NOT CHANGED
 
 			if (PRESET_selected_IndexMain == PRESET_selected_IndexMain_PRE)
@@ -2903,7 +2919,7 @@ void ofxPresetsManager::save_ControlSettings()
 #else
 	ofLogNotice(__FUNCTION__) << "[DEBUG] BLOCKED save_ControlSettings()";
 #endif
-	}
+}
 
 //--
 
@@ -3201,7 +3217,7 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 #else
 	gui_ImGui.end();
 #endif
-	}
+}
 
 //--------------------------------------------------------------
 bool ofxPresetsManager::ImGui_Draw_Window()
@@ -3969,7 +3985,7 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 		ImGui::ProgressBar(_prog);
 		ImGui::PopStyleColor();
 		ImGui::PopID();
-		cout << _prog << endl;
+		//cout << _prog << endl;
 
 		//--
 
