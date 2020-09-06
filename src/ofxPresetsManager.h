@@ -142,8 +142,8 @@ private:
 
 private:
 
-	ofParameter<bool> MODE_Editor;
-
+	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };
+	ofParameter<bool> bThemDark{ "THEME DARK", true };
 
 #ifdef INCLUDE_DEBUG_ERRORS
 	ofxDEBUG_errors errorsDEBUG;
@@ -795,10 +795,13 @@ private:
 public:
 	void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
 	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
+	void ImGui_Draw_Selectors(ofxImGui::Settings &settings);
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
 	void ImGui_Draw_Randomizers(ofxImGui::Settings &settings);
 	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
+	ofParameter<bool> SHOW_ImGui_Selectors;
+	ofParameter<bool> SHOW_Help;
 
 	//set custom path
 	void doFileDialogProcessSelection(ofFileDialogResult openFileResult);

@@ -703,6 +703,8 @@ ofxPresetsManager::ofxPresetsManager()
 	PRESET_selected_IndexMain.set("PRESET", 0, 0, mainGroupAmtPresetsFav - 1);
 	SHOW_ImGui.set("SHOW ImGui", false);
 	SHOW_ImGui_PresetsParams.set("SHOW PARAMETERS", false);
+	SHOW_ImGui_Selectors.set("SHOW SELECTORS", false);
+	SHOW_Help.set("SHOW HELP", false);
 	MODE_Browser_NewPreset.set("NEW!", false);
 	browser_PresetName = "NO_NAME_PRESET";//browser loaded preset name
 	bSave.set("SAVE", false);
@@ -876,10 +878,11 @@ void ofxPresetsManager::setup(bool buildGroupSelector)
 
 	//group selector
 
-	if (bBuildGroupSelector) {
+	if (bBuildGroupSelector) 
+	{
 		//will combine all group
-	//#define NUM_MAIN_SELECTOR_PRESETS 8
-	//	mainSelector.setMax(NUM_MAIN_SELECTOR_PRESETS);
+		//#define NUM_MAIN_SELECTOR_PRESETS 8
+		//	mainSelector.setMax(NUM_MAIN_SELECTOR_PRESETS);
 		ofParameterGroup params_MainSelector{ "GROUP" };
 		for (int i = 0; i < PRESETS_Selected_Index.size(); i++)
 		{
@@ -922,6 +925,14 @@ void ofxPresetsManager::setup(bool buildGroupSelector)
 #ifdef INCLUDE_ofxUndoSimple
 	undoStringParams = groups[0].toString();//TODO: main group only
 #endif
+
+	//--
+
+	params_Control.add(MODE_Editor);
+	params_Control.add(bThemDark);
+	params_Control.add(SHOW_ImGui_Selectors);
+	params_Control.add(SHOW_ImGui_PresetsParams);
+	params_Control.add(SHOW_Help);
 
 	//-------
 
@@ -1205,7 +1216,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	bImGui_mouseOver = false;
 #endif
 
-}
+	}
 
 
 //--------------------------------------------------------------
@@ -1231,14 +1242,13 @@ void ofxPresetsManager::drawPresetClicker()
 	float _round = 3.0f;
 	float _pad = 3.0f;
 
-	bool bThemDark = false;
 	ofColor _color1;//lines and text colors
 	ofColor _color2;//lines and text colors
 	ofColor _cBg;//background color
 	if (bThemDark) {//dark
 		_color1 = ofColor(0, 255);
-		_color2 = ofColor(8, 128);
-		_cBg = ofColor(0, 64);
+		_color2 = ofColor(8, 32);
+		_cBg = ofColor(8, 64);
 	}
 	else {//light
 		_color1 = ofColor(255, 200);
@@ -1368,19 +1378,22 @@ void ofxPresetsManager::drawPresetClicker()
 			//mark if gui visible
 			if (SHOW_ImGui)
 			{
-				//border only
-				//ofNoFill();
-				//ofSetColor(_color1);
-
 				//filled
 				ofSetColor(_color2);
 				ofFill();
+				ofDrawRectRounded(cellSize * k + _pad, cellSize * i + _pad,
+					cellSize - 2 * _pad, cellSize - 2 * _pad,
+					_round);
 
+				//border only
+				ofNoFill();
+				ofSetColor(_color1);
 				ofDrawRectRounded(cellSize * k + _pad, cellSize * i + _pad,
 					cellSize - 2 * _pad, cellSize - 2 * _pad,
 					_round);
 			}
 
+			//label
 			if (!myFont.isLoaded())//without ttf font
 			{
 				ofDrawBitmapString(_label, cellSize * k + 8, cellSize * i + 18);
@@ -1421,7 +1434,7 @@ void ofxPresetsManager::drawPresetClicker()
 			if (myFont.isLoaded()) myFont.drawString(info, xG + gap, ySave + gap);
 			else ofDrawBitmapString(info, xG + gap, ySave + gap);
 
-			ofSetColor(_color1);//white
+			ofSetColor(_color1);
 			if (myFont.isLoaded()) myFont.drawString(info, xG, ySave);
 			else ofDrawBitmapString(info, xG, ySave);
 		}
@@ -1430,24 +1443,26 @@ void ofxPresetsManager::drawPresetClicker()
 
 		//8. help info text: 
 		{
-			bool bLateralPosition = true;
+			bool bLateralPosition = false;//false=on top
 			bool bLeftPosition = true;
 
-			debugClicker = false;
-			if (debugClicker && ENABLE_Keys)
+			debugClicker = SHOW_Help.get();
+			if (debugClicker && ENABLE_Keys && (i == 0))
 			{
 				string info = "";
-				bool bSimpleInfo = true;
-				if (bSimpleInfo)
-				{
-					//keys[i][k]
-					info += "[keys " + ofToString((char)keys[0][0]) + "|";
-					info += ofToString((char)keys[0][keys[0].size() - 1]) + "]";
-				}
-				else
+				bool bSimpleinfo = false;
+
+				//if (bSimpleInfo)
+				//{
+				//	//keys[i][k]
+				//	info += "[keys " + ofToString((char)keys[0][0]) + "|";
+				//	info += ofToString((char)keys[0][keys[0].size() - 1]) + "]";
+				//}
+				//else
 				{
 					info += "MOUSE-CLICK OR KEYS TO LOAD PRESET\n";
-					info += "HOLD [CTRL] TO SAVE/COPY OR [ALT] TO SWAP PRESET";
+					info += "[CTRL] TO SAVE/COPY\n";
+					info += "[ALT] TO SWAP PRESETS";
 				}
 
 				int x;
@@ -1455,28 +1470,33 @@ void ofxPresetsManager::drawPresetClicker()
 				int gap = 1;
 				int pad = 13;
 
-				if (!bLateralPosition)//A. vertical position below boxes
+				//A. vertical position below boxes
+				if (!bLateralPosition)
 				{
+					y = -14 - myFont.getStringBoundingBox(info, 0, 0).getHeight();
 					x = 0;
-					y = (cellSize + 15) * groups.size();
+					//y = (cellSize + 15) * groups.size();
 				}
-				else//B. lateral position right to the boxes
+				//B. lateral position right to the boxes
+				else
 				{
 					if (!bLeftPosition)
 					{
 						x = cellSize * i + pad;//i or k..?
-						y = ySave - (bSimpleInfo ? -2 : sizeTTF);
+						//y = ySave - (bSimpleInfo ? -2 : sizeTTF);
+						y = ySave - sizeTTF;
 					}
 					else {
-						float strW = 50;
+						float strW;
 						if (myFont.isLoaded())
 						{
-							strW = myFont.getStringBoundingBox(info, 0, 0).width;
+							strW = myFont.getStringBoundingBox(info, 0, 0).getWidth();
+							strW += myFont.getStringBoundingBox(groups[0].getName(), 0, 0).getWidth();
+							strW += 50;
 						}
-						int xG = -strW - 20;
-
-						x = xG;
-						y = ySave + sizeTTF + 10;
+						x = -strW;
+						y = ySave;
+						//y = ySave + sizeTTF + 10;
 					}
 				}
 
@@ -3267,46 +3287,69 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	//if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
 	//if (no_settings)	window_flags |= ImGuiWindowFlags_NoSavedSettings;
 
-	//---
+	//----
 
-	//A
-
+	//A window: main (1st) group
+	_collapse = true;
 	if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
 	{
 		ImGui_Draw_WindowContent(mainSettings);
-
-		//-
 
 		//get window position/size: must be inside begin/end
 		pos = ImGui::GetWindowPos();
 		size = ImGui::GetWindowSize();
 		ImGui_Position = glm::vec2(pos.x, pos.y);
 		ImGui_Size = glm::vec2(size.x, size.y);
-		//cout << "pos:" << ofToString(pos) << endl;
-		//cout << "size:" << ofToString(size) << endl;
 	}
 	ofxImGui::EndWindow(mainSettings);
 
-	//--
+	//----
 
-	//splitted window for parameters
+	//B window
+	//window for all group parameters contained into presetsManager
+	//all parameters in all added groups
+
 	if (SHOW_ImGui_PresetsParams) {
+
 		pos = pos - ofVec2f(575, 0);
-		size = ofVec2f(200, 400);
-		mainSettings.windowPos = pos;//required
-		_mode = ImGuiCond_FirstUseEver;//ImGuiCond_Always;
+		size = ofVec2f(300, 500);
+		mainSettings.windowPos = pos;
+		mainSettings.windowSize = size;
+		_mode = ImGuiCond_FirstUseEver;
 		ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), _mode);
 		ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), _mode);
 		_name = "ofxPresetsManager";
 		if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
 		{
-			//2. preset params preview
 			ImGui_Draw_PresetPreview(mainSettings);
 		}
 		ofxImGui::EndWindow(mainSettings);
 	}
 
-	//--
+	//----
+
+	//C window
+	//each group selectors 
+	//window for each group selector
+
+	if (SHOW_ImGui_Selectors) {
+
+		pos = pos - ofVec2f(575, 0);
+		size = ofVec2f(200, 200);
+		mainSettings.windowPos = pos;
+		mainSettings.windowSize = size;
+		_mode = ImGuiCond_FirstUseEver;
+		ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), _mode);
+		ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), _mode);
+		_name = "SELECTORS";
+		if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
+		{
+			ImGui_Draw_Selectors(mainSettings);
+		}
+		ofxImGui::EndWindow(mainSettings);
+	}
+
+	//----
 
 	return mainSettings.mouseOverGui;
 }
@@ -3328,6 +3371,17 @@ void ofxPresetsManager::ImGui_Draw_PresetPreview(ofxImGui::Settings &settings)
 }
 
 //--------------------------------------------------------------
+void ofxPresetsManager::ImGui_Draw_Selectors(ofxImGui::Settings &settings)
+{
+	//0.1 sliders preset selectors
+	//for (int i = 0; i < PRESETS_Selected_Index.size(); i++)
+	//{
+	//	ofxImGui::AddParameter(PRESETS_Selected_Index[i]);
+	//}
+	ofxImGui::AddGroup(params_PRESETS_Selected, settings);
+}
+
+//--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 {
 	//---
@@ -3336,17 +3390,8 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 	//ImGui::Text("PRESET");
 
 	//User-Kit name
-	string str = "User-Kit: " + nameUserKit;
+	string str = "Path User-Kit: " + nameUserKit;
 	ImGui::Text(str.c_str());
-
-	//---
-
-	//0.1 sliders preset selectors
-	//for (int i = 0; i < PRESETS_Selected_Index.size(); i++)
-	//{
-	//	ofxImGui::AddParameter(PRESETS_Selected_Index[i]);
-	//}
-	ofxImGui::AddGroup(params_PRESETS_Selected, settings);
 
 	//---
 
@@ -3445,9 +3490,15 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 		ofxImGui::AddParameter(autoSave);
 		ImGui::SameLine();
 		ofxImGui::AddParameter(autoLoad);
-		ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
 		ImGui::SameLine();
 		ofxImGui::AddParameter(MODE_MemoryLive);
+
+		ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
+		ImGui::SameLine();
+		ofxImGui::AddParameter(SHOW_ImGui_Selectors);
+		ofxImGui::AddParameter(SHOW_Help);
+		ImGui::SameLine();
+		ofxImGui::AddParameter(bThemDark);
 
 		//--
 
