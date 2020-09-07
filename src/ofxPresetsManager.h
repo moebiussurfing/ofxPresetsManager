@@ -14,8 +14,15 @@
 //
 //	TODO:
 //
-///	+++		put all presets into a main parent folder. split out the session settings on root folder and a single file.
+///	++++		change file format from xml to json
+///	++++		add big toggle to edit/live modes: enables undo, autosave, memory mode..etc
+///	++++		open/save dialog to project session single file.
+///	++++		select wich group is the target to randomizer/main group extras
+///					or allowed to all the groups?
+///	++++		add draggable rectangle to move/resize clicker
+//
 ///	++		randomize editor preset
+///				make for multigroup
 ///				preset mini engine. ABC dropdown list for randomizers
 ///				could add also several randomizer settings presets. selectable by dropdown list..
 ///				add limit range min/max to randomize
@@ -26,22 +33,26 @@
 ///				add setter to enable randomize wich params
 ///				call populate. disable debug_display red info
 //
-///	++		add ofColor to ImGui helpers
-///	++		add multiple groups engine. look into ofxGuiPresets fron #npisanti
-///	+++		lock (by toggle) params that we want to ignore on changing presets
+///	++		add ofColor to ImGui helpers vs ofFloatColor
+///	++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
-///	++		performance: check memory_mode
+///	++		performance: 
+///				check memory_mode. memory mode to extra groups too
 ///				check workflow: when playing randomizer disable autosave
 ///				check disable autosave
 ///	+		repair autosave timer. exclude log
 ///	+		add workflow to not collide manual preset click with randomizer timer
 ///	+		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
-///	+		could make tween when changing params using lerp...
+///				or add simpler class but compatible with preset files kits
+///	+		could make tween when changing params using lerp or ofxKeyTween...
+///	+		add undo to all the groups
 //
 //	BUG:	
 //
-//	?		repair play randomizer
-//	?		there's a problem when CheckFolder or setPath_UserKit_Folder are something like "myApp/ofxPresetsManager" ?
+//	?		startup bug not loading presets well...
+//	?		startup doCheckPresetsFolderIsEmpty fails and overwrite all presets in some situations...
+//				it seems that it's when user-kit folder is customized, not the default one
+//	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager" ?
 //
 //---
 
@@ -53,12 +64,10 @@
 //	DEFINES
 //
 //#define MODE_ImGui_EXTERNAL			//MODE_ImGui_EXTERNAL. this must be defined here and (not only) in ofApp (too)!!
-#define INCLUDE_GUI_IM_GUI				//ImGui & browser system
 #define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
 #define INCLUDE_ofxUndoSimple			//undo engine to store after randomize preset parameters (& recall)
 //#define USE_ofxImGuiSimple			//TEST alternative addon
 //
-#define INCLUDE_DEBUG_ERRORS			//debug errors
 //#define INCLUDE_PERFORMANCE_MEASURES	//measure performance ofxTimeMeasurements
 //#define DEBUG_randomTest				//uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
 //#define DEBUG_BLOCK_SAVE_SETTINGS		//disable save settings//enable this bc sometimes there's crashes on exit
@@ -70,37 +79,24 @@
 
 //--
 
-#ifdef INCLUDE_GUI_IM_GUI
 #define INCLUDE_RANDOMIZER
-#endif
 //BUG: seems to make exceptions when multiple ImGui/ofxPresetsManager instances...
-
-//internal control
-#include "ofxGui.h"
 
 //--
 
 //browser system
-#ifdef INCLUDE_GUI_IM_GUI
 #ifdef USE_ofxImGuiSimple
 #include "ofxImGuiSimple.h"
 #include "Helpers.h"
 #else
 #include "ofxImGui.h"
 #endif
-#endif
 
 #ifdef INCLUDE_ofxUndoSimple
 #include "ofxUndoSimple.h"
 #endif
 
-//optional to debug not located files or others
-#ifdef INCLUDE_DEBUG_ERRORS
-#include "ofxDEBUG_errors.h"
-#endif
-
 #include "ofxSurfingHelpers.h"
-//#include "ofxFilikaUtils.h"
 
 //optional to debug performance or delay when loading files or presets on hd or memory modes
 #ifdef INCLUDE_PERFORMANCE_MEASURES
@@ -112,19 +108,11 @@
 #define TSGL_STOP
 #endif
 
-//--
-
 //-------------------------------
 
 #pragma mark - DEFINE_DATA_TYPES
 
-//-
-
-//TODO
-//#define NUM_OF_PRESETS 8//delete this
-
-//only one it's implemented! can't add more than one parameter group!
-#define NUM_MAX_GROUPS 1
+#define NUM_MAX_GROUPS 10
 
 //---
 
@@ -135,43 +123,44 @@ class ofxPresetsManager : public ofBaseApp//TODO: remove ofBaseApp? it's for aut
 private:
 #ifdef INCLUDE_ofxUndoSimple
 	ofxUndoSimple<std::string> undoStringParams;
-	ofXml xmlParams;
+	ofXml undoXmlParams;
 	void undoRefreshParams();
 	void undoStoreParams();
 #endif
 
-	//TODO:
-	//bool bStartupForcePopulate = false;
+	bool bBuildGroupSelector = true;//to allow auto build a group selector to combine all the added groups to the presets manager
 
 	//--
 
 private:
 
-#ifdef INCLUDE_DEBUG_ERRORS
-	ofxDEBUG_errors errorsDEBUG;
-#endif
+	ofParameter<bool> bSplitGroupFolders{ "MODE SPLIT FOLDERS", true };//on this mode we split every group on his own sub folder
+
+	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };//this mode improves performance disabling autosave, undo history..etc
+	ofParameter<bool> bThemDark{ "THEME DARK", true };
+
+	string helpInfo;
+	void buildHelpInfo();
 
 	//-
 
 	//settings paths
 
 	//all folder names must go without '/'
-	std::string path_UserKit_Folder;//User-Kit folder for both other subfolders
+	std::string path_UserKit_Folder;//User-Kit folder for both other subfolders. 
 	std::string path_PresetsFavourites;//path for kit of favourite presets. live kit
 	std::string path_PresetsStandalone;//path for browse other presets. archive kit
 	std::string path_ControlSettings;//path for app state session settings
-	std::string path_Root;
+	//std::string path_Root;
 
 	std::string filename_ControlSettings;
 	std::string filename_Randomizers;//path for randomizers settings
-	std::string filenamesPresetsPrefix;//to add to file names to split names with index
-	std::string nameUserKit;
+	std::string filenamesPrefix;//to add to file names to split names with index
+	std::string nameDisplayUserKit;
 	std::string browser_PresetName;
 
-	std::string groupName;//get from ofParameterGroup name
-	//TODO:
-	//std::string groupName2;//get from ofParameterGroup name
-	std::string gui_LabelName = "NO_NAME";//default gui panel name
+	std::string nameMainSettings;
+	std::string fileExtension;
 
 	//-
 
@@ -182,20 +171,14 @@ private:
 
 	//-
 
-private:
-#ifndef INCLUDE_GUI_IM_GUI
-	ofxPanel gui_InternalControl;
-#endif
-
-	//-
-
 	//improve performance loading from memory nor xml files
 private:
+	ofParameter<bool> MODE_MemoryLive;//when enabled all presets are handled from a memory vector to avoid lag of loading xml files
 	ofParameter<bool> loadToMemory;
 	ofParameter<bool> saveFromMemory;
+
 	void load_AllKit_ToMemory();
 	void save_AllKit_FromMemory();
-	ofParameter<bool> MODE_MemoryLive;//when enabled all presets are handled from a memory vector to avoid lag of loading xml files
 public:
 	void setModeMemoryPerformance(bool b) {
 		MODE_MemoryLive = b;
@@ -215,7 +198,6 @@ private:
 	ofParameter<bool> MODE_AvoidRandomRepeat;//this mode re makes randomize again if new index preset it's the same!
 	ofParameter<bool> bResetDices;
 	ofParameter<int> randomizedDice;//to test
-	//ofParameter<string> _totalDicesStr;
 	bool bLatchRun = false;
 
 public:
@@ -231,10 +213,11 @@ private:
 	int randomizeSpeed;//real time dureation
 	uint32_t randomizerTimer;
 	int randomize_MAX_DURATION = 6000;
-	int randomize_MAX_DURATION_SHORT = 6000 / 2.;
+	int randomize_MAX_DURATION_SHORT = 6000 / 2.f;
 	vector<ofParameter<int>> presetsRandomFactor;//probability of every preset
 	vector<ofParameter<bool>> presetsRandomModeShort;//mode short for ebvery preset
 	vector<int> randomFactorsDices;
+	void buildRandomizers();
 	void setupRandomizer();//engine to get a random between all posible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
 	void doRandomizeWichSelectedPreset();//randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
 	int doRandomizeWichSelectedPresetCheckChanged();
@@ -246,7 +229,6 @@ private:
 
 public:
 	ofParameter<bool> bRandomizeEditor;
-
 private:
 	ofParameter<bool> bRandomizeEditorAll;//put all toggles/params to true. a randomize will act over all params
 	ofParameter<bool> bRandomizeEditorNone;//put to disabled all toggles
@@ -262,22 +244,16 @@ private:
 	void doRandomizeEditor();//randomize params of current selected preset
 	void doRandomizeEditorGroup(ofParameterGroup& group);//randomize params of current selected preset
 
-	////TODO:
-	//ofParameterGroup group_TARGET;
-	//void addGroup_TARGET(ofParameterGroup &g);	
-	//vector<ofParameterGroup> groupsMem;
-
 private:
 	//TODO:
-	//data
 	//should use keys[i].size() instead of this:
-	vector<ofXml> presetsXmlArray;
-	//ofXml presetsXmlArray[NUM_OF_PRESETS];//fixed lenght mode..
+	vector<ofXml> mainGroupPresetsXmls;
 
 	//--
 
 #pragma mark - CALLBACKS
 private:
+	bool DISABLE_CALLBACKS_SELECTORS = false;//to avoid multiple calls on multiple presets selector engine
 
 	bool DISABLE_CALLBACKS = true;//to avoid startup crashes and objects are not initialized properly
 	//updating some params before save will trigs also the group callbacks
@@ -316,20 +292,24 @@ public:
 private:
 	//TODO:
 	//BUG:
-	//not working
+	//not working. must use below add method. maybe can add a correlative keys list
 	void add(ofParameterGroup params, int numPresets = 8);//add a param group for preset saving and how many presets on favs
 
 public:
-
 	void add(ofParameterGroup params, initializer_list<int> keysList);//adds and define keys to trig presets too
 
+	//-
+
 	void setup();//must be called after params group has been added!
-	void setup(std::string name);//optional to set gui panel name header label
+	void setup(std::string name);//TODO: should use char array to avoid collapse with bool...
+	void setup(std::string name, bool _buildGroupSelector);
+	void setup(bool _buildGroupSelector);
+	
 	void startup();//must be called after setup to se initial states
 
 	//-
 
-	//easy callback to get from ofApp if required
+	//callback to get when saved/loaded done from ofApp if desired
 public:
 	ofParameter<bool> DONE_load;//easy callback to know (in ofApp) that preset LOAD is done 
 	ofParameter<bool> DONE_save;//easy callback to know (in ofApp) that preset SAVE is done
@@ -347,7 +327,6 @@ public:
 		}
 		return false;
 	}
-
 	////to check in update() as callback
 	//bool isDoneLoad()
 	//{
@@ -370,21 +349,28 @@ public:
 	//--------------------------------------------------------------
 	float getPresetClicker_Width()
 	{
-		return clicker_cellSize * (keys[0].size() + 2);
+		//return cellSize * (keys[0].size() + 2);
+		return cellSize * getAmountPresetsOfGroup(getAmountGroups() - 1);
 	}
 	//--------------------------------------------------------------
 	float getPresetClicker_BoxSize()
 	{
-		return clicker_cellSize;
+		return cellSize;
+	}
+	//--------------------------------------------------------------
+	void setSizeBox_PresetClicker(float size)
+	{
+		cellSize = size;
 	}
 	//--------------------------------------------------------------
 	float getPresetClicker_Height()
 	{
-		return clicker_cellSize;
+		return getAmountGroups() * cellSize;
 	}
 
 	//-
 
+	//--------------------------------------------------------------
 	void setModeKeySave(int key);//set the key you have to hold for saving, default is OF_KEY_CONTROL
 	void setModeKeySwap(int key);//set the key you have to hold for swap, default is OF_KEY_ALT
 
@@ -416,37 +402,118 @@ public:
 	//-
 
 	//--------------------------------------------------------------
-	void load_Next()
+	void load_Next()//for main group
 	{
-		PRESET_selected++;
-		if (PRESET_selected >= numPresetsFavorites - 1)
+		PRESET_Selected_IndexMain++;
+		if (PRESET_Selected_IndexMain >= mainGroupAmtPresetsFav - 1)
 		{
-			PRESET_selected = numPresetsFavorites - 1;
+			PRESET_Selected_IndexMain = mainGroupAmtPresetsFav - 1;
 		}
 	}
 
 	//--------------------------------------------------------------
-	void load_Previous()
+	void load_Previous()//for main group
 	{
-		PRESET_selected--;
-		if (PRESET_selected < 0)
+		PRESET_Selected_IndexMain--;
+		if (PRESET_Selected_IndexMain < 0)
 		{
-			PRESET_selected = 0;
+			PRESET_Selected_IndexMain = 0;
 		}
 	}
 
-	void loadPreset(int p);//load preset by code from ofApp
+	//--------------------------------------------------------------
+	void loadPreset(int p);//load preset for the main group by code from ofApp
+	void loadPreset(int p, int _indexGroup);//load preset for extra groups by code from ofApp
+	void savePreset(int p, int _indexGroup);//save preset for extra groups by code from ofApp
 
 	//--------------------------------------------------------------
-	int getNumPresets()
+	int getAmoutPresetsMain()//get main group amount of presets
 	{
-		return numPresetsFavorites;
+		return mainGroupAmtPresetsFav;
 	}
 
+	//helpers main for external layout or other workflow purposes
+	//--------------------------------------------------------------
+	int getAmountGroups()
+	{
+		return groups.size();
+	}
+
+	//--------------------------------------------------------------
+	int getAmountPresetsOfGroup(int g)
+	{
+		int _size = -1;
+		if (g < groups.size()) _size = groupsSizes[g];
+		return _size;
+	}
+
+	//--------------------------------------------------------------
+	string getGroupName(int i)
+	{
+		string _name = "ERROR UNKNOWN";
+		if (i < groups.size()) _name = groups[i];
+		return _name;
+	}
+
+	//--------------------------------------------------------------
+	string getGroupsNames()
+	{
+		string _names = "";
+		for (int i = 0; i < groups.size(); i++)
+		{
+			_names += groups[i].getName();
+			_names += "\n";
+		}
+		return _names;
+	}
+
+	//--------------------------------------------------------------
+	string getGroupsPaths(bool simplified = true)
+	{
+		string _names = "";
+
+		if (!simplified) {
+			for (int i = 0; i < groups.size(); i++)
+			{
+				_names += getGroupPath(i);
+				_names += "\n";
+			}
+		}
+		else {
+			//simplify
+			if (!bPathDirCustom) _names += "/data/";
+
+			_names += path_UserKit_Folder + "/" + path_PresetsFavourites;
+			_names += "\n";
+			for (int i = 0; i < groups.size(); i++)
+			{
+				_names += ofToString(i) + " /";
+				_names += groups[i].getName();
+				_names += "/";
+				_names += "\n";
+			}
+		}
+		return _names;
+	}
+
+	//--------------------------------------------------------------
+	string getGroupsPath()
+	{
+		string _names = "";
+		_names = getGroupPath(0);//simpler: get first group bc all are in the same folder
+		return _names;
+	}
 	//--------------------------------------------------------------
 	int getCurrentPreset()//get index of selected preset
 	{
-		return PRESET_selected;
+		return PRESET_Selected_IndexMain;
+	}
+	//--------------------------------------------------------------
+	int getCurrentPreset(int _group)//get index of selected preset on the group
+	{
+		int _presetIndex = -1;
+		if (_group < groups.size()) _presetIndex = PRESETS_Selected_Index[_group];
+		return _presetIndex;
 	}
 
 	//-
@@ -457,17 +524,13 @@ public:
 		SHOW_GroupName = b;
 	}
 
-	//--------------------------------------------------------------
-	std::string getGroupName()//get the paramGroup being managed here. Useful when using more than one ofxPresetsManager instances
-	{
-		return groups[0].getName();
-	}
-
 	//--
 
 	//randomizer helpers
-
 public:
+	ofParameter<int> randomizerProgress{ "%", 0, 0, 100 };
+	float _prog;
+
 	//--------------------------------------------------------------
 	void setPlayRandomizerTimer(bool b)//play randomizer timer
 	{
@@ -514,6 +577,7 @@ public:
 	void doCloneRight(int pIndex);//clone from selected preset to all others to the right
 	void doCloneAll();//clone all presets from the current selected
 	void doPopulateFavs();//fast populate random presets around all favs
+	void doSwap(int groupIndex, int fromIndex, int toIndex);
 
 	//--
 
@@ -545,31 +609,22 @@ public:
 
 	//browser for standalone presets
 private:
-#ifdef INCLUDE_GUI_IM_GUI
 	//load presets from preset folder, not from favorites presets folders
-	void browser_PresetLoad(string name);
-	void browser_PresetSave(string name);
-	bool browser_FilesRefresh();
-	void browser_Setup();
-	float _w;
-
-	void doCheckPresetsFolderIsEmpty();
-
-#endif
+	void doLoadMainGroupPreset(string name);
+	void doStandalonePresetSave(string name);
+	bool doStandaloneRefreshPresets();
+	void buildStandalonePresets();//standalone presets splitted from favourites presets
+	//void doCheckPresetsFolderIsEmpty();
 
 	//-
 
-#pragma mark - GUI
-
-	//-
-
-public:
-
-	//-
-
+private:
 	//expose basic controls to allow use on external gui
 	ofParameterGroup params_Controls{ "Presets Manager" };
+public:
 	ofParameterGroup getControls() {
+		params_Controls.clear();
+		params_Controls.setName(nameDisplayUserKit);
 		params_Controls.add(SHOW_ClickPanel);
 		params_Controls.add(PLAY_RandomizeTimer);
 		return params_Controls;
@@ -579,6 +634,7 @@ public:
 
 	//API
 
+public:
 	//BUG: 
 	//workflow 
 	//to solve auto load fail because the sorting of xml autoSave after preset selector tag
@@ -587,14 +643,15 @@ public:
 	void refreshStartup()
 	{
 		////browser
-		//browser_FilesRefresh();
+		//doStandaloneRefreshPresets();
 
 		//-
 
 		ofLogNotice(__FUNCTION__);
-		PRESET_selected_PRE = -1;
-		PRESET_selected = PRESET_selected;
-		ofLogNotice(__FUNCTION__) << "Preset " << PRESET_selected;
+		PRESET_Selected_IndexMain_PRE = -1;
+
+		PRESET_Selected_IndexMain = PRESET_Selected_IndexMain;//just for refresh callback
+		ofLogNotice(__FUNCTION__) << "Preset " << PRESET_Selected_IndexMain;
 	}
 
 	//--------------------------------------------------------------
@@ -602,7 +659,6 @@ public:
 	{
 		debugClicker = b;
 	}
-#ifdef INCLUDE_GUI_IM_GUI
 	//--------------------------------------------------------------
 	void setPosition_GUI_ImGui(int x, int y)
 	{
@@ -623,15 +679,6 @@ public:
 	{
 		return SHOW_ImGui;
 	}
-#endif
-#ifndef INCLUDE_GUI_IM_GUI
-	//--------------------------------------------------------------
-	void setPosition_GUI_InternalControl(int x, int y)
-	{
-		guiPos_InternalControl = ofVec2f(x, y);
-		gui_InternalControl.setPosition(guiPos_InternalControl.x, guiPos_InternalControl.y);
-	}
-#endif
 	//--------------------------------------------------------------
 	void setVisible_GUI_Internal(bool visible)
 	{
@@ -652,7 +699,13 @@ public:
 	{
 		clicker_Pos.x = x;
 		clicker_Pos.y = y;
-		clicker_cellSize = _cellSize;
+		cellSize = _cellSize;
+	}
+	//--------------------------------------------------------------
+	void setPosition_PresetClicker(int x, int y)
+	{
+		clicker_Pos.x = x;
+		clicker_Pos.y = y;
 	}
 	//--------------------------------------------------------------
 	void setVisible_PresetClicker(bool visible)
@@ -684,16 +737,17 @@ public:
 	void setPath_PresetsFavourites(string folder);//path folder for favorite/live presets
 	void setPath_PresetsStandalone(string folder);//path folder for kit for the browser
 	void setPath_ControlSettings(string str)//for the session states settings
+	//--------------------------------------------------------------
 	{
 		ofLogNotice(__FUNCTION__) << str;
 		path_ControlSettings = str;
 	}
-	void setPath_Root(string str)
-	{
-		ofLogNotice(__FUNCTION__) << str;
-		path_Root = str;
-	}
-
+	////--------------------------------------------------------------
+	//void setPath_Root(string str)
+	//{
+	//	ofLogNotice(__FUNCTION__) << str;
+	//	path_Root = str;
+	//}
 	//--------------------------------------------------------------
 	void setModeAutoLoad(bool b)
 	{
@@ -718,10 +772,11 @@ public:
 	//--
 
 public:
-	ofParameter<int> PRESET_selected;//main current preset selector
+	ofParameter<int> PRESET_Selected_IndexMain;//main group preset selector (current)
+	//vector<ofParameter<int>> PRESETS_Selected_Index;//extra groups preset selector (current)
 
 private:
-	int PRESET_selected_PRE = -1;//used as callback
+	int PRESET_Selected_IndexMain_PRE = -1;//used as callback
 
 	//--
 
@@ -732,9 +787,11 @@ public:
 	//-
 
 public:
+	//--------------------------------------------------------------
 	void saveCurrentPreset() {
-		ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_selected.get();
-		doSave(PRESET_selected);
+		ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_Selected_IndexMain.get();
+		save(PRESET_Selected_IndexMain, 0);
+		//doSave(PRESET_Selected_IndexMain);
 	}
 
 	//--
@@ -754,8 +811,11 @@ private:
 	int getPresetIndex(int guiIndex) const;
 	int getPresetIndex(string guiName) const;
 
-	int getGuiIndex(string name) const;
-	string getPresetName(string guiName, int presetIndex);
+	int getGuiIndex(string name) const;//get index for a name of group
+	string getPresetPath(string guiName, int presetIndex);//get path of a preset of a group
+
+	string getGroupPath(string guiName);//get path of a group. for external monitor only
+	string getGroupPath(int index);//get path of a group. for external monitor only
 
 	//--
 
@@ -766,29 +826,19 @@ private:
 	//-
 
 	//ImGui
-#ifdef INCLUDE_GUI_IM_GUI
-
-	//ImGui pure content
 public:
 	void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
+	void ImGui_Draw_MainPanel(ofxImGui::Settings &settings);
 	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
+	void ImGui_Draw_Selectors(ofxImGui::Settings &settings);
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
 	void ImGui_Draw_Randomizers(ofxImGui::Settings &settings);
 	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
-
-	//set custom path
-	void doFileDialogProcessSelection(ofFileDialogResult openFileResult);
-	void doLoadUserKit();
+	ofParameter<bool> SHOW_ImGui_PresetsParams;
+	ofParameter<bool> SHOW_ImGui_Selectors;
+	ofParameter<bool> SHOW_Help;
 
 	//--
-
-#ifndef USE_ofxImGuiSimple
-	//ImGui theme
-	void ImGui_FontCustom();
-	void ImGui_ThemeMoebiusSurfing();
-#endif
-
-	//-
 
 private:
 #ifdef USE_ofxImGuiSimple
@@ -801,7 +851,6 @@ private:
 	void ImGui_Draw_WindowBegin();
 	void ImGui_Draw_WindowEnd();
 	bool ImGui_Draw_Window();
-#endif
 #endif
 
 	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. 
@@ -816,26 +865,26 @@ private:
 	bool bImGui_mouseOver_PRE;
 	bool bMouseOver_Changed = false;
 
-public:
-	////--------------------------------------------------------------
-	//bool isMouseOver()
-	//{
-	//	bool b;
-	//	if (!SHOW_ImGui) b = false;
-	//	else b = bImGui_mouseOver;
-	//	return b;
-	//}
+	//public:
+		////--------------------------------------------------------------
+		//bool isMouseOver()
+		//{
+		//	bool b;
+		//	if (!SHOW_ImGui) b = false;
+		//	else b = bImGui_mouseOver;
+		//	return b;
+		//}
+		////--------------------------------------------------------------
+		//bool isMouseOver_Changed()
+		//{
+		//	if (bMouseOver_Changed)
+		//	{
+		//		//bMouseOver_Changed = false;//reset
+		//		return true;
+		//	}
+		//}
 
-	//bool isMouseOver_Changed()
-	//{
-	//	if (bMouseOver_Changed)
-	//	{
-	//		//bMouseOver_Changed = false;//reset
-	//		return true;
-	//	}
-	//}
-
-	//--
+		//--
 
 public:
 	ofParameterGroup params_randomizer;
@@ -869,12 +918,12 @@ public:
 
 		//browser number of files
 		//iterate all presets
-		for (int i = 0; i < numPresetsFavorites; i++)
+		for (int i = 0; i < mainGroupAmtPresetsFav; i++)
 		{
 			std::string pathSrc;
 			std::string pathDst;
 
-			pathSrc = getPresetName(groups[0].getName(), i);
+			pathSrc = getPresetPath(groups[0].getName(), i);
 			boost::filesystem::path bPath(pathSrc);
 
 			//string pathFolder = ofToString(bPath.parent_path());
@@ -892,7 +941,7 @@ public:
 		//--
 
 		//refresh files
-		browser_FilesRefresh();
+		doStandaloneRefreshPresets();
 	}
 
 #endif//end browser
@@ -903,7 +952,7 @@ private:
 
 	//layout
 	ofVec2f guiPos_InternalControl = ofVec2f(500, 500);
-	int clicker_cellSize = 80;
+	int cellSize = 80;
 	ofVec2f clicker_Pos = ofVec2f(500, 500);
 
 	//--
@@ -916,12 +965,13 @@ private:
 
 	//--
 
-	std::vector<int> lastIndices;//? seems to be the size of any group or:
-	//? this seems to be the last selected of any group(?)
-	//TODO:
-	//lastIndices it's the gui box clicked only, not important.. ?
+	//selectors
+	std::vector<ofParameter<int>> PRESETS_Selected_Index;//? seems to be the size (last index of data vector) of any group or:
+	std::vector<int> PRESETS_Selected_Index_PRE;
+	ofParameterGroup params_PRESETS_Selected{ "Preset Selectors" };
+	//ofParameter<int> mainSelector;
 
-	std::vector<int> presetsOnGroup;//?? this seems to be the number of presets of each added group(?)
+	std::vector<int> groupsSizes;//this is the number of presets of each added group
 
 	//--
 
@@ -933,8 +983,8 @@ private:
 	void addKeysListeners();
 	void removeKeysListeners();
 
-	bool bKeys;//enabled keys
 	vector<vector<int>> keys;//queued trigger keys for each group ? (all presets) (size of)
+	bool bKeys;//enabled keys
 	bool keysNotActivated;
 
 	//save
@@ -948,15 +998,13 @@ private:
 	void mousePressed(int x, int y);
 	bool lastMouseButtonState;
 
-	std::vector<int> newIndices;//? this seems to be the number of the groups(? )
-
-	int numPresetsFavorites;//amount of box-clickable handled presets on current favorites/kit [8]
+	int mainGroupAmtPresetsFav;//amount of box-clickable handled presets on current favorites/kit [8]
 
 	//---
 
 private:
-	void doLoad(int pIndex);//engine loader. not used? bc bug on bLoad trigger..
-	void doSave(int pIndex);//engine saver starting at 0
+	//void doLoad(int pIndex);//engine loader. not used? bc bug on bLoad trigger..
+	//void doSave(int pIndex);//engine saver starting at 0
 
 	//-
 
@@ -971,6 +1019,7 @@ private:
 	//callback
 private:
 	void Changed_Params_Control(ofAbstractParameter &e);
+	void Changed_Params_UserKit(ofAbstractParameter &e);
 
 	//-
 
@@ -980,10 +1029,8 @@ public:
 private:
 	ofParameterGroup params_Control;
 
-#ifdef INCLUDE_GUI_IM_GUI
 public:
 	ofParameter<bool> SHOW_ImGui;
-#endif
 
 private:
 	ofParameter<bool> bSave;
@@ -992,8 +1039,9 @@ private:
 	ofParameter<bool> autoLoad;
 	ofParameter<bool> bCloneRight;
 	ofParameter<bool> bCloneAll;
+
 	//internal groups
-	ofParameterGroup params_Favourites;
+	ofParameterGroup params_UserKitSettings;
 	ofParameterGroup params_Gui;
 	ofParameterGroup params_Options;
 	ofParameterGroup params_HelperTools;
@@ -1002,12 +1050,21 @@ private:
 	ofParameter<glm::vec2> Gui_Internal_Position;
 	ofParameter<bool> ENABLE_Keys;
 
+	//--
+
 	//custom path
 	ofParameter<bool> bPathDirCustom;
 	ofParameter<string> pathDirCustom;
 
+public:
+	//set custom path
+	void doFileDialogProcessSelection(ofFileDialogResult openFileResult);
+	void buildCustomUserKit();
+	void buildDefaultUserKit();
+
 	//--
 
+private:
 	//timer autosave
 	ofParameter<bool> bAutosaveTimer;
 	uint64_t timerLast_Autosave = 0;
@@ -1036,404 +1093,39 @@ private:
 	}
 
 	//--------------------------------------------------------------
-	void CheckAllFolder()//check that folders exist and create them if not
+	void CheckAllFolders()//check that folders exist and create them if not
 	{
-		//CheckFolder(path_Root);//TODO: use a container for all User-Kit together...
+		//TODO: 
+		//use a container for all User-Kit together...
+		//CheckFolder(path_Root);
 
 		string _path;
+
 		_path = path_UserKit_Folder;//current kit-preset main folder
 		CheckFolder(_path);
-		_path = path_UserKit_Folder + "/" + path_PresetsStandalone;//current kit-presets presets folder
+
+		_path = path_UserKit_Folder + "/" + path_PresetsFavourites;//current kit-presets favourite presets folder
 		CheckFolder(_path);
-		_path = path_UserKit_Folder + "/" + path_PresetsFavourites;//current kit-presets standalone presets folder
+
+		_path = path_UserKit_Folder + "/" + path_PresetsStandalone;//current kit-presets standalone presets folder
 		CheckFolder(_path);
-		//_path = path_UserKit_Folder;//for randomizer settings (into his own kit-preset folder)
-		//_path = path_UserKit_Folder + "/" + path_ControlSettings;//for randomizer settings (into his own kit-preset folder)
-		//CheckFolder(_path);
-		_path = path_ControlSettings;//app settings (shared from all kit-presets)
+
+		_path = path_UserKit_Folder + "/" + path_ControlSettings;//for randomizer settings (into his own kit-preset folder)
 		CheckFolder(_path);
-	}
 
-	//--
+		_path = path_UserKit_Folder + "/" + path_ControlSettings;//app settings (shared from all kit-presets)
+		CheckFolder(_path);
 
-#ifdef INCLUDE_GUI_IM_GUI			
-	//my custom ImGui helpers
-	////https://github.com/ocornut/imgui/issues/1537
-	//--------------------------------------------------------------
-	bool AddBigButton(ofParameter<bool>& parameter, float h)//button but using a bool not void param
-	{
-		auto tmpRef = parameter.get();
-		auto name = ofxImGui::GetUniqueName(parameter);
-
-		float w;
-		w = ImGui::GetWindowWidth()*0.9f;
-
-		ImGuiStyle *style = &ImGui::GetStyle();
-
-		const ImVec4 colorButton = style->Colors[ImGuiCol_Button];//better for my theme
-		const ImVec4 colorHover = style->Colors[ImGuiCol_Button];
-		const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
-		//const ImVec4 colorButton = style->Colors[ImGuiCol_ButtonHovered];//better for default theme
-		//const ImVec4 colorHover = style->Colors[ImGuiCol_ButtonHovered];
-		//const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
-
-		ImGui::PushID(name);
-		ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorHover);
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorActive);
-
-		if (ImGui::Button((name), ImVec2(w, h)))
+		//create the folders of each group into main presets folder 
+		if (bSplitGroupFolders.get())
 		{
-			ofLogNotice(__FUNCTION__) << name << ": BANG";
-
-			tmpRef = true;
-			parameter.set(tmpRef);
-		}
-
-		ImGui::PopStyleColor(3);
-		ImGui::PopID();
-
-		return true;//not used
-	}
-
-	//--------------------------------------------------------------
-	bool AddBigToggle(ofParameter<bool>& parameter, float h)//TODO: seems not working well linked to the param..
-	{
-		auto tmpRef = parameter.get();
-		auto name = ofxImGui::GetUniqueName(parameter);
-
-		//--
-
-		//how to set colors
-		//static float b = 1.0f;
-		//static float c = 0.5f;
-		//static int i = 3;// hue colors are from 0 to 7
-		//ImVec4 _color1 = (ImVec4)ImColor::HSV(i / 7.0f, b, b);
-		//ImVec4 _color2 = (ImVec4)ImColor::HSV(i / 7.0f, c, c);
-
-		//--
-
-		//button toggle
-
-		float w;
-		//float h;
-		//h = 30;
-		//w = 200;
-		w = ImGui::GetWindowWidth()*0.9f;
-
-		static bool _boolToggle = tmpRef;  // default value, the button is disabled 
-		if (_boolToggle == true)//enabled
-		{
-			ImGuiStyle *style = &ImGui::GetStyle();
-			const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
-			const ImVec4 colorButton = style->Colors[ImGuiCol_ButtonHovered];
-			const ImVec4 colorHover = style->Colors[ImGuiCol_ButtonHovered];
-			ImGui::PushID(name);
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorActive);
-			ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorHover);
-
-			ImGui::Button(name, ImVec2(w, h));
-			if (ImGui::IsItemClicked(0))
+			for (int i = 0; i < groups.size(); i++)
 			{
-				_boolToggle = !_boolToggle;
-				tmpRef = _boolToggle;
-				parameter.set(tmpRef);
+				_path = path_UserKit_Folder + "/" + path_PresetsFavourites;//current kit-presets presets folder
+				_path += "/" + groups[i].getName();//append group name
+
+				CheckFolder(_path);
 			}
-
-			ImGui::PopStyleColor(3);
-			ImGui::PopID();
 		}
-		else//disabled
-		{
-			ImGuiStyle *style = &ImGui::GetStyle();
-			const ImVec4 colorActive = style->Colors[ImGuiCol_ButtonActive];
-			const ImVec4 colorHover = style->Colors[ImGuiCol_Button];
-			const ImVec4 colorButton = style->Colors[ImGuiCol_Button];//better for my theme
-			//const ImVec4 colorButton = style->Colors[ImGuiCol_ButtonHovered];//better for default theme
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorActive);
-			ImGui::PushStyleColor(ImGuiCol_Button, colorHover);
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorHover);
-			if (ImGui::Button(name, ImVec2(w, h))) {
-				_boolToggle = true;
-				tmpRef = _boolToggle;
-				parameter.set(tmpRef);
-			}
-			ImGui::PopStyleColor(3);
-		}
-
-		//--
-
-		//checkbox
-		//ImGui::PushID(name);
-		//ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(i / 7.0f, b, b));
-		//ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i / 7.0f, b, b));
-		//ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i / 7.0f, c, c));
-		//if (ImGui::Checkbox(name, (bool *)&tmpRef))
-		//	//if (ImGui::Checkbox(ofxImGui::GetUniqueName(parameter), (bool *)&tmpRef))
-		//{
-		//	parameter.set(tmpRef);
-		//	ImGui::PopStyleColor(3);
-		//	ImGui::PopID();
-		//	return true;
-		//}
-		//ImGui::PopStyleColor(3);
-		//ImGui::PopID();
-		//return false;
-
-		return true;//not used
 	}
-
-	//--------------------------------------------------------------
-	void ImGui_ThemeModernDark()
-	{
-		ofLogNotice(__FUNCTION__);
-
-		auto& style = ImGui::GetStyle();
-		style.ChildRounding = 0;
-		style.GrabRounding = 0;
-		style.FrameRounding = 2;
-		style.PopupRounding = 0;
-		style.ScrollbarRounding = 0;
-		style.TabRounding = 2;
-		style.WindowRounding = 0;
-		style.FramePadding = { 4, 4 };
-
-		style.WindowTitleAlign = { 0.0, 0.5 };
-		style.ColorButtonPosition = ImGuiDir_Left;
-
-		ImVec4* colors = ImGui::GetStyle().Colors;
-		colors[ImGuiCol_Text] = { 1.0f, 1.0f, 1.0f, 1.00f };				//
-		colors[ImGuiCol_TextDisabled] = { 0.25f, 0.25f, 0.25f, 1.00f };		//
-		colors[ImGuiCol_WindowBg] = { 0.09f, 0.09f, 0.09f, 0.94f };			//
-		colors[ImGuiCol_ChildBg] = { 0.11f, 0.11f, 0.11f, 1.00f };			//
-		colors[ImGuiCol_PopupBg] = { 0.11f, 0.11f, 0.11f, 0.94f };			//
-		colors[ImGuiCol_Border] = { 0.07f, 0.08f, 0.08f, 1.00f };
-		colors[ImGuiCol_BorderShadow] = { 0.00f, 0.00f, 0.00f, 0.00f };
-		colors[ImGuiCol_FrameBg] = { 0.35f, 0.35f, 0.35f, 0.54f };			//
-		colors[ImGuiCol_FrameBgHovered] = { 0.3f, 0.3f, 0.3f, 1.00f };
-		//colors[ImGuiCol_FrameBgHovered] = { 0.31f, 0.29f, 0.27f, 1.00f };
-		colors[ImGuiCol_FrameBgActive] = { 0.40f, 0.36f, 0.33f, 0.67f };
-		colors[ImGuiCol_TitleBg] = { 0.1f, 0.1f, 0.1f, 1.00f };
-		colors[ImGuiCol_TitleBgActive] = { 0.3f, 0.3f, 0.3f, 1.00f };		//
-		colors[ImGuiCol_TitleBgCollapsed] = { 0.0f, 0.0f, 0.0f, 0.61f };
-		colors[ImGuiCol_MenuBarBg] = { 0.18f, 0.18f, 0.18f, 0.94f };		//
-		colors[ImGuiCol_ScrollbarBg] = { 0.00f, 0.00f, 0.00f, 0.16f };
-		colors[ImGuiCol_ScrollbarGrab] = { 0.24f, 0.22f, 0.21f, 1.00f };
-		colors[ImGuiCol_ScrollbarGrabHovered] = { 0.3f, 0.3f, 0.3f, 1.00f };
-		colors[ImGuiCol_ScrollbarGrabActive] = { 0.40f, 0.36f, 0.33f, 1.00f };
-		colors[ImGuiCol_CheckMark] = { 0.84f, 0.84f, 0.84f, 1.0f };			//
-		colors[ImGuiCol_SliderGrab] = { 0.4f, 0.4f, 0.4f, 1.0f };			//		
-		//colors[ImGuiCol_SliderGrab] = { 0.8f, 0.8f, 0.8f, 1.0f };			//		
-		colors[ImGuiCol_SliderGrabActive] = { 0.35f, 0.35f, 0.35f, 1.00f }; //
-		//colors[ImGuiCol_SliderGrabActive] = { 0.55f, 0.55f, 0.55f, 1.00f }; //
-		colors[ImGuiCol_Button] = { 0.55f, 0.55f, 0.55f, 0.40f };			//
-		colors[ImGuiCol_ButtonHovered] = { 0.15f, 0.15f, 0.15f, 0.62f };	//	
-		colors[ImGuiCol_ButtonActive] = { 0.60f, 0.60f, 0.60f, 1.00f };		//
-		colors[ImGuiCol_Header] = { 0.84f, 0.36f, 0.05f, 0.0f };			//
-		colors[ImGuiCol_HeaderHovered] = { 0.25f, 0.25f, 0.25f, 0.80f };	//
-		colors[ImGuiCol_HeaderActive] = { 0.42f, 0.42f, 0.42f, 1.00f };
-		colors[ImGuiCol_Separator] = { 0.35f, 0.35f, 0.35f, 0.50f };		//
-		colors[ImGuiCol_SeparatorHovered] = { 0.3f, 0.3f, 0.3f, 0.78f };
-		colors[ImGuiCol_SeparatorActive] = { 0.40f, 0.36f, 0.33f, 1.00f };
-		colors[ImGuiCol_ResizeGrip] = { 1.0f, 1.0f, 1.0f, 0.25f };			//
-		colors[ImGuiCol_ResizeGripHovered] = { 1.00f, 1.0f, 1.0f, 0.4f };	//
-		colors[ImGuiCol_ResizeGripActive] = { 1.00f, 1.00f, 1.0f, 0.95f };	//
-		colors[ImGuiCol_Tab] = { 0.18f, 0.18f, 0.18f, 1.0f };				//
-		colors[ImGuiCol_TabHovered] = { 0.58f, 0.58f, 0.58f, 0.80f };		//
-		colors[ImGuiCol_TabActive] = { 0.6f, 0.60f, 0.60f, 1.00f };
-		colors[ImGuiCol_TabUnfocused] = { 0.07f, 0.10f, 0.15f, 0.97f };
-		colors[ImGuiCol_TabUnfocusedActive] = { 0.14f, 0.26f, 0.42f, 1.00f };
-		colors[ImGuiCol_PlotLines] = { 0.66f, 0.60f, 0.52f, 1.00f };
-		colors[ImGuiCol_PlotLinesHovered] = { 0.98f, 0.29f, 0.20f, 1.00f };
-		colors[ImGuiCol_PlotHistogram] = { 0.60f, 0.59f, 0.10f, 1.00f };
-		colors[ImGuiCol_PlotHistogramHovered] = { 0.72f, 0.73f, 0.15f, 1.00f };
-		colors[ImGuiCol_TextSelectedBg] = { 0.27f, 0.52f, 0.53f, 0.35f };
-		colors[ImGuiCol_DragDropTarget] = { 0.60f, 0.59f, 0.10f, 0.90f };
-		colors[ImGuiCol_NavHighlight] = { 0.51f, 0.65f, 0.60f, 1.00f };
-		colors[ImGuiCol_NavWindowingHighlight] = { 1.00f, 1.00f, 1.00f, 0.70f };
-		colors[ImGuiCol_NavWindowingDimBg] = { 0.80f, 0.80f, 0.80f, 0.20f };
-		colors[ImGuiCol_ModalWindowDimBg] = { 0.11f, 0.13f, 0.13f, 0.35f };
-	}
-
-	//--
-
-	////https://github.com/erickjung/SwiftGUI
-	////ImGui theme
-	//void ImGui_ThemeDarcula()
-	//{
-	//	//		//
-	//	//// Copyright (c) 2020, Erick Jung.
-	//	//// All rights reserved.
-	//	////
-	//	//// This source code is licensed under the MIT-style license found in the
-	//	//// LICENSE file in the root directory of this source tree.
-	//	////
-	//	//
-	//	//		import Foundation
-	//	//
-	//	//			public class DarculaTheme : Theme {
-	//	//
-	//	//			public var colors : [GuiColorProperty:GuiColor]{
-	//	//
-	//	//				return[
-	//	//					.text:.white,
-	//	//					.textDisabled : GuiColor(r : 0.54, g : 0.54, b : 0.54, a : 1),
-	//	//					.windowBg : GuiColor(r : 0.23, g : 0.24, b : 0.25, a : 1),
-	//	//					.childBg : GuiColor(r : 0.23, g : 0.24, b : 0.25, a : 1),
-	//	//					.popupBg : GuiColor(r : 0.23, g : 0.24, b : 0.25, a : 1),
-	//	//					.border : GuiColor(r : 0.36, g : 0.36, b : 0.36, a : 1),
-	//	//					.borderShadow : GuiColor(r : 0.15, g : 0.15, b : 0.15, a : 0),
-	//	//					.frameBg : GuiColor(r : 0.27, g : 0.28, b : 0.29, a : 1),
-	//	//					.frameBgHovered : GuiColor(r : 0.27, g : 0.28, b : 0.29, a : 1),
-	//	//					.frameBgActive : GuiColor(r : 0.47, g : 0.47, b : 0.47, a : 0.67),
-	//	//					.titleBg : GuiColor(r : 0.04, g : 0.04, b : 0.04, a : 1),
-	//	//					.titleBgActive : GuiColor(r : 0, g : 0, b : 0, a : 0.51),
-	//	//					.titleBgCollapsed : GuiColor(r : 0.16, g : 0.29, b : 0.48, a : 1),
-	//	//					.menuBarBg : GuiColor(r : 0.27, g : 0.28, b : 0.29, a : 0.8),
-	//	//					.scrollbarBg : GuiColor(r : 0.39, g : 0.4, b : 0.4, a : 0),
-	//	//					.scrollbarGrab : GuiColor(r : 0.39, g : 0.4, b : 0.4, a : 1),
-	//	//					.scrollbarGrabHovered : GuiColor(r : 0.39, g : 0.4, b : 0.4, a : 1),
-	//	//					.scrollbarGrabActive : GuiColor(r : 0.39, g : 0.4, b : 0.4, a : 1),
-	//	//					.checkMark : GuiColor(r : 0.65, g : 0.65, b : 0.65, a : 1),
-	//	//					.sliderGrab : GuiColor(r : 0.7, g : 0.7, b : 0.7, a : 0.62),
-	//	//					.sliderGrabActive : GuiColor(r : 0.3, g : 0.3, b : 0.3, a : 0.84),
-	//	//					.button : GuiColor(r : 0.29, g : 0.31, b : 0.32, a : 1),
-	//	//					.buttonHovered : GuiColor(r : 0.29, g : 0.31, b : 0.32, a : 1),
-	//	//					.buttonActive : GuiColor(r : 0.21, g : 0.34, b : 0.5, a : 1),
-	//	//					.header : GuiColor(r : 0.32, g : 0.33, b : 0.34, a : 1),
-	//	//					.headerHovered : GuiColor(r : 0.30, g : 0.32, b : 0.32, a : 1),
-	//	//					.headerActive : GuiColor(r : 0.47, g : 0.47, b : 0.47, a : 0.67),
-	//	//					.separator : GuiColor(r : 0.31, g : 0.31, b : 0.31, a : 1),
-	//	//					.separatorHovered : GuiColor(r : 0.31, g : 0.31, b : 0.31, a : 1),
-	//	//					.separatorActive : GuiColor(r : 0.31, g : 0.31, b : 0.31, a : 1),
-	//	//					.resizeGrip : GuiColor(r : 1, g : 1, b : 1, a : 0.85),
-	//	//					.resizeGripHovered : GuiColor(r : 1, g : 1, b : 1, a : 0.6),
-	//	//					.resizeGripActive : GuiColor(r : 0.47, g : 0.47, b : 0.47, a : 0.67),
-	//	//					.tab : GuiColor(r : 0.32, g : 0.33, b : 0.34, a : 1),
-	//	//					.tabHovered : GuiColor(r : 0.21, g : 0.34, b : 0.5, a : 1),
-	//	//					.tabActive : GuiColor(r : 0.21, g : 0.34, b : 0.5, a : 1),
-	//	//					.tabUnfocused : GuiColor(r : 0.06, g : 0.53, b : 0.98, a : 0.8),
-	//	//					.tabUnfocusedActive : GuiColor(r : 0.06, g : 0.53, b : 0.98, a : 0.4),
-	//	//					.plotLines : GuiColor(r : 0.61, g : 0.61, b : 0.61, a : 1),
-	//	//					.plotLinesHovered : GuiColor(r : 1, g : 0.43, b : 0.35, a : 1),
-	//	//					.plotHistogram : GuiColor(r : 0.9, g : 0.7, b : 0, a : 1),
-	//	//					.plotHistogramHovered : GuiColor(r : 1, g : 0.6, b : 0, a : 1),
-	//	//					.textSelectedBg : GuiColor(r : 0.18, g : 0.39, b : 0.79, a : 0.9),
-	//	//					.modalWindowDimBg : GuiColor(r : 0.18, g : 0.39, b : 0.79, a : 1)
-	//	//				]
-	//	//			}
-	//	//
-	//	//				public var windowRounding : Float{
-	//	//					return 5.3
-	//	//					}
-	//	//
-	//	//						public var grabRounding : Float{
-	//	//							return 2.3
-	//	//					}
-	//	//
-	//	//						public var frameRounding : Float{
-	//	//							return 2.3
-	//	//					}
-	//	//
-	//	//						public var scrollbarRounding : Float{
-	//	//							return 5
-	//	//					}
-	//	//
-	//	//						public var frameBorderSize : Float{
-	//	//							return 1
-	//	//					}
-	//	//
-	//	//						public var itemSpacing : GuiPoint{
-	//	//							return GuiPoint(x: 8, y : 6.5)
-	//	//					}
-	//	//
-	//	//						public init() {}
-	//	//		}
-
-	//	auto& style = ImGui::GetStyle();
-	//	style.ChildRounding = 0;
-	//	style.GrabRounding = 0;
-	//	style.FrameRounding = 2;
-	//	style.PopupRounding = 0;
-	//	style.ScrollbarRounding = 0;
-	//	style.TabRounding = 2;
-	//	style.WindowRounding = 0;
-	//	style.FramePadding = { 4, 4 };
-	//	style.WindowTitleAlign = { 0.0, 0.5 };
-	//	style.ColorButtonPosition = ImGuiDir_Left;
-	//	ImVec4* colors = ImGui::GetStyle().Colors;
-	//	colors[ImGuiCol_Text] = { 1.0f, 1.0f, 1.0f, 1.00f };				//
-	//	colors[ImGuiCol_TextDisabled] = { 0.25f, 0.25f, 0.25f, 1.00f };		//
-	//	colors[ImGuiCol_WindowBg] = { 0.09f, 0.09f, 0.09f, 0.94f };			//
-	//	colors[ImGuiCol_ChildBg] = { 0.11f, 0.11f, 0.11f, 1.00f };			//
-	//	colors[ImGuiCol_PopupBg] = { 0.11f, 0.11f, 0.11f, 0.94f };			//
-	//	colors[ImGuiCol_Border] = { 0.07f, 0.08f, 0.08f, 1.00f };
-	//	colors[ImGuiCol_BorderShadow] = { 0.00f, 0.00f, 0.00f, 0.00f };
-	//	colors[ImGuiCol_FrameBg] = { 0.35f, 0.35f, 0.35f, 0.54f };			//
-	//	colors[ImGuiCol_FrameBgHovered] = { 0.31f, 0.29f, 0.27f, 1.00f };
-	//	colors[ImGuiCol_FrameBgActive] = { 0.40f, 0.36f, 0.33f, 0.67f };
-	//	colors[ImGuiCol_TitleBg] = { 0.1f, 0.1f, 0.1f, 1.00f };
-	//	colors[ImGuiCol_TitleBgActive] = { 0.3f, 0.3f, 0.3f, 1.00f };		//
-	//	colors[ImGuiCol_TitleBgCollapsed] = { 0.0f, 0.0f, 0.0f, 0.61f };
-	//	colors[ImGuiCol_MenuBarBg] = { 0.18f, 0.18f, 0.18f, 0.94f };		//
-	//	colors[ImGuiCol_ScrollbarBg] = { 0.00f, 0.00f, 0.00f, 0.16f };
-	//	colors[ImGuiCol_ScrollbarGrab] = { 0.24f, 0.22f, 0.21f, 1.00f };
-	//	colors[ImGuiCol_ScrollbarGrabHovered] = { 0.31f, 0.29f, 0.27f, 1.00f };
-	//	colors[ImGuiCol_ScrollbarGrabActive] = { 0.40f, 0.36f, 0.33f, 1.00f };
-	//	colors[ImGuiCol_CheckMark] = { 0.84f, 0.84f, 0.84f, 1.0f };			//
-	//	colors[ImGuiCol_SliderGrab] = { 0.8f, 0.8f, 0.8f, 1.0f };			//		
-	//	colors[ImGuiCol_SliderGrabActive] = { 0.55f, 0.55f, 0.55f, 1.00f }; //
-	//	colors[ImGuiCol_Button] = { 0.55f, 0.55f, 0.55f, 0.40f };			//
-	//	colors[ImGuiCol_ButtonHovered] = { 0.15f, 0.15f, 0.15f, 0.62f };	//	
-	//	colors[ImGuiCol_ButtonActive] = { 0.60f, 0.60f, 0.60f, 1.00f };		//
-	//	colors[ImGuiCol_Header] = { 0.84f, 0.36f, 0.05f, 0.0f };			//
-	//	colors[ImGuiCol_HeaderHovered] = { 0.25f, 0.25f, 0.25f, 0.80f };	//
-	//	colors[ImGuiCol_HeaderActive] = { 0.42f, 0.42f, 0.42f, 1.00f };
-	//	colors[ImGuiCol_Separator] = { 0.35f, 0.35f, 0.35f, 0.50f };		//
-	//	colors[ImGuiCol_SeparatorHovered] = { 0.31f, 0.29f, 0.27f, 0.78f };
-	//	colors[ImGuiCol_SeparatorActive] = { 0.40f, 0.36f, 0.33f, 1.00f };
-	//	colors[ImGuiCol_ResizeGrip] = { 1.0f, 1.0f, 1.0f, 0.25f };			//
-	//	colors[ImGuiCol_ResizeGripHovered] = { 1.00f, 1.0f, 1.0f, 0.4f };	//
-	//	colors[ImGuiCol_ResizeGripActive] = { 1.00f, 1.00f, 1.0f, 0.95f };	//
-	//	colors[ImGuiCol_Tab] = { 0.18f, 0.18f, 0.18f, 1.0f };				//
-	//	colors[ImGuiCol_TabHovered] = { 0.58f, 0.58f, 0.58f, 0.80f };		//
-	//	colors[ImGuiCol_TabActive] = { 0.6f, 0.60f, 0.60f, 1.00f };
-	//	colors[ImGuiCol_TabUnfocused] = { 0.07f, 0.10f, 0.15f, 0.97f };
-	//	colors[ImGuiCol_TabUnfocusedActive] = { 0.14f, 0.26f, 0.42f, 1.00f };
-	//	colors[ImGuiCol_PlotLines] = { 0.66f, 0.60f, 0.52f, 1.00f };
-	//	colors[ImGuiCol_PlotLinesHovered] = { 0.98f, 0.29f, 0.20f, 1.00f };
-	//	colors[ImGuiCol_PlotHistogram] = { 0.60f, 0.59f, 0.10f, 1.00f };
-	//	colors[ImGuiCol_PlotHistogramHovered] = { 0.72f, 0.73f, 0.15f, 1.00f };
-	//	colors[ImGuiCol_TextSelectedBg] = { 0.27f, 0.52f, 0.53f, 0.35f };
-	//	colors[ImGuiCol_DragDropTarget] = { 0.60f, 0.59f, 0.10f, 0.90f };
-	//	colors[ImGuiCol_NavHighlight] = { 0.51f, 0.65f, 0.60f, 1.00f };
-	//	colors[ImGuiCol_NavWindowingHighlight] = { 1.00f, 1.00f, 1.00f, 0.70f };
-	//	colors[ImGuiCol_NavWindowingDimBg] = { 0.80f, 0.80f, 0.80f, 0.20f };
-	//	colors[ImGuiCol_ModalWindowDimBg] = { 0.11f, 0.13f, 0.13f, 0.35f };
-	//}
-
-//--
-
-	////slider enum
-	//// Using the format string to display a name instead of an integer.
-	//// Here we completely omit '%d' from the format string, so it'll only display a name.
-	//// This technique can also be used with DragInt().
-	////DemoCode_("Widgets/Basic/Inputs/Slider Enum");
-	//enum Element { Element_Fire, Element_Earth, Element_Air, Element_Water, Element_COUNT };
-	//static int elem = Element_Fire;
-	//const char* elems_names[Element_COUNT] = { "Fire", "Earth", "Air", "Water" };
-	//const char* elem_name = (elem >= 0 && elem < Element_COUNT) ? elems_names[elem] : "Unknown";
-	//ImGui::SliderInt("slider enum", &elem, 0, Element_COUNT - 1, elem_name);
-	////ImGui::SameLine(); 
-	////HelpMarker("Using the format string parameter to display a name instead of the underlying integer.");
-
-	////drop list
-	//// Using the _simplified_ one-liner Combo() api here
-	//// See "Combo" section for examples of how to use the more complete BeginCombo()/EndCombo() api.
-	//const char* items[] = { "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIIIIII", "JJJJ", "KKKKKKK" };
-	//static int item_current = 0;
-	//ImGui::Combo("combo", &item_current, items, IM_ARRAYSIZE(items));
-
-#endif
 };

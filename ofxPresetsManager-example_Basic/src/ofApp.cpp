@@ -16,21 +16,21 @@ void ofApp::setup()
 	//--
 
 	//0. our app parameters
-	params.setName("mySettings");//main (target) group
-	params.add(shapeType.set("shape", 1, 1, 2));
-	params.add(numShapes.set("num squares", 1, 1, 24));
+	params.setName("paramsGroup");//main (target) group
+	params.add(shapeType.set("shapeType", 1, 1, 2));
+	params.add(numShapes.set("numShapes", 1, 1, 24));
 	params.add(separation.set("separation", 5, 1, 100));
-	params.add(shapeSide.set("square side", 50, 5, 200));
-	paramsNested.setName("style");//another nested group
+	params.add(shapeSide.set("shapeSide", 50, 5, 200));
+	paramsNested.setName("styleGroup");//another nested group
 	paramsNested.add(fill.set("fill", false));
-	paramsNested.add(color.set("color", ofColor(1), ofColor(0, 0), ofColor(1, 1)));
+	paramsNested.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
 	paramsNested.add(lineWidth.set("lineWidth", 1, 0.1, 10));
 	params.add(paramsNested);//main preset settings container
 
 	//--
 
 	//1. (optional) customize path folders at first
-	presetsManager.setPath_GlobalFolder("presetsManager");	//main container folder where all other files will be
+	//presetsManager.setPath_UserKit_Folder("presetsManager");	//main container folder where all other files will be
 
 	//2. add our ofParameterGroup to the preset manager 
 	//also define wich key triggers are associated to each preset. 
@@ -42,7 +42,24 @@ void ofApp::setup()
 
 	//4. (optional) customize gui positions
 	presetsManager.setVisible_PresetClicker(true);//user panel clicker
-	presetsManager.setPosition_PresetClicker(200, 100, 50);
+	presetsManager.setSizeBox_PresetClicker(80);
+	presetsManager.setPosition_PresetClicker(200, ofGetHeight() - 100);
+
+	//--
+
+	//custom callback (B)
+	listener_PresetManager_DoneLoad = presetsManager.DONE_load.newListener([this](bool &)
+		{
+			this->Changed_PresetManager_DoneLoad();
+		});
+
+	//--
+
+#ifdef MODE_ImGui_EXTERNAL
+	presetsManager.ImGui_FontCustom();
+	gui_ImGui.setup();
+	presetsManager.ImGui_ThemeMoebiusSurfing();
+#endif
 
 	//-------
 
@@ -50,17 +67,20 @@ void ofApp::setup()
 	//to show how our params/settings changes when using the presets manager
 	gui.setup("ofApp");
 	gui.add(params);
-	gui.setPosition(50, 500);
+	gui.setPosition(50, 300);
 }
 
 //--------------------------------------------------------------
 void ofApp::update()
 {
-	//easy simple callback
-	if (presetsManager.isDoneLoad())//just loaded preset it's done
-	{
-		ofLogNotice("ofApp") << "--------------------------------------------------------------[isDoneLoad]";
-	}
+	//presetsManager.update();
+
+	////easy callback (A)
+	//if (presetsManager.isDoneLoad())//just loaded preset it's done
+	//{
+	//	cout << (__FUNCTION__) << "--------------------------------------------------------------[ EasyCallback -> DoneLoad! ]" << endl;
+	//	ofLogWarning(__FUNCTION__) << "--------------------------------------------------------------[ EasyCallback -> DoneLoad! ]";
+	//}
 }
 
 //--------------------------------------------------------------
@@ -72,38 +92,28 @@ void ofApp::draw()
 
 	//debug object linked to grouped parameters
 	string str;
-	
 	int x = gui.getPosition().x + 15;
 	int y = gui.getPosition().y + gui.getHeight() + 30;
-	int pad = 20;
-	int i = 0;
-	{
-		str = "fill      : " + ofToString(fill);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "lineWidth : " + ofToString(lineWidth);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		//str = "color     : " + ofToString(color);
-		//ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "shapeType : " + ofToString(shapeType);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "numShapes : " + ofToString(numShapes);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "separation: " + ofToString(separation);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-		str = "shapeSide : " + ofToString(shapeSide);
-		ofDrawBitmapStringHighlight(str, x, y + pad * i++);
-	}
+	str = "";
+	str += "shapeType : " + ofToString(shapeType);
+	str += "numShapes : " + ofToString(numShapes);
+	str += "separation: " + ofToString(separation);
+	str += "shapeSide : " + ofToString(shapeSide);
+	str += "fill      : " + ofToString(fill);
+	str += "color     : " + ofToString(color);
+	str += "lineWidth : " + ofToString(lineWidth);
 
 	//-
 
 	//scene draw object linked to grouped parameters
 	ofPushStyle();
+	ofPushMatrix();
+
+	ofTranslate(300, 50);
 	ofSetColor(color.get());
 	ofSetLineWidth(lineWidth);
 	if (fill) ofFill();
 	else ofNoFill();
-	ofPushMatrix();
-	ofTranslate(300, 50);
 
 	for (int i = 0; i < numShapes; ++i)
 	{
@@ -119,9 +129,47 @@ void ofApp::draw()
 
 	//-
 
+#ifdef MODE_ImGui_EXTERNAL
+	drawImGui();
+#endif
+
+	//-
+
 	//local gui parameters
 	gui.draw();
+
+	//--
 }
+
+#ifdef MODE_ImGui_EXTERNAL
+//--------------------------------------------------------------
+void ofApp::drawImGui()
+{
+	gui_ImGui.begin();
+
+	//ImGui::ShowDemoWindow();
+
+	if (presetsManager.SHOW_ImGui)
+	{
+		ofVec2f pos(500, 10);
+		auto mainSettings = ofxImGui::Settings();
+		mainSettings.windowPos = pos;
+		ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y));
+
+		string _name = "ofxPresetsManager";
+		bool _collapse = true;
+		if (ofxImGui::BeginWindow(_name, mainSettings, _collapse))
+		{
+			presetsManager.ImGui_Draw_WindowContent(mainSettings);
+		}
+		ofxImGui::EndWindow(mainSettings);
+
+		bMouseOverGui = mainSettings.mouseOverGui;
+	}
+
+	gui_ImGui.end();
+}
+#endif
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
@@ -169,15 +217,10 @@ void ofApp::keyPressed(int key)
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h)
 {
-	//optional adapt to layout
-	int cellw = 50;
-	presetsManager.setPosition_PresetClicker(0.5* ofGetWidth() - (9 * cellw*0.5f), ofGetHeight() - 200, cellw);//position and boxes sizes
 }
 
 //--------------------------------------------------------------
 void ofApp::exit()
 {
 	presetsManager.exit();//required to store settings. (maybe required before destruct our class params..)
-
-	WindowApp.exit();
 }

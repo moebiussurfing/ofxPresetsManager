@@ -8,12 +8,14 @@
 #ifdef USE_WindowApp
 #include "ofxWindowApp.h"
 #endif
+#include "ofxSurfingHelpers.h"
 #include "ofxGui.h"
 
 class ofApp : public ofBaseApp
 {
 public:
     void setup();
+    void setupParameters();
     void update();
     void draw();
     void exit();
@@ -26,16 +28,13 @@ public:
 
     void drawScene1();
     void drawScene2();
-	ofxPanel gui;
-	ofxPanel gui2;
+    void drawScene3();
 
     //presetsManager
     ofxPresetsManager presetsManager;
 
-    // group
-
-	//group1
-    ofParameterGroup params;
+	//group0
+    ofParameterGroup params0;
     ofParameterGroup paramsNested;
 	ofParameter<bool> fill;
 	ofParameter<float> lineWidth;
@@ -45,10 +44,27 @@ public:
 	ofParameter<int> separation;
     ofParameter<int> shapeSide;
 	
-	//TODO:
-	//group2
+	//group1
+	ofParameterGroup params1;
+	ofParameter<int> numShapes1;
+	ofParameter<int> separation1;
+	ofParameter<int> shapeSide1;
+	
+	//group3
 	ofParameterGroup params2;
-	ofParameter<int> numShapes2;
-	ofParameter<int> separation2;
-	ofParameter<int> shapeSide2;
+	ofParameter<ofFloatColor> color2;
+	ofParameter<bool> fill2;
+	
+	//group4
+	ofParameterGroup params3;	
+	ofParameter<int> numTriangles;
+	ofParameter<float> sizeTriangles;
+	ofParameter<int> separationTriangles;
+	ofParameter<ofFloatColor> color3;
+	
+	//gui panels
+	ofxPanel gui0;
+	ofxPanel gui1;
+	ofxPanel gui2;
+	ofxPanel gui3;
 };

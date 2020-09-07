@@ -2,9 +2,7 @@
 
 #include "ofMain.h"
 
-///
 //#define MODE_ImGui_EXTERNAL		//MUST be defined at the addon class (or in both places: here too)
-///
 
 #include "ofxPresetsManager.h"
 
@@ -51,8 +49,6 @@ public:
     //--
 
     // group
-
-	//group1
     ofParameterGroup params;
     ofParameterGroup paramsNested;
 	ofParameter<bool> fill;
@@ -62,13 +58,6 @@ public:
 	ofParameter<int> numShapes;
 	ofParameter<int> separation;
     ofParameter<int> shapeSide;
-	
-	//TODO:
-	//group2
-	ofParameterGroup params2;
-	ofParameter<int> numShapes2;
-	ofParameter<int> separation2;
-	ofParameter<int> shapeSide2;
 
 	//--
 

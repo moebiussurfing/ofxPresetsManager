@@ -18,7 +18,7 @@ meta:
 	ADDON_NAME = ofxPresetsManager
 	ADDON_DESCRIPTION = ofParameterGroup presets manager
 	ADDON_AUTHOR = @moebiussurfing
-	ADDON_TAGS = "ofParameterGroup" "presets" "manager"
+	ADDON_TAGS = "ofParameterGroup" "presets" "manager" "presets manager"
 	ADDON_URL = https://github.com/moebiussurfing/ofxPresetsManager
 
 common:
