@@ -304,7 +304,7 @@ public:
 	void setup(std::string name);//TODO: should use char array to avoid collapse with bool...
 	void setup(std::string name, bool _buildGroupSelector);
 	void setup(bool _buildGroupSelector);
-	
+
 	void startup();//must be called after setup to se initial states
 
 	//-
@@ -621,12 +621,18 @@ private:
 private:
 	//expose basic controls to allow use on external gui
 	ofParameterGroup params_Controls{ "Presets Manager" };
+
 public:
-	ofParameterGroup getControls() {
+	ofParameterGroup getControls() {//this are usefull parameters to use in our projects/addons gui's
 		params_Controls.clear();
 		params_Controls.setName(nameDisplayUserKit);
-		params_Controls.add(SHOW_ClickPanel);
+		params_Controls.add(getPresetSelectors());
 		params_Controls.add(PLAY_RandomizeTimer);
+		params_Controls.add(randomizeDuration);
+		params_Controls.add(randomizeDurationShort);
+		params_Controls.add(randomizerProgress);
+		params_Controls.add(SHOW_ClickPanel);
+		params_Controls.add(MODE_Editor);
 		return params_Controls;
 	}
 
@@ -970,7 +976,11 @@ private:
 	std::vector<int> PRESETS_Selected_Index_PRE;
 	ofParameterGroup params_PRESETS_Selected{ "Preset Selectors" };
 	//ofParameter<int> mainSelector;
-
+public:
+	ofParameterGroup getPresetSelectors() {
+		return params_PRESETS_Selected;
+	}
+private:
 	std::vector<int> groupsSizes;//this is the number of presets of each added group
 
 	//--

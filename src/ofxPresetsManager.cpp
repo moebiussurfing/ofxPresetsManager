@@ -666,6 +666,8 @@ ofxPresetsManager::ofxPresetsManager()
 	fileExtension = ".xml";
 	nameMainSettings = "ofxPresetsManagerSettings" + fileExtension;//default user preset name
 
+	nameDisplayUserKit = "ofxPresetsManager";
+
 	//-
 
 	DISABLE_CALLBACKS = true;
