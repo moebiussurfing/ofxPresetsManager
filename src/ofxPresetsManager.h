@@ -68,7 +68,6 @@
 #define INCLUDE_ofxUndoSimple			//undo engine to store after randomize preset parameters (& recall)
 //#define USE_ofxImGuiSimple			//TEST alternative addon
 //
-#define INCLUDE_DEBUG_ERRORS			//debug errors
 //#define INCLUDE_PERFORMANCE_MEASURES	//measure performance ofxTimeMeasurements
 //#define DEBUG_randomTest				//uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
 //#define DEBUG_BLOCK_SAVE_SETTINGS		//disable save settings//enable this bc sometimes there's crashes on exit
@@ -95,11 +94,6 @@
 
 #ifdef INCLUDE_ofxUndoSimple
 #include "ofxUndoSimple.h"
-#endif
-
-//optional to debug not located files or others
-#ifdef INCLUDE_DEBUG_ERRORS
-#include "ofxDEBUG_errors.h"
 #endif
 
 #include "ofxSurfingHelpers.h"
@@ -141,15 +135,12 @@ private:
 private:
 
 	ofParameter<bool> bSplitGroupFolders{ "MODE SPLIT FOLDERS", true };//on this mode we split every group on his own sub folder
-	
-	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };
-	ofParameter<bool> bThemDark{ "THEME DARK", true };
-	
-	string helpInfo;
 
-#ifdef INCLUDE_DEBUG_ERRORS
-	ofxDEBUG_errors errorsDEBUG;
-#endif
+	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };//this mode improves performance disabling autosave, undo history..etc
+	ofParameter<bool> bThemDark{ "THEME DARK", true };
+
+	string helpInfo;
+	void buildHelpInfo();
 
 	//-
 
@@ -160,15 +151,16 @@ private:
 	std::string path_PresetsFavourites;//path for kit of favourite presets. live kit
 	std::string path_PresetsStandalone;//path for browse other presets. archive kit
 	std::string path_ControlSettings;//path for app state session settings
-	std::string path_Root;
+	//std::string path_Root;
 
 	std::string filename_ControlSettings;
 	std::string filename_Randomizers;//path for randomizers settings
 	std::string filenamesPrefix;//to add to file names to split names with index
-	std::string nameUserKit;
+	std::string nameDisplayUserKit;
 	std::string browser_PresetName;
 
-	std::string gui_LabelName = "NO_NAME";//default gui panel name
+	std::string nameMainSettings;
+	std::string fileExtension;
 
 	//-
 
@@ -184,6 +176,7 @@ private:
 	ofParameter<bool> MODE_MemoryLive;//when enabled all presets are handled from a memory vector to avoid lag of loading xml files
 	ofParameter<bool> loadToMemory;
 	ofParameter<bool> saveFromMemory;
+
 	void load_AllKit_ToMemory();
 	void save_AllKit_FromMemory();
 public:
@@ -224,6 +217,7 @@ private:
 	vector<ofParameter<int>> presetsRandomFactor;//probability of every preset
 	vector<ofParameter<bool>> presetsRandomModeShort;//mode short for ebvery preset
 	vector<int> randomFactorsDices;
+	void buildRandomizers();
 	void setupRandomizer();//engine to get a random between all posible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
 	void doRandomizeWichSelectedPreset();//randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
 	int doRandomizeWichSelectedPresetCheckChanged();
@@ -306,8 +300,11 @@ public:
 
 	//-
 
-	void setup(bool buildGroupSelector = true);//must be called after params group has been added!
-	void setup(std::string name, bool buildGroupSelector = true);//optional to set gui panel name header label
+	void setup();//must be called after params group has been added!
+	void setup(std::string name);//TODO: should use char array to avoid collapse with bool...
+	void setup(std::string name, bool _buildGroupSelector);
+	void setup(bool _buildGroupSelector);
+	
 	void startup();//must be called after setup to se initial states
 
 	//-
@@ -352,7 +349,8 @@ public:
 	//--------------------------------------------------------------
 	float getPresetClicker_Width()
 	{
-		return cellSize * (keys[0].size() + 2);
+		//return cellSize * (keys[0].size() + 2);
+		return cellSize * getAmountPresetsOfGroup(getAmountGroups() - 1);
 	}
 	//--------------------------------------------------------------
 	float getPresetClicker_BoxSize()
@@ -360,9 +358,14 @@ public:
 		return cellSize;
 	}
 	//--------------------------------------------------------------
+	void setSizeBox_PresetClicker(float size)
+	{
+		cellSize = size;
+	}
+	//--------------------------------------------------------------
 	float getPresetClicker_Height()
 	{
-		return cellSize;
+		return getAmountGroups() * cellSize;
 	}
 
 	//-
@@ -465,13 +468,30 @@ public:
 	}
 
 	//--------------------------------------------------------------
-	string getGroupsPaths()
+	string getGroupsPaths(bool simplified = true)
 	{
 		string _names = "";
-		for (int i = 0; i < groups.size(); i++)
-		{
-			_names += getGroupPath(i);
+
+		if (!simplified) {
+			for (int i = 0; i < groups.size(); i++)
+			{
+				_names += getGroupPath(i);
+				_names += "\n";
+			}
+		}
+		else {
+			//simplify
+			if (!bPathDirCustom) _names += "/data/";
+
+			_names += path_UserKit_Folder + "/" + path_PresetsFavourites;
 			_names += "\n";
+			for (int i = 0; i < groups.size(); i++)
+			{
+				_names += ofToString(i) + " /";
+				_names += groups[i].getName();
+				_names += "/";
+				_names += "\n";
+			}
 		}
 		return _names;
 	}
@@ -590,18 +610,21 @@ public:
 	//browser for standalone presets
 private:
 	//load presets from preset folder, not from favorites presets folders
-	void browser_PresetLoad(string name);
-	void browser_PresetSave(string name);
-	bool browser_FilesRefresh();
-	void browser_Setup();
-	void doCheckPresetsFolderIsEmpty();
+	void doLoadMainGroupPreset(string name);
+	void doStandalonePresetSave(string name);
+	bool doStandaloneRefreshPresets();
+	void buildStandalonePresets();//standalone presets splitted from favourites presets
+	//void doCheckPresetsFolderIsEmpty();
 
 	//-
 
-public:
+private:
 	//expose basic controls to allow use on external gui
 	ofParameterGroup params_Controls{ "Presets Manager" };
+public:
 	ofParameterGroup getControls() {
+		params_Controls.clear();
+		params_Controls.setName(nameDisplayUserKit);
 		params_Controls.add(SHOW_ClickPanel);
 		params_Controls.add(PLAY_RandomizeTimer);
 		return params_Controls;
@@ -620,7 +643,7 @@ public:
 	void refreshStartup()
 	{
 		////browser
-		//browser_FilesRefresh();
+		//doStandaloneRefreshPresets();
 
 		//-
 
@@ -679,6 +702,12 @@ public:
 		cellSize = _cellSize;
 	}
 	//--------------------------------------------------------------
+	void setPosition_PresetClicker(int x, int y)
+	{
+		clicker_Pos.x = x;
+		clicker_Pos.y = y;
+	}
+	//--------------------------------------------------------------
 	void setVisible_PresetClicker(bool visible)
 	{
 		SHOW_ClickPanel = visible;
@@ -713,12 +742,12 @@ public:
 		ofLogNotice(__FUNCTION__) << str;
 		path_ControlSettings = str;
 	}
-	//--------------------------------------------------------------
-	void setPath_Root(string str)
-	{
-		ofLogNotice(__FUNCTION__) << str;
-		path_Root = str;
-	}
+	////--------------------------------------------------------------
+	//void setPath_Root(string str)
+	//{
+	//	ofLogNotice(__FUNCTION__) << str;
+	//	path_Root = str;
+	//}
 	//--------------------------------------------------------------
 	void setModeAutoLoad(bool b)
 	{
@@ -808,10 +837,6 @@ public:
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
 	ofParameter<bool> SHOW_ImGui_Selectors;
 	ofParameter<bool> SHOW_Help;
-
-	//set custom path
-	void doFileDialogProcessSelection(ofFileDialogResult openFileResult);
-	void doLoadUserKit();
 
 	//--
 
@@ -916,7 +941,7 @@ public:
 		//--
 
 		//refresh files
-		browser_FilesRefresh();
+		doStandaloneRefreshPresets();
 	}
 
 #endif//end browser
@@ -994,6 +1019,7 @@ private:
 	//callback
 private:
 	void Changed_Params_Control(ofAbstractParameter &e);
+	void Changed_Params_UserKit(ofAbstractParameter &e);
 
 	//-
 
@@ -1015,7 +1041,7 @@ private:
 	ofParameter<bool> bCloneAll;
 
 	//internal groups
-	ofParameterGroup params_UserFav;
+	ofParameterGroup params_UserKitSettings;
 	ofParameterGroup params_Gui;
 	ofParameterGroup params_Options;
 	ofParameterGroup params_HelperTools;
@@ -1024,12 +1050,21 @@ private:
 	ofParameter<glm::vec2> Gui_Internal_Position;
 	ofParameter<bool> ENABLE_Keys;
 
+	//--
+
 	//custom path
 	ofParameter<bool> bPathDirCustom;
 	ofParameter<string> pathDirCustom;
 
+public:
+	//set custom path
+	void doFileDialogProcessSelection(ofFileDialogResult openFileResult);
+	void buildCustomUserKit();
+	void buildDefaultUserKit();
+
 	//--
 
+private:
 	//timer autosave
 	ofParameter<bool> bAutosaveTimer;
 	uint64_t timerLast_Autosave = 0;
@@ -1060,29 +1095,35 @@ private:
 	//--------------------------------------------------------------
 	void CheckAllFolders()//check that folders exist and create them if not
 	{
-		//CheckFolder(path_Root);//TODO: use a container for all User-Kit together...
+		//TODO: 
+		//use a container for all User-Kit together...
+		//CheckFolder(path_Root);
 
 		string _path;
+
 		_path = path_UserKit_Folder;//current kit-preset main folder
 		CheckFolder(_path);
-		_path = path_UserKit_Folder + "/" + path_PresetsStandalone;//current kit-presets standalone presets folder
+
+		_path = path_UserKit_Folder + "/" + path_PresetsFavourites;//current kit-presets favourite presets folder
 		CheckFolder(_path);
-		
-		_path = path_UserKit_Folder + "/" + path_PresetsFavourites;//current kit-presets presets folder
+
+		_path = path_UserKit_Folder + "/" + path_PresetsStandalone;//current kit-presets standalone presets folder
 		CheckFolder(_path);
 
 		_path = path_UserKit_Folder + "/" + path_ControlSettings;//for randomizer settings (into his own kit-preset folder)
 		CheckFolder(_path);
-		_path = path_ControlSettings;//app settings (shared from all kit-presets)
+
+		_path = path_UserKit_Folder + "/" + path_ControlSettings;//app settings (shared from all kit-presets)
 		CheckFolder(_path);
 
 		//create the folders of each group into main presets folder 
-		if (bSplitGroupFolders.get()) 
+		if (bSplitGroupFolders.get())
 		{
-			for (int i = 0; i < groups.size(); i++) 
+			for (int i = 0; i < groups.size(); i++)
 			{
 				_path = path_UserKit_Folder + "/" + path_PresetsFavourites;//current kit-presets presets folder
-				_path += "/" + groups[i].getName();
+				_path += "/" + groups[i].getName();//append group name
+
 				CheckFolder(_path);
 			}
 		}

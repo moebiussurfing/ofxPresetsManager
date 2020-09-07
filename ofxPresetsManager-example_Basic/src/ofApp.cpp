@@ -30,7 +30,7 @@ void ofApp::setup()
 	//--
 
 	//1. (optional) customize path folders at first
-	presetsManager.setPath_UserKit_Folder("presetsManager");	//main container folder where all other files will be
+	//presetsManager.setPath_UserKit_Folder("presetsManager");	//main container folder where all other files will be
 
 	//2. add our ofParameterGroup to the preset manager 
 	//also define wich key triggers are associated to each preset. 
@@ -42,7 +42,8 @@ void ofApp::setup()
 
 	//4. (optional) customize gui positions
 	presetsManager.setVisible_PresetClicker(true);//user panel clicker
-	presetsManager.setPosition_PresetClicker(200, 100, 50);
+	presetsManager.setSizeBox_PresetClicker(80);
+	presetsManager.setPosition_PresetClicker(200, ofGetHeight() - 100);
 
 	//--
 
@@ -216,15 +217,10 @@ void ofApp::keyPressed(int key)
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h)
 {
-	//optional adapt to layout
-	int cellw = 50;
-	presetsManager.setPosition_PresetClicker(0.5* ofGetWidth() - (9 * cellw*0.5f), ofGetHeight() - 200, cellw);//position and boxes sizes
 }
 
 //--------------------------------------------------------------
 void ofApp::exit()
 {
 	presetsManager.exit();//required to store settings. (maybe required before destruct our class params..)
-
-	WindowApp.exit();
 }
