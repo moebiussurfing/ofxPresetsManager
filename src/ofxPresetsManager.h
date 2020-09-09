@@ -137,7 +137,7 @@ private:
 	ofParameter<bool> bSplitGroupFolders{ "MODE SPLIT FOLDERS", true };//on this mode we split every group on his own sub folder
 
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };//this mode improves performance disabling autosave, undo history..etc
-	ofParameter<bool> bThemDark{ "THEME DARK", true };
+	ofParameter<bool> bThemDark{ "THEME DARK", false };
 
 	string helpInfo;
 	void buildHelpInfo();
@@ -424,6 +424,12 @@ public:
 	//--------------------------------------------------------------
 	void loadPreset(int p);//load preset for the main group by code from ofApp
 	void loadPreset(int p, int _indexGroup);//load preset for extra groups by code from ofApp
+	void loadPresetGroup(int presetIndex)//load preset for main group by code from ofApp
+	{
+		int groupIndex = groups.size() - 1;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
+		load(presetIndex, groupIndex);
+	}
 	void savePreset(int p, int _indexGroup);//save preset for extra groups by code from ofApp
 
 	//--------------------------------------------------------------
@@ -615,26 +621,6 @@ private:
 	bool doStandaloneRefreshPresets();
 	void buildStandalonePresets();//standalone presets splitted from favourites presets
 	//void doCheckPresetsFolderIsEmpty();
-
-	//-
-
-private:
-	//expose basic controls to allow use on external gui
-	ofParameterGroup params_Controls{ "Presets Manager" };
-
-public:
-	ofParameterGroup getControls() {//this are usefull parameters to use in our projects/addons gui's
-		params_Controls.clear();
-		params_Controls.setName(nameDisplayUserKit);
-		params_Controls.add(getPresetSelectors());
-		params_Controls.add(PLAY_RandomizeTimer);
-		params_Controls.add(randomizeDuration);
-		params_Controls.add(randomizeDurationShort);
-		params_Controls.add(randomizerProgress);
-		params_Controls.add(SHOW_ClickPanel);
-		params_Controls.add(MODE_Editor);
-		return params_Controls;
-	}
 
 	//-
 
@@ -963,11 +949,11 @@ private:
 
 	//--
 
-	//A. ofParameterGroup
-	std::vector<ofParameterGroup> groups;
-	//to store multiple group targets. 
-	//when using only one ofParameterGroup, there's only one group element!
-	//ofParameterGroup params_gui;
+private:
+	//main data/settings container
+	//group of ofParameterGroup
+	std::vector<ofParameterGroup> groups;//contyainer to store multiple group targets. 
+	std::vector<int> groupsSizes;//this is the number of presets of each added group
 
 	//--
 
@@ -976,12 +962,40 @@ private:
 	std::vector<int> PRESETS_Selected_Index_PRE;
 	ofParameterGroup params_PRESETS_Selected{ "Preset Selectors" };
 	//ofParameter<int> mainSelector;
+
+	ofParameter<int> SelectorUserGlobal;//global selector
+
+	//--
+
+	//helpers to easy integrate into external gui's
+
+private:
+	//expose basic controls to allow use on external gui
+	ofParameterGroup params_Controls{ "PRESETS MANAGER" };
+
 public:
-	ofParameterGroup getPresetSelectors() {
+	ofParameterGroup getParamsControls() {//this are usefull parameters to use in our projects/addons gui's
+		params_Controls.clear();
+		//cout << "nameDisplayUserKit: " << nameDisplayUserKit << endl;//TODO: not refreshing well on startup..
+		//params_Controls.setName(nameDisplayUserKit);
+		//params_Controls.setName("OVERLAY");
+		params_Controls.add(getParamsPresetSelectors());
+		params_Controls.add(getParamsRandomizers());
+		params_Controls.add(SHOW_ClickPanel);
+		params_Controls.add(MODE_Editor);
+		return params_Controls;
+	}
+	ofParameterGroup getParamsPresetSelectors() {
 		return params_PRESETS_Selected;
 	}
-private:
-	std::vector<int> groupsSizes;//this is the number of presets of each added group
+	ofParameterGroup getParamsRandomizers() {
+		ofParameterGroup _g{ "RANDOMIZERS" };
+		_g.add(PLAY_RandomizeTimer);
+		_g.add(randomizeDuration);
+		_g.add(randomizeDurationShort);
+		_g.add(randomizerProgress);
+		return _g;
+	}
 
 	//--
 

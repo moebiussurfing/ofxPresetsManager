@@ -26,6 +26,7 @@ public:
 	ofxWindowApp WindowApp;
 #endif
 
+    void drawScene0();
     void drawScene1();
     void drawScene2();
     void drawScene3();
@@ -35,31 +36,33 @@ public:
 
 	//group0
     ofParameterGroup params0;
-    ofParameterGroup paramsNested;
-	ofParameter<bool> fill;
-	ofParameter<float> lineWidth;
-	ofParameter<ofFloatColor> color;//ofColor not implemented on ImGui yet
-	ofParameter<int> shapeType;
-	ofParameter<int> numShapes;
-	ofParameter<int> separation;
-    ofParameter<int> shapeSide;
+    ofParameterGroup params0_Nested;
+	ofParameter<bool> fill0;
+	ofParameter<float> lineWidth0;
+	ofParameter<ofFloatColor> color0;//bc ofColor not implemented on ImGui yet
+	ofParameter<int> shapeType0;
+	ofParameter<int> numShapes0;
+	ofParameter<int> separation0;
+    ofParameter<int> shapeSide0;
 	
 	//group1
 	ofParameterGroup params1;
+	ofParameter<ofFloatColor> color1;
 	ofParameter<int> numShapes1;
 	ofParameter<int> separation1;
 	ofParameter<int> shapeSide1;
 	
-	//group3
+	//group2
 	ofParameterGroup params2;
 	ofParameter<ofFloatColor> color2;
+	ofParameter<float> size2;
 	ofParameter<bool> fill2;
 	
-	//group4
+	//group3
 	ofParameterGroup params3;	
-	ofParameter<int> numTriangles;
-	ofParameter<float> sizeTriangles;
-	ofParameter<int> separationTriangles;
+	ofParameter<int> numTriangles3;
+	ofParameter<float> sizeTriangles3;
+	ofParameter<int> separationTriangles3;
 	ofParameter<ofFloatColor> color3;
 	
 	//gui panels

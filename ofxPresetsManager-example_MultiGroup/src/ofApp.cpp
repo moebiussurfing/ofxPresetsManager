@@ -59,33 +59,35 @@ void ofApp::setupParameters()
 
 	//group0
 	params0.setName("paramsGroup0");
-	params0.add(shapeType.set("shapeType", 1, 1, 2));
-	params0.add(numShapes.set("numShapes", 1, 1, 24));
-	params0.add(separation.set("separation", 5, 1, 100));
-	params0.add(shapeSide.set("shapeSide", 50, 5, 200));
-	paramsNested.setName("styleGroup");//another nested group
-	paramsNested.add(fill.set("fill", false));
-	paramsNested.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
-	paramsNested.add(lineWidth.set("lineWidth", 1, 0.1, 10));
-	params0.add(paramsNested);//main preset settings container
+	params0.add(color0.set("color0", ofColor(ofColor::red, 0.8), ofColor(0, 0), ofColor(255, 255)));
+	params0.add(numShapes0.set("numShapes0", 5, 1, 5));
+	params0.add(shapeType0.set("shapeType0", 1, 1, 2));
+	params0.add(separation0.set("separation0", 100, 1, 100));
+	params0.add(shapeSide0.set("shapeSide0", 50, 5, 200));
+	params0_Nested.setName("styleGroup");//another nested group
+	params0_Nested.add(fill0.set("fill0", true));
+	params0_Nested.add(lineWidth0.set("lineWidth0", 1, 0.1, 10));
+	params0.add(params0_Nested);//main preset settings container
 
 	//group1
 	params1.setName("paramsGroup1");
+	params1.add(color1.set("color1", ofColor(ofColor::green, 0.8), ofColor(0, 0), ofColor(255, 255)));
+	params1.add(numShapes1.set("numShapes1", 5, 1, 5));
 	params1.add(shapeSide1.set("shapeSide1", 50, 5, 200));
-	params1.add(numShapes1.set("numShapes1", 10, 1, 24));
-	params1.add(separation1.set("separation1", 15, 1, 100));
+	params1.add(separation1.set("separation1", 100, 1, 100));
 
 	//group2
 	params2.setName("paramsGroup2");
-	params2.add(fill2.set("fill2", false));
-	params2.add(color2.set("color2", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
+	params2.add(color2.set("color2", ofColor(ofColor::yellow, 0.8), ofColor(0, 0), ofColor(255, 255)));
+	params2.add(size2.set("size2", 50, 5, 200));
+	params2.add(fill2.set("fill2", true));
 
 	//group3
 	params3.setName("paramsGroup3");
-	params3.add(numTriangles.set("numTriangles", 1, 1, 10));
-	params3.add(sizeTriangles.set("sizeTriangles", 5, 1, 200));
-	params3.add(separationTriangles.set("separationTriangles", 50, 5, 100));
-	params3.add(color3.set("color3", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
+	params3.add(color3.set("color3", ofColor(ofColor::blueViolet, 0.8), ofColor(0, 0), ofColor(255, 255)));
+	params3.add(numTriangles3.set("numTriangles3", 5, 1, 5));
+	params3.add(sizeTriangles3.set("sizeTriangles3", 5, 1, 200));
+	params3.add(separationTriangles3.set("separationTriangles3", 50, 5, 100));
 
 	//--
 
@@ -121,6 +123,7 @@ void ofApp::draw()
 	ofBackground(ofColor::darkBlue);
 
 	//scene draw object linked to grouped parameters
+	drawScene0();
 	drawScene1();
 	drawScene2();
 	drawScene3();
@@ -154,20 +157,37 @@ void ofApp::exit()
 }
 
 //--------------------------------------------------------------
+void ofApp::drawScene0()
+{
+	ofPushStyle();
+	ofPushMatrix();
+	ofTranslate(200, 300);
+	ofSetColor(color0.get());
+	ofSetLineWidth(lineWidth0);
+	if (fill0) ofFill();
+	else ofNoFill();
+	for (int i = 0; i < numShapes0; ++i)
+	{
+		if (shapeType0 == 1) ofDrawRectangle(0, 0, shapeSide0 * i / 2, shapeSide0 * i / 2);
+		else if (shapeType0 == 2) ofDrawCircle(0, 0, shapeSide0 * i / 2);
+		ofTranslate(separation0, 0);
+	}
+	ofPopMatrix();
+	ofPopStyle();
+}
+
+//--------------------------------------------------------------
 void ofApp::drawScene1()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(200, 500);
-	ofSetColor(color.get());
-	ofSetLineWidth(lineWidth);
-	if (fill) ofFill();
-	else ofNoFill();
-	for (int i = 0; i < numShapes; ++i)
+	ofTranslate(600, 400 - shapeSide1 / 10);
+	ofSetColor(color1.get());
+	ofFill();
+	for (int i = 0; i < numShapes1; ++i)
 	{
-		if (shapeType == 1) ofDrawRectangle(0, 0, shapeSide, shapeSide);
-		else if (shapeType == 2) ofDrawCircle(0, 0, shapeSide);
-		ofTranslate(separation, 0);
+		ofDrawCircle(0, 0, shapeSide1);
+		ofTranslate(separation1 * 3, 0);
 	}
 	ofPopMatrix();
 	ofPopStyle();
@@ -178,14 +198,14 @@ void ofApp::drawScene2()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(200, 500);
+	ofTranslate(100, 800);
 	ofSetColor(color2.get());
 	if (fill2) ofFill();
 	else ofNoFill();
-	for (int i = 0; i < numShapes1; ++i)
+	for (int i = 0; i < 5; ++i)
 	{
-		ofDrawCircle(0, 0, shapeSide1);
-		ofTranslate(-separation1, separation1);
+		ofDrawCircle(0, 0, (size2 + size2 / i) / 4);
+		ofTranslate(size2 * i * 1.5, -size2 / 10 - i * 25);
 	}
 	ofPopMatrix();
 	ofPopStyle();
@@ -196,15 +216,19 @@ void ofApp::drawScene3()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(400, 200);
-	ofSetLineWidth(2);
+	ofTranslate(1000, 500);
+	//ofSetLineWidth(2);
+	ofFill();
 	ofSetColor(color3.get());
-	for (int i = 0; i < numTriangles; ++i)
+	for (int i = 0; i < numTriangles3; ++i)
 	{
-		ofDrawLine(0, 0, 0, sizeTriangles);
-		ofDrawLine(0, sizeTriangles, sizeTriangles / 2, sizeTriangles / 2);
-		ofDrawLine(sizeTriangles / 2, sizeTriangles / 2, 0, 0);
-		ofTranslate(0, separationTriangles / 2);
+		//ofDrawLine(0, 0, 0, sizeTriangles3);
+		//ofDrawLine(0, sizeTriangles3, sizeTriangles3 / 2, sizeTriangles3 / 2);
+		//ofDrawLine(sizeTriangles3 / 2, sizeTriangles3 / 2, 0, 0);
+		ofDrawRectangle(0, 0, sizeTriangles3 * i / 2, sizeTriangles3 * i / 2);
+
+		float _tr = i * (separationTriangles3 + 20);
+		ofTranslate(_tr, -_tr);
 	}
 	ofPopMatrix();
 	ofPopStyle();
