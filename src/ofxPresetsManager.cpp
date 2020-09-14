@@ -655,6 +655,10 @@ void ofxPresetsManager::setupRandomizer()
 //--------------------------------------------------------------
 ofxPresetsManager::ofxPresetsManager()
 {
+	setSizeBox_PresetClicker(80);
+	setPosition_PresetClicker(200, ofGetHeight() - getPresetClicker_Height() - 100);
+	//setPosition_PresetClicker(200, ofGetHeight() - 50 - 5);
+
 	//-
 
 #ifdef DEBUG_randomTest
@@ -884,16 +888,13 @@ ofxPresetsManager::ofxPresetsManager()
 	myTTF = "assets/fonts/" + str;//assets folder
 	sizeTTF = 10;
 	bool bLoaded = myFont.load(myTTF, sizeTTF, true, true);
-	if (!bLoaded)
-	{
-		bLoaded = myFont.load(OF_TTF_SANS, sizeTTF, true, true);
-	}
+	if (!bLoaded) bLoaded = myFont.load(OF_TTF_SANS, sizeTTF, true, true);
 
 	//--
 
 	//custom path:
 	bPathDirCustom.set("MODE CUSTOM PATH", false);
-	pathDirCustom.set("Path", "UNDEFINED_DATA_PATH");
+	pathDirCustom.set("Path", "DEFAULT_DATA_PATH");
 
 	//randomizer settings
 	params_RandomizerSettings.add(params_Randomizer);
@@ -970,11 +971,13 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 		//TODO:
 		//store the main slector only!
-		int _last = PRESETS_Selected_Index.size() - 1;
-		SelectorUserGlobal.setMax(_last);
+		int _last = groups.size() - 1;
+		//int _last = PRESETS_Selected_Index.size() - 1;
+		SelectorUserGlobal.setMax(groupsSizes[_last] - 1);
+		//SelectorUserGlobal.setMax(_last);
 		//SelectorUserGlobal = PRESETS_Selected_Index[_last];
 		SelectorUserGlobal.makeReferenceTo(PRESETS_Selected_Index[_last]);
-		
+
 		//excludes all selectors except the main one. the other will be saved as preset
 		params_PRESETS_Selected.setSerializable(false);
 
@@ -1006,9 +1009,10 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	//--
 
+	bSplitGroupFolders.setSerializable(false);//force to this mode. do not store
+
 	//some params that we want to store
 	params_Options.add(MODE_Editor);
-	bSplitGroupFolders.setSerializable(false);//force to this mode. do not store
 	params_Options.add(bSplitGroupFolders);
 	params_Control.add(params_Options);
 
@@ -1024,16 +1028,25 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_UserKitSettings.setName("USER-KIT");
 	params_UserKitSettings.add(params_PRESETS_Selected);//includes all selectors
 
-	SelectorUserGlobal.set("GLOBAL SELECTOR", 0, 0, 0);
+	//main user global selector
+	int _last = groups.size() - 1;
+	SelectorUserGlobal.set("GLOBAL SELECTOR", 0, 0, groupsSizes[_last] - 1);
 	params_UserKitSettings.add(SelectorUserGlobal);
 
-	////int _last = (groups.size() - 1);
+	//--
+
+	//TODO:
+	//int _last = (groups.size() - 1);
 	//int _last = (PRESETS_Selected_Index.size() - 1);
 	////params_UserKitSettings.add(PRESETS_Selected_Index[_last]);//includes group selector only!
 	////params_UserKitSettings.add(PRESET_Selected_IndexMain);
 
 	//PRESETS_Selected_Index[_last].setSerializable(true);
 	////exclude saving all slectors except last one, that will be enalbed at setup
+
+	//PRESETS_Selected_Index[_last].setMax(groupsSizes[_last]-1);
+
+	//--
 
 	//custom path
 	params_Custom.setName("CUSTOM PATH");
@@ -1066,7 +1079,7 @@ void ofxPresetsManager::startup()
 
 	if (bPathDirCustom.get())
 	{
-		if (pathDirCustom.get() != "UNDEFINED_DATA_PATH") buildCustomUserKit();
+		if (pathDirCustom.get() != "DEFAULT_DATA_PATH") buildCustomUserKit();
 		else bPathDirCustom = false;//force false
 	}
 	if (!bPathDirCustom.get())
@@ -1102,6 +1115,22 @@ void ofxPresetsManager::startup()
 	//when you create a new project or added the addon to your existing project
 	//and no /data files are present
 	CheckAllFolders();
+
+	//--
+
+	//group selector
+
+	//TODO: startup crash when first clicking main group...
+	////refresh already loaded user global main selector
+	//if (bBuildGroupSelector)
+	//{
+	//	int _last = groups.size() - 1;
+	//	cout << "PRESETS_Selected_Index[_last] : " << PRESETS_Selected_Index[_last] << endl;
+	//	PRESETS_Selected_Index[_last] = groupsSizes[_last];
+	//	cout << "PRESETS_Selected_Index[_last] : " << PRESETS_Selected_Index[_last] << endl;
+	//	PRESETS_Selected_Index[_last] = SelectorUserGlobal.get();
+	//	cout << "PRESETS_Selected_Index[_last] : " << PRESETS_Selected_Index[_last] << endl;
+	//}
 
 	//--
 }
@@ -1295,7 +1324,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	bImGui_mouseOver = false;
 #endif
 
-}
+	}
 
 
 //--------------------------------------------------------------
@@ -1325,9 +1354,9 @@ void ofxPresetsManager::drawPresetClicker()
 	ofColor _color2;//lines and text colors
 	ofColor _cBg;//background color
 	if (bThemDark) {//dark
-		_color1 = ofColor(32, 255);
-		_color2 = ofColor(8, 50);
-		_cBg = ofColor(0, 32);
+		_color1 = ofColor(0, 255);
+		_color2 = ofColor(8, 100);
+		_cBg = ofColor(200, 50);
 	}
 	else {//light
 		_color1 = ofColor(255, 200);
@@ -1514,8 +1543,8 @@ void ofxPresetsManager::drawPresetClicker()
 			int xG = -strW - 20;
 			ySave = ySave - 2;//little up
 
-			//ofSetColor(255, 128);//shadow
-			ofSetColor(_color2);//shadow
+			if (bThemDark) ofSetColor(_cBg);//shadow
+			else ofSetColor(_color2);//shadow
 			if (myFont.isLoaded()) myFont.drawString(info, xG + gap, ySave + gap);
 			else ofDrawBitmapString(info, xG + gap, ySave + gap);
 
@@ -2730,7 +2759,7 @@ void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
 
 		//	if (bPathDirCustom.get())
 		//	{
-		//		if (pathDirCustom.get() != "UNDEFINED_DATA_PATH") buildCustomUserKit();
+		//		if (pathDirCustom.get() != "DEFAULT_DATA_PATH") buildCustomUserKit();
 		//		else bPathDirCustom = false;//force false
 		//	}
 		//	if (!bPathDirCustom.get())
@@ -3113,8 +3142,8 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				}
 			}
 		}
-		}
 	}
+}
 #pragma mark - SETTINGS
 
 //--------------------------------------------------------------
@@ -3731,7 +3760,10 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 			if (ImGui::TreeNode("USER-KIT")) {
 
 				//User-Kit name
-				string str = "User-Kit: " + nameDisplayUserKit;
+				string str;
+				str = "User-Kit:";
+				ImGui::Text(str.c_str());
+				str = nameDisplayUserKit;
 				ImGui::Text(str.c_str());
 
 				//button to Open File Dialog as folder

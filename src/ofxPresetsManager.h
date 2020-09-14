@@ -14,12 +14,12 @@
 //
 //	TODO:
 //
-///	++++		change file format from xml to json
-///	++++		add big toggle to edit/live modes: enables undo, autosave, memory mode..etc
+///	++++		add randimizer engine to user main group selector
+///					select wich group is the target to randomizer/main group extras
+///	++			add big toggle to edit/live modes: enables undo, autosave, memory mode..etc
 ///	++++		open/save dialog to project session single file.
-///	++++		select wich group is the target to randomizer/main group extras
 ///					or allowed to all the groups?
-///	++++		add draggable rectangle to move/resize clicker
+///	+			add draggable rectangle to move/resize clicker
 //
 ///	++		randomize editor preset
 ///				make for multigroup
@@ -33,6 +33,7 @@
 ///				add setter to enable randomize wich params
 ///				call populate. disable debug_display red info
 //
+///	+		change file format from xml to json
 ///	++		add ofColor to ImGui helpers vs ofFloatColor
 ///	++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
@@ -46,13 +47,6 @@
 ///				or add simpler class but compatible with preset files kits
 ///	+		could make tween when changing params using lerp or ofxKeyTween...
 ///	+		add undo to all the groups
-//
-//	BUG:	
-//
-//	?		startup bug not loading presets well...
-//	?		startup doCheckPresetsFolderIsEmpty fails and overwrite all presets in some situations...
-//				it seems that it's when user-kit folder is customized, not the default one
-//	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager" ?
 //
 //---
 
@@ -442,7 +436,8 @@ public:
 	//--------------------------------------------------------------
 	int getAmountGroups()
 	{
-		return groups.size();
+		if (groups.size() > 0) return groups.size();
+		else return 1;//workaround to set default height before groups are added
 	}
 
 	//--------------------------------------------------------------
@@ -945,7 +940,7 @@ private:
 	//layout
 	ofVec2f guiPos_InternalControl = ofVec2f(500, 500);
 	int cellSize = 80;
-	ofVec2f clicker_Pos = ofVec2f(500, 500);
+	ofVec2f clicker_Pos;
 
 	//--
 
