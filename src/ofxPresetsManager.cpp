@@ -910,7 +910,8 @@ void ofxPresetsManager::setup()
 {
 	ofLogNotice(__FUNCTION__);
 	//nameMainSettings will use default name "ofxPresetsManagerSettings.xml"
-	setup(true);//split folders by group name
+	setup(bAllowGroupSelector);//split folders by group name
+	//setup(true);//split folders by group name
 }
 
 //--------------------------------------------------------------
@@ -918,7 +919,8 @@ void ofxPresetsManager::setup(std::string name)///must be called after adding pa
 {
 	ofLogNotice(__FUNCTION__) << name;
 	nameMainSettings = name + fileExtension;
-	setup(true);
+	setup(bAllowGroupSelector);
+	//setup(true);
 }
 
 //--------------------------------------------------------------
@@ -1324,7 +1326,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	bImGui_mouseOver = false;
 #endif
 
-	}
+}
 
 
 //--------------------------------------------------------------
@@ -1474,9 +1476,12 @@ void ofxPresetsManager::drawPresetClicker()
 
 		//5. gui toggle button box
 
+		//int _i;
+		//if (bBuildGroupSelector) _i = groups.size() - 1;
+		//else _i = 0;
 		int _i;
 		if (bBuildGroupSelector) _i = groups.size() - 1;
-		else _i = 0;
+		else _i = 1;
 
 		if (i == _i)
 		{
@@ -2578,9 +2583,12 @@ void ofxPresetsManager::mousePressed(int x, int y)
 	//int _offset = (autoSave ? 0 : 1);
 	int _offset = 1;
 
+	//int _i;
+	//if (bBuildGroupSelector) _i = groups.size() - 1;
+	//else _i = 0;
 	int _i;
 	if (bBuildGroupSelector) _i = groups.size() - 1;
-	else _i = 0;
+	else _i = 1;
 
 	if ((yIndex == groups.size() - 1) && (xIndex == groupsSizes[_i] + _offset))
 	{

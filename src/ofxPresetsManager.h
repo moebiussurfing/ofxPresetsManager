@@ -122,7 +122,13 @@ private:
 	void undoStoreParams();
 #endif
 
+	//main group selector
 	bool bBuildGroupSelector = true;//to allow auto build a group selector to combine all the added groups to the presets manager
+	bool bAllowGroupSelector = true;//to allow disable main group. not allways we need it..
+public:
+	void setEnableMainGroupSelector(bool b) {//disable the use of main group selector. must call before setup. enabled by default
+		bAllowGroupSelector = b;
+	}
 
 	//--
 
@@ -337,14 +343,19 @@ public:
 	//    return isDone;
 	//}
 
-	//--------------------------------------------------------------
-	void setPosition_DEBUG(int x, int y);//where to display if we get errors (ie: data files not found) on startup
+	////--------------------------------------------------------------
+	//void setPosition_DEBUG(int x, int y);//where to display if we get errors (ie: data files not found) on startup
 
 	//--------------------------------------------------------------
-	float getPresetClicker_Width()
+	float getPresetClicker_Width()//get width of bigger group of presets row
 	{
-		//return cellSize * (keys[0].size() + 2);
-		return cellSize * getAmountPresetsOfGroup(getAmountGroups() - 1);
+		float _maxPresets = 0;
+		for (int i = 0; i < groups.size(); i++) {
+			if (getAmountPresetsOfGroup(getAmountGroups() - 1) > _maxPresets) _maxPresets = getAmountPresetsOfGroup(getAmountGroups() - 1);
+		}
+		int _extraButtons = 2;
+		float w = cellSize * (_maxPresets + _extraButtons);
+		return w;
 	}
 	//--------------------------------------------------------------
 	float getPresetClicker_BoxSize()
