@@ -59,7 +59,7 @@ void ofApp::setupParameters()
 
 	//group0
 	params0.setName("paramsGroup0");
-	params0.add(color0.set("color0", ofColor(ofColor::red, 0.8), ofColor(0, 0), ofColor(255, 255)));
+	params0.add(color0.set("color0", ofColor(ofColor::red), ofColor(0, 0), ofColor(255, 255)));
 	params0.add(numShapes0.set("numShapes0", 5, 1, 5));
 	params0.add(shapeType0.set("shapeType0", 1, 1, 2));
 	params0.add(separation0.set("separation0", 100, 1, 100));
@@ -71,23 +71,23 @@ void ofApp::setupParameters()
 
 	//group1
 	params1.setName("paramsGroup1");
-	params1.add(color1.set("color1", ofColor(ofColor::green, 0.8), ofColor(0, 0), ofColor(255, 255)));
+	params1.add(color1.set("color1", ofColor(ofColor::green), ofColor(0, 0), ofColor(255, 255)));
 	params1.add(numShapes1.set("numShapes1", 5, 1, 5));
 	params1.add(shapeSide1.set("shapeSide1", 50, 5, 200));
 	params1.add(separation1.set("separation1", 100, 1, 100));
 
 	//group2
 	params2.setName("paramsGroup2");
-	params2.add(color2.set("color2", ofColor(ofColor::yellow, 0.8), ofColor(0, 0), ofColor(255, 255)));
+	params2.add(color2.set("color2", ofColor(ofColor::yellow), ofColor(0, 0), ofColor(255, 255)));
 	params2.add(size2.set("size2", 50, 5, 200));
 	params2.add(fill2.set("fill2", true));
 
 	//group3
 	params3.setName("paramsGroup3");
-	params3.add(color3.set("color3", ofColor(ofColor::blueViolet, 0.8), ofColor(0, 0), ofColor(255, 255)));
-	params3.add(numTriangles3.set("numTriangles3", 5, 1, 5));
-	params3.add(sizeTriangles3.set("sizeTriangles3", 5, 1, 200));
-	params3.add(separationTriangles3.set("separationTriangles3", 50, 5, 100));
+	params3.add(color3.set("color3", ofColor(ofColor::blueViolet), ofColor(0, 0), ofColor(255, 255)));
+	params3.add(numObjects3.set("numObjects3", 5, 1, 5));
+	params3.add(sizeObjects3.set("sizeObjects3", 5, 1, 200));
+	params3.add(separationObjects3.set("separationObjects3", 50, 5, 100));
 
 	//--
 
@@ -220,14 +220,14 @@ void ofApp::drawScene3()
 	//ofSetLineWidth(2);
 	ofFill();
 	ofSetColor(color3.get());
-	for (int i = 0; i < numTriangles3; ++i)
+	for (int i = 0; i < numObjects3; ++i)
 	{
-		//ofDrawLine(0, 0, 0, sizeTriangles3);
-		//ofDrawLine(0, sizeTriangles3, sizeTriangles3 / 2, sizeTriangles3 / 2);
-		//ofDrawLine(sizeTriangles3 / 2, sizeTriangles3 / 2, 0, 0);
-		ofDrawRectangle(0, 0, sizeTriangles3 * i / 2, sizeTriangles3 * i / 2);
+		//ofDrawLine(0, 0, 0, sizeObjects3);
+		//ofDrawLine(0, sizeObjects3, sizeObjects3 / 2, sizeObjects3 / 2);
+		//ofDrawLine(sizeObjects3 / 2, sizeObjects3 / 2, 0, 0);
+		ofDrawRectangle(0, 0, sizeObjects3 * i / 2, sizeObjects3 * i / 2);
 
-		float _tr = i * (separationTriangles3 + 20);
+		float _tr = i * (separationObjects3 + 20);
 		ofTranslate(_tr, -_tr);
 	}
 	ofPopMatrix();

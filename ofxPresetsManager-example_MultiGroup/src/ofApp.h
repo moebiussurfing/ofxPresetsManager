@@ -60,9 +60,9 @@ public:
 	
 	//group3
 	ofParameterGroup params3;	
-	ofParameter<int> numTriangles3;
-	ofParameter<float> sizeTriangles3;
-	ofParameter<int> separationTriangles3;
+	ofParameter<int> numObjects3;
+	ofParameter<float> sizeObjects3;
+	ofParameter<int> separationObjects3;
 	ofParameter<ofFloatColor> color3;
 	
 	//gui panels

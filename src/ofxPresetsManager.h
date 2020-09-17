@@ -60,7 +60,8 @@
 //#define MODE_ImGui_EXTERNAL			//MODE_ImGui_EXTERNAL. this must be defined here and (not only) in ofApp (too)!!
 #define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
 #define INCLUDE_ofxUndoSimple			//undo engine to store after randomize preset parameters (& recall)
-//#define USE_ofxImGuiSimple			//TEST alternative addon
+//#define USE_ofxImGuiSimple			//TEST alternative addon+
+#define USE_JSON
 //
 //#define INCLUDE_PERFORMANCE_MEASURES	//measure performance ofxTimeMeasurements
 //#define DEBUG_randomTest				//uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working

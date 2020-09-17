@@ -667,8 +667,6 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//-
 
-#define USE_JSON
-
 #ifndef USE_JSON
 	fileExtension = ".xml";
 #endif
@@ -1363,8 +1361,8 @@ void ofxPresetsManager::drawPresetClicker()
 	float _round = 3.0f;
 	float _pad = 3.0f;
 
-	ofColor _color1;//lines and text colors
-	ofColor _color2;//lines and text colors
+	ofColor _color1;//lines and text color
+	ofColor _color2;//bg selected button
 	ofColor _cBg;//background color
 	if (bThemDark) {//dark
 		_color1 = ofColor(0, 255);
@@ -1373,7 +1371,7 @@ void ofxPresetsManager::drawPresetClicker()
 	}
 	else {//light
 		_color1 = ofColor(255, 200);
-		_color2 = ofColor(128, 150);
+		_color2 = ofColor(0, 150);
 		_cBg = ofColor(0, 128);
 	}
 
