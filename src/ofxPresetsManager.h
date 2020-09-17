@@ -14,12 +14,12 @@
 //
 //	TODO:
 //
-///	++++		change file format from xml to json
-///	++++		add big toggle to edit/live modes: enables undo, autosave, memory mode..etc
+///	++++		add randimizer engine to user main group selector
+///					select wich group is the target to randomizer/main group extras
+///	++			add big toggle to edit/live modes: enables undo, autosave, memory mode..etc
 ///	++++		open/save dialog to project session single file.
-///	++++		select wich group is the target to randomizer/main group extras
 ///					or allowed to all the groups?
-///	++++		add draggable rectangle to move/resize clicker
+///	+			add draggable rectangle to move/resize clicker
 //
 ///	++		randomize editor preset
 ///				make for multigroup
@@ -33,6 +33,7 @@
 ///				add setter to enable randomize wich params
 ///				call populate. disable debug_display red info
 //
+///	+		change file format from xml to json
 ///	++		add ofColor to ImGui helpers vs ofFloatColor
 ///	++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
@@ -47,13 +48,6 @@
 ///	+		could make tween when changing params using lerp or ofxKeyTween...
 ///	+		add undo to all the groups
 //
-//	BUG:	
-//
-//	?		startup bug not loading presets well...
-//	?		startup doCheckPresetsFolderIsEmpty fails and overwrite all presets in some situations...
-//				it seems that it's when user-kit folder is customized, not the default one
-//	?		there's a problem when CheckFolder or setPath_GlobalFolder are something like "myApp/ofxPresetsManager" ?
-//
 //---
 
 
@@ -66,7 +60,8 @@
 //#define MODE_ImGui_EXTERNAL			//MODE_ImGui_EXTERNAL. this must be defined here and (not only) in ofApp (too)!!
 #define INCLUDE_IMGUI_CUSTOM_FONT		//customize ImGui font
 #define INCLUDE_ofxUndoSimple			//undo engine to store after randomize preset parameters (& recall)
-//#define USE_ofxImGuiSimple			//TEST alternative addon
+//#define USE_ofxImGuiSimple			//TEST alternative addon+
+#define USE_JSON
 //
 //#define INCLUDE_PERFORMANCE_MEASURES	//measure performance ofxTimeMeasurements
 //#define DEBUG_randomTest				//uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
@@ -128,7 +123,15 @@ private:
 	void undoStoreParams();
 #endif
 
+	//--
+
+	//main group selector
 	bool bBuildGroupSelector = true;//to allow auto build a group selector to combine all the added groups to the presets manager
+	bool bAllowGroupSelector = true;//to allow disable main group. not allways we need it..
+public:
+	void setEnableMainGroupSelector(bool b) {//disable the use of main group selector. must call before setup. enabled by default
+		bAllowGroupSelector = b;
+	}
 
 	//--
 
@@ -137,7 +140,7 @@ private:
 	ofParameter<bool> bSplitGroupFolders{ "MODE SPLIT FOLDERS", true };//on this mode we split every group on his own sub folder
 
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };//this mode improves performance disabling autosave, undo history..etc
-	ofParameter<bool> bThemDark{ "THEME DARK", true };
+	ofParameter<bool> bThemDark{ "THEME DARK", false };
 
 	string helpInfo;
 	void buildHelpInfo();
@@ -179,6 +182,7 @@ private:
 
 	void load_AllKit_ToMemory();
 	void save_AllKit_FromMemory();
+
 public:
 	void setModeMemoryPerformance(bool b) {
 		MODE_MemoryLive = b;
@@ -304,7 +308,7 @@ public:
 	void setup(std::string name);//TODO: should use char array to avoid collapse with bool...
 	void setup(std::string name, bool _buildGroupSelector);
 	void setup(bool _buildGroupSelector);
-	
+
 	void startup();//must be called after setup to se initial states
 
 	//-
@@ -343,14 +347,19 @@ public:
 	//    return isDone;
 	//}
 
-	//--------------------------------------------------------------
-	void setPosition_DEBUG(int x, int y);//where to display if we get errors (ie: data files not found) on startup
+	////--------------------------------------------------------------
+	//void setPosition_DEBUG(int x, int y);//where to display if we get errors (ie: data files not found) on startup
 
 	//--------------------------------------------------------------
-	float getPresetClicker_Width()
+	float getPresetClicker_Width()//get width of bigger group of presets row
 	{
-		//return cellSize * (keys[0].size() + 2);
-		return cellSize * getAmountPresetsOfGroup(getAmountGroups() - 1);
+		float _maxPresets = 0;
+		for (int i = 0; i < groups.size(); i++) {
+			if (getAmountPresetsOfGroup(getAmountGroups() - 1) > _maxPresets) _maxPresets = getAmountPresetsOfGroup(getAmountGroups() - 1);
+		}
+		int _extraButtons = 2;
+		float w = cellSize * (_maxPresets + _extraButtons);
+		return w;
 	}
 	//--------------------------------------------------------------
 	float getPresetClicker_BoxSize()
@@ -424,6 +433,12 @@ public:
 	//--------------------------------------------------------------
 	void loadPreset(int p);//load preset for the main group by code from ofApp
 	void loadPreset(int p, int _indexGroup);//load preset for extra groups by code from ofApp
+	void loadPresetGroup(int presetIndex)//load preset for main group by code from ofApp
+	{
+		int groupIndex = groups.size() - 1;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
+		load(presetIndex, groupIndex);
+	}
 	void savePreset(int p, int _indexGroup);//save preset for extra groups by code from ofApp
 
 	//--------------------------------------------------------------
@@ -436,7 +451,8 @@ public:
 	//--------------------------------------------------------------
 	int getAmountGroups()
 	{
-		return groups.size();
+		if (groups.size() > 0) return groups.size();
+		else return 1;//workaround to set default height before groups are added
 	}
 
 	//--------------------------------------------------------------
@@ -615,20 +631,6 @@ private:
 	bool doStandaloneRefreshPresets();
 	void buildStandalonePresets();//standalone presets splitted from favourites presets
 	//void doCheckPresetsFolderIsEmpty();
-
-	//-
-
-private:
-	//expose basic controls to allow use on external gui
-	ofParameterGroup params_Controls{ "Presets Manager" };
-public:
-	ofParameterGroup getControls() {
-		params_Controls.clear();
-		params_Controls.setName(nameDisplayUserKit);
-		params_Controls.add(SHOW_ClickPanel);
-		params_Controls.add(PLAY_RandomizeTimer);
-		return params_Controls;
-	}
 
 	//-
 
@@ -953,15 +955,15 @@ private:
 	//layout
 	ofVec2f guiPos_InternalControl = ofVec2f(500, 500);
 	int cellSize = 80;
-	ofVec2f clicker_Pos = ofVec2f(500, 500);
+	ofVec2f clicker_Pos;
 
 	//--
 
-	//A. ofParameterGroup
-	std::vector<ofParameterGroup> groups;
-	//to store multiple group targets. 
-	//when using only one ofParameterGroup, there's only one group element!
-	//ofParameterGroup params_gui;
+private:
+	//main data/settings container
+	//group of ofParameterGroup
+	std::vector<ofParameterGroup> groups;//contyainer to store multiple group targets. 
+	std::vector<int> groupsSizes;//this is the number of presets of each added group
 
 	//--
 
@@ -971,7 +973,39 @@ private:
 	ofParameterGroup params_PRESETS_Selected{ "Preset Selectors" };
 	//ofParameter<int> mainSelector;
 
-	std::vector<int> groupsSizes;//this is the number of presets of each added group
+	ofParameter<int> SelectorUserGlobal;//global selector
+
+	//--
+
+	//helpers to easy integrate into external gui's
+
+private:
+	//expose basic controls to allow use on external gui
+	ofParameterGroup params_Controls{ "PRESETS MANAGER" };
+
+public:
+	ofParameterGroup getParamsControls() {//this are usefull parameters to use in our projects/addons gui's
+		params_Controls.clear();
+		//cout << "nameDisplayUserKit: " << nameDisplayUserKit << endl;//TODO: not refreshing well on startup..
+		//params_Controls.setName(nameDisplayUserKit);
+		//params_Controls.setName("OVERLAY");
+		params_Controls.add(getParamsPresetSelectors());
+		params_Controls.add(getParamsRandomizers());
+		params_Controls.add(SHOW_ClickPanel);
+		params_Controls.add(MODE_Editor);
+		return params_Controls;
+	}
+	ofParameterGroup getParamsPresetSelectors() {
+		return params_PRESETS_Selected;
+	}
+	ofParameterGroup getParamsRandomizers() {
+		ofParameterGroup _g{ "RANDOMIZERS" };
+		_g.add(PLAY_RandomizeTimer);
+		_g.add(randomizeDuration);
+		_g.add(randomizeDurationShort);
+		_g.add(randomizerProgress);
+		return _g;
+	}
 
 	//--
 
