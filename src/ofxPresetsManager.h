@@ -122,6 +122,8 @@ private:
 	void undoStoreParams();
 #endif
 
+	//--
+
 	//main group selector
 	bool bBuildGroupSelector = true;//to allow auto build a group selector to combine all the added groups to the presets manager
 	bool bAllowGroupSelector = true;//to allow disable main group. not allways we need it..
@@ -179,6 +181,7 @@ private:
 
 	void load_AllKit_ToMemory();
 	void save_AllKit_FromMemory();
+
 public:
 	void setModeMemoryPerformance(bool b) {
 		MODE_MemoryLive = b;

@@ -161,7 +161,7 @@ void ofApp::drawScene0()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(200, 300);
+	ofTranslate(100, 700);
 	ofSetColor(color0.get());
 	ofSetLineWidth(lineWidth0);
 	if (fill0) ofFill();
@@ -181,7 +181,7 @@ void ofApp::drawScene1()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(600, 400 - shapeSide1 / 10);
+	ofTranslate(350, 700 - shapeSide1 / 10);
 	ofSetColor(color1.get());
 	ofFill();
 	for (int i = 0; i < numShapes1; ++i)
@@ -198,7 +198,7 @@ void ofApp::drawScene2()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(100, 800);
+	ofTranslate(100, 700);
 	ofSetColor(color2.get());
 	if (fill2) ofFill();
 	else ofNoFill();
@@ -216,7 +216,7 @@ void ofApp::drawScene3()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(1000, 500);
+	ofTranslate(400, 700);
 	//ofSetLineWidth(2);
 	ofFill();
 	ofSetColor(color3.get());

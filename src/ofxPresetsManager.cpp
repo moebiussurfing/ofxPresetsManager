@@ -667,7 +667,18 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//-
 
+#define USE_JSON
+
+#ifndef USE_JSON
 	fileExtension = ".xml";
+#endif
+
+#ifdef USE_JSON
+	fileExtension = ".json";
+#endif
+
+	//-
+
 	nameMainSettings = "ofxPresetsManagerSettings" + fileExtension;//default user preset name
 
 	nameDisplayUserKit = "ofxPresetsManager";
@@ -4622,11 +4633,11 @@ void ofxPresetsManager::doStandalonePresetSave(string name)//without xml extensi
 //--------------------------------------------------------------
 void ofxPresetsManager::doLoadMainGroupPreset(string name)//without xml extension nor path
 {
-	ofLogNotice(__FUNCTION__) << name << ".xml";
+	ofLogNotice(__FUNCTION__) << name << fileExtension;
 
 	string _path;
 	_path = path_UserKit_Folder + "/" + path_PresetsStandalone + "/" + name;
-	_path += ".xml";
+	_path += fileExtension;
 
 	bool b = ofxSurfingHelpers::loadGroup(groups[0], _path);
 	if (!b)
