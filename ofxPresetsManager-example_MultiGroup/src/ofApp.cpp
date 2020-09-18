@@ -11,6 +11,7 @@ void ofApp::setup()
 	ofSetVerticalSync(true);
 #endif
 	ofxSurfingHelpers::setTheme_ofxGui();
+	ofSetCircleResolution(200);
 
 	//--
 

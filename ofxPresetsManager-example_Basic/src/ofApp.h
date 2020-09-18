@@ -3,7 +3,6 @@
 #include "ofMain.h"
 
 #include "ofxPresetsManager.h"
-#include "ofxGui.h"
 
 class ofApp : public ofBaseApp
 {
@@ -15,7 +14,6 @@ public:
 	// scene
 	void setupScene();
 	void drawScene();
-	ofxPanel gui;
 
 	// preset params
 	ofParameterGroup params;

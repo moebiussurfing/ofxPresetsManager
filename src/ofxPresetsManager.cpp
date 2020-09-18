@@ -1004,7 +1004,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	//--
 
-//callback
+	//callback
 	ofAddListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 
 	//--
@@ -1490,7 +1490,9 @@ void ofxPresetsManager::drawPresetClicker()
 		//else _i = 0;
 		int _i;
 		if (bBuildGroupSelector) _i = groups.size() - 1;
-		else _i = 1;
+		//else _i = 1;
+		else if (groups.size() > 1) _i = 1;
+		else _i = 0;
 
 		if (i == _i)
 		{
@@ -1772,7 +1774,7 @@ void ofxPresetsManager::add(ofParameterGroup _params, initializer_list<int> _key
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, int guiIndex)
 {
-	ofLogVerbose(__FUNCTION__) << "group: " << guiIndex << " preset: " << presetIndex;
+	ofLogNotice(__FUNCTION__) << "group: " << guiIndex << " preset: " << presetIndex;
 
 	if (((guiIndex >= 0) && (guiIndex < (int)groups.size())) &&
 		(presetIndex >= 0) && (presetIndex < groupsSizes[guiIndex]))
@@ -1784,7 +1786,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 		bool b = ofxSurfingHelpers::saveGroup(groups[guiIndex], _path);
 
-		if (b) ofLogNotice(__FUNCTION__) << " " << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
+		if (b) ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
 		else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " at " << _path;
 	}
 
@@ -1856,7 +1858,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, string gName)
 {
-	ofLogVerbose(__FUNCTION__) << "group: " << gName << " preset: " << presetIndex;
+	ofLogNotice(__FUNCTION__) << "group: " << gName << " preset: " << presetIndex;
 
 	int guiIndex = getGuiIndex(gName);
 
@@ -1868,7 +1870,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 			TS_START("SAVE FILE 2");//for TimeMeasurements only
 			std::string _path = getPresetPath(gName, presetIndex);
 			bool b = ofxSurfingHelpers::saveGroup(groups[guiIndex], _path);
-			if (b) ofLogNotice(__FUNCTION__) << " " << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
+			if (b) ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " " << guiIndex << " at " << _path;
 			else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " at " << _path;
 			TS_STOP("SAVE FILE 2");//for TimeMeasurements only
 		}
@@ -1938,7 +1940,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, int guiIndex)
 {
-	ofLogVerbose(__FUNCTION__) << "group: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex;
+	ofLogNotice(__FUNCTION__) << "group: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex;
 
 	if (((guiIndex >= 0) && (guiIndex < (int)groups.size())) &&
 		(presetIndex >= 0) && (presetIndex < groupsSizes[guiIndex]))
@@ -2039,7 +2041,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, string gName)
 {
-	ofLogVerbose(__FUNCTION__) << "group: " << gName << " preset: " << presetIndex;
+	ofLogNotice(__FUNCTION__) << "group: " << gName << " preset: " << presetIndex;
 
 	int guiIndex = getGuiIndex(gName);
 
@@ -2592,12 +2594,13 @@ void ofxPresetsManager::mousePressed(int x, int y)
 	//int _offset = (autoSave ? 0 : 1);
 	int _offset = 1;
 
-	//int _i;
+	int _i;
 	//if (bBuildGroupSelector) _i = groups.size() - 1;
 	//else _i = 0;
-	int _i;
 	if (bBuildGroupSelector) _i = groups.size() - 1;
-	else _i = 1;
+	//else _i = 1;
+	else if (groups.size() > 1) _i = 1;
+	else _i = 0;
 
 	if ((yIndex == groups.size() - 1) && (xIndex == groupsSizes[_i] + _offset))
 	{
@@ -2797,13 +2800,11 @@ void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
 			{
 				for (int p = 0; p < groupsSizes[g]; p++)//iterate each preset on each group
 				{
-					if (name == PRESETS_Selected_Index[g].getName() &&
-						PRESETS_Selected_Index[g].get() == p)
+					if (name == PRESETS_Selected_Index[g].getName() && PRESETS_Selected_Index[g].get() == p)
 					{
 						//some preset of any group changed
 
-						ofLogNotice(__FUNCTION__) << ">";
-						ofLogNotice(__FUNCTION__) << groups[g].getName() << " group: " << g << " preset: " << p;
+						ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " group: " << g << " preset: " << p;
 
 						//-
 
@@ -2818,7 +2819,7 @@ void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
 
 						if (PRESETS_Selected_Index[g] == PRESETS_Selected_Index_PRE[g])
 						{
-							ofLogNotice(__FUNCTION__) << groups[g].getName() << " PRESET " << p << " [NOT CHANGED]";
+							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " PRESET " << p << " [NOT CHANGED]";
 
 							//browser
 							//if (MODE_Browser_NewPreset)
@@ -2837,7 +2838,7 @@ void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
 
 						else if (PRESETS_Selected_Index[g] != PRESETS_Selected_Index_PRE[g])
 						{
-							ofLogNotice(__FUNCTION__) << groups[g].getName() << " PRESET " << p << " [CHANGED]";
+							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " PRESET " << p << " [CHANGED]";
 
 							//-
 
@@ -2866,8 +2867,6 @@ void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
 
 			if (name == "PRESET")//TODO: aux for main group
 			{
-				ofLogNotice(__FUNCTION__) << "--------------------------------------------------------------";
-
 				PRESETS_Selected_Index[0] = PRESET_Selected_IndexMain;
 			}
 
@@ -3214,6 +3213,7 @@ void ofxPresetsManager::load_ControlSettings()
 	string path3 = nameMainSettings;
 
 	b = ofxSurfingHelpers::loadGroup(params_UserKitSettings, path3);
+
 	if (!b) ofLogError(__FUNCTION__) << "CANT LOAD FILE '" << path3 << "'!";
 	else ofLogNotice(__FUNCTION__) << "LOADED " << path3;
 
@@ -3605,14 +3605,15 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 {
 	auto mainSettings = ofxImGui::Settings();
 
-	ofVec2f pos(ImGui_Position.get().x, ImGui_Position.get().y);
-	ofVec2f size(ImGui_Size.get().x, ImGui_Size.get().y);
-	mainSettings.windowPos = pos;//required
-	mainSettings.windowSize = size;
+	ofVec2f _pos(ImGui_Position.get().x, ImGui_Position.get().y);
+	ofVec2f _size(ImGui_Size.get().x, ImGui_Size.get().y);
+	mainSettings.windowPos = _pos;//required
+	mainSettings.windowSize = _size;
+
 	auto _mode = ImGuiCond_FirstUseEver;//ImGuiCond_Always;
-	ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), _mode);
-	ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), _mode);
-	//ofLogNotice(__FUNCTION__) << "ImGui position: " << ofToString(pos);
+	ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
+	ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
+	//ofLogNotice(__FUNCTION__) << "ImGui position: " << ofToString(_pos);
 	//ofLogNotice(__FUNCTION__) << "ImGui size: " << ofToString(size);
 
 	//--
@@ -3659,10 +3660,11 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		ImGui_Draw_WindowContent(mainSettings);
 
 		//get window position/size: must be inside begin/end
-		pos = ImGui::GetWindowPos();
-		size = ImGui::GetWindowSize();
-		ImGui_Position = glm::vec2(pos.x, pos.y);
-		ImGui_Size = glm::vec2(size.x, size.y);
+		_pos = ImGui::GetWindowPos();
+		_size = ImGui::GetWindowSize();
+
+		ImGui_Position = glm::vec2(_pos.x, _pos.y);
+		ImGui_Size = glm::vec2(_size.x, _size.y);
 	}
 	ofxImGui::EndWindow(mainSettings);
 
@@ -3674,13 +3676,15 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 	if (SHOW_ImGui_PresetsParams) {
 
-		pos = pos - ofVec2f(410, 0);
-		size = ofVec2f(400, 500);
-		mainSettings.windowPos = pos;
-		mainSettings.windowSize = size;
+		_pos = _pos - ofVec2f(410, 0);
+		_size = ofVec2f(400, 800);
+		mainSettings.windowPos = _pos;
+		mainSettings.windowSize = _size;
 		_mode = ImGuiCond_FirstUseEver;
-		ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), _mode);
-		ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), _mode);
+		
+		ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
+		ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
+
 		_name = "ofxPresetsManager";
 		if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
 		{
@@ -3697,13 +3701,15 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 	if (SHOW_ImGui_Selectors) {
 
-		pos = pos - ofVec2f(310, 0);
-		size = ofVec2f(300, 300);
-		mainSettings.windowPos = pos;
-		mainSettings.windowSize = size;
+		_pos = _pos - ofVec2f(310, 0);
+		_size = ofVec2f(300, 300);
+		mainSettings.windowPos = _pos;
+		mainSettings.windowSize = _size;
 		_mode = ImGuiCond_FirstUseEver;
-		ImGui::SetNextWindowPos(ofVec2f(pos.x, pos.y), _mode);
-		ImGui::SetNextWindowSize(ofVec2f(size.x, size.y), _mode);
+
+		ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
+		ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
+
 		_name = "SELECTORS";
 		if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
 		{
@@ -3907,61 +3913,68 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 
 		//-
 
-		//main helpers
-		if (ImGui::Button("CLONE ALL"))
+		if (ImGui::TreeNode("HELPERS"))
 		{
-			bCloneAll = true;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("CLONE >"))
-		{
-			bCloneRight = true;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("POPULATE!"))
-		{
-			//populate all favs
-			doPopulateFavs();
-			//create browser files too
-			doGetFavsToFilesBrowser();
-		}
-
-		//-
-
-		//ImGui::SetNextItemWidth(_w);
-
-		ofxImGui::AddParameter(autoSave);
-		//ImGui::SameLine();
-		//ofxImGui::AddParameter(autoLoad);
-		ImGui::SameLine();
-		ofxImGui::AddParameter(MODE_MemoryLive);
-
-		//-
-
-		ofxImGui::AddParameter(SHOW_Help);
-		ImGui::SameLine();
-		ofxImGui::AddParameter(bThemDark);
-
-		//--
-
-		//2. panels toggles
-
-		if (ImGui::TreeNode("EXTRA")) {
-			ofxImGui::AddParameter(SHOW_ImGui);
-			ofxImGui::AddParameter(SHOW_Gui_AdvancedControl);
+			//main helpers
+			if (ImGui::Button("CLONE ALL"))
+			{
+				bCloneAll = true;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("CLONE >"))
+			{
+				bCloneRight = true;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("POPULATE!"))
+			{
+				//populate all favs
+				doPopulateFavs();
+				//create browser files too
+				doGetFavsToFilesBrowser();
+			}
 
 			//-
 
-			//2. advanced
+			//ImGui::SetNextItemWidth(_w);
 
-			if (SHOW_Gui_AdvancedControl)
-			{
-				//show ALL the addon params! mainly to debug..
-				ofxImGui::AddGroup(params_Control, settings);
+			ofxImGui::AddParameter(autoSave);
+			//ImGui::SameLine();
+			//ofxImGui::AddParameter(autoLoad);
+			ImGui::SameLine();
+			ofxImGui::AddParameter(MODE_MemoryLive);
+
+			//-
+
+			ofxImGui::AddParameter(SHOW_Help);
+			ImGui::SameLine();
+			ofxImGui::AddParameter(bThemDark);
+
+			//--
+
+			//2. panels toggles
+
+			if (ImGui::TreeNode("EXTRA")) {
+				ofxImGui::AddParameter(SHOW_ImGui);
+				ofxImGui::AddParameter(SHOW_Gui_AdvancedControl);
+
+				//-
+
+				//2. advanced
+
+				if (SHOW_Gui_AdvancedControl)
+				{
+					//show ALL the addon params! mainly to debug..
+					ofxImGui::AddGroup(params_Control, settings);
+				}
+
+				ImGui::TreePop();
 			}
 
 			ImGui::TreePop();
 		}
+
+		//-
 
 		ofxImGui::EndTree(settings);
 	}
