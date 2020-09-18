@@ -4,12 +4,12 @@
 
 #include "ofxPresetsManager.h"
 
+#include "ofxGui.h"
+#include "ofxSurfingHelpers.h"
 #define USE_WindowApp
 #ifdef USE_WindowApp
 #include "ofxWindowApp.h"
 #endif
-#include "ofxSurfingHelpers.h"
-#include "ofxGui.h"
 
 class ofApp : public ofBaseApp
 {
