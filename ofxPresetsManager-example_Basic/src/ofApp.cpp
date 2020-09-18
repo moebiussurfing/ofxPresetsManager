@@ -6,20 +6,20 @@ void ofApp::setup()
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
 
-	// define our parameters (ofParameterGroup params) and our scene
+	// define our parameters (ofParameterGroup params) for our scene and add them to our params
 	setupScene();
 
 	// add our ofParameterGroup to the presetManager 
 	// and define key triggers for each preset. the amount of keys will be the amount of favourites presets
 	presetsManager.add(params, { '0', '1', '2', '3', '4', '5' });
-	presetsManager.setup();//must call after adding all the ofParameterGroup(s)
+	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
 }
 
 //--------------------------------------------------------------
 void ofApp::setupScene()
 {
 	// preset parameters
-	params.setName("sceneParamsGroup");// main group
+	params.setName("sceneParamsGroup");// preset settings main container	
 	params.add(shapeType.set("shapeType", 1, 1, 2));
 	params.add(amount.set("amount", 10, 1, 24));
 	params.add(separation.set("separation", 10, 1, 100));
@@ -28,7 +28,7 @@ void ofApp::setupScene()
 	paramsNested.add(fill.set("fill", true));
 	paramsNested.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
 	paramsNested.add(lineWidth.set("lineWidth", 1, 0.1, 10));
-	params.add(paramsNested);// preset main settings container	
+	params.add(paramsNested);// container ready to add to presetsManager
 }
 
 //--------------------------------------------------------------
@@ -59,18 +59,22 @@ void ofApp::drawScene()
 	ofPopMatrix();
 	ofPopStyle();
 
-	// debug object linked to grouped parameters
-	int x = 15;
-	int y = 30;
-	string str = "";
-	str += "shapeType : " + ofToString(shapeType); str += "\n";
-	str += "amount    : " + ofToString(amount); str += "\n";
-	str += "separation: " + ofToString(separation); str += "\n";
-	str += "size      : " + ofToString(size); str += "\n";
-	str += "fill      : " + ofToString(fill); str += "\n";
-	str += "color     : " + ofToString(color); str += "\n";
-	str += "lineWidth : " + ofToString(lineWidth);
-	ofDrawBitmapStringHighlight(str, x, y);
+	// show help and debug preset
+	string str = "HELP\n";
+	str += "G            : Show Gui\n";
+	str += "0-5          : Load Preset\n";
+	str += "Ctrl + Click : Save to Preset\n";
+	str += "Alt + Click  : Swap Presets\n";
+	str += "\n";
+	str += "DEBUG SCENE\n";
+	str += "shapeType    : " + ofToString(shapeType) + "\n";
+	str += "amount       : " + ofToString(amount) + "\n";
+	str += "separation   : " + ofToString(separation) + "\n";
+	str += "size         : " + ofToString(size) + "\n";
+	str += "fill         : " + ofToString(fill) + "\n";
+	str += "color        : " + ofToString(color) + "\n";
+	str += "lineWidth    : " + ofToString(lineWidth);
+	ofDrawBitmapStringHighlight(str, 35, 50);
 }
 
 //--------------------------------------------------------------

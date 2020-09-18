@@ -3604,17 +3604,17 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 bool ofxPresetsManager::ImGui_Draw_Window()
 {
 	auto mainSettings = ofxImGui::Settings();
+	ofVec2f _pos;
+	ofVec2f _size;
 
-	ofVec2f _pos(ImGui_Position.get().x, ImGui_Position.get().y);
-	ofVec2f _size(ImGui_Size.get().x, ImGui_Size.get().y);
+	_pos.set(ImGui_Position.get().x, ImGui_Position.get().y);
+	_size.set(ImGui_Size.get().x, ImGui_Size.get().y);
+
 	mainSettings.windowPos = _pos;//required
 	mainSettings.windowSize = _size;
-
 	auto _mode = ImGuiCond_FirstUseEver;//ImGuiCond_Always;
 	ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
 	ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
-	//ofLogNotice(__FUNCTION__) << "ImGui position: " << ofToString(_pos);
-	//ofLogNotice(__FUNCTION__) << "ImGui size: " << ofToString(size);
 
 	//--
 
@@ -3677,11 +3677,11 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	if (SHOW_ImGui_PresetsParams) {
 
 		_pos = _pos - ofVec2f(410, 0);
-		_size = ofVec2f(400, 800);
+		_size = ofVec2f(400, 600);
+		
 		mainSettings.windowPos = _pos;
 		mainSettings.windowSize = _size;
 		_mode = ImGuiCond_FirstUseEver;
-		
 		ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
 		ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
 
@@ -3703,10 +3703,10 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 		_pos = _pos - ofVec2f(310, 0);
 		_size = ofVec2f(300, 300);
+
 		mainSettings.windowPos = _pos;
 		mainSettings.windowSize = _size;
 		_mode = ImGuiCond_FirstUseEver;
-
 		ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
 		ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
 
