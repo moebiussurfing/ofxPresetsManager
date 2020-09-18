@@ -159,7 +159,7 @@ public:
 
 private:
 	void drawPresetClicker();// user clickeable box panel preset selector
-	
+
 	//--
 
 	// core engine
@@ -199,7 +199,7 @@ private:
 	ofParameterGroup params_PRESETS_Selected{ "Preset Selectors" };// group all selectors
 
 	//--
-	
+
 	ofParameter<int> GROUP_Selected_Index;// global selector. this selector will control all linked groups
 
 	//group main selector
@@ -216,15 +216,16 @@ private:
 
 	//--
 
-	// callbacks
-	// callbacks to get when 'saved/loaded done' happens from ofApp if desired
+	// better callbacks
+	// to get when 'saved/loaded done' happens from ofApp if desired
 public:
 	ofParameter<bool> DONE_load;// easy callback to know (in ofApp) that preset LOAD is done 
 	ofParameter<bool> DONE_save;// easy callback to know (in ofApp) that preset SAVE is done
 
 	//--
 
-	// easy callback to faster ofApp integration 
+	// easy callback 
+	// to faster ofApp integration 
 public:
 	//--------------------------------------------------------------
 	bool isDoneLoad()
@@ -251,7 +252,6 @@ public:
 	//    }
 	//    return isDone;
 	//}
-
 private:
 	bool bIsDoneLoad = false;
 
@@ -292,6 +292,7 @@ public:
 
 	//-
 
+	// keys modes
 	//--------------------------------------------------------------
 	void setModeKeySave(int key);// set the key you have to hold for saving, default is OF_KEY_CONTROL
 	void setModeKeySwap(int key);// set the key you have to hold for swap, default is OF_KEY_ALT
@@ -331,7 +332,7 @@ private:
 
 	//--
 
-	// settings paths
+	// paths for settings
 
 	// all folder names must go without '/'
 	//std::string path_Root;
@@ -361,7 +362,7 @@ private:
 
 	// memory mode
 
-	// improve performance loading from xml objects at memory nor xml files from hd
+	// improve performance loading from xml objects from memory not xml files from hd
 private:
 	ofParameter<bool> MODE_MemoryLive;// when enabled all presets are handled from a memory vector to avoid lag of loading xml files from hd
 	ofParameter<bool> loadToMemory;
@@ -369,11 +370,12 @@ private:
 
 	void load_AllKit_ToMemory();
 	void save_AllKit_FromMemory();
-	
+
 	//--
 
 private:
 	// TODO:
+	// add json..
 	// should use keys[i].size() instead of this:
 	vector<ofXml> mainGroupPresetsXmls;
 public:
@@ -442,157 +444,15 @@ private:
 	void doRandomizeEditor();// randomize params of current selected preset
 	void doRandomizeEditorGroup(ofParameterGroup& group);// randomize params of current selected preset
 
-	//----
-
-private:
-	bool DISABLE_CALLBACKS_SELECTORS = false;//to avoid multiple calls on multiple presets selector engine
-	bool DISABLE_CALLBACKS = true;//to avoid startup crashes and objects are not initialized properly
-	//updating some params before save will trigs also the group callbacks
-	//so we disable this callbacks just in case params updatings are required
-	//in this case we will need to update gui position param
-
 	//--
 
 public:
-
-	//----
-	//
-	// API
-	//
-	//----
-
-	//--------------------------------------------------------------
-	void load_Next()// for main group
-	{
-		PRESET_Selected_IndexMain++;
-		if (PRESET_Selected_IndexMain >= mainGroupAmtPresetsFav - 1)
-		{
-			PRESET_Selected_IndexMain = mainGroupAmtPresetsFav - 1;
-		}
-	}
-	//--------------------------------------------------------------
-	void load_Previous()// for main group
-	{
-		PRESET_Selected_IndexMain--;
-		if (PRESET_Selected_IndexMain < 0)
-		{
-			PRESET_Selected_IndexMain = 0;
-		}
-	}
-	//--------------------------------------------------------------
-	void loadPreset(int p);// load preset for the main group by code from ofApp
-	void loadPreset(int p, int _indexGroup);// load preset for extra groups by code from ofApp
-	void loadPresetGroup(int presetIndex)// load preset for main group by code from ofApp
-	{
-		int groupIndex = groups.size() - 1;
-		ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
-		load(presetIndex, groupIndex);
-	}
-	void savePreset(int p, int _indexGroup);// save preset for extra groups by code from ofApp
-
-	//--------------------------------------------------------------
-	int getCurrentPreset()// get index of selected preset
-	{
-		return PRESET_Selected_IndexMain;
-	}
-	//--------------------------------------------------------------
-	int getCurrentPreset(int _group)// get index of selected preset on the group
-	{
-		int _presetIndex = -1;
-		if (_group < groups.size()) _presetIndex = PRESETS_Selected_Index[_group];
-		return _presetIndex;
-	}
-
-	//--------------------------------------------------------------
-	int getAmoutPresetsMain()// get main group amount of presets
-	{
-		return mainGroupAmtPresetsFav;
-	}
-
-	// helpers main for external layout or other workflow purposes
-	//--------------------------------------------------------------
-	int getAmountGroups()
-	{
-		if (groups.size() > 0) return groups.size();
-		else return 1;// workaround to set default height before groups are added
-	}
-
-	//--------------------------------------------------------------
-	int getAmountPresetsOfGroup(int g)
-	{
-		int _size = -1;
-		if (g < groups.size()) _size = groupsSizes[g];
-		return _size;
-	}
-
-	//--------------------------------------------------------------
-	string getGroupName(int i)
-	{
-		string _name = "ERROR UNKNOWN";
-		if (i < groups.size()) _name = groups[i];
-		return _name;
-	}
-
-	//--------------------------------------------------------------
-	string getGroupsNames()
-	{
-		string _names = "";
-		for (int i = 0; i < groups.size(); i++)
-		{
-			_names += groups[i].getName();
-			_names += "\n";
-		}
-		return _names;
-	}
-
-	//--------------------------------------------------------------
-	string getGroupsPaths(bool simplified = true)
-	{
-		string _names = "";
-
-		if (!simplified) {
-			for (int i = 0; i < groups.size(); i++)
-			{
-				_names += getGroupPath(i);
-				_names += "\n";
-			}
-		}
-		else {
-			//simplify
-			if (!bPathDirCustom) _names += "/data/";
-
-			_names += path_UserKit_Folder + "/" + path_PresetsFavourites;
-			_names += "\n";
-			for (int i = 0; i < groups.size(); i++)
-			{
-				_names += ofToString(i) + " /";
-				_names += groups[i].getName();
-				_names += "/";
-				_names += "\n";
-			}
-		}
-		return _names;
-	}
-
-	//--------------------------------------------------------------
-	string getGroupsPath()
-	{
-		string _names = "";
-		_names = getGroupPath(0);// simpler: get first group bc all are in the same folder
-		return _names;
-	}
-
-	//-
-
-	//--------------------------------------------------------------
-	void setVisible_GroupName(bool b)// disabler for minimal design
-	{
-		SHOW_GroupName = b;
-	}
+	ofParameterGroup params_randomizer;
 
 	//--
 
 	// randomizer helpers
+
 public:
 	ofParameter<int> randomizerProgress{ "%", 0, 0, 100 };
 	float _prog;
@@ -637,9 +497,161 @@ public:
 		doRandomizeEditor();
 	}
 
+	//----
+
+private:
+	bool DISABLE_CALLBACKS_SELECTORS = false;// to avoid multiple calls on multiple presets selector engine
+	bool DISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
+	// updating some params before save will trigs also the group callbacks
+	// so we disable this callbacks just in case params updatings are required
+
 	//--
 
+public:
+
+	//----
+	//
+	// API
+	//
+	//----
+
+	// presets browsing
+
+	//--------------------------------------------------------------
+	void load_Next()// for main group
+	{
+		PRESET_Selected_IndexMain++;
+		if (PRESET_Selected_IndexMain >= mainGroupAmtPresetsFav - 1)
+		{
+			PRESET_Selected_IndexMain = mainGroupAmtPresetsFav - 1;
+		}
+	}
+	//--------------------------------------------------------------
+	void load_Previous()// for main group
+	{
+		PRESET_Selected_IndexMain--;
+		if (PRESET_Selected_IndexMain < 0)
+		{
+			PRESET_Selected_IndexMain = 0;
+		}
+	}
+	//--------------------------------------------------------------
+	void loadPreset(int p);// load preset for the main group by code from ofApp
+	void loadPreset(int p, int _indexGroup);// load preset for extra groups by code from ofApp
+	void loadPresetGroup(int presetIndex)// load preset for main group by code from ofApp
+	{
+		int groupIndex = groups.size() - 1;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
+		load(presetIndex, groupIndex);
+	}
+	void savePreset(int p, int _indexGroup);// save preset for extra groups by code from ofApp
+
+	//--------------------------------------------------------------
+	int getCurrentPreset()// get index of selected preset
+	{
+		return PRESET_Selected_IndexMain;
+	}
+	//--------------------------------------------------------------
+	int getCurrentPreset(int _group)// get index of selected preset on the group
+	{
+		int _presetIndex = -1;
+		if (_group < groups.size()) _presetIndex = PRESETS_Selected_Index[_group];
+		return _presetIndex;
+	}
+
+	//--
+
+	// for external layout or other workflow purposes
+
+	//--------------------------------------------------------------
+	int getAmoutPresetsMain()// get main group amount of presets
+	{
+		return mainGroupAmtPresetsFav;
+	}
+
+	//--------------------------------------------------------------
+	int getAmountGroups()
+	{
+		if (groups.size() > 0) return groups.size();
+		else return 1;// workaround to set default height before groups are added
+	}
+
+	//--------------------------------------------------------------
+	int getAmountPresetsOfGroup(int g)
+	{
+		int _size = -1;
+		if (g < groups.size()) _size = groupsSizes[g];
+		return _size;
+	}
+
+	//--------------------------------------------------------------
+	string getGroupName(int i)
+	{
+		string _name = "ERROR UNKNOWN";
+		if (i < groups.size()) _name = groups[i];
+		return _name;
+	}
+
+	//--------------------------------------------------------------
+	string getGroupsNames()
+	{
+		string _names = "";
+		for (int i = 0; i < groups.size(); i++)
+		{
+			_names += groups[i].getName();
+			_names += "\n";
+		}
+		return _names;
+	}
+
+	//--------------------------------------------------------------
+	string getGroupsPaths(bool simplified = true)
+	{
+		string _names = "";
+
+		if (!simplified)
+		{
+			for (int i = 0; i < groups.size(); i++)
+			{
+				_names += getGroupPath(i);
+				_names += "\n";
+			}
+		}
+		else// simplified
+		{
+			if (!bPathDirCustom) _names += "/data/";
+			_names += path_UserKit_Folder + "/" + path_PresetsFavourites;
+			_names += "\n";
+
+			for (int i = 0; i < groups.size(); i++)
+			{
+				_names += ofToString(i) + " /";
+				_names += groups[i].getName();
+				_names += "/";
+				_names += "\n";
+			}
+		}
+		return _names;
+	}
+
+	//--------------------------------------------------------------
+	string getGroupsPath()
+	{
+		string _names = "";
+		_names = getGroupPath(0);// simpler: get first group bc all are in the same folder
+		return _names;
+	}
+
+	//--------------------------------------------------------------
+	void setVisible_GroupName(bool b)// disabler for minimal design
+	{
+		SHOW_GroupName = b;
+	}
+
+	//----
+
 	// helper tools
+
 	void doCloneRight(int pIndex);// clone from selected preset to all others to the right
 	void doCloneAll();// clone all presets from the current selected
 	void doPopulateFavs();// fast populate random presets around all favs
@@ -648,12 +660,12 @@ public:
 	//--
 
 private:
-	//draws group name into clicker boxes panel
+	// draws group name into clicker boxes panel
 	bool SHOW_GroupName = true;
 
 	//--
 
-	// asy callback
+	// easy callback
 	// used when preset has not changed but we like to retrig
 	bool bMustTrig = false;
 public:
@@ -679,12 +691,10 @@ private:
 	void doLoadMainGroupPreset(string name);
 	void doStandalonePresetSave(string name);
 	bool doStandaloneRefreshPresets();
-	void buildStandalonePresets();//standalone presets splitted from favourites presets
+	void buildStandalonePresets();// standalone presets splitted from favourites presets
 	//void doCheckPresetsFolderIsEmpty();
 
 	//-
-
-	// API
 
 public:
 	// BUG: 
@@ -702,10 +712,21 @@ public:
 		ofLogNotice(__FUNCTION__);
 		PRESET_Selected_IndexMain_PRE = -1;
 
-		PRESET_Selected_IndexMain = PRESET_Selected_IndexMain;//just for refresh callback
+		PRESET_Selected_IndexMain = PRESET_Selected_IndexMain;// just for refresh callback
 		ofLogNotice(__FUNCTION__) << "Preset " << PRESET_Selected_IndexMain;
 	}
 
+	//--
+
+	//----
+	//
+	// API
+	//
+	//----
+
+	// layout
+
+public:
 	//--------------------------------------------------------------
 	void setVisible_Help(bool b)
 	{
@@ -800,7 +821,6 @@ public:
 	//	ofLogNotice(__FUNCTION__) << str;
 	//	path_Root = str;
 	//}
-
 	//--------------------------------------------------------------
 	void setModeAutoLoad(bool b)
 	{
@@ -869,7 +889,7 @@ private:
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
 	ofParameter<bool> bThemDark{ "THEME DARK", false };
 	ofParameter<glm::vec2> Gui_Internal_Position;
-	
+
 private:
 	string helpInfo;
 	void buildHelpInfo();
@@ -891,8 +911,8 @@ private:
 	bool ImGui_Draw_Window();
 #endif
 
-	ofParameter<glm::vec2> ImGui_Position;//ImGui browser panel position. 
-	ofParameter<glm::vec2> ImGui_Size;//ImGui browser panel position. 
+	ofParameter<glm::vec2> ImGui_Position;// ImGui browser panel position. 
+	ofParameter<glm::vec2> ImGui_Size;// ImGui browser panel position. 
 
 	//--
 
@@ -922,11 +942,6 @@ private:
 
 	//--
 
-public:
-	ofParameterGroup params_randomizer;
-
-	//--
-
 	// '/archive' folder for standalone presets browser 
 
 	//bool MODE_newPreset = false;
@@ -949,12 +964,12 @@ public:
 	{
 		ofLogNotice(__FUNCTION__);
 
-		//browser path
+		// browser path
 		string browser_path;
 		browser_path = path_UserKit_Folder + "/" + path_PresetsStandalone;
 
-		//browser number of files
-		//iterate all presets
+		// browser number of files
+		// iterate all presets
 		for (int i = 0; i < mainGroupAmtPresetsFav; i++)
 		{
 			std::string pathSrc;
@@ -971,7 +986,7 @@ public:
 			ofLogNotice(__FUNCTION__) << "pathDst: " << pathDst;
 
 			ofFile file;
-			file.copyFromTo(pathSrc, pathDst, true, true);//relative, overwrite
+			file.copyFromTo(pathSrc, pathDst, true, true);// relative, overwrite
 
 		}
 
@@ -1027,7 +1042,9 @@ public:
 		return _g;
 	}
 
-	//--
+	//----
+
+	//keys
 
 public:
 	void keyPressed(ofKeyEventArgs &eventArgs);
@@ -1037,34 +1054,45 @@ private:
 	void addKeysListeners();
 	void removeKeysListeners();
 
-	vector<vector<int>> keys;//queued trigger keys for each group ? (all presets) (size of)
-	bool bKeys;//enabled keys
+	vector<vector<int>> keys;// queued trigger keys for each group ? (all presets) (size of)
+	bool bKeys;// enabled keys
 	bool keysNotActivated;
 
 	//save
-	int modeKeySave;//save mod key
-	bool bKeySave;//save mod key state
+	int modeKeySave;// save mod key
+	bool bKeySave;// save mod key state
 
-	//swap selected preset with the currently clicked (i.e: 4 -> 7  &  4 <- 7)
-	int modKeySwap;//swap mod key 
-	bool bKeySwap;//swap mod key state
+	// swap selected preset with the currently clicked (i.e: 4 -> 7  &  4 <- 7)
+	int modKeySwap;// swap mod key 
+	bool bKeySwap;// swap mod key state
+
+	bool ENABLE_KeysArrowBrowse = true;// allow browse by arrows keys by default
+
+public:
+	//--------------------------------------------------------------
+	void setEnableKeysArrowBrowse(bool b)
+	{
+		ENABLE_KeysArrowBrowse = b;
+	}
+
+	//--
 
 	void mousePressed(int x, int y);
 	bool lastMouseButtonState;
 
-	int mainGroupAmtPresetsFav;//amount of box-clickable handled presets on current favorites/kit [8]
+	int mainGroupAmtPresetsFav;// amount of box-clickable handled presets on current favorites/kit [8]
 
-	//---
+	//----
 
 private:
-	//font to label clicker boxes
+	// font to label clicker boxes
 	ofTrueTypeFont myFont;
-	string myTTF;//gui font for all gui theme
+	string myTTF;// gui font for all gui theme
 	int sizeTTF;
 
 	//-
 
-	//callback
+	// callback
 private:
 	void Changed_Params_Control(ofAbstractParameter &e);
 	void Changed_Params_UserKit(ofAbstractParameter &e);
@@ -1072,10 +1100,10 @@ private:
 	//-
 
 public:
-	ofParameter<bool> SHOW_ClickPanel;//to allow include as toggle parameter into external gui
+	ofParameterGroup params_Control;// to use on external gui
 
 private:
-	ofParameterGroup params_Control;
+	ofParameter<bool> SHOW_ClickPanel;// to allow include as toggle parameter into external gui
 
 public:
 	ofParameter<bool> SHOW_ImGui;
@@ -1100,7 +1128,7 @@ private:
 
 	//--
 
-	// custom path
+	// custom path for preset favourites
 	ofParameter<bool> bPathDirCustom;
 	ofParameter<string> pathDirCustom;
 
@@ -1117,17 +1145,6 @@ private:
 	ofParameter<bool> bAutosaveTimer;
 	uint64_t timerLast_Autosave = 0;
 	int timeToAutosave = 9000;
-
-	//--
-
-	bool ENABLE_KeysArrowBrowse = true;// allow browse by arrows keys by default
-
-public:
-	//--------------------------------------------------------------
-	void setEnableKeysArrowBrowse(bool b)
-	{
-		ENABLE_KeysArrowBrowse = b;
-	}
 
 	//--
 

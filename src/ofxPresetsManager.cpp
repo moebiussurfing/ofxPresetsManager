@@ -4,10 +4,6 @@
 //--------------------------------------------------------------
 ofxPresetsManager::ofxPresetsManager()
 {
-	// layout
-	setSizeBox_PresetClicker(80);
-	setPosition_PresetClicker(200, ofGetHeight() - getPresetClicker_Height() - 100);
-
 	//-
 
 #ifdef DEBUG_randomTest
@@ -33,20 +29,6 @@ ofxPresetsManager::ofxPresetsManager()
 	//subscribed to auto run update and draw without required 'manual calls'
 	ofAddListener(ofEvents().update, this, &ofxPresetsManager::update);
 	ofAddListener(ofEvents().draw, this, &ofxPresetsManager::draw);
-
-	//-
-
-	//mainly to measure performance when using hd files vs faster memory vectors
-#ifdef INCLUDE_PERFORMANCE_MEASURES
-	//specify a target framerate
-	//TIME_SAMPLE_SET_FRAMERATE(fps);
-	//TIME_SAMPLE_ENABLE();
-	TIME_SAMPLE_SET_AVERAGE_RATE(0.1);
-	TIME_SAMPLE_SET_DRAW_LOCATION(TIME_SAMPLE_DRAW_LOC_BOTTOM_LEFT);
-	TIME_SAMPLE_SET_PRECISION(4);
-	TIME_SAMPLE_GET_INSTANCE()->setEnabled(true);
-	TIME_SAMPLE_DISABLE();
-#endif
 
 	//--
 
@@ -83,6 +65,12 @@ ofxPresetsManager::ofxPresetsManager()
 	//// root folder
 	//path_Root = "myAddon";
 
+	//-
+
+	// layout
+	setSizeBox_PresetClicker(80);
+	setPosition_PresetClicker(200, ofGetHeight() - getPresetClicker_Height() - 100);
+
 	//--
 
 	bKeys = false;
@@ -104,10 +92,10 @@ ofxPresetsManager::ofxPresetsManager()
 
 	// callbacks to know when preset loading/save is done
 
-	DONE_load.set("DONE LOAD", false);//callback to know (in ofApp) that preset LOAD is done
-	DONE_save.set("DONE SAVE", false);//callback to know (in ofApp) that preset SAVE is done
+	DONE_load.set("DONE LOAD", false);// callback to know (in ofApp) that preset LOAD is done
+	DONE_save.set("DONE SAVE", false);// callback to know (in ofApp) that preset SAVE is done
 
-	//easy callback: we can use too the easy isDoneLoad() to check in ofApp update() as kind of callback.
+	// easy callback: we can use too the easy isDoneLoad() to check in ofApp update() as kind of callback.
 
 	//--
 
@@ -156,7 +144,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//-
 
-	// exclude from xml settings
+	// exclude from settings
 	bSave.setSerializable(false);
 	bCloneRight.setSerializable(false);
 	bCloneAll.setSerializable(false);
@@ -168,7 +156,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//--
 
-	// params groups
+	// internal control params
 
 	params_Options.setName("OPTIONS");
 	params_Options.add(MODE_MemoryLive);
@@ -253,6 +241,20 @@ ofxPresetsManager::ofxPresetsManager()
 	// randomizer settings
 	params_RandomizerSettings.add(params_Randomizer);
 	params_RandomizerSettings.add(params_Editor);
+
+	//-
+
+	//mainly to measure performance when using hd files vs faster memory vectors
+#ifdef INCLUDE_PERFORMANCE_MEASURES
+	//specify a target framerate
+	//TIME_SAMPLE_SET_FRAMERATE(fps);
+	//TIME_SAMPLE_ENABLE();
+	TIME_SAMPLE_SET_AVERAGE_RATE(0.1);
+	TIME_SAMPLE_SET_DRAW_LOCATION(TIME_SAMPLE_DRAW_LOC_BOTTOM_LEFT);
+	TIME_SAMPLE_SET_PRECISION(4);
+	TIME_SAMPLE_GET_INSTANCE()->setEnabled(true);
+	TIME_SAMPLE_DISABLE();
+#endif
 }
 
 //----
@@ -973,8 +975,9 @@ void ofxPresetsManager::drawPresetClicker()
 //--------------------------------------------------------------
 ofxPresetsManager::~ofxPresetsManager()
 {
-	//exit();//TODO: not sure if can avoid call manually exit(), bc here groups could be externally destroyed..
-	//so we would prefer to call presetsManager.exit() manually on the first place sorting.
+	// TODO: not sure if can avoid call manually exit(), bc here groups could be externally destroyed..
+	// so we would prefer to call presetsManager.exit() manually on the first place sorting.
+	//exit();
 }
 
 //---
@@ -1026,7 +1029,7 @@ string ofxPresetsManager::getGroupPath(int _index)
 	if (_index < groups.size()) _pathFolder = _gName;
 	else return "UNKNOWN";
 
-	////append group name to subfolder files by each parameter group
+	//// append group name to subfolder files by each parameter group
 	//if (bSplitGroupFolders) _pathFolder += _gName + "/";
 
 	ofLogVerbose(__FUNCTION__) << "group path: " << _pathFolder;
@@ -3096,6 +3099,11 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 	{
 		//---
 
+		// main group
+		if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);
+
+		//--
+
 		////0.label
 		//ImGui::Text("PRESET");
 
@@ -3793,19 +3801,14 @@ void ofxPresetsManager::ImGui_Draw_WindowContent(ofxImGui::Settings &settings)
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 {
-	//1. randomizers
+	// 1. randomizers
 
-	//if (ImGui::TreeNode("RANDOMIZERS"))
+	//if (ImGui::TreeNode("GROUP RANDOMIZERS"))
 	if (ofxImGui::BeginTree("GROUP RANDOMIZERS", settings))
 	{
 		//---
 
 		// preset selector
-
-		// main group
-		if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);
-
-		//--
 
 		//group 0 
 
@@ -3957,9 +3960,9 @@ void ofxPresetsManager::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings
 	}
 }
 
-//standalone presets browser
+// standalone presets browser
 //--------------------------------------------------------------
-void ofxPresetsManager::doStandalonePresetSave(string name)//without xml extension nor path
+void ofxPresetsManager::doStandalonePresetSave(string name)// without xml extension nor path
 {
 	ofLogNotice(__FUNCTION__) << name << fileExtension;
 
@@ -3978,7 +3981,7 @@ void ofxPresetsManager::doStandalonePresetSave(string name)//without xml extensi
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::doLoadMainGroupPreset(string name)//without xml extension nor path
+void ofxPresetsManager::doLoadMainGroupPreset(string name)// without xml extension nor path
 {
 	ofLogNotice(__FUNCTION__) << name << fileExtension;
 
@@ -3997,21 +4000,21 @@ void ofxPresetsManager::doLoadMainGroupPreset(string name)//without xml extensio
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::buildStandalonePresets()//standalone presets splitted from favourites presets
+void ofxPresetsManager::buildStandalonePresets()// standalone presets splitted from favourites presets
 {
-	//load files structure directory
+	// load files structure directory
 	bool bLoaded = doStandaloneRefreshPresets();
 
-	//workflow
+	// workflow
 	if (bLoaded)
 	{
-		//load first preset
+		// load first preset
 		if (fileNames.size() > 0)
 		{
 			currentFile = 0;
 			displayNamePreset = fileNames[currentFile];
 
-			////workflow
+			//// workflow
 			//doLoadMainGroupPreset(displayNamePreset);
 		}
 	}
@@ -4070,11 +4073,11 @@ bool ofxPresetsManager::doStandaloneRefreshPresets()
 
 	//-
 
-	//clear files and filenames vectors
+	// clear files and filenames vectors
 	files.clear();
 	fileNames.clear();
 
-	//load all folder files in one call
+	// load all folder files in one call
 	files = dataDirectory.getFiles();
 
 	ofLogNotice(__FUNCTION__) << "Preset files:";
@@ -4086,12 +4089,12 @@ bool ofxPresetsManager::doStandaloneRefreshPresets()
 
 	//-
 
-	//TODO
+	// TODO
 	//void to go to 1st...
 
-	//1. load same position preset
-	//if preset is deleted goes to nextone..
-	//should check names because sorting changes..
+	// 1. load same position preset
+	// if preset is deleted goes to nextone..
+	// should check names because sorting changes..
 	if (fileNames.size() > 0)
 	{
 		bFilesError = false;
@@ -4101,17 +4104,17 @@ bool ofxPresetsManager::doStandaloneRefreshPresets()
 		ofLogError(__FUNCTION__) << "BROWSER: FILES NOT FOUND ON FOLDER!";
 		bFilesError = true;
 
-		////TODO:
-		////disable custom path bc error
+		//// TODO:
+		//// disable custom path bc error
 		//ofLogError(__FUNCTION__) << "Disable custom path: " << path_BrowserPathFree;
 		//bCustomBrowserPath = false;
 		//ofLogError(__FUNCTION__) << "------------------------";
 	}
 
 	//workflow
-	////2. always goes to 1st preset 0
-	////that's because saving re sort the files
-	////and we don't know the position of last saved preset..
+	//// 2. always goes to 1st preset 0
+	//// that's because saving re sort the files
+	//// and we don't know the position of last saved preset..
 	//if (fileNames.size() > 0)
 	//{
 	//   currentFile = 0;

@@ -4,8 +4,6 @@
 
 class groupRandomizer
 {
-
-
 	//--
 
 	// randomizer
@@ -66,6 +64,59 @@ private:
 	void Changed_Params_Editor(ofAbstractParameter &e);
 	void doRandomizeEditor();// randomize params of current selected preset
 	void doRandomizeEditorGroup(ofParameterGroup& group);// randomize params of current selected preset
+
+	//--
+
+public:
+	ofParameterGroup params_randomizer;
+
+	//--
+
+	// randomizer helpers
+
+public:
+	ofParameter<int> randomizerProgress{ "%", 0, 0, 100 };
+	float _prog;
+
+	//--------------------------------------------------------------
+	void setPlayRandomizerTimer(bool b)// play randomizer timer
+	{
+		PLAY_RandomizeTimer = b;
+		if (b) doRandomizeWichSelectedPreset();
+	}
+	//--------------------------------------------------------------
+	void setTogglePlayRandomizerPreset()// toggle randomizer timer
+	{
+		PLAY_RandomizeTimer = !PLAY_RandomizeTimer;
+	}
+	//--------------------------------------------------------------
+	void setRandomizerDuration(float t)
+	{
+		randomizeDuration = t;
+		randomizeDurationBpm = 60000.f / randomizeDuration;
+	}
+	//--------------------------------------------------------------
+	void setRandomizerDurationShort(float t)
+	{
+		randomizeDurationShort = t;
+	}
+	//--------------------------------------------------------------
+	void setRandomizerBpm(float bpm)
+	{
+		randomizeDurationBpm = bpm;
+		// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
+		randomizeDuration = 60000.f / bpm;
+		randomizeDurationShort = randomizeDuration / 2.f;
+	}
+	//--------------------------------------------------------------
+	void doRandomizePresetFromFavs()// trig randomize and select one of the favs presets
+	{
+		bRandomizeIndex = true;
+	}
+	//--------------------------------------------------------------
+	void doRandomizePresetSelected() {// randomize params of current selected preset
+		doRandomizeEditor();
+	}
 
 
 
