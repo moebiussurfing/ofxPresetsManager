@@ -1361,18 +1361,18 @@ void ofxPresetsManager::drawPresetClicker()
 	float _round = 3.0f;
 	float _pad = 3.0f;
 
-	ofColor _color1;//lines and text color
-	ofColor _color2;//bg selected button
-	ofColor _cBg;//background color
+	ofColor _colorText;//lines and text color
+	ofColor _colorButton;//bg selected button
+	ofColor _colorBg;//background color
 	if (bThemDark) {//dark
-		_color1 = ofColor(0, 255);
-		_color2 = ofColor(8, 100);
-		_cBg = ofColor(200, 50);
+		_colorText = ofColor(0, 255);
+		_colorButton = ofColor(8, 100);
+		_colorBg = ofColor(200, 50);
 	}
 	else {//light
-		_color1 = ofColor(255, 200);
-		_color2 = ofColor(0, 150);
-		_cBg = ofColor(0, 128);
+		_colorText = ofColor(255, 200);
+		_colorButton = ofColor(0, 150);
+		_colorBg = ofColor(0, 128);
 	}
 
 	//----
@@ -1382,7 +1382,7 @@ void ofxPresetsManager::drawPresetClicker()
 	{
 		//0. bg box of all boxes background
 		ofFill();
-		ofSetColor(_cBg);
+		ofSetColor(_colorBg);
 		int _extraButs;
 		_extraButs = (i == groups.size() - 1 ? 2 : 1);//only main group has gui toggle button
 		//_extraButs = (i == 0 ? 2 : 1);//only main group has gui toggle button
@@ -1392,7 +1392,7 @@ void ofxPresetsManager::drawPresetClicker()
 		//-
 
 		//1. draw each preset box button
-		ofSetColor(_color1);
+		ofSetColor(_colorText);
 		ofNoFill();
 
 		size_t k = 0;//iterate keys
@@ -1409,7 +1409,7 @@ void ofxPresetsManager::drawPresetClicker()
 				ofPushStyle();
 
 				//filled
-				ofSetColor(_color2);
+				ofSetColor(_colorButton);
 				ofFill();
 				ofDrawRectRounded(
 					cellSize * k + _pad, cellSize * i + _pad,
@@ -1418,7 +1418,7 @@ void ofxPresetsManager::drawPresetClicker()
 				ofNoFill();
 
 				//border only
-				ofSetColor(_color1);
+				ofSetColor(_colorText);
 				ofNoFill();
 				ofDrawRectRounded(
 					cellSize * k + _pad, cellSize * i + _pad,
@@ -1508,7 +1508,7 @@ void ofxPresetsManager::drawPresetClicker()
 			if (SHOW_ImGui)
 			{
 				//filled
-				ofSetColor(_color2);
+				ofSetColor(_colorButton);
 				ofFill();
 				ofDrawRectRounded(cellSize * k + _pad, cellSize * i + _pad,
 					cellSize - 2 * _pad, cellSize - 2 * _pad,
@@ -1516,7 +1516,7 @@ void ofxPresetsManager::drawPresetClicker()
 
 				//border only
 				ofNoFill();
-				ofSetColor(_color1);
+				ofSetColor(_colorText);
 				ofDrawRectRounded(cellSize * k + _pad, cellSize * i + _pad,
 					cellSize - 2 * _pad, cellSize - 2 * _pad,
 					_round);
@@ -1529,7 +1529,7 @@ void ofxPresetsManager::drawPresetClicker()
 			}
 			else//custom font 
 			{
-				ofSetColor(_color1);
+				ofSetColor(_colorText);
 				float wx = 0.5f * myFont.getStringBoundingBox(_label, 0, 0).width;
 				myFont.drawString(_label,
 					cellSize * k + 0.5 * cellSize - wx,
@@ -1559,12 +1559,12 @@ void ofxPresetsManager::drawPresetClicker()
 			int xG = -strW - 20;
 			ySave = ySave - 2;//little up
 
-			if (bThemDark) ofSetColor(_cBg);//shadow
-			else ofSetColor(_color2);//shadow
+			if (bThemDark) ofSetColor(_colorBg);//shadow
+			else ofSetColor(_colorButton);//shadow
 			if (myFont.isLoaded()) myFont.drawString(info, xG + gap, ySave + gap);
 			else ofDrawBitmapString(info, xG + gap, ySave + gap);
 
-			ofSetColor(_color1);
+			ofSetColor(_colorText);
 			if (myFont.isLoaded()) myFont.drawString(info, xG, ySave);
 			else ofDrawBitmapString(info, xG, ySave);
 		}
@@ -1581,18 +1581,18 @@ void ofxPresetsManager::drawPresetClicker()
 			{
 				string info = helpInfo;
 
-				int x;
-				int y;
-				int gap = 1;
+				int x = 0;
+				int y = 0;
 				int pad = 13;
 
 				//A. vertical position below boxes
 				if (!bLateralPosition)
 				{
-					y = -14 - myFont.getStringBoundingBox(info, 0, 0).getHeight();
-					x = 0;
-					//y = (cellSize + 15) * groups.size();
+					float hh = ofxSurfingHelpers::getHeightBBtextBoxed(myFont, info);
+					x = pad;
+					y -= hh + pad;
 				}
+
 				//B. lateral position right to the boxes
 				else
 				{
@@ -1601,6 +1601,8 @@ void ofxPresetsManager::drawPresetClicker()
 						x = cellSize * i + pad;//i or k..?
 						//y = ySave - (bSimpleInfo ? -2 : sizeTTF);
 						y = ySave - sizeTTF;
+
+
 					}
 					else {
 						float strW;
@@ -1616,14 +1618,7 @@ void ofxPresetsManager::drawPresetClicker()
 					}
 				}
 
-				//double font to improve different background colors
-				ofSetColor(_color2);//shadow
-				if (myFont.isLoaded()) myFont.drawString(info, x + gap, y + gap);
-				else ofDrawBitmapString(info, x + gap, y + gap);
-
-				ofSetColor(_color1);
-				if (myFont.isLoaded()) myFont.drawString(info, x, y);
-				else ofDrawBitmapString(info, x, y);
+				ofxSurfingHelpers::drawTextBoxed(myFont, info, x, y, _colorText, _colorBg, true, _colorButton);
 			}
 		}
 	}
@@ -3078,7 +3073,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 			ofLogNotice(__FUNCTION__) << "loadToMemory:" << e;
 			loadToMemory = false;
 			load_AllKit_ToMemory();
-		}
+	}
 		else if (name == "SAVE FROM MEMORY" && saveFromMemory)
 		{
 			ofLogNotice(__FUNCTION__) << "saveFromMemory:" << e;
@@ -3158,7 +3153,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 				}
 			}
 		}
-	}
+}
 }
 #pragma mark - SETTINGS
 
@@ -3678,7 +3673,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 		_pos = _pos - ofVec2f(410, 0);
 		_size = ofVec2f(400, 600);
-		
+
 		mainSettings.windowPos = _pos;
 		mainSettings.windowSize = _size;
 		_mode = ImGuiCond_FirstUseEver;
@@ -4619,7 +4614,7 @@ void ofxPresetsManager::ImGui_Draw_Randomizers(ofxImGui::Settings &settings)
 		ofxImGui::EndTree(settings);
 		//ImGui::TreePop();
 	}
-}
+	}
 
 //standalone presets browser
 //--------------------------------------------------------------

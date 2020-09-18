@@ -11,7 +11,7 @@ void ofApp::setup()
 
 	// add our ofParameterGroup to the presetManager 
 	// and define key triggers for each preset. the amount of keys will be the amount of favourites presets
-	presetsManager.add(params, { '0', '1', '2', '3', '4', '5' });
+	presetsManager.add(params, { 'a', 'b', '0', '1', '2', '3' });
 	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
 }
 
@@ -62,7 +62,7 @@ void ofApp::drawScene()
 	// show help and debug preset
 	string str = "HELP\n";
 	str += "G            : Show Gui\n";
-	str += "0-5          : Load Preset\n";
+	str += "a,b,0,1,2,4  : Load Preset\n";
 	str += "Ctrl + Click : Save to Preset\n";
 	str += "Alt + Click  : Swap Presets\n";
 	str += "\n";
