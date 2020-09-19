@@ -12,12 +12,10 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//-
 
-#ifndef USE_JSON
+#ifdef USE_XML
 	fileExtension = ".xml";
-#endif
-
-#ifdef USE_JSON
-	fileExtension = ".json";
+	#elifdef USE_JSON
+		fileExtension = ".json";
 #endif
 
 	//-
@@ -46,9 +44,9 @@ ofxPresetsManager::ofxPresetsManager()
 	// default User-Kit folder (main root container!)
 	path_UserKit_Folder = "ofxPresetsManager";
 
-	// default kit folder for live/favorites presets
+	// default kit folder for live/favourites presets
 	path_PresetsFavourites = "presets";
-	// big browser
+	// big browser for standalone presets
 	path_PresetsStandalone = "archive";
 	// app settings
 	path_ControlSettings = "appSettings";
@@ -715,14 +713,17 @@ void ofxPresetsManager::drawPresetClicker()
 	ofPushMatrix();
 	ofTranslate(clicker_Pos);
 
-	if (bThemDark) {// dark theme
+	// dark theme
+	if (bThemDark) {
 		_colorText = ofColor(0, 255);
-		_colorButton = ofColor(8, 100);
-		_colorBg = ofColor(200, 50);
+		_colorButton = ofColor(0, 64);
+		_colorBg = ofColor(255, 8);
 	}
-	else {// light theme
+
+	// light theme
+	else {
 		_colorText = ofColor(255, 200);
-		_colorButton = ofColor(0, 150);
+		_colorButton = ofColor(0, 200);
 		_colorBg = ofColor(0, 128);
 	}
 
@@ -735,8 +736,14 @@ void ofxPresetsManager::drawPresetClicker()
 		// 0. bg box of all boxes background
 		ofFill();
 		ofSetColor(_colorBg);
-		int _extraButs;
-		_extraButs = (i == groups.size() - 1 ? 2 : 1);// only main group has gui toggle button
+
+		// TODO:
+		//int _saveBut;
+		//if (!autoSave) _saveBut = 1; else _saveBut = 0;
+		//int _extraButs = (i == groups.size() - 1 ? (1 + _saveBut) : 1);// only main group has gui toggle button
+
+		int _extraButs = (i == groups.size() - 1 ? 2 : 1);// only main group has gui toggle button
+
 		ofDrawRectangle(0, i * cellSize, cellSize * (keys[i].size() + _extraButs), cellSize);
 		// amount group presets + 2 save. + gui if it's main group row
 
@@ -763,8 +770,7 @@ void ofxPresetsManager::drawPresetClicker()
 				ofSetColor(_colorButton);
 				ofFill();
 				ofDrawRectRounded(
-					cellSize * k + _pad, cellSize * i + _pad,
-					cellSize - 2 * _pad, cellSize - 2 * _pad,
+					cellSize * k + _pad, cellSize * i + _pad, cellSize - 2 * _pad, cellSize - 2 * _pad,
 					_round);
 				ofNoFill();
 
@@ -772,8 +778,7 @@ void ofxPresetsManager::drawPresetClicker()
 				ofSetColor(_colorText);
 				ofNoFill();
 				ofDrawRectRounded(
-					cellSize * k + _pad, cellSize * i + _pad,
-					cellSize - 2 * _pad, cellSize - 2 * _pad,
+					cellSize * k + _pad, cellSize * i + _pad, cellSize - 2 * _pad, cellSize - 2 * _pad,
 					_round);
 
 				ofPopStyle();
@@ -785,14 +790,12 @@ void ofxPresetsManager::drawPresetClicker()
 			if (!myFont.isLoaded())// without ttf font
 			{
 				ofDrawBitmapString(ofToString((char)keys[i][k]),
-					cellSize*k + 8,
-					cellSize*i + 18);
+					cellSize*k + 8, cellSize*i + 18);
 			}
 			else// custom font 
 			{
 				myFont.drawString(ofToString((char)keys[i][k]),
-					cellSize * k + (0.5 * cellSize - 0.25 * sizeTTF),
-					cellSize * i + (0.5 * cellSize + 0.5 * sizeTTF));
+					cellSize * k + (0.5 * cellSize - 0.25 * sizeTTF), cellSize * i + (0.5 * cellSize + 0.5 * sizeTTF));
 			}
 		}
 
@@ -802,6 +805,7 @@ void ofxPresetsManager::drawPresetClicker()
 
 		//--
 
+		// TODO:
 		//if (!autoSave)
 		{
 			// 3.1 save button
@@ -926,44 +930,41 @@ void ofxPresetsManager::drawPresetClicker()
 			debugClicker = SHOW_Help.get();
 			if (debugClicker && ENABLE_Keys && (i == 0))
 			{
-				string info = helpInfo;
-
+				string ss = helpInfo;
+				int pad = 22;
 				int x = 0;
 				int y = 0;
-				int pad = 13;
 
 				// A. vertical position below boxes
 				if (!bLateralPosition)
 				{
-					float hh = ofxSurfingHelpers::getHeightBBtextBoxed(myFont, info);
-					x = pad;
+					float hh = ofxSurfingHelpers::getHeightBBtextBoxed(myFont, ss);
+					x = 5 + pad;
 					y -= hh + pad;
 				}
 
-				// B. lateral position right to the boxes
-				else
-				{
-					if (!bLeftPosition)
-					{
-						x = cellSize * i + pad;
-						y = ySave - sizeTTF;
+				//// B. lateral position right to the boxes
+				//else
+				//{
+				//	if (!bLeftPosition)
+				//	{
+				//		x = cellSize * i + pad;
+				//		y = ySave - sizeTTF;
+				//	}
+				//	else {
+				//		float strW;
+				//		if (myFont.isLoaded())
+				//		{
+				//			strW = myFont.getStringBoundingBox(ss, 0, 0).getWidth();
+				//			strW += myFont.getStringBoundingBox(groups[0].getName(), 0, 0).getWidth();
+				//			strW += 50;
+				//		}
+				//		x = -strW;
+				//		y = ySave;
+				//	}
+				//}
 
-
-					}
-					else {
-						float strW;
-						if (myFont.isLoaded())
-						{
-							strW = myFont.getStringBoundingBox(info, 0, 0).getWidth();
-							strW += myFont.getStringBoundingBox(groups[0].getName(), 0, 0).getWidth();
-							strW += 50;
-						}
-						x = -strW;
-						y = ySave;
-					}
-				}
-
-				ofxSurfingHelpers::drawTextBoxed(myFont, info, x, y, _colorText, _colorBg, true, _colorButton);
+				ofxSurfingHelpers::drawTextBoxed(myFont, ss, x, y, _colorText, _colorBg, true, _colorButton);
 			}
 		}
 	}
@@ -1069,7 +1070,7 @@ void ofxPresetsManager::add(ofParameterGroup _params, int _amt_presets)//main ad
 		mainGroupAmtPresetsFav = _amt_presets;
 		PRESET_Selected_IndexMain.setMax(mainGroupAmtPresetsFav - 1);
 
-		mainGroupPresetsXmls.resize(mainGroupAmtPresetsFav);
+		mainGroupMemoryFilesPresets.resize(mainGroupAmtPresetsFav);
 
 		//-
 
@@ -1127,8 +1128,8 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 		bool b = ofxSurfingHelpers::saveGroup(groups[guiIndex], _path);
 
-		if (b) ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " " << guiIndex << " at " << _path;
-		else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " at " << _path;
+		if (b) ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " " << guiIndex << " " << _path;
+		else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " " << _path;
 	}
 
 	//--
@@ -1138,7 +1139,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 	//{
 	//	//A. main group
 	//	if ((guiIndex == 0) &&
-	//		(presetIndex >= 0) && (presetIndex < mainGroupPresetsXmls.size()))
+	//		(presetIndex >= 0) && (presetIndex < mainGroupMemoryFilesPresets.size()))
 	//	{
 	//		ofLogVerbose(__FUNCTION__) << "DONE_save (by index)";
 
@@ -1152,8 +1153,8 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 	//			TS_START("SAVE FILE 1");
 	//			std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
 	//			bool b = ofxSurfingHelpers::saveGroup(groups[guiIndex], _path);
-	//			if (b) ofLogNotice(__FUNCTION__) << " " << groups[guiIndex].getName() << " at " << _path;
-	//			else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " at " << _path;
+	//			if (b) ofLogNotice(__FUNCTION__) << " " << groups[guiIndex].getName() << " " << _path;
+	//			else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " " << _path;
 	//			TS_STOP("SAVE FILE 1");
 	//		}
 
@@ -1162,13 +1163,13 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 	//		{
 	//			ofLogNotice(__FUNCTION__) << "MEMORY MODE";
 	//			TS_START("SAVE MEM 1");
-	//			if ((presetIndex >= 0) && (presetIndex < mainGroupPresetsXmls.size()))
+	//			if ((presetIndex >= 0) && (presetIndex < mainGroupMemoryFilesPresets.size()))
 	//			{
-	//				ofSerialize(mainGroupPresetsXmls[presetIndex], groups[guiIndex]);
+	//				ofSerialize(mainGroupMemoryFilesPresets[presetIndex], groups[guiIndex]);
 	//			}
 	//			else
 	//			{
-	//				ofLogError(__FUNCTION__) << "mainGroupPresetsXmls OUT OF RANGE";
+	//				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 	//			}
 	//			TS_STOP("SAVE MEM 1");
 	//		}
@@ -1183,8 +1184,8 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 	//	{
 	//		std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
 	//		bool b = ofxSurfingHelpers::saveGroup(groups[guiIndex], _path);
-	//		if (b) ofLogNotice(__FUNCTION__) << >" << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
-	//		else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " at " << _path;
+	//		if (b) ofLogNotice(__FUNCTION__) << >" << groups[guiIndex].getName() << " : " << guiIndex << " " << _path;
+	//		else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " " << _path;
 	//	}
 	//}
 
@@ -1211,8 +1212,8 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 			TS_START("SAVE FILE 2");//for TimeMeasurements only
 			std::string _path = getPresetPath(gName, presetIndex);
 			bool b = ofxSurfingHelpers::saveGroup(groups[guiIndex], _path);
-			if (b) ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " " << guiIndex << " at " << _path;
-			else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " at " << _path;
+			if (b) ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " " << guiIndex << " " << _path;
+			else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " " << _path;
 			TS_STOP("SAVE FILE 2");//for TimeMeasurements only
 		}
 	}
@@ -1224,7 +1225,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 	//{
 	//	//A. main group
 	//	if ((guiIndex == 0) &&
-	//		(presetIndex >= 0) && (presetIndex < mainGroupPresetsXmls.size()))
+	//		(presetIndex >= 0) && (presetIndex < mainGroupMemoryFilesPresets.size()))
 	//	{
 	//		ofLogVerbose(__FUNCTION__) << "DONE_save (by name)";
 
@@ -1237,8 +1238,8 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 	//			TS_START("SAVE FILE 2");//for TimeMeasurements only
 	//			std::string _path = getPresetPath(gName, presetIndex);
 	//			bool b = ofxSurfingHelpers::saveGroup(groups[guiIndex], _path);
-	//			if (b) ofLogNotice(__FUNCTION__) << " " << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
-	//			else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " at " << _path;
+	//			if (b) ofLogNotice(__FUNCTION__) << " " << groups[guiIndex].getName() << " : " << guiIndex << " " << _path;
+	//			else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " " << _path;
 	//			TS_STOP("SAVE FILE 2");//for TimeMeasurements only
 	//		}
 
@@ -1247,11 +1248,11 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 	//		{
 	//			TS_START("SAVE MEM 2");//for TimeMeasurements only
 
-	//			if (presetIndex < mainGroupPresetsXmls.size()) {
-	//				ofSerialize(mainGroupPresetsXmls[presetIndex], groups[guiIndex]);
+	//			if (presetIndex < mainGroupMemoryFilesPresets.size()) {
+	//				ofSerialize(mainGroupMemoryFilesPresets[presetIndex], groups[guiIndex]);
 	//			}
 	//			else {
-	//				ofLogError(__FUNCTION__) << "mainGroupPresetsXmls OUT OF RANGE";
+	//				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 	//			}
 
 	//			TS_STOP("SAVE MEM 2");//for TimeMeasurements only
@@ -1265,7 +1266,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 	//	//B. extra groups guiIndex != 0
 	//	else if ((presetIndex >= 0) && (presetIndex < groupsSizes[guiIndex]))
 	//	{
-	//		ofSerialize(mainGroupPresetsXmls[presetIndex], groups[guiIndex]);
+	//		ofSerialize(mainGroupMemoryFilesPresets[presetIndex], groups[guiIndex]);
 	//		ofLogNotice(__FUNCTION__) << "Serialized: " << groups[guiIndex].getName();
 	//	}
 	//}
@@ -1281,7 +1282,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, int guiIndex)
 {
-	ofLogNotice(__FUNCTION__) << "group: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex;
+	ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex;
 
 	if (((guiIndex >= 0) && (guiIndex < (int)groups.size())) &&
 		(presetIndex >= 0) && (presetIndex < groupsSizes[guiIndex]))
@@ -1291,7 +1292,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 		std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
 		bool b = ofxSurfingHelpers::loadGroup(groups[guiIndex], _path);
 		if (!b) {
-			ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
+			ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " " << _path;
 
 			//file not found so create one file instead
 			save(presetIndex, guiIndex);
@@ -1309,7 +1310,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	//{
 	//	//A. main group
 	//	if ((guiIndex == 0) &&
-	//		(presetIndex >= 0) && (presetIndex < mainGroupPresetsXmls.size()))
+	//		(presetIndex >= 0) && (presetIndex < mainGroupMemoryFilesPresets.size()))
 	//	{
 	//		if (!MODE_MemoryLive)
 	//		{
@@ -1317,8 +1318,8 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	//			TS_START("LOAD FILE 1");//for TimeMeasurements only
 	//			std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
 	//			bool b = ofxSurfingHelpers::loadGroup(groups[guiIndex], _path);
-	//			if (b) ofLogNotice(__FUNCTION__) << "Load: " << groups[guiIndex].getName() << " at " << _path;
-	//			else ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " at " << _path;
+	//			if (b) ofLogNotice(__FUNCTION__) << "Load: " << groups[guiIndex].getName() << " " << _path;
+	//			else ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " " << _path;
 	//			TS_STOP("LOAD FILE 1");//for TimeMeasurements only
 	//		}
 	//		else
@@ -1326,13 +1327,13 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	//			//MODE B: direct from memory
 	//			TS_START("LOAD MEM 1");//for TimeMeasurements only
 	//			//using xml array
-	//			if (presetIndex < mainGroupPresetsXmls.size())
+	//			if (presetIndex < mainGroupMemoryFilesPresets.size())
 	//			{
-	//				ofDeserialize(mainGroupPresetsXmls[presetIndex], groups[guiIndex]);
+	//				ofDeserialize(mainGroupMemoryFilesPresets[presetIndex], groups[guiIndex]);
 	//			}
 	//			else
 	//			{
-	//				ofLogError(__FUNCTION__) << "mainGroupPresetsXmls OUT OF RANGE";
+	//				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 	//			}
 	//			TS_STOP("LOAD MEM 1");//for TimeMeasurements only
 	//		}
@@ -1360,7 +1361,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	//		std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
 	//		bool b = ofxSurfingHelpers::loadGroup(groups[guiIndex], _path);
 	//		if (!b) {
-	//			ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
+	//			ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " " << _path;
 
 	//			//file not found so create one file instead
 	//			save(presetIndex, guiIndex);
@@ -1394,7 +1395,7 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 		std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
 		bool b = ofxSurfingHelpers::loadGroup(groups[guiIndex], _path);
 		if (!b) {
-			ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
+			ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " " << _path;
 
 			//file not found so create one file instead
 			save(presetIndex, guiIndex);
@@ -1411,7 +1412,7 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 	//{
 	//	//A. main group
 	//	if ((guiIndex == 0) &&
-	//		(presetIndex >= 0) && (presetIndex < mainGroupPresetsXmls.size()))
+	//		(presetIndex >= 0) && (presetIndex < mainGroupMemoryFilesPresets.size()))
 	//	{
 	//		if (!MODE_MemoryLive)
 	//		{
@@ -1427,11 +1428,11 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 	//		{
 	//			//MODE B: direct from memory
 	//			TS_START("LOAD MEM 2""LOAD MEM 2");//for TimeMeasurements only
-	//			if (presetIndex < mainGroupPresetsXmls.size()) {
-	//				ofDeserialize(mainGroupPresetsXmls[presetIndex], groups[guiIndex]);
+	//			if (presetIndex < mainGroupMemoryFilesPresets.size()) {
+	//				ofDeserialize(mainGroupMemoryFilesPresets[presetIndex], groups[guiIndex]);
 	//			}
 	//			else {
-	//				ofLogError(__FUNCTION__) << "mainGroupPresetsXmls OUT OF RANGE LOAD";
+	//				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE LOAD";
 	//			}
 	//			TS_STOP("LOAD MEM 2");//for TimeMeasurements only
 	//		}
@@ -1458,7 +1459,7 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 	//		std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
 	//		bool b = ofxSurfingHelpers::loadGroup(groups[guiIndex], _path);
 	//		if (!b) {
-	//			ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " at " << _path;
+	//			ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " " << _path;
 
 	//			//file not found so create one file instead
 	//			save(presetIndex, guiIndex);
@@ -1721,7 +1722,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				//int i = PRESET_Selected_IndexMain;
 				//i++;
-				//if (i > mainGroupPresetsXmls.size() - 1) i = mainGroupPresetsXmls.size() - 1;
+				//if (i > mainGroupMemoryFilesPresets.size() - 1) i = mainGroupMemoryFilesPresets.size() - 1;
 				//PRESET_Selected_IndexMain = i;
 
 				//TODO: crashes
@@ -2675,22 +2676,28 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 {
 	ofLogVerbose(__FUNCTION__);
 
-	for (int i = 0; i < mainGroupPresetsXmls.size(); i++)
+	for (int i = 0; i < mainGroupMemoryFilesPresets.size(); i++)
 	{
-		string strFolder;
-		string strFile;
-		string strPath;
+		string _folder;
+		string _file;
+		string _path;
 
-		strFolder = path_UserKit_Folder + "/" + path_PresetsFavourites + "/";
-		strFile = groups[0].getName() + filenamesPrefix + ofToString(i);
-		strPath = strFolder + strFile;
-		strPath += fileExtension;
+		_folder = path_UserKit_Folder + "/" + path_PresetsFavourites + "/";
+		_file = groups[0].getName() + filenamesPrefix + ofToString(i);
+		_path = _folder + _file;
+		_path += fileExtension;
 
-		if (i < mainGroupPresetsXmls.size()) {
-			mainGroupPresetsXmls[i].save(strPath);
+		if (i < mainGroupMemoryFilesPresets.size())
+		{
+#ifdef USE_XML
+			mainGroupMemoryFilesPresets[i].save(_path);
+			#elifdef USE_JSON
+				bool b = ofSavePrettyJson(_path, mainGroupMemoryFilesPresets[i]);
+			if (!b) ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets > " << _path;
+#endif
 		}
 		else {
-			ofLogError(__FUNCTION__) << "mainGroupPresetsXmls OUT OF RANGE";
+			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
 	}
@@ -2698,9 +2705,12 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 	//debug params
 	if (true)
 	{
-		for (int i = 0; i < mainGroupPresetsXmls.size(); i++)
+		for (int i = 0; i < mainGroupMemoryFilesPresets.size(); i++)
 		{
-			ofLogNotice(__FUNCTION__) << "mainGroupPresetsXmls[" << i << "] " << ofToString(mainGroupPresetsXmls[i].toString());
+#ifdef USE_XML
+			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
+			#elifdef USE_JSON
+#endif
 		}
 	}
 }
@@ -2715,7 +2725,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	//groupsMem.reserve(NUM_OF_PRESETS);
 	//groupsMem.resize(NUM_OF_PRESETS);
 
-	for (int i = 0; i < mainGroupPresetsXmls.size(); i++)
+	for (int i = 0; i < mainGroupMemoryFilesPresets.size(); i++)
 	{
 		//TODO:
 		//PROBLEM:
@@ -2757,11 +2767,14 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 
 		if (bLoaded)
 		{
-			if (i < mainGroupPresetsXmls.size()) {
-				mainGroupPresetsXmls[i] = settings;
+			if (i < mainGroupMemoryFilesPresets.size()) {
+
+#ifdef USE_XML
+				mainGroupMemoryFilesPresets[i] = settings;
+#endif
 			}
 			else {
-				ofLogError(__FUNCTION__) << "mainGroupPresetsXmls OUT OF RANGE";
+				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
 		}
 	}
@@ -2771,9 +2784,11 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 	//debug params
 	if (false)
 	{
-		for (int i = 0; i < mainGroupPresetsXmls.size(); i++)
+		for (int i = 0; i < mainGroupMemoryFilesPresets.size(); i++)
 		{
-			ofLogNotice(__FUNCTION__) << "mainGroupPresetsXmls[" << i << "] " << ofToString(mainGroupPresetsXmls[i].toString());
+#ifdef USE_XML
+			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
+#endif
 		}
 	}
 }
@@ -3158,27 +3173,8 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 	{
 		//-
 
-		if (ImGui::TreeNode("HELPERS"))
+		if (ImGui::TreeNode("MODES"))
 		{
-			// main helpers
-			if (ImGui::Button("CLONE ALL"))
-			{
-				bCloneAll = true;
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("CLONE >"))
-			{
-				bCloneRight = true;
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("POPULATE!"))
-			{
-				// populate all favs
-				doPopulateFavs();
-				// create browser files too
-				doGetFavsToFilesBrowser();
-			}
-
 			//-
 
 			ofxImGui::AddParameter(autoSave); ImGui::SameLine();
@@ -3263,19 +3259,30 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 void ofxPresetsManager::buildHelpInfo() {
 	// build help info
 	helpInfo = "";
-	helpInfo += "USER-KIT: " + displayNameUserKit + "\n";
-	helpInfo += "PATHS: ";
+	helpInfo += "USER-KIT\n";
+	helpInfo += "  " + displayNameUserKit;
+
+	helpInfo += "\n\nPATHS\n  ";
 	helpInfo += getGroupsPaths();
+	helpInfo += "                            ";
+#ifdef USE_XML
+	helpInfo += ".xml";
+#else
+#ifdef USE_JSON
+	helpInfo += ".json";
+#endif
+#endif
+
 	helpInfo += "\n";
+	helpInfo += "MOUSE|KEYS    LOAD\n";
+	helpInfo += "CTRL          SAVE/COPY\n";
+	helpInfo += "ALT           SWAP";
 
 	// TODO:
 	//bool bKeysinfo = false;
 	//if (!bKeysinfo)
-	{
-		helpInfo += "MOUSE&KEYS LOAD\n";
-		helpInfo += "CTRL SAVE/COPY\n";
-		helpInfo += "ALT  SWAP";
-	}
+	//{
+	//}
 	//else
 	//{
 	//	//keys[i][k]
@@ -3810,22 +3817,22 @@ void ofxPresetsManager::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings
 
 		// preset selector
 
-		//group 0 
+		// group 0 
 
 		string str = groups[0].getName();
 		//string str = "User-Kit: " + displayNameUserKit;
 		ImGui::Text(str.c_str());
 
+		//ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
 		//--
 
-		//preset clicker matrix buttons
-		//if (ImGui::TreeNode("Test"))
+		// preset clicker matrix buttons
 		{
-
-			//toggle button matrix
+			// toggle button matrix
 			ImVec2 button_sz(40, 40);
-			//Manually wrapping
-			//(we should eventually provide this as an automatic layout feature, but for now you can do it manually)
+			// Manually wrapping
+			// (we should eventually provide this as an automatic layout feature, but for now you can do it manually)
 			//ImGui::Text("PRESET SELECTOR:");
 			ImGuiStyle& style = ImGui::GetStyle();
 			int _amtButtons = mainGroupAmtPresetsFav;
@@ -3834,23 +3841,23 @@ void ofxPresetsManager::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings
 			{
 				ImGui::PushID(n);
 				string name = ofToString((char)(keys[0][n]));
-				//customize colors
+				// customize colors
 				{
-					if (PRESET_Selected_IndexMain.get() == n)//when selected
+					if (PRESET_Selected_IndexMain.get() == n)// when selected
 					{
-						const ImVec4 colorActive = style.Colors[ImGuiCol_ButtonHovered];//changes the color
+						const ImVec4 colorActive = style.Colors[ImGuiCol_ButtonHovered];// changes the color
 						ImGui::PushStyleColor(ImGuiCol_Button, colorActive);
 					}
 					else {
-						const ImVec4 colorButton = style.Colors[ImGuiCol_Button];//do not changes the color
+						const ImVec4 colorButton = style.Colors[ImGuiCol_Button];// do not changes the color
 						ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
 					}
-					//draw button
+					// draw button
 					if (ImGui::Button(name.c_str(), button_sz))
 					{
-						loadPreset(n);//trig load preset
+						loadPreset(n);// trig load preset
 					}
-					//customize colors
+					// customize colors
 					ImGui::PopStyleColor();
 				}
 				float last_button_x2 = ImGui::GetItemRectMax().x;
@@ -3859,7 +3866,31 @@ void ofxPresetsManager::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings
 				ImGui::PopID();
 			}
 		}
-		//ImGui::TreePop();
+
+		ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
+		//--
+
+		// main helpers
+		if (ImGui::Button("CLONE ALL"))
+		{
+			bCloneAll = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("CLONE >"))
+		{
+			bCloneRight = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("POPULATE!"))
+		{
+			// populate all favs
+			doPopulateFavs();
+			// create browser files too
+			doGetFavsToFilesBrowser();
+		}
+
+		//--
 
 		//ImGui::Spacing(0, 10.0f);
 		ImGui::Dummy(ImVec2(0.0f, 10.0f));
@@ -4284,10 +4315,10 @@ int ofxPresetsManager::doRandomizeWichSelectedPresetCheckChanged()
 	//		ofLogWarning(__FUNCTION__) << "Randomize not changed! Try #" << ofToString(++numTryes);
 	//		ofLogNotice(__FUNCTION__) << "PRESET Previous was : " << ofToString(_r);
 	//		ofLogNotice(__FUNCTION__) << "PRESET New Random is: " << ofToString(PRESET_Selected_IndexMain);
-	//		PRESET_Selected_IndexMain = (int)ofRandom(0, mainGroupPresetsXmls.size());
+	//		PRESET_Selected_IndexMain = (int)ofRandom(0, mainGroupMemoryFilesPresets.size());
 	//		
-	//		//if (MODE_MemoryLive) _r = (int)ofRandom(0, mainGroupPresetsXmls.size());
-	//		//_r = (int)ofRandom(1, mainGroupPresetsXmls.size() + 1);
+	//		//if (MODE_MemoryLive) _r = (int)ofRandom(0, mainGroupMemoryFilesPresets.size());
+	//		//_r = (int)ofRandom(1, mainGroupMemoryFilesPresets.size() + 1);
 	//	}
 	//}
 

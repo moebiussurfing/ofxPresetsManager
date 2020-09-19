@@ -11,6 +11,7 @@
 
 #pragma once
 #include "ofMain.h"
+#include "ofxSurfingConstants.h" // -> defines (modes) are here "to share between addons" in one place
 #include "ofxPresetsManager.h"
 
 class ofApp : public ofBaseApp

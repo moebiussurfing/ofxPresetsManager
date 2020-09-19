@@ -10,45 +10,45 @@ void ofApp::setup()
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
 #endif
-	ofxSurfingHelpers::setTheme_ofxGui();
 	ofSetCircleResolution(200);
+	ofxSurfingHelpers::setThemeDark_ofxGui();
 
 	//--
 
-	//0. setup your parameters
+	// 0. setup your parameters
 	setupParameters();
 
 	//--
 
-	//1. (optional) customize path folders at first
-	//presetsManager.setPath_UserKit_Folder("myAddon");
-	//main container folder where all other files will be
+	// 1. (optional) customize path folders at first
+	// presetsManager.setPath_UserKit_Folder("myAddon");
+	// main container folder where all other files will be
 
 	//--
 
-	//2. add our ofParameterGroup to the preset manager 
-	//also define wich key triggers are associated to each preset. 
-	//the amount of keys will be also the amount of favorites/clickable presets per group
+	// 2. add our ofParameterGroup to the preset manager 
+	// also define wich key triggers are associated to each preset. 
+	// the amount of keys will be also the amount of favorites/clickable presets per group
 
-	//group 0
+	// group 0
 	presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' });
 
-	//group 1
+	// group 1
 	presetsManager.add(params1, { 'a', 's', 'd', 'f' });
 
-	//group 2
+	// group 2
 	presetsManager.add(params2, { 'z', 'x', 'c' });
 
-	//group 3
+	// group 3
 	presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
 
 	//--
 
-	//3. call setup after adding ofParameterGroup
+	// 3. call setup after adding ofParameterGroup
 	std::string name = "myKit_01";
 	presetsManager.setup(name);
 
-	//4. show clicker
+	// 4. show clicker
 	presetsManager.setVisible_PresetClicker(true);//user panel clicker
 
 }
@@ -56,46 +56,53 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::setupParameters()
 {
-	//0. ofParameterGroup's
+	// 0. ofParameterGroup's
 
-	//group0
+	// group0
 	params0.setName("paramsGroup0");
 	params0.add(color0.set("color0", ofColor(ofColor::red), ofColor(0, 0), ofColor(255, 255)));
 	params0.add(numShapes0.set("numShapes0", 5, 1, 5));
 	params0.add(shapeType0.set("shapeType0", 1, 1, 2));
 	params0.add(separation0.set("separation0", 100, 1, 100));
 	params0.add(shapeSide0.set("shapeSide0", 50, 5, 200));
-	params0_Nested.setName("styleGroup");//another nested group
+	params0_Nested.setName("styleGroup");// another nested group
 	params0_Nested.add(fill0.set("fill0", true));
 	params0_Nested.add(lineWidth0.set("lineWidth0", 1, 0.1, 10));
-	params0.add(params0_Nested);//main preset settings container
+	params0.add(params0_Nested);// main preset settings container
 
-	//group1
+	// group1
 	params1.setName("paramsGroup1");
 	params1.add(color1.set("color1", ofColor(ofColor::green), ofColor(0, 0), ofColor(255, 255)));
 	params1.add(numShapes1.set("numShapes1", 5, 1, 5));
 	params1.add(shapeSide1.set("shapeSide1", 50, 5, 200));
 	params1.add(separation1.set("separation1", 100, 1, 100));
 
-	//group2
+	// group2
 	params2.setName("paramsGroup2");
 	params2.add(color2.set("color2", ofColor(ofColor::yellow), ofColor(0, 0), ofColor(255, 255)));
 	params2.add(size2.set("size2", 50, 5, 200));
 	params2.add(fill2.set("fill2", true));
 
-	//group3
+	// group3
 	params3.setName("paramsGroup3");
 	params3.add(color3.set("color3", ofColor(ofColor::blueViolet), ofColor(0, 0), ofColor(255, 255)));
 	params3.add(numObjects3.set("numObjects3", 5, 1, 5));
 	params3.add(sizeObjects3.set("sizeObjects3", 5, 1, 200));
 	params3.add(separationObjects3.set("separationObjects3", 50, 5, 100));
 
+	// we can exclude some parameters that we don't want to handle into preset
+	// ie: exclude all colors
+	color0.setSerializable(false);
+	color1.setSerializable(false);
+	color2.setSerializable(false);
+	color3.setSerializable(false);
+
 	//--
 
-	//1. guis
+	// 1. guis
 
-	//local ofApp gui to show/edit our settings/parameters
-	//to show how our params/settings changes when using the presets manager
+	// a local ofApp gui to show/edit our settings/parameters
+	// we will see here show how our params/settings changes when using the presets manager
 	gui0.setup("ofApp0");
 	gui0.add(params0);
 	gui0.setPosition(5, 10);
@@ -123,7 +130,7 @@ void ofApp::draw()
 {
 	ofBackground(ofColor::darkBlue);
 
-	//scene draw object linked to grouped parameters
+	// scene draw object linked to grouped parameters
 	drawScene0();
 	drawScene1();
 	drawScene2();
@@ -144,8 +151,8 @@ void ofApp::keyPressed(int key)
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h)
 {
-	//customize layout
-	//bottom and centered
+	// customize layout
+	// bottom and centered
 	presetsManager.setSizeBox_PresetClicker(75);
 	int _w = presetsManager.getPresetClicker_Width();
 	presetsManager.setPosition_PresetClicker(ofGetWidth() / 2.f - _w / 2.f, ofGetHeight() - presetsManager.getPresetClicker_Height() - 20);
@@ -154,7 +161,7 @@ void ofApp::windowResized(int w, int h)
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-	presetsManager.exit();//required to store settings. (maybe required before destruct our class params..)
+	presetsManager.exit();// required to store settings. (maybe required before destruct our class params..)
 }
 
 //--------------------------------------------------------------
@@ -218,14 +225,14 @@ void ofApp::drawScene3()
 	ofPushStyle();
 	ofPushMatrix();
 	ofTranslate(400, 700);
-	//ofSetLineWidth(2);
+	// ofSetLineWidth(2);
 	ofFill();
 	ofSetColor(color3.get());
 	for (int i = 0; i < numObjects3; ++i)
 	{
-		//ofDrawLine(0, 0, 0, sizeObjects3);
-		//ofDrawLine(0, sizeObjects3, sizeObjects3 / 2, sizeObjects3 / 2);
-		//ofDrawLine(sizeObjects3 / 2, sizeObjects3 / 2, 0, 0);
+		// ofDrawLine(0, 0, 0, sizeObjects3);
+		// ofDrawLine(0, sizeObjects3, sizeObjects3 / 2, sizeObjects3 / 2);
+		// ofDrawLine(sizeObjects3 / 2, sizeObjects3 / 2, 0, 0);
 		ofDrawRectangle(0, 0, sizeObjects3 * i / 2, sizeObjects3 * i / 2);
 
 		float _tr = i * (separationObjects3 + 20);

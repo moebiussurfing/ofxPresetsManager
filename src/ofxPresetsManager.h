@@ -50,8 +50,9 @@
 //
 //---
 
-
 #pragma once
+
+#include "ofMain.h"
 
 //--------------------------------------
 //
@@ -65,6 +66,7 @@
 //#define USE_JSON						// file settings format
 //										   
 //	DEBUG									   
+//										   
 //#define INCLUDE_PERFORMANCE_MEASURES	// measure performance ofxTimeMeasurements
 //#define DEBUG_randomTest				// uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
 //#define DEBUG_BLOCK_SAVE_SETTINGS		// disable save settings//enable this bc sometimes there's crashes on exit
@@ -72,7 +74,7 @@
 //--------------------------------------
 
 
-#include "ofMain.h"
+#include "ofxSurfingConstants.h" // -> defines (modes) are here "to share between addons" in one place
 
 //--
 
@@ -129,8 +131,6 @@ public:
 
 	//--
 
-#pragma mark - API
-
 	//----
 	//
 	// API
@@ -163,8 +163,8 @@ private:
 	//--
 
 	// core engine
-private:
 
+private:
 	// save to a preset
 	void save(int presetIndex, int guiIndex = 0);
 	void save(int presetIndex, string guiName);
@@ -185,6 +185,8 @@ private:
 
 	//--
 
+	// data
+
 private:
 	// main settings/parameters container
 	// all parameters are contained into an ofParameterGroup
@@ -200,7 +202,7 @@ private:
 
 	//--
 
-	ofParameter<int> GROUP_Selected_Index;// global selector. this selector will control all linked groups
+	ofParameter<int> GROUP_Selected_Index;// global group selector. this selector will control all linked groups
 
 	//group main selector
 	bool bBuildGroupSelector = true;// to allow auto build a group selector to combine all the added groups to the presets manager
@@ -214,9 +216,9 @@ public:
 private:
 	ofParameter<bool> bSplitGroupFolders{ "MODE SPLIT FOLDERS", true };//on this mode we split every group on his own sub folder
 
-	//--
+	//----
 
-	// better callbacks
+	// A. better callbacks
 	// to get when 'saved/loaded done' happens from ofApp if desired
 public:
 	ofParameter<bool> DONE_load;// easy callback to know (in ofApp) that preset LOAD is done 
@@ -224,7 +226,7 @@ public:
 
 	//--
 
-	// easy callback 
+	// B. easy callback 
 	// to faster ofApp integration 
 public:
 	//--------------------------------------------------------------
@@ -290,7 +292,7 @@ public:
 	////--------------------------------------------------------------
 	//void setPosition_DEBUG(int x, int y);// where to display if we get errors (ie: data files not found) on startup
 
-	//-
+	//----
 
 	// keys modes
 	//--------------------------------------------------------------
@@ -319,7 +321,7 @@ public:
 		return ENABLE_Keys;
 	}
 
-	//--
+	//----
 
 	// undo engine
 private:
@@ -330,7 +332,7 @@ private:
 	void undoStoreParams();
 #endif
 
-	//--
+	//----
 
 	// paths for settings
 
@@ -358,7 +360,7 @@ private:
 	void load_ControlSettings();
 	void save_ControlSettings();
 
-	//--
+	//----
 
 	// memory mode
 
@@ -377,7 +379,12 @@ private:
 	// TODO:
 	// add json..
 	// should use keys[i].size() instead of this:
-	vector<ofXml> mainGroupPresetsXmls;
+#ifdef USE_JSON
+	vector<ofJson> mainGroupMemoryFilesPresets;
+#else
+	vector<ofXml> mainGroupMemoryFilesPresets;
+#endif
+
 public:
 	void setModeMemoryPerformance(bool b) {
 		MODE_MemoryLive = b;
