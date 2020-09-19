@@ -141,6 +141,7 @@ public:
 	//--
 
 public:
+	// TODO: should use &reference? it's better?
 	void add(ofParameterGroup params, initializer_list<int> keysList);// adds and define keys to trig presets too
 
 private:
@@ -151,12 +152,12 @@ private:
 	//--
 
 public:
-	void setup();// must be called after params group has been added!
-	void setup(std::string name);// TODO: should use char array to avoid collapse with bool...
+	void setup();// must be called after params groups has been added!
+	void setup(std::string name);// TODO: should use char array to avoid collapse with bool..?
 	void setup(std::string name, bool _buildGroupSelector);
 	void setup(bool _buildGroupSelector);
 
-	void startup();// must be called after setup to set initial states well
+	void startup();// must be called after setup (who is called after all group adds) to set initial states well
 
 private:
 	void drawPresetClicker();// user clickeable box panel preset selector

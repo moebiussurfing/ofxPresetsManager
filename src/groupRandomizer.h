@@ -3,6 +3,8 @@
 #include "ofxSurfingHelpers.h"
 #include "ofxImGui.h"
 
+#define DEBUG_randomTest
+
 class groupRandomizer
 {
 
@@ -11,6 +13,8 @@ public:
 	~groupRandomizer();
 
 	void setup(ofParameterGroup &g, int _numPresets);
+	void setup(ofParameterGroup &g, vector<int> keysList);
+
 	void update();
 	void draw();
 	void keyPressed(int key);
@@ -30,9 +34,12 @@ public:
 	//ofParameterGroup params_Randomizer;
 	void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
 	int mainGroupAmtPresetsFav;// amount of box-clickable handled presets on current favorites/kit
+	bool bIsDoneLoad = false;
 	void loadPreset(int p)
 	{
 		ofLogNotice(__FUNCTION__) << "p: " << p;
+		PRESET_Selected_IndexMain = p;
+		bIsDoneLoad = true;// TODO: workaround bc the done-loading happens out of the class..
 	}
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
 	vector<int> keys;// queued trigger keys for each group ? (all presets) (size of)

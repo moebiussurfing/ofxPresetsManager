@@ -406,8 +406,9 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	groupRandomizers.resize(groups.size());
 
 	for (int i = 0; i < groups.size(); i++) {
-		groupRandomizers[i].setup(groups[i], groupsSizes[i] - 1);// pass the group and the amount of presets
 		// TODO: must pass the keys list!
+		groupRandomizers[i].setup(groups[i], keys[i]);// pass the group and the associated keys
+		//groupRandomizers[i].setup(groups[i], groupsSizes[i] - 1);// pass the group and the amount of presets
 	}
 
 	//----
@@ -452,6 +453,7 @@ void ofxPresetsManager::startup()
 
 	//--
 
+	// custom path
 	if (bPathDirCustom.get())
 	{
 		if (pathDirCustom.get() != "DEFAULT_DATA_PATH") buildCustomUserKit();
@@ -1523,8 +1525,8 @@ void ofxPresetsManager::loadPreset(int p)
 	{
 		ofLogNotice(__FUNCTION__) << ofToString(p);
 
-		//TODO:
-		//mode latch
+		// TODO:
+		// mode latch
 		if (MODE_LatchTrig && bLatchRun)
 		{
 			if (p != 0)
@@ -1539,7 +1541,8 @@ void ofxPresetsManager::loadPreset(int p)
 			//randomizerTimer = ofGetElapsedTimeMillis();
 		}
 
-		if (PRESET_Selected_IndexMain >= 0 && PRESET_Selected_IndexMain <= mainGroupAmtPresetsFav - 1)
+		if (PRESET_Selected_IndexMain >= 0 && 
+			PRESET_Selected_IndexMain <= mainGroupAmtPresetsFav - 1)
 		{
 			PRESET_Selected_IndexMain = p;
 			//PRESET_Selected_IndexMain_PRE = PRESET_Selected_IndexMain;//TODO:
@@ -1548,8 +1551,8 @@ void ofxPresetsManager::loadPreset(int p)
 		{
 			ofLogError(__FUNCTION__) << "OUT OF RANGE! CLAMP PRESET TO 0";
 
-			//workaround
-			//clamp
+			// workaround
+			// clamp
 			PRESET_Selected_IndexMain = 0;//set to first as default presets when out of range
 		}
 	}
@@ -4821,7 +4824,6 @@ void ofxPresetsManager::buildRandomizers()
 
 	//preset editor tools
 	setupRandomizerEditor();
-
 }
 
 //--------------------------------------------------------------
@@ -4905,226 +4907,3 @@ void ofxPresetsManager::ChangedGuiGroup(int & index) {
 	ofLogWarning(__FUNCTION__) << "GuiGROUP_Selected_Index: " << index;
 
 }
-
-//
-//
-////--------------------------------------------------------------
-//void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
-//{
-//	if (!DISABLE_CALLBACKS)
-//	{
-//		string name = e.getName();
-//
-//		//if ((name != "exclude") //&&
-//		//	//(name != ImGui_Position.getName()) &&
-//		//	//(name != ImGui_Size.getName())// &&
-//		//	//(name != "DICE") &&
-//		//	//(name != "PRESET")
-//		//	)
-//		{
-//			ofLogNotice(__FUNCTION__) << name << " : " << e;
-//		}
-//
-//		if (false) {}
-//
-//		//--
-//
-//		// mode edit: when false, we disabled autosave to allow performance do faster
-//		else if (name == MODE_Editor.getName())
-//		{
-//			ofLogNotice(__FUNCTION__) << "MODE EDITOR: " << (MODE_Editor.get() ? "TRUE" : "FALSE");
-//
-//			autoSave = MODE_Editor.get();
-//
-//			//--
-//
-//			//// TODO:
-//			//// refresh in other another better place?...
-//			//buildHelpInfo();
-//		}
-//
-//		//--
-//
-//		// save load
-//		else if (name == "SAVE" && bSave)
-//		{
-//			ofLogNotice(__FUNCTION__) << "SAVE: " << e;
-//			bSave = false;
-//			//doSave(PRESET_Selected_IndexMain);
-//			save(PRESET_Selected_IndexMain, 0);
-//		}
-//		//else if (name == "LOAD" && bLoad)
-//		//{
-//		//	ofLogNotice(__FUNCTION__) << "LOAD: " << e;
-//		//	bLoad = false;
-//		//	doLoad(PRESET_Selected_IndexMain);
-//		//}
-//
-//		//----
-//
-//		else if (name == "LOAD TO MEMORY" && loadToMemory)
-//		{
-//			ofLogNotice(__FUNCTION__) << "loadToMemory:" << e;
-//			loadToMemory = false;
-//			load_AllKit_ToMemory();
-//		}
-//		else if (name == "SAVE FROM MEMORY" && saveFromMemory)
-//		{
-//			ofLogNotice(__FUNCTION__) << "saveFromMemory:" << e;
-//			saveFromMemory = false;
-//			save_AllKit_FromMemory();
-//		}
-//		else if (name == "MODE MEMORY")
-//		{
-//			ofLogNotice(__FUNCTION__) << "MODE MEMORY: " << e;
-//
-//			if (MODE_MemoryLive)
-//			{
-//				//reload all xml preset files to memory
-//				load_AllKit_ToMemory();
-//			}
-//			else
-//			{
-//				//save all xml preset files to disk from memory
-//				save_AllKit_FromMemory();
-//			}
-//		}
-//
-//		//--
-//
-//		//		else if (name == "GUI ImGui POSITION")
-//		//		{
-//		//			ofLogVerbose(__FUNCTION__) << "GUI BROWSER POSITION: " << e;
-//		//
-//		//			////clamp inside window
-//		//			//float x, y;
-//		//			//x = ofClamp(ImGui_Position.get().x, 0, ofGetWidth() - 200);
-//		//			//y = ofClamp(ImGui_Position.get().y, 0, ofGetHeight() - 20);
-//		//			//ImGui_Position = glm::vec2(x, y);
-//		//		}
-//		//		else if (name == "GUI ImGui SIZE")
-//		//		{
-//		//			ofLogVerbose(__FUNCTION__) << "GUI BROWSER SIZE: " << e;
-//		//
-//		//			////clamp inside window
-//		//			//float x, y;
-//		//			//x = ofClamp(ImGui_Position.get().x, 0, ofGetWidth() - 200);
-//		//			//y = ofClamp(ImGui_Position.get().y, 0, ofGetHeight() - 20);
-//		//			//ImGui_Position = glm::vec2(x, y);
-//		//		}
-//
-////		//----
-////
-////		// helper tools
-////		else if (name == "CLONE >" && bCloneRight)
-////		{
-////			ofLogNotice(__FUNCTION__) << "CLONE >: " << e;
-////			bCloneRight = false;
-////			doCloneRight(PRESET_Selected_IndexMain);
-////		}
-////		else if (name == "CLONE ALL" && bCloneAll)
-////		{
-////			ofLogNotice(__FUNCTION__) << "CLONE ALL: " << e;
-////			bCloneAll = false;
-////			doCloneAll();
-////		}
-////
-////		//--
-////
-////		////clicker
-////		//else if (name == "SHOW CLICK PANEL" && !SHOW_ClickPanel.get())
-////		//{
-////		//	SHOW_ImGui = false;//workflow
-////		//}
-////		//randomizer
-////		else if (name == "RANDOMIZE INDEX" && bRandomizeIndex)
-////		{
-////			ofLogNotice(__FUNCTION__) << "RANDOMIZE !";
-////			bRandomizeIndex = false;
-////			doRandomizeWichSelectedPreset();
-////		}
-////		//play randomizer
-////		else if (name == PLAY_RandomizeTimer.getName())
-////		{
-////			ofLogNotice(__FUNCTION__) << "MODE TIMER: " << e;
-////			if (PLAY_RandomizeTimer) {
-////				MODE_LatchTrig = false;
-////			}
-////		}
-////		//latch
-////		else if (name == "MODE LATCH")
-////		{
-////			ofLogNotice(__FUNCTION__) << "MODE LATCH: " << e;
-////			if (MODE_LatchTrig) {
-////				PLAY_RandomizeTimer = false;
-////			}
-////		}
-////		//else if (name == "SPEED FACTOR")
-////		//{
-////		//	ofLogNotice(__FUNCTION__) << "SPEED FACTOR: " << e;
-////		//	//randomizeDuration = randomize_MAX_DURATION * (1.f - randomizeSpeedF);
-////		//	randomizeDuration.setMax(randomizeSpeedF * randomize_MAX_DURATION);
-////		//	randomizeDurationShort.setMax(randomizeSpeedF * randomize_MAX_DURATION_SHORT);
-////		//}
-////		else if (name == randomizeDuration.getName())
-////		{
-////			ofLogNotice(__FUNCTION__) << "DURATION: " << e;
-////
-////			randomizeDurationBpm = 60000.f / randomizeDuration;
-////
-////			//randomizeSpeedF = -((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
-////			////randomizeSpeedF = 1 + (randomizeDuration / (float)randomize_MAX_DURATION);
-////		}
-////		else if (name == randomizeDurationBpm.getName())
-////		{
-////			ofLogNotice(__FUNCTION__) << "BPM: " << e;
-////
-////			//60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
-////			randomizeDuration = 60000.f / randomizeDurationBpm;
-////			randomizeDurationShort = randomizeDuration / 4.f;
-////		}
-////#ifdef DEBUG_randomTest
-////		else if (name == "DICE")//when debug enabled: set dice by user to test
-////		{
-////			ofLogNotice(__FUNCTION__) << "DICE: " << e;
-////			doRandomizeWichSelectedPreset();
-////		}
-////#endif
-////		else if (name == "RESET DICES" && bResetDices)
-////		{
-////			ofLogNotice(__FUNCTION__) << "RESET DICES: " << e;
-////			doResetDices();
-////			bResetDices = false;
-////		}
-////
-////		//--
-////
-////		//all other widgets/params
-////		else
-////		{
-////			//check if changed prob sliders
-////			{
-////				bool doDices = false;
-////				for (int i = 0; i < presetsRandomFactor.size(); i++)
-////				{
-////					if (name == "PROB " + ofToString(i)) {
-////						doDices = true;//TODO: would be faster making return on first 'true'
-////					}
-////				}
-////				if (doDices)
-////				{
-////					//sum total dices/all probs
-////					dicesTotalAmount = 0;
-////					for (auto &p : presetsRandomFactor) {
-////						dicesTotalAmount += p.get();
-////					}
-////					randomizedDice.setMax(dicesTotalAmount - 1);
-////
-////					ofLogNotice(__FUNCTION__) << "dicesTotalAmount: " << dicesTotalAmount;
-////				}
-////			}
-////		}
-//
-////----
-	//}
-//}
