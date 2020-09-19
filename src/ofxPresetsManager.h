@@ -83,7 +83,7 @@
 //--
 
 // gui
-#ifdef USE_ofxImGuiSimple//alternative to official addon
+#ifdef USE_ofxImGuiSimple// alternative to official addon
 #include "ofxImGuiSimple.h"
 #include "Helpers.h"
 #else
@@ -96,6 +96,7 @@
 #endif
 
 #include "ofxSurfingHelpers.h"
+#include "groupRandomizer.h"
 
 // optional to debug performance or delay when loading files or presets on hd or memory modes
 #ifdef INCLUDE_PERFORMANCE_MEASURES
@@ -202,6 +203,13 @@ private:
 
 	//--
 
+	//TODO:
+	ofParameter<int> GuiGROUP_Selected_Index;// only this selected group will be showed on gui to edit
+	void ChangedGuiGroup(int & index);
+	std::vector<groupRandomizer> groupRandomizers;
+
+	//--
+
 	ofParameter<int> GROUP_Selected_Index;// global group selector. this selector will control all linked groups
 
 	//group main selector
@@ -258,6 +266,10 @@ private:
 	bool bIsDoneLoad = false;
 
 	//----
+	//
+	// API
+	//
+	//----
 
 	// layout helpers
 
@@ -294,10 +306,7 @@ public:
 
 	//----
 
-	// keys modes
-	//--------------------------------------------------------------
-	void setModeKeySave(int key);// set the key you have to hold for saving, default is OF_KEY_CONTROL
-	void setModeKeySwap(int key);// set the key you have to hold for swap, default is OF_KEY_ALT
+	// keys
 
 	//--------------------------------------------------------------
 	void setEnableKeys(bool active)
@@ -320,10 +329,14 @@ public:
 	{
 		return ENABLE_Keys;
 	}
+	//--------------------------------------------------------------
+	void setModeKeySave(int key);// setup the key you have to hold for saving, default is OF_KEY_CONTROL
+	void setModeKeySwap(int key);// setup the key you have to hold for swap, default is OF_KEY_ALT
 
 	//----
 
 	// undo engine
+
 private:
 #ifdef INCLUDE_ofxUndoSimple
 	ofxUndoSimple<std::string> undoStringParams;
@@ -336,7 +349,7 @@ private:
 
 	// paths for settings
 
-	// all folder names must go without '/'
+	// all folder names must go without ending with '/'
 	//std::string path_Root;
 	std::string path_UserKit_Folder;// User-Kit folder for both other subfolders. 
 	std::string path_PresetsFavourites;// path for kit of favourite presets. live kit
@@ -362,14 +375,19 @@ private:
 
 	//----
 
+	// TODO:
 	// memory mode
 
 	// improve performance loading from xml objects from memory not xml files from hd
 private:
 	ofParameter<bool> MODE_MemoryLive;// when enabled all presets are handled from a memory vector to avoid lag of loading xml files from hd
+public:
+	void setModeMemoryPerformance(bool b) {
+		MODE_MemoryLive = b;
+	}
+private:
 	ofParameter<bool> loadToMemory;
 	ofParameter<bool> saveFromMemory;
-
 	void load_AllKit_ToMemory();
 	void save_AllKit_FromMemory();
 
@@ -382,13 +400,10 @@ private:
 #ifdef USE_JSON
 	vector<ofJson> mainGroupMemoryFilesPresets;
 #else
+#ifdef USE_XML
 	vector<ofXml> mainGroupMemoryFilesPresets;
 #endif
-
-public:
-	void setModeMemoryPerformance(bool b) {
-		MODE_MemoryLive = b;
-	}
+#endif
 
 	//----
 
@@ -423,6 +438,7 @@ private:
 	vector<ofParameter<int>> presetsRandomFactor;// probability of every preset
 	vector<ofParameter<bool>> presetsRandomModeShort;// mode short for ebvery preset
 	vector<int> randomFactorsDices;
+
 	void buildRandomizers();
 	void setupRandomizer();// engine to get a random between all posible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
 	void doRandomizeWichSelectedPreset();// randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
@@ -458,11 +474,21 @@ public:
 
 	//--
 
+private:
+	ofParameter<int> randomizerProgress{ "%", 0, 0, 100 };
+	float _prog;
+
+	//--
+
+	//----
+	//
+	// API
+	//
+	//----
+
 	// randomizer helpers
 
 public:
-	ofParameter<int> randomizerProgress{ "%", 0, 0, 100 };
-	float _prog;
 
 	//--------------------------------------------------------------
 	void setPlayRandomizerTimer(bool b)// play randomizer timer
@@ -506,14 +532,6 @@ public:
 
 	//----
 
-private:
-	bool DISABLE_CALLBACKS_SELECTORS = false;// to avoid multiple calls on multiple presets selector engine
-	bool DISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
-	// updating some params before save will trigs also the group callbacks
-	// so we disable this callbacks just in case params updatings are required
-
-	//--
-
 public:
 
 	//----
@@ -553,6 +571,10 @@ public:
 	}
 	void savePreset(int p, int _indexGroup);// save preset for extra groups by code from ofApp
 
+	//--
+
+	// for external layout or other workflow purposes
+
 	//--------------------------------------------------------------
 	int getCurrentPreset()// get index of selected preset
 	{
@@ -565,10 +587,6 @@ public:
 		if (_group < groups.size()) _presetIndex = PRESETS_Selected_Index[_group];
 		return _presetIndex;
 	}
-
-	//--
-
-	// for external layout or other workflow purposes
 
 	//--------------------------------------------------------------
 	int getAmoutPresetsMain()// get main group amount of presets
@@ -666,12 +684,6 @@ public:
 
 	//--
 
-private:
-	// draws group name into clicker boxes panel
-	bool SHOW_GroupName = true;
-
-	//--
-
 	// easy callback
 	// used when preset has not changed but we like to retrig
 	bool bMustTrig = false;
@@ -690,9 +702,10 @@ public:
 		}
 	}
 
-	//--
+	//----
 
 	// browser for standalone presets
+
 private:
 	// load presets from preset folder, not from favorites presets folders
 	void doLoadMainGroupPreset(string name);
@@ -701,7 +714,7 @@ private:
 	void buildStandalonePresets();// standalone presets splitted from favourites presets
 	//void doCheckPresetsFolderIsEmpty();
 
-	//-
+	//----
 
 public:
 	// BUG: 
@@ -808,9 +821,9 @@ public:
 		return SHOW_ClickPanel;
 	}
 
-	//--
+	//----
 
-#pragma mark - SETTINGS
+	// file paths
 
 	//--------------------------------------------------------------
 	void setPath_UserKit_Folder(string folder);// path for root container folder. must be called before setup()!
@@ -828,6 +841,11 @@ public:
 	//	ofLogNotice(__FUNCTION__) << str;
 	//	path_Root = str;
 	//}
+
+	//----
+
+	// modes
+
 	//--------------------------------------------------------------
 	void setModeAutoLoad(bool b)
 	{
@@ -849,20 +867,17 @@ public:
 		bAutosaveTimer = b;
 	}
 
-	//--
+	//----
+
+	int mainGroupAmtPresetsFav;// amount of box-clickable handled presets on current favorites/kit
 
 public:
 	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
-	//vector<ofParameter<int>> PRESETS_Selected_Index;// extra groups preset selector (current)
+	
+//vector<ofParameter<int>> PRESETS_Selected_Index;// extra groups preset selector (current)
 
 private:
 	int PRESET_Selected_IndexMain_PRE = -1;// used as callback
-
-	//--
-
-public:
-	// switch on or off the control with the keys
-	void setToggleKeysControl(bool active);
 
 	//--
 
@@ -887,21 +902,27 @@ public:
 	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
 
 private:
+	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
+	ofParameter<bool> MODE_Browser_NewPreset;
+	ofParameter<bool> SHOW_ClickPanel;// to allow include as toggle parameter into external gui
+	ofParameter<bool> SHOW_ImGui;
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
 	ofParameter<bool> SHOW_ImGui_Selectors;
 	ofParameter<bool> SHOW_Help;
-	ofParameter<bool> MODE_Browser_NewPreset;
 	ofParameter<bool> SHOW_Gui_AdvancedControl;
 	ofParameter<bool> ENABLE_Keys;
-	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
 	ofParameter<bool> bThemDark{ "THEME DARK", false };
 	ofParameter<glm::vec2> Gui_Internal_Position;
 
 private:
-	string helpInfo;
-	void buildHelpInfo();
-
+	bool SHOW_GroupName = true;// draws group name into clicker boxes panel
 	bool debugClicker = true;
+
+	//--
+
+private:
+	string helpInfo;// info text to display shortcuts or path settings
+	void buildHelpInfo();
 
 	//--
 
@@ -1003,7 +1024,7 @@ public:
 		doStandaloneRefreshPresets();
 	}
 
-#endif// end browser
+#endif
 
 	//----
 
@@ -1065,16 +1086,21 @@ private:
 	bool bKeys;// enabled keys
 	bool keysNotActivated;
 
-	//save
+	//save keys
 	int modeKeySave;// save mod key
 	bool bKeySave;// save mod key state
 
 	// swap selected preset with the currently clicked (i.e: 4 -> 7  &  4 <- 7)
 	int modKeySwap;// swap mod key 
 	bool bKeySwap;// swap mod key state
+	
+public:
+	// switch on or off the control with the keys
+	void setToggleKeysControl(bool active);
 
-	bool ENABLE_KeysArrowBrowse = true;// allow browse by arrows keys by default
+	//--
 
+	bool ENABLE_KeysArrowBrowse = true;// allow browse presets by arrows keys by default
 public:
 	//--------------------------------------------------------------
 	void setEnableKeysArrowBrowse(bool b)
@@ -1084,10 +1110,11 @@ public:
 
 	//--
 
-	void mousePressed(int x, int y);
-	bool lastMouseButtonState;
+	// mouse
 
-	int mainGroupAmtPresetsFav;// amount of box-clickable handled presets on current favorites/kit [8]
+	void mousePressed(int x, int y);
+private:
+	bool lastMouseButtonState;
 
 	//----
 
@@ -1099,21 +1126,24 @@ private:
 
 	//-
 
-	// callback
+	// callbacks
+
 private:
 	void Changed_Params_Control(ofAbstractParameter &e);
 	void Changed_Params_UserKit(ofAbstractParameter &e);
 
 	//-
 
+private:
+	bool DISABLE_CALLBACKS_SELECTORS = false;// to avoid multiple calls on multiple presets selector engine
+	bool DISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
+	// updating some params before save will trigs also the group callbacks
+	// so we disable this callbacks just in case params updatings are required
+
+	//--
+
 public:
 	ofParameterGroup params_Control;// to use on external gui
-
-private:
-	ofParameter<bool> SHOW_ClickPanel;// to allow include as toggle parameter into external gui
-
-public:
-	ofParameter<bool> SHOW_ImGui;
 
 private:
 	ofParameter<bool> bSave;
@@ -1133,12 +1163,12 @@ private:
 	ofParameterGroup params_Randomizer;
 	ofParameterGroup params_Custom;
 
-	//--
+	//----
 
 	// custom path for preset favourites
+private:
 	ofParameter<bool> bPathDirCustom;
 	ofParameter<string> pathDirCustom;
-
 public:
 	// set custom path
 	void doFileDialogProcessSelection(ofFileDialogResult openFileResult);
@@ -1147,16 +1177,16 @@ public:
 
 	//--
 
-private:
 	// timer autosave
+private:
 	ofParameter<bool> bAutosaveTimer;
 	uint64_t timerLast_Autosave = 0;
 	int timeToAutosave = 9000;
 
 	//--
 
-private:
 	// check if a folder path exist and creates one if not
+private:
 	// many times when you try to save a file, this is not possible and do not happens bc the container folder do not exist
 	//--------------------------------------------------------------
 	void CheckFolder(string _path)

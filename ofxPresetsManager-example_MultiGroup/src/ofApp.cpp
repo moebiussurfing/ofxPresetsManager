@@ -56,19 +56,37 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::setupParameters()
 {
+	//--
+
+	// some useful OF tips with parameters
+
+	// 1. we can exclude some parameters that we don't want to handle into presets
+	// ie: exclude all colors
+	color0.setSerializable(false);
+	color1.setSerializable(false);
+	color2.setSerializable(false);
+	color3.setSerializable(false);
+
+	// 2. we can link some parameters to make them change together
+	// must call makeRefereceTo before params are setted below
+	// note that setted names will be overrided
+	size2.makeReferenceTo(sizeObjects3);
+
+	//--
+
 	// 0. ofParameterGroup's
 
 	// group0
-	params0.setName("paramsGroup0");
+	params0.setName("paramsGroup0");// this is our parent group
 	params0.add(color0.set("color0", ofColor(ofColor::red), ofColor(0, 0), ofColor(255, 255)));
 	params0.add(numShapes0.set("numShapes0", 5, 1, 5));
 	params0.add(shapeType0.set("shapeType0", 1, 1, 2));
 	params0.add(separation0.set("separation0", 100, 1, 100));
 	params0.add(shapeSide0.set("shapeSide0", 50, 5, 200));
-	params0_Nested.setName("styleGroup");// another nested group
+	params0_Nested.setName("styleGroup");// we can use nested groups as ofParameterGroup
 	params0_Nested.add(fill0.set("fill0", true));
 	params0_Nested.add(lineWidth0.set("lineWidth0", 1, 0.1, 10));
-	params0.add(params0_Nested);// main preset settings container
+	params0.add(params0_Nested);// add a group to the parent group
 
 	// group1
 	params1.setName("paramsGroup1");
@@ -90,34 +108,32 @@ void ofApp::setupParameters()
 	params3.add(sizeObjects3.set("sizeObjects3", 5, 1, 200));
 	params3.add(separationObjects3.set("separationObjects3", 50, 5, 100));
 
-	// we can exclude some parameters that we don't want to handle into preset
-	// ie: exclude all colors
-	color0.setSerializable(false);
-	color1.setSerializable(false);
-	color2.setSerializable(false);
-	color3.setSerializable(false);
-
 	//--
 
-	// 1. guis
+	// 1. local guis
 
 	// a local ofApp gui to show/edit our settings/parameters
 	// we will see here show how our params/settings changes when using the presets manager
+
+	int x = 5;
+	int y = 10;
+	int w = 200 + 5;
+
 	gui0.setup("ofApp0");
 	gui0.add(params0);
-	gui0.setPosition(5, 10);
+	gui0.setPosition(x, y);
 
 	gui1.setup("ofApp1");
 	gui1.add(params1);
-	gui1.setPosition(5 + 1 * (5 + 200), 10);
+	gui1.setPosition(x + 1 * w, y);
 
 	gui2.setup("ofApp2");
 	gui2.add(params2);
-	gui2.setPosition(5 + 2 * (5 + 200), 10);
+	gui2.setPosition(x + 2 * w, y);
 
 	gui3.setup("ofApp3");
 	gui3.add(params3);
-	gui3.setPosition(5 + 3 * (5 + 200), 10);
+	gui3.setPosition(x + 3 * w, y);
 }
 
 //--------------------------------------------------------------

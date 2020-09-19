@@ -36,7 +36,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	displayNameUserKit = "ofxPresetsManager";
 
-	//-
+	//----
 
 	filenameMainSettings = "ofxPresetsManagerSettings" + fileExtension;// default user preset name
 
@@ -65,7 +65,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//// root folder
 	//path_Root = "myAddon";
 
-	//-
+	//----
 
 	// layout
 	setSizeBox_PresetClicker(80);
@@ -83,10 +83,12 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//--
 
-	// this multidimension is for multiple gui/groups (feature not implemented!)
+	// reserve memory data
+
 	groups.reserve(NUM_MAX_GROUPS);
 	keys.reserve(NUM_MAX_GROUPS);
 	PRESETS_Selected_Index.reserve(NUM_MAX_GROUPS);
+	groupRandomizers.reserve(NUM_MAX_GROUPS);
 
 	//--
 
@@ -238,15 +240,19 @@ ofxPresetsManager::ofxPresetsManager()
 	bPathDirCustom.set("MODE CUSTOM PATH", false);
 	pathDirCustom.set("Path", "DEFAULT_DATA_PATH");
 
+	//--
+
 	// randomizer settings
+#ifdef INCLUDE_RANDOMIZER
 	params_RandomizerSettings.add(params_Randomizer);
 	params_RandomizerSettings.add(params_Editor);
+#endif
 
 	//-
 
-	//mainly to measure performance when using hd files vs faster memory vectors
+	// mainly to measure performance when using hd files vs faster memory vectors
 #ifdef INCLUDE_PERFORMANCE_MEASURES
-	//specify a target framerate
+	// specify a target framerate
 	//TIME_SAMPLE_SET_FRAMERATE(fps);
 	//TIME_SAMPLE_ENABLE();
 	TIME_SAMPLE_SET_AVERAGE_RATE(0.1);
@@ -265,13 +271,13 @@ ofxPresetsManager::ofxPresetsManager()
 void ofxPresetsManager::setup()
 {
 	ofLogNotice(__FUNCTION__);
-	//filenameMainSettings will use default name "ofxPresetsManagerSettings.xml"
+	// filenameMainSettings will use default name "ofxPresetsManagerSettings.xml"
 	setup(bAllowGroupSelector);// split folders by group name
 	//setup(true);// split folders by group name
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::setup(std::string name)/// must be called after adding params group
+void ofxPresetsManager::setup(std::string name)// must be called after adding params group
 {
 	ofLogNotice(__FUNCTION__) << name;
 	filenameMainSettings = name + fileExtension;
@@ -280,7 +286,7 @@ void ofxPresetsManager::setup(std::string name)/// must be called after adding p
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::setup(std::string name, bool _buildGroupSelector)/// must be called after adding params group
+void ofxPresetsManager::setup(std::string name, bool _buildGroupSelector)// must be called after adding params group
 {
 	ofLogNotice(__FUNCTION__) << name << " " << _buildGroupSelector;
 	filenameMainSettings = name + fileExtension;
@@ -322,8 +328,8 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 			params_GroupMainSelector.add(PRESETS_Selected_Index[i]);
 		}
 
-		// TODO: should allow customize keys..
-		//create the extra main selector
+		// TODO: should allow customize keys to avoid coollide with 0,1,2..
+		// create the extra main selector
 		add(params_GroupMainSelector, { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
 
 		//--
@@ -331,15 +337,11 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		// TODO:
 		// store the main slector only!
 		int _last = groups.size() - 1;
-		//int _last = PRESETS_Selected_Index.size() - 1;
 		GROUP_Selected_Index.setMax(groupsSizes[_last] - 1);
-		//GROUP_Selected_Index.setMax(_last);
-		//GROUP_Selected_Index = PRESETS_Selected_Index[_last];
-		GROUP_Selected_Index.makeReferenceTo(PRESETS_Selected_Index[_last]);
+		GROUP_Selected_Index.makeReferenceTo(PRESETS_Selected_Index[_last]);//link
 
-		//excludes all selectors except the main one. the other will be saved as preset
+		// excludes all selectors except the main one. the other will be saved as preset
 		params_PRESETS_Selected.setSerializable(false);
-
 	}
 
 	//--
@@ -352,30 +354,31 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	//--
 
-	//callback
+#ifdef INCLUDE_RANDOMIZER
+	// callback
 	ofAddListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
+#endif
 
 	//----
 
-	//ImGui
+	// ImGui
 
 #ifndef MODE_ImGui_EXTERNAL
 	ImGui_Setup();
 #endif
 
 #ifdef INCLUDE_ofxUndoSimple
-	undoStringParams = groups[0].toString();//TODO: main group only
+	// TODO: main group only
+	undoStringParams = groups[0].toString();
 #endif
 
-	//--
+	//----
 
-	bSplitGroupFolders.setSerializable(false);//force to this mode. do not store
+	bSplitGroupFolders.setSerializable(false);// force to this mode. do not store
 
-	// some params that we want to store
 	params_Options.add(MODE_Editor);
 	params_Options.add(bSplitGroupFolders);
 	params_Control.add(params_Options);
-
 	params_Gui.add(bThemDark);
 	params_Gui.add(SHOW_ImGui_Selectors);
 	params_Gui.add(SHOW_ImGui_PresetsParams);
@@ -393,9 +396,23 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	GROUP_Selected_Index.set("GROUP SELECTOR", 0, 0, groupsSizes[_last] - 1);
 	params_UserKitSettings.add(GROUP_Selected_Index);
 
-	//--
+	//----
 
-	//TODO:
+	// TODO:
+	// user gui selector
+	GuiGROUP_Selected_Index.set("GUI GROUP SELECTOR", 0, 0, groups.size() - 1);
+	GuiGROUP_Selected_Index.addListener(this, &ofxPresetsManager::ChangedGuiGroup);
+
+	groupRandomizers.resize(groups.size());
+
+	for (int i = 0; i < groups.size(); i++) {
+		groupRandomizers[i].setup(groups[i], groupsSizes[i] - 1);// pass the group and the amount of presets
+		// TODO: must pass the keys list!
+	}
+
+	//----
+
+	// TODO:
 	//int _last = (groups.size() - 1);
 	//int _last = (PRESETS_Selected_Index.size() - 1);
 	////params_UserKitSettings.add(PRESETS_Selected_Index[_last]);//includes group selector only!
@@ -491,6 +508,12 @@ void ofxPresetsManager::startup()
 	//}
 
 	//--
+
+	// TODO:
+	// refresh in other another better place?...
+	buildHelpInfo();
+
+	//--
 }
 
 //--------------------------------------------------------------
@@ -500,94 +523,104 @@ void ofxPresetsManager::update(ofEventArgs & args)
 	{
 		//-
 
-		// randomizer timer mode latch
-		if (bIsDoneLoad &&
-			MODE_LatchTrig &&
-			!PLAY_RandomizeTimer) {
+		// randomize timer
 
-			randomizerTimer = ofGetElapsedTimeMillis();
-
-			if (PRESET_Selected_IndexMain != 0)
-			{
-				bLatchRun = true;
-			}
-			else
-			{
-				bLatchRun = false;
-			}
+		for (int i = 0; i < groups.size(); i++) {
+			groupRandomizers[i].update();
 		}
 
 		//-
 
-		// randomize timer
-		if (PLAY_RandomizeTimer || MODE_LatchTrig)//?
-		{
-			uint32_t _time = ofGetElapsedTimeMillis();
-			timerRandomizer = _time - randomizerTimer;
-
-			if (PRESET_Selected_IndexMain < presetsRandomModeShort.size()) {// avoid out of range
-
-				// A. long mode
-				if (presetsRandomModeShort[PRESET_Selected_IndexMain] == false)// get if it's marked as shor or long by default (false)
-				{
-					if (timerRandomizer >= randomizeDuration)
-					{
-						if (MODE_LatchTrig) {
-							if (bLatchRun) {
-								loadPreset(0);
-							}
-						}
-						else {
-							bRandomizeIndex = true;// TODO: can be improved calling directly the method! bc this flag will be readed on update()..
-						}
-					}
-				}
-
-				// B. short mode
-				else {
-					if (timerRandomizer >= randomizeDurationShort)
-					{
-						if (MODE_LatchTrig) {
-							if (bLatchRun) {
-								loadPreset(0);
-							}
-						}
-						else {
-							bRandomizeIndex = true;
-						}
-					}
-				}
-			}
-		}
-
-		//--
-
-		// 1.0.2 draw progress bar for the randomizer timer
-		//// long mode
-		//if (presetsRandomModeShort[PRESET_Selected_IndexMain - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
-		//// short mode
-		//else _prog = timerRandomizer / (float)randomizeDurationShort;
-		// bar relative only to long
-		if (PLAY_RandomizeTimer) {
-			randomizerProgress = 100 * timerRandomizer / (float)randomizeDuration;
-		}
-		else if (MODE_LatchTrig) {
-			if (bLatchRun) {
-				randomizerProgress = 100 * timerRandomizer / (float)randomizeDuration;
-			}
-			else {
-				randomizerProgress = 0;
-			}
-		}
-		else {
-			randomizerProgress = 0;
-		}
-		_prog = randomizerProgress / 100.f;
-
-		//--
-
-		// TODO:
-		//_totalDicesStr = "/ " + ofToString(randomizedDice.getMax());
+		//#ifdef INCLUDE_RANDOMIZER
+		//
+		//// randomizer timer mode latch
+		//
+		//if (bIsDoneLoad &&
+		//	MODE_LatchTrig &&
+		//	!PLAY_RandomizeTimer) {
+		//	randomizerTimer = ofGetElapsedTimeMillis();
+		//
+		//	if (PRESET_Selected_IndexMain != 0)
+		//	{
+		//		bLatchRun = true;
+		//	}
+		//	else
+		//	{
+		//		bLatchRun = false;
+		//	}
+		//}
+		//
+		////----
+		//
+		//		if (PLAY_RandomizeTimer || MODE_LatchTrig)//?
+		//		{
+		//			uint32_t _time = ofGetElapsedTimeMillis();
+		//			timerRandomizer = _time - randomizerTimer;
+		//
+		//			if (PRESET_Selected_IndexMain < presetsRandomModeShort.size()) {// avoid out of range
+		//
+		//				// A. long mode
+		//				if (presetsRandomModeShort[PRESET_Selected_IndexMain] == false)// get if it's marked as shor or long by default (false)
+		//				{
+		//					if (timerRandomizer >= randomizeDuration)
+		//					{
+		//						if (MODE_LatchTrig) {
+		//							if (bLatchRun) {
+		//								loadPreset(0);
+		//							}
+		//						}
+		//						else {
+		//							bRandomizeIndex = true;// TODO: can be improved calling directly the method! bc this flag will be readed on update()..
+		//						}
+		//					}
+		//				}
+		//
+		//				// B. short mode
+		//				else {
+		//					if (timerRandomizer >= randomizeDurationShort)
+		//					{
+		//						if (MODE_LatchTrig) {
+		//							if (bLatchRun) {
+		//								loadPreset(0);
+		//							}
+		//						}
+		//						else {
+		//							bRandomizeIndex = true;
+		//						}
+		//					}
+		//				}
+		//			}
+		//		}
+		//
+		//		//--
+		//
+		//		// 1.0.2 draw progress bar for the randomizer timer
+		//		//// long mode
+		//		//if (presetsRandomModeShort[PRESET_Selected_IndexMain - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
+		//		//// short mode
+		//		//else _prog = timerRandomizer / (float)randomizeDurationShort;
+		//		// bar relative only to long
+		//		if (PLAY_RandomizeTimer) {
+		//			randomizerProgress = 100 * timerRandomizer / (float)randomizeDuration;
+		//		}
+		//		else if (MODE_LatchTrig) {
+		//			if (bLatchRun) {
+		//				randomizerProgress = 100 * timerRandomizer / (float)randomizeDuration;
+		//			}
+		//			else {
+		//				randomizerProgress = 0;
+		//			}
+		//		}
+		//		else {
+		//			randomizerProgress = 0;
+		//		}
+		//		_prog = randomizerProgress / 100.f;
+		//
+		//		//--
+		//
+		//		// TODO:
+		//		//_totalDicesStr = "/ " + ofToString(randomizedDice.getMax());
+		//#endif
 
 		//-
 
@@ -604,6 +637,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//--
 
 		// TODO: this disables the easycallback feature..
+		// TODO: callback should listen to selected preset in all groups! now only on main-one..
 		if (isDoneLoad())
 		{
 			ofLogNotice(__FUNCTION__) << groups[0].getName() << " PRESET " << PRESET_Selected_IndexMain << " LOADED.";
@@ -619,13 +653,10 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//if (!MODE_Browser_NewPreset && autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
 		//{
 		//	ofLogNotice(__FUNCTION__) << "[AUTOSAVE]";
-
 		//	//app settings
 		//	save_ControlSettings();
-
 		//	//save current preset
 		//	doSave(PRESET_Selected_IndexMain);
-
 		//	if (!MODE_MemoryLive)
 		//	{
 		//		//MODE A: from hd file
@@ -636,9 +667,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//		//MODE B: direct from memory
 		//		save_AllKit_FromMemory();
 		//	}
-
 		//	//-
-
 		//	//auto save timer
 		//	timerLast_Autosave = ofGetElapsedTimeMillis();
 		//}
@@ -739,7 +768,7 @@ void ofxPresetsManager::drawPresetClicker()
 		ofFill();
 		ofSetColor(_colorBg);
 
-		// TODO:
+		// TODO: hide save button when not required
 		//int _saveBut;
 		//if (!autoSave) _saveBut = 1; else _saveBut = 0;
 		//int _extraButs = (i == groups.size() - 1 ? (1 + _saveBut) : 1);// only main group has gui toggle button
@@ -1044,9 +1073,9 @@ string ofxPresetsManager::getGroupPath(int _index)
 //--
 
 //--------------------------------------------------------------
-void ofxPresetsManager::add(ofParameterGroup _params, int _amt_presets)//main adder
+void ofxPresetsManager::add(ofParameterGroup _params, int _amt_presets)
 {
-	//main adder of a ofParameterGroup for preset management
+	// main adder of a ofParameterGroup's but kind of internal yet. TODO: fix to work as public..
 
 	ofLogNotice(__FUNCTION__) << "Added group " << _params.getName() << " with " << _amt_presets << " presets";
 	int _size = groups.size();
@@ -1054,7 +1083,7 @@ void ofxPresetsManager::add(ofParameterGroup _params, int _amt_presets)//main ad
 	groups.push_back(_params);//each enqueued group of params handles all presets of each added ofParameterGroup
 	groupsSizes.push_back(_amt_presets);
 
-	//preset selectors
+	// preset selectors
 	ofParameter<int> p{ groups[_size].getName(), 0, 0,  _amt_presets - 1 };
 	//p.setSerializable(false);//exclude saving all slectors except last one, that will be enalbed at setup
 	PRESETS_Selected_Index.push_back(p);
@@ -1062,23 +1091,24 @@ void ofxPresetsManager::add(ofParameterGroup _params, int _amt_presets)//main ad
 
 	//-
 
-	//TODO:
+	// TODO:
 
-	//A. first and main group 0 
-	//has special control helpers, panel, randomizers and features
+	// A. first and main group 0 
+	// has special control helpers, panel, randomizers and features
 
 	if (_size == 0)
 	{
-		//update control gui panel params
+		// update control gui panel params
 		mainGroupAmtPresetsFav = _amt_presets;
 		PRESET_Selected_IndexMain.setMax(mainGroupAmtPresetsFav - 1);
 
+		// memory mode
 		mainGroupMemoryFilesPresets.resize(mainGroupAmtPresetsFav);
 
 		//-
 
-		//used for path folder and xml presets file names
-		ofLogNotice(__FUNCTION__) << "group 0 : " << groups[0].getName();
+		//// used for path folder and xml/json presets file names
+		//ofLogNotice(__FUNCTION__) << "group 0 : " << groups[0].getName();
 
 		//-
 
@@ -1086,21 +1116,25 @@ void ofxPresetsManager::add(ofParameterGroup _params, int _amt_presets)//main ad
 		load_AllKit_ToMemory();
 	}
 
-	////B. extra groups
+	//// B. extra groups
 	////else
 	//{
 	//	//ofParameter<int> p{ groups[_size].getName(), 0, 0,  groupsSizes[_size] - 1};
 	//	//PRESETS_Selected_Index.push_back(p);
 	//	//ofLogNotice(__FUNCTION__) << "group " << _size << " : " << groups[_size].getName();
 	//}
+
+	//-
+
+	ofLogNotice(__FUNCTION__) << "group " << (_size) << " : " << groups[_size].getName();
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::add(ofParameterGroup _params, initializer_list<int> _keysList)
 {
-	//adds a ofParameterGroup for preset management with the list of trigger keys
+	// adds a ofParameterGroup for preset management with the list of trigger keys
 
-	add(_params, _keysList.size());//re add with known size affter counted passed key triggers
+	add(_params, _keysList.size());// re add with known size affter counted passed key triggers
 
 	keys.resize(groups.size());
 	int i = groups.size() - 1;
@@ -1600,8 +1634,6 @@ void ofxPresetsManager::setModeKeySwap(int key)
 	modKeySwap = key;
 }
 
-#pragma mark - OF_LISTENERS
-
 //----------------------------------------------------------------
 void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 {
@@ -1683,6 +1715,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				doRandomizeEditor();
 			}
 		}
+
 #ifdef INCLUDE_ofxUndoSimple
 		if (key == 'A')// previous
 		{
@@ -1855,24 +1888,28 @@ void ofxPresetsManager::removeKeysListeners()
 	ofRemoveListener(ofEvents().keyReleased, this, &ofxPresetsManager::keyReleased);
 }
 
+//----
+
 //-----------------------------------------------------
 void ofxPresetsManager::mousePressed(int x, int y)
 {
+	// this method will get what box button is pressed: in wich group-row (y) and wich preset (x)
+
 	x = x - clicker_Pos.x;
 	y = y - clicker_Pos.y;
 
 	int xIndex = x / cellSize;
 	int yIndex = y / cellSize;
 
-	//Index -1 for out (left) of boxes
+	// Index -1 for out (left) of boxes
 	xIndex = (x > 0) ? xIndex : -1;
 	yIndex = (y > 0) ? yIndex : -1;
 
 	//-
 
-	//1. presets buttons & save button
+	// 1. presets buttons & save button
 
-	//click is iniside allowed presets/groups
+	// click is iniside allowed presets/groups
 	if ((yIndex >= 0) && (yIndex < (int)groups.size()))//valid group
 	{
 		//avoid outer panel logs. only into the group row levels
@@ -1885,7 +1922,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 		if ((xIndex >= 0) && (xIndex < groupsSizes[yIndex]))
 		{
-			//1. mod save controlled by modeKeySave
+			// 1. mod save controlled by modeKeySave
 			if (bKeySave)
 			{
 				ofLogNotice(__FUNCTION__) << "SAVE";
@@ -1898,7 +1935,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 			//-
 
-			//2. mod swap controlled by modKeySwap
+			// 2. mod swap controlled by modKeySwap
 			else if (bKeySwap)
 			{
 				ofLogNotice(__FUNCTION__) << "SWAP";
@@ -1908,7 +1945,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 			//-
 
-			//3. no mod keys: normal load (not any key modifier pressed)
+			// 3. no mod keys: normal load (not any key modifier pressed)
 			else
 			{
 				ofLogNotice(__FUNCTION__) << "LOAD";
@@ -1919,7 +1956,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 		//-
 
-		//2. last button (save button)
+		// 2. last button (save button)
 		else if (xIndex == groupsSizes[yIndex])
 		{
 			//TODO: hide save buttons if autoSave 
@@ -1934,16 +1971,13 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 	//-
 
-	//3. toggle show gui (on main group only)
-	//TODO: hide save button on autosave mode...
+	// 3. toggle show gui (on main group only)
+	// TODO: hide save button on autosave mode...
 	//int _offset = (autoSave ? 0 : 1);
 	int _offset = 1;
 
 	int _i;
-	//if (bBuildGroupSelector) _i = groups.size() - 1;
-	//else _i = 0;
 	if (bBuildGroupSelector) _i = groups.size() - 1;
-	//else _i = 1;
 	else if (groups.size() > 1) _i = 1;
 	else _i = 0;
 
@@ -1954,6 +1988,10 @@ void ofxPresetsManager::mousePressed(int x, int y)
 		ofLogNotice(__FUNCTION__) << "SHOW_ImGui : " << (SHOW_ImGui ? "TRUE" : "FALSE");
 	}
 }
+
+//----
+
+// helpers 
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doCloneRight(int pIndex)
@@ -2047,14 +2085,15 @@ void ofxPresetsManager::doCloneAll()
 	}
 }
 
+//----
+
 //--------------------------------------------------------------
 void ofxPresetsManager::setToggleKeysControl(bool active)
 {
 	bKeys = active;
 }
 
-#pragma mark - CALLBACKS
-
+#ifdef INCLUDE_RANDOMIZER
 //--------------------------------------------------------------
 void ofxPresetsManager::Changed_Params_Editor(ofAbstractParameter &e)
 {
@@ -2095,6 +2134,7 @@ void ofxPresetsManager::Changed_Params_Editor(ofAbstractParameter &e)
 		}
 	}
 }
+#endif
 
 //--------------------------------------------------------------
 void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
@@ -2299,9 +2339,9 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		if (false) {}
 
-		//-
+		//--
 
-		//mode edit
+		// mode edit: when false, we disabled autosave to allow performance do faster
 		else if (name == MODE_Editor.getName())
 		{
 			ofLogNotice(__FUNCTION__) << "MODE EDITOR: " << (MODE_Editor.get() ? "TRUE" : "FALSE");
@@ -2310,14 +2350,14 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 			//--
 
-			//TODO:
-			//refresh..
-			buildHelpInfo();
+			//// TODO:
+			//// refresh in other another better place?...
+			//buildHelpInfo();
 		}
 
 		//--
 
-		//save load
+		// save load
 		else if (name == "SAVE" && bSave)
 		{
 			ofLogNotice(__FUNCTION__) << "SAVE: " << e;
@@ -2332,91 +2372,7 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//	doLoad(PRESET_Selected_IndexMain);
 		//}
 
-		//-
-
-		//helper tools
-		else if (name == "CLONE >" && bCloneRight)
-		{
-			ofLogNotice(__FUNCTION__) << "CLONE >: " << e;
-			bCloneRight = false;
-			doCloneRight(PRESET_Selected_IndexMain);
-		}
-		else if (name == "CLONE ALL" && bCloneAll)
-		{
-			ofLogNotice(__FUNCTION__) << "CLONE ALL: " << e;
-			bCloneAll = false;
-			doCloneAll();
-		}
-
-		//--
-
-		////clicker
-		//else if (name == "SHOW CLICK PANEL" && !SHOW_ClickPanel.get())
-		//{
-		//	SHOW_ImGui = false;//workflow
-		//}
-		//randomizer
-		else if (name == "RANDOMIZE INDEX" && bRandomizeIndex)
-		{
-			ofLogNotice(__FUNCTION__) << "RANDOMIZE !";
-			bRandomizeIndex = false;
-			doRandomizeWichSelectedPreset();
-		}
-		//play randomizer
-		else if (name == PLAY_RandomizeTimer.getName())
-		{
-			ofLogNotice(__FUNCTION__) << "MODE TIMER: " << e;
-			if (PLAY_RandomizeTimer) {
-				MODE_LatchTrig = false;
-			}
-		}
-		//latch
-		else if (name == "MODE LATCH")
-		{
-			ofLogNotice(__FUNCTION__) << "MODE LATCH: " << e;
-			if (MODE_LatchTrig) {
-				PLAY_RandomizeTimer = false;
-			}
-		}
-		//else if (name == "SPEED FACTOR")
-		//{
-		//	ofLogNotice(__FUNCTION__) << "SPEED FACTOR: " << e;
-		//	//randomizeDuration = randomize_MAX_DURATION * (1.f - randomizeSpeedF);
-		//	randomizeDuration.setMax(randomizeSpeedF * randomize_MAX_DURATION);
-		//	randomizeDurationShort.setMax(randomizeSpeedF * randomize_MAX_DURATION_SHORT);
-		//}
-		else if (name == randomizeDuration.getName())
-		{
-			ofLogNotice(__FUNCTION__) << "DURATION: " << e;
-
-			randomizeDurationBpm = 60000.f / randomizeDuration;
-
-			//randomizeSpeedF = -((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
-			////randomizeSpeedF = 1 + (randomizeDuration / (float)randomize_MAX_DURATION);
-		}
-		else if (name == randomizeDurationBpm.getName())
-		{
-			ofLogNotice(__FUNCTION__) << "BPM: " << e;
-
-			//60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
-			randomizeDuration = 60000.f / randomizeDurationBpm;
-			randomizeDurationShort = randomizeDuration / 4.f;
-		}
-#ifdef DEBUG_randomTest
-		else if (name == "DICE")//when debug enabled: set dice by user to test
-		{
-			ofLogNotice(__FUNCTION__) << "DICE: " << e;
-			doRandomizeWichSelectedPreset();
-		}
-#endif
-		else if (name == "RESET DICES" && bResetDices)
-		{
-			ofLogNotice(__FUNCTION__) << "RESET DICES: " << e;
-			doResetDices();
-			bResetDices = false;
-		}
-
-		//--
+		//----
 
 		else if (name == "LOAD TO MEMORY" && loadToMemory)
 		{
@@ -2448,12 +2404,6 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 
 		//--
 
-		//else if (name == "ENABLE KEYS")
-		//{
-		//}
-
-		//--
-
 		//		else if (name == "GUI ImGui POSITION")
 		//		{
 		//			ofLogVerbose(__FUNCTION__) << "GUI BROWSER POSITION: " << e;
@@ -2474,38 +2424,124 @@ void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
 		//			//y = ofClamp(ImGui_Position.get().y, 0, ofGetHeight() - 20);
 		//			//ImGui_Position = glm::vec2(x, y);
 		//		}
-		//--
 
-		//--
+//		//----
 
-		//all other widgets/params
-		else
-		{
-			//check if changed prob sliders
-			{
-				bool doDices = false;
-				for (int i = 0; i < presetsRandomFactor.size(); i++)
-				{
-					if (name == "PROB " + ofToString(i)) {
-						doDices = true;//TODO: would be faster making return on first 'true'
-					}
-				}
-				if (doDices)
-				{
-					//sum total dices/all probs
-					dicesTotalAmount = 0;
-					for (auto &p : presetsRandomFactor) {
-						dicesTotalAmount += p.get();
-					}
-					randomizedDice.setMax(dicesTotalAmount - 1);
+#ifdef INCLUDE_RANDOMIZER
+//
+//		//helper tools
+//		else if (name == "CLONE >" && bCloneRight)
+//		{
+//			ofLogNotice(__FUNCTION__) << "CLONE >: " << e;
+//			bCloneRight = false;
+//			doCloneRight(PRESET_Selected_IndexMain);
+//		}
+//		else if (name == "CLONE ALL" && bCloneAll)
+//		{
+//			ofLogNotice(__FUNCTION__) << "CLONE ALL: " << e;
+//			bCloneAll = false;
+//			doCloneAll();
+//		}
+//
+//		//--
+//
+//		////clicker
+//		//else if (name == "SHOW CLICK PANEL" && !SHOW_ClickPanel.get())
+//		//{
+//		//	SHOW_ImGui = false;//workflow
+//		//}
+//		//randomizer
+//		else if (name == "RANDOMIZE INDEX" && bRandomizeIndex)
+//		{
+//			ofLogNotice(__FUNCTION__) << "RANDOMIZE !";
+//			bRandomizeIndex = false;
+//			doRandomizeWichSelectedPreset();
+//		}
+//		//play randomizer
+//		else if (name == PLAY_RandomizeTimer.getName())
+//		{
+//			ofLogNotice(__FUNCTION__) << "MODE TIMER: " << e;
+//			if (PLAY_RandomizeTimer) {
+//				MODE_LatchTrig = false;
+//			}
+//		}
+//		//latch
+//		else if (name == "MODE LATCH")
+//		{
+//			ofLogNotice(__FUNCTION__) << "MODE LATCH: " << e;
+//			if (MODE_LatchTrig) {
+//				PLAY_RandomizeTimer = false;
+//			}
+//		}
+//		//else if (name == "SPEED FACTOR")
+//		//{
+//		//	ofLogNotice(__FUNCTION__) << "SPEED FACTOR: " << e;
+//		//	//randomizeDuration = randomize_MAX_DURATION * (1.f - randomizeSpeedF);
+//		//	randomizeDuration.setMax(randomizeSpeedF * randomize_MAX_DURATION);
+//		//	randomizeDurationShort.setMax(randomizeSpeedF * randomize_MAX_DURATION_SHORT);
+//		//}
+//		else if (name == randomizeDuration.getName())
+//		{
+//			ofLogNotice(__FUNCTION__) << "DURATION: " << e;
+//
+//			randomizeDurationBpm = 60000.f / randomizeDuration;
+//
+//			//randomizeSpeedF = -((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
+//			////randomizeSpeedF = 1 + (randomizeDuration / (float)randomize_MAX_DURATION);
+//		}
+//		else if (name == randomizeDurationBpm.getName())
+//		{
+//			ofLogNotice(__FUNCTION__) << "BPM: " << e;
+//
+//			//60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
+//			randomizeDuration = 60000.f / randomizeDurationBpm;
+//			randomizeDurationShort = randomizeDuration / 4.f;
+//		}
+//#ifdef DEBUG_randomTest
+//		else if (name == "DICE")//when debug enabled: set dice by user to test
+//		{
+//			ofLogNotice(__FUNCTION__) << "DICE: " << e;
+//			doRandomizeWichSelectedPreset();
+//		}
+//#endif
+//		else if (name == "RESET DICES" && bResetDices)
+//		{
+//			ofLogNotice(__FUNCTION__) << "RESET DICES: " << e;
+//			doResetDices();
+//			bResetDices = false;
+//		}
+//
+//		//--
+//
+//		//all other widgets/params
+//		else
+//		{
+//			//check if changed prob sliders
+//			{
+//				bool doDices = false;
+//				for (int i = 0; i < presetsRandomFactor.size(); i++)
+//				{
+//					if (name == "PROB " + ofToString(i)) {
+//						doDices = true;//TODO: would be faster making return on first 'true'
+//					}
+//				}
+//				if (doDices)
+//				{
+//					//sum total dices/all probs
+//					dicesTotalAmount = 0;
+//					for (auto &p : presetsRandomFactor) {
+//						dicesTotalAmount += p.get();
+//					}
+//					randomizedDice.setMax(dicesTotalAmount - 1);
+//
+//					ofLogNotice(__FUNCTION__) << "dicesTotalAmount: " << dicesTotalAmount;
+//				}
+//			}
+//		}
+#endif
 
-					ofLogNotice(__FUNCTION__) << "dicesTotalAmount: " << dicesTotalAmount;
-				}
-			}
-		}
 	}
 }
-#pragma mark - SETTINGS
 
 //--------------------------------------------------------------
 void ofxPresetsManager::load_ControlSettings()
@@ -2540,12 +2576,11 @@ void ofxPresetsManager::load_ControlSettings()
 	string path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
 
 	bool b2 = ofxSurfingHelpers::loadGroup(params_RandomizerSettings, path2);
-
-	ofLogNotice(__FUNCTION__) << "Loaded " << path2 << " " << (b2 ? "DONE" : "FAILED");
-	if (!b2)
-	{
-		ofLogError(__FUNCTION__) << "FILE '" << path << "' NOT FOUND!";
-	}
+	//ofLogNotice(__FUNCTION__) << "Loaded " << path2 << " " << (b2 ? "DONE" : "FAILED");
+	//if (!b2)
+	//{
+	//	ofLogError(__FUNCTION__) << "FILE '" << path << "' NOT FOUND!";
+	//}
 
 	//--
 
@@ -2559,8 +2594,8 @@ void ofxPresetsManager::load_ControlSettings()
 
 	b = ofxSurfingHelpers::loadGroup(params_UserKitSettings, path3);
 
-	if (!b) ofLogError(__FUNCTION__) << "CANT LOAD FILE '" << path3 << "'!";
-	else ofLogNotice(__FUNCTION__) << "LOADED " << path3;
+	//if (!b) ofLogError(__FUNCTION__) << "CANT LOAD FILE '" << path3 << "'!";
+	//else ofLogNotice(__FUNCTION__) << "LOADED " << path3;
 
 	//--
 
@@ -2592,8 +2627,8 @@ void ofxPresetsManager::save_ControlSettings()
 		bool b;
 
 		b = ofxSurfingHelpers::saveGroup(params_Control, path);
-		if (!b) ofLogError(__FUNCTION__) << "CANT SAVE FILE '" << path << "'!";
-		else ofLogNotice(__FUNCTION__) << "SAVED " << path;
+		//if (!b) ofLogError(__FUNCTION__) << "CANT SAVE FILE '" << path << "'!";
+		//else ofLogNotice(__FUNCTION__) << "SAVED " << path;
 
 		//-
 
@@ -2601,8 +2636,8 @@ void ofxPresetsManager::save_ControlSettings()
 		string path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
 
 		b = ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path2);
-		if (!b) ofLogError(__FUNCTION__) << "CANT SAVE FILE '" << path2 << "'!";
-		else ofLogNotice(__FUNCTION__) << "SAVED " << path2;
+		//if (!b) ofLogError(__FUNCTION__) << "CANT SAVE FILE '" << path2 << "'!";
+		//else ofLogNotice(__FUNCTION__) << "SAVED " << path2;
 
 		//--
 
@@ -2610,8 +2645,8 @@ void ofxPresetsManager::save_ControlSettings()
 		string path3 = filenameMainSettings;
 
 		b = ofxSurfingHelpers::saveGroup(params_UserKitSettings, path3);
-		if (!b) ofLogError(__FUNCTION__) << "CANT SAVE FILE '" << path3 << "'!";
-		else ofLogNotice(__FUNCTION__) << "SAVED " << path3;
+		//if (!b) ofLogError(__FUNCTION__) << "CANT SAVE FILE '" << path3 << "'!";
+		//else ofLogNotice(__FUNCTION__) << "SAVED " << path3;
 
 		//--
 	}
@@ -2716,8 +2751,8 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 #ifdef USE_JSON
 #endif
 #endif
+		}
 	}
-}
 }
 
 //--------------------------------------------------------------
@@ -2792,8 +2827,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
+		}
 	}
-}
 }
 
 ////--------------------------------------------------------------
@@ -2815,12 +2850,15 @@ void ofxPresetsManager::exit()
 	removeKeysListeners();
 	ofRemoveListener(params_UserKitSettings.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_UserKit);
 	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
+	
 	ofRemoveListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 	ofRemoveListener(params_Editor.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Editor);
 
 	// TODO: required?
 	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
 	ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
+
+	GuiGROUP_Selected_Index.removeListener(this, &ofxPresetsManager::ChangedGuiGroup);
 
 	//--
 
@@ -3206,7 +3244,7 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 
 			if (SHOW_Gui_AdvancedControl)
 			{
-				// show ALL the addon params! mainly to debug..
+				// show ALL the addon internal params! mainly to debug all settings or to use without ImGui..
 				ofxImGui::AddGroup(params_Control, settings);
 			}
 
@@ -3264,7 +3302,7 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo = "";
 	helpInfo += "USER-KIT\n";
 	helpInfo += "  " + displayNameUserKit;
-	helpInfo += "          ";
+	helpInfo += "         ";
 #ifdef USE_XML
 	helpInfo += ".xml";
 #else
@@ -3278,22 +3316,19 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo += getGroupsPaths();
 	helpInfo += "                            ";
 
-	helpInfo += "\n";
-	helpInfo += "MOUSE|KEYS    LOAD\n";
-	helpInfo += "CTRL          SAVE/COPY\n";
-	helpInfo += "ALT           SWAP";
-
 	// TODO:
 	//bool bKeysinfo = false;
-	//if (!bKeysinfo)
-	//{
-	//}
-	//else
+	//if (bKeysinfo)
 	//{
 	//	//keys[i][k]
 	//	helpInfo += "[keys " + ofToString((char)keys[0][0]) + "|";
 	//	helpInfo += ofToString((char)keys[0][keys[0].size() - 1]) + "]";
 	//}
+
+	helpInfo += "\n";
+	helpInfo += "MOUSE|KEYS    LOAD\n";
+	helpInfo += "CTRL          SAVE/COPY\n";
+	helpInfo += "ALT           SWAP";
 }
 
 //--------------------------------------------------------------
@@ -3323,7 +3358,9 @@ void ofxPresetsManager::buildDefaultUserKit() {
 	//--
 
 	// radomizers
+#ifdef INCLUDE_RANDOMIZER
 	buildRandomizers();
+#endif
 }
 
 // TODO:
@@ -3334,7 +3371,7 @@ void ofxPresetsManager::buildCustomUserKit() {
 
 	//-
 
-	//reduce to name only
+	// reduce to name only
 	string str = path_UserKit_Folder;
 	std::string temp = R"(\)";//use '\' as splitter...should use '/' too bc Windows/macOS compatibility..
 	auto ss = ofSplitString(path_UserKit_Folder, temp);
@@ -3342,25 +3379,25 @@ void ofxPresetsManager::buildCustomUserKit() {
 
 	//-
 
-	//TODO:
-	//load standalone presets for browser gui
+	// TODO:
+	// load standalone presets for browser gui
 	buildStandalonePresets();
 
 	//-
 
-	//load randomizers settings
+	// load randomizers settings
 	string path2;
 	bool b2;
 	path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
 	b2 = ofxSurfingHelpers::loadGroup(params_RandomizerSettings, path2);
 	ofLogNotice(__FUNCTION__) << "Loaded " << path2 << " " << (b2 ? "DONE" : "FAILED");	//--
 
-	//build help info
+	// build help info
 	buildHelpInfo();
 
 	//--
 
-	//radomizers
+	// radomizers
 	buildRandomizers();
 }
 
@@ -3372,10 +3409,10 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 
 	//--
 
-	//autosave all group presets
+	// autosave all group presets
 	if (autoSave)
 	{
-		//seve selected presets
+		// save selected presets
 		for (int g = 0; g < groups.size(); g++)//iterate each group
 		{
 			save(PRESETS_Selected_Index[g], g);
@@ -3384,7 +3421,7 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 
 	//--
 
-	//save randomizers settings
+	// save randomizers settings
 	string path2;
 	bool b2;
 	path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
@@ -3407,20 +3444,20 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 
 	//--
 
-	//autoload all group presets
+	// autoload all group presets
 	if (autoLoad)
 	{
-		//must disable autosave to avoid overwrite between user-kits
+		// must disable autosave to avoid overwrite between user-kits
 		bool bPre = autoSave;
 		autoSave = false;
 
-		//set selected first preset o last/main group
+		// set selected first preset o last/main group
 		int _last = groups.size() - 1;
 		PRESETS_Selected_Index[_last] = 0;
 		load(PRESETS_Selected_Index[_last], _last);
 		autoSave = bPre;
 
-		////load all group selected presets
+		//// load all group selected presets
 		//for (int g = 0; g < groups.size(); g++)//iterate each group
 		//{
 		//	load(PRESETS_Selected_Index[g], g);
@@ -3788,23 +3825,28 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_WindowContent(ofxImGui::Settings &settings)
 {
-	//0. tittle
+	// 0. tittle
 	//ImGui::Text("PRESETS MANAGER");
 	//ImGui::NewLine();
 
-	//main panel
+	// main panel
 	ImGui_Draw_MainPanel(settings);
 
-	//1. basic controls
+	// 1. basic controls
 	if (MODE_Editor) ImGui_Draw_Basic(settings);
 
-	////2. preset params preview
+	//// 2. preset params preview
 	//ImGui_Draw_PresetPreview(settings);
 
-	//3. advanced params
-	ImGui_Draw_GroupRandomizers(settings);
 
-	//4. browser params
+	// 3. randomizers
+	ofxImGui::AddParameter(GuiGROUP_Selected_Index);
+	groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers(settings);
+
+	//ImGui_Draw_GroupRandomizers(settings);
+
+
+	// 4. standalone presets browser
 	if (MODE_Editor) {
 		ImGui_Draw_Browser(settings);
 	}
@@ -4785,7 +4827,8 @@ void ofxPresetsManager::buildRandomizers()
 //--------------------------------------------------------------
 void ofxPresetsManager::setupRandomizer()
 {
-	//select a random preset (from 1 to 8)
+	// select a random preset (index) of the group (vector)
+
 	//params_Randomizer.setName("Randomizer");
 	bRandomizeIndex.set("RANDOMIZE INDEX", false);
 	PLAY_RandomizeTimer.set("PLAY RANDOMIZER", false);
@@ -4800,36 +4843,37 @@ void ofxPresetsManager::setupRandomizer()
 	//randomizeSpeedF.set("SPEED FACTOR", 1.f, 0.01f, 2.f);
 	bResetDices.set("RESET DICES", false);
 
-	//exclude
+	// exclude
 	bRandomizeIndex.setSerializable(false);
 	bResetDices.setSerializable(false);
 	//randomizeDuration.setSerializable(false);
 
-	//erase
+	// erase
 	presetsRandomFactor.clear();
 	presetsRandomModeShort.clear();
 	randomFactorsDices.clear();
-	//resize
+
+	// resize
 	presetsRandomFactor.resize(mainGroupAmtPresetsFav);
 	presetsRandomModeShort.resize(mainGroupAmtPresetsFav);
 	randomFactorsDices.resize(mainGroupAmtPresetsFav);
 
 	int i;
 
-	//ints as probability for every preset
+	// ints as probability for every preset
+	i = 0;
 	ofParameterGroup _gOdds{ "PRESETS PROBS" };
 	_gOdds.clear();
-	i = 0;
 	for (auto &p : presetsRandomFactor) {
 		string n = "PROB " + ofToString(i++);
 		p.set(n, 5, 0, 10);
 		_gOdds.add(p);
 	}
 
-	//toggles to enable short duration mode
+	// toggles to enable short duration mode
+	i = 0;
 	ofParameterGroup _gShort{ "MODE DURATION SHORT" };
 	_gShort.clear();
-	i = 0;
 	for (auto &p : presetsRandomModeShort) {
 		string n = "SHORT " + ofToString(i++);
 		p.set(n, false);
@@ -4838,7 +4882,6 @@ void ofxPresetsManager::setupRandomizer()
 
 	params_Randomizer.clear();
 	params_Randomizer.setName("FAVOURITES");
-	//params_Randomizer.clear();//should split to avoid call again when setted custom path...
 	params_Randomizer.add(PLAY_RandomizeTimer);
 	params_Randomizer.add(bRandomizeIndex);
 	params_Randomizer.add(randomizeDuration);
@@ -4855,3 +4898,233 @@ void ofxPresetsManager::setupRandomizer()
 #endif
 }
 #endif
+
+//--------------------------------------------------------------
+void ofxPresetsManager::ChangedGuiGroup(int & index) {
+	//ofLogWarning(__FUNCTION__) << "GuiGROUP_Selected_Index: " << GuiGROUP_Selected_Index;
+	ofLogWarning(__FUNCTION__) << "GuiGROUP_Selected_Index: " << index;
+
+}
+
+//
+//
+////--------------------------------------------------------------
+//void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
+//{
+//	if (!DISABLE_CALLBACKS)
+//	{
+//		string name = e.getName();
+//
+//		//if ((name != "exclude") //&&
+//		//	//(name != ImGui_Position.getName()) &&
+//		//	//(name != ImGui_Size.getName())// &&
+//		//	//(name != "DICE") &&
+//		//	//(name != "PRESET")
+//		//	)
+//		{
+//			ofLogNotice(__FUNCTION__) << name << " : " << e;
+//		}
+//
+//		if (false) {}
+//
+//		//--
+//
+//		// mode edit: when false, we disabled autosave to allow performance do faster
+//		else if (name == MODE_Editor.getName())
+//		{
+//			ofLogNotice(__FUNCTION__) << "MODE EDITOR: " << (MODE_Editor.get() ? "TRUE" : "FALSE");
+//
+//			autoSave = MODE_Editor.get();
+//
+//			//--
+//
+//			//// TODO:
+//			//// refresh in other another better place?...
+//			//buildHelpInfo();
+//		}
+//
+//		//--
+//
+//		// save load
+//		else if (name == "SAVE" && bSave)
+//		{
+//			ofLogNotice(__FUNCTION__) << "SAVE: " << e;
+//			bSave = false;
+//			//doSave(PRESET_Selected_IndexMain);
+//			save(PRESET_Selected_IndexMain, 0);
+//		}
+//		//else if (name == "LOAD" && bLoad)
+//		//{
+//		//	ofLogNotice(__FUNCTION__) << "LOAD: " << e;
+//		//	bLoad = false;
+//		//	doLoad(PRESET_Selected_IndexMain);
+//		//}
+//
+//		//----
+//
+//		else if (name == "LOAD TO MEMORY" && loadToMemory)
+//		{
+//			ofLogNotice(__FUNCTION__) << "loadToMemory:" << e;
+//			loadToMemory = false;
+//			load_AllKit_ToMemory();
+//		}
+//		else if (name == "SAVE FROM MEMORY" && saveFromMemory)
+//		{
+//			ofLogNotice(__FUNCTION__) << "saveFromMemory:" << e;
+//			saveFromMemory = false;
+//			save_AllKit_FromMemory();
+//		}
+//		else if (name == "MODE MEMORY")
+//		{
+//			ofLogNotice(__FUNCTION__) << "MODE MEMORY: " << e;
+//
+//			if (MODE_MemoryLive)
+//			{
+//				//reload all xml preset files to memory
+//				load_AllKit_ToMemory();
+//			}
+//			else
+//			{
+//				//save all xml preset files to disk from memory
+//				save_AllKit_FromMemory();
+//			}
+//		}
+//
+//		//--
+//
+//		//		else if (name == "GUI ImGui POSITION")
+//		//		{
+//		//			ofLogVerbose(__FUNCTION__) << "GUI BROWSER POSITION: " << e;
+//		//
+//		//			////clamp inside window
+//		//			//float x, y;
+//		//			//x = ofClamp(ImGui_Position.get().x, 0, ofGetWidth() - 200);
+//		//			//y = ofClamp(ImGui_Position.get().y, 0, ofGetHeight() - 20);
+//		//			//ImGui_Position = glm::vec2(x, y);
+//		//		}
+//		//		else if (name == "GUI ImGui SIZE")
+//		//		{
+//		//			ofLogVerbose(__FUNCTION__) << "GUI BROWSER SIZE: " << e;
+//		//
+//		//			////clamp inside window
+//		//			//float x, y;
+//		//			//x = ofClamp(ImGui_Position.get().x, 0, ofGetWidth() - 200);
+//		//			//y = ofClamp(ImGui_Position.get().y, 0, ofGetHeight() - 20);
+//		//			//ImGui_Position = glm::vec2(x, y);
+//		//		}
+//
+////		//----
+////
+////		// helper tools
+////		else if (name == "CLONE >" && bCloneRight)
+////		{
+////			ofLogNotice(__FUNCTION__) << "CLONE >: " << e;
+////			bCloneRight = false;
+////			doCloneRight(PRESET_Selected_IndexMain);
+////		}
+////		else if (name == "CLONE ALL" && bCloneAll)
+////		{
+////			ofLogNotice(__FUNCTION__) << "CLONE ALL: " << e;
+////			bCloneAll = false;
+////			doCloneAll();
+////		}
+////
+////		//--
+////
+////		////clicker
+////		//else if (name == "SHOW CLICK PANEL" && !SHOW_ClickPanel.get())
+////		//{
+////		//	SHOW_ImGui = false;//workflow
+////		//}
+////		//randomizer
+////		else if (name == "RANDOMIZE INDEX" && bRandomizeIndex)
+////		{
+////			ofLogNotice(__FUNCTION__) << "RANDOMIZE !";
+////			bRandomizeIndex = false;
+////			doRandomizeWichSelectedPreset();
+////		}
+////		//play randomizer
+////		else if (name == PLAY_RandomizeTimer.getName())
+////		{
+////			ofLogNotice(__FUNCTION__) << "MODE TIMER: " << e;
+////			if (PLAY_RandomizeTimer) {
+////				MODE_LatchTrig = false;
+////			}
+////		}
+////		//latch
+////		else if (name == "MODE LATCH")
+////		{
+////			ofLogNotice(__FUNCTION__) << "MODE LATCH: " << e;
+////			if (MODE_LatchTrig) {
+////				PLAY_RandomizeTimer = false;
+////			}
+////		}
+////		//else if (name == "SPEED FACTOR")
+////		//{
+////		//	ofLogNotice(__FUNCTION__) << "SPEED FACTOR: " << e;
+////		//	//randomizeDuration = randomize_MAX_DURATION * (1.f - randomizeSpeedF);
+////		//	randomizeDuration.setMax(randomizeSpeedF * randomize_MAX_DURATION);
+////		//	randomizeDurationShort.setMax(randomizeSpeedF * randomize_MAX_DURATION_SHORT);
+////		//}
+////		else if (name == randomizeDuration.getName())
+////		{
+////			ofLogNotice(__FUNCTION__) << "DURATION: " << e;
+////
+////			randomizeDurationBpm = 60000.f / randomizeDuration;
+////
+////			//randomizeSpeedF = -((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
+////			////randomizeSpeedF = 1 + (randomizeDuration / (float)randomize_MAX_DURATION);
+////		}
+////		else if (name == randomizeDurationBpm.getName())
+////		{
+////			ofLogNotice(__FUNCTION__) << "BPM: " << e;
+////
+////			//60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
+////			randomizeDuration = 60000.f / randomizeDurationBpm;
+////			randomizeDurationShort = randomizeDuration / 4.f;
+////		}
+////#ifdef DEBUG_randomTest
+////		else if (name == "DICE")//when debug enabled: set dice by user to test
+////		{
+////			ofLogNotice(__FUNCTION__) << "DICE: " << e;
+////			doRandomizeWichSelectedPreset();
+////		}
+////#endif
+////		else if (name == "RESET DICES" && bResetDices)
+////		{
+////			ofLogNotice(__FUNCTION__) << "RESET DICES: " << e;
+////			doResetDices();
+////			bResetDices = false;
+////		}
+////
+////		//--
+////
+////		//all other widgets/params
+////		else
+////		{
+////			//check if changed prob sliders
+////			{
+////				bool doDices = false;
+////				for (int i = 0; i < presetsRandomFactor.size(); i++)
+////				{
+////					if (name == "PROB " + ofToString(i)) {
+////						doDices = true;//TODO: would be faster making return on first 'true'
+////					}
+////				}
+////				if (doDices)
+////				{
+////					//sum total dices/all probs
+////					dicesTotalAmount = 0;
+////					for (auto &p : presetsRandomFactor) {
+////						dicesTotalAmount += p.get();
+////					}
+////					randomizedDice.setMax(dicesTotalAmount - 1);
+////
+////					ofLogNotice(__FUNCTION__) << "dicesTotalAmount: " << dicesTotalAmount;
+////				}
+////			}
+////		}
+//
+////----
+	//}
+//}

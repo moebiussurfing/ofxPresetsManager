@@ -1,10 +1,91 @@
 #pragma once
 #include "ofMain.h"
 #include "ofxSurfingHelpers.h"
+#include "ofxImGui.h"
 
 class groupRandomizer
 {
-	//--
+
+public:
+	groupRandomizer();
+	~groupRandomizer();
+
+	void setup(ofParameterGroup &g, int _numPresets);
+	void update();
+	void draw();
+	void keyPressed(int key);
+	void exit();
+
+	ofParameterGroup group;
+
+	//----
+
+public:
+	ofParameterGroup params_HelperTools;
+	ofParameterGroup params_Randomizer;
+	ofParameterGroup params_Control;// to use on external gui
+	void Changed_Params_Control(ofAbstractParameter &e);
+
+	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
+	//ofParameterGroup params_Randomizer;
+	void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
+	int mainGroupAmtPresetsFav;// amount of box-clickable handled presets on current favorites/kit
+	void loadPreset(int p)
+	{
+		ofLogNotice(__FUNCTION__) << "p: " << p;
+	}
+	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
+	vector<int> keys;// queued trigger keys for each group ? (all presets) (size of)
+
+	// helper tools
+	ofParameter<bool> bCloneRight;
+	ofParameter<bool> bCloneAll;
+	void doCloneRight(int pIndex);// clone from selected preset to all others to the right
+	void doCloneAll();// clone all presets from the current selected
+	void doPopulateFavs();// fast populate random presets around all favs
+	void doSwap(int groupIndex, int fromIndex, int toIndex);
+
+	// helpers
+public:
+	//--------------------------------------------------------------
+	void doGetFavsToFilesBrowser()// save all favorites presets to the browser (archive) folder
+	{
+		ofLogNotice(__FUNCTION__);
+
+		//// browser path
+		//string browser_path;
+		//browser_path = path_UserKit_Folder + "/" + path_PresetsStandalone;
+
+		//// browser number of files
+		//// iterate all presets
+		//for (int i = 0; i < mainGroupAmtPresetsFav; i++)
+		//{
+		//	std::string pathSrc;
+		//	std::string pathDst;
+
+		//	pathSrc = getPresetPath(groups[0].getName(), i);
+		//	boost::filesystem::path bPath(pathSrc);
+
+		//	//string pathFolder = ofToString(bPath.parent_path());
+		//	string fileName = ofToString(bPath.filename().generic_string());
+		//	pathDst = browser_path + "/" + fileName;
+
+		//	ofLogNotice(__FUNCTION__) << "pathSrc: " << pathSrc;
+		//	ofLogNotice(__FUNCTION__) << "pathDst: " << pathDst;
+
+		//	ofFile file;
+		//	file.copyFromTo(pathSrc, pathDst, true, true);// relative, overwrite
+
+		//}
+
+		////--
+
+		//// refresh files
+		//doStandaloneRefreshPresets();
+	}
+
+	//----
+
 
 	// randomizer
 
@@ -37,6 +118,7 @@ private:
 	vector<ofParameter<int>> presetsRandomFactor;// probability of every preset
 	vector<ofParameter<bool>> presetsRandomModeShort;// mode short for ebvery preset
 	vector<int> randomFactorsDices;
+
 	void buildRandomizers();
 	void setupRandomizer();// engine to get a random between all posible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
 	void doRandomizeWichSelectedPreset();// randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
@@ -57,26 +139,34 @@ private:
 
 	// system to select what params of current selected preset to: clone, randomize etc
 	void setupRandomizerEditor();
-	vector<ofParameter<bool>> editorPresets;
-	ofParameterGroup params_Editor;
-	ofParameterGroup params_Editor_Toggles;
 	void addGroupToEditor(ofParameterGroup& group);// queue all contained params inside the paramGroup and nested too
 	void Changed_Params_Editor(ofAbstractParameter &e);
 	void doRandomizeEditor();// randomize params of current selected preset
 	void doRandomizeEditorGroup(ofParameterGroup& group);// randomize params of current selected preset
+	vector<ofParameter<bool>> editorPresets;
+	ofParameterGroup params_Editor;
+	ofParameterGroup params_Editor_Toggles;
 
 	//--
 
 public:
 	ofParameterGroup params_randomizer;
 
+private:
+	ofParameter<int> randomizerProgress{ "%", 0, 0, 100 };
+	float _prog;
+
 	//--
+
+	//----
+	//
+	// API
+	//
+	//----
 
 	// randomizer helpers
 
 public:
-	ofParameter<int> randomizerProgress{ "%", 0, 0, 100 };
-	float _prog;
 
 	//--------------------------------------------------------------
 	void setPlayRandomizerTimer(bool b)// play randomizer timer
@@ -119,7 +209,7 @@ public:
 	}
 
 
-
+	bool DISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
 
 };
 
