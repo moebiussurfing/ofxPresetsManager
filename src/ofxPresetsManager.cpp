@@ -14,8 +14,10 @@ ofxPresetsManager::ofxPresetsManager()
 
 #ifdef USE_XML
 	fileExtension = ".xml";
-	#elifdef USE_JSON
-		fileExtension = ".json";
+#else
+#ifdef USE_JSON
+	fileExtension = ".json";
+#endif
 #endif
 
 	//-
@@ -924,8 +926,8 @@ void ofxPresetsManager::drawPresetClicker()
 
 		// 8. help info text: 
 		{
-			bool bLateralPosition = false;// false = on top
-			bool bLeftPosition = true;
+			bool bLateralPosition = true;// false = on top of clicker
+			bool bLeftPosition = true;// left or right. only if lateral pos true
 
 			debugClicker = SHOW_Help.get();
 			if (debugClicker && ENABLE_Keys && (i == 0))
@@ -939,30 +941,31 @@ void ofxPresetsManager::drawPresetClicker()
 				if (!bLateralPosition)
 				{
 					float hh = ofxSurfingHelpers::getHeightBBtextBoxed(myFont, ss);
-					x = 5 + pad;
+					x += 4 + pad;
 					y -= hh + pad;
 				}
 
-				//// B. lateral position right to the boxes
-				//else
-				//{
-				//	if (!bLeftPosition)
-				//	{
-				//		x = cellSize * i + pad;
-				//		y = ySave - sizeTTF;
-				//	}
-				//	else {
-				//		float strW;
-				//		if (myFont.isLoaded())
-				//		{
-				//			strW = myFont.getStringBoundingBox(ss, 0, 0).getWidth();
-				//			strW += myFont.getStringBoundingBox(groups[0].getName(), 0, 0).getWidth();
-				//			strW += 50;
-				//		}
-				//		x = -strW;
-				//		y = ySave;
-				//	}
-				//}
+				// B. lateral position right to the boxes
+				else
+				{
+					float _w;
+					y = ySave + pad;
+
+					if (!bLeftPosition)// on the right
+					{
+						_w = getPresetClicker_Width();
+						x = _w + pad + 30;
+					}
+					else {// on the left
+						if (myFont.isLoaded())
+						{
+							_w = ofxSurfingHelpers::getWidthBBtextBoxed(myFont, ss);
+							_w += myFont.getStringBoundingBox(groups[0].getName(), 0, 0).getWidth();
+							_w += 70;
+						}
+						x = -_w;
+					}
+				}
 
 				ofxSurfingHelpers::drawTextBoxed(myFont, ss, x, y, _colorText, _colorBg, true, _colorButton);
 			}
@@ -2709,7 +2712,9 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 		{
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
-			#elifdef USE_JSON
+#else
+#ifdef USE_JSON
+#endif
 #endif
 		}
 	}
@@ -2789,8 +2794,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
-		}
 	}
+}
 }
 
 ////--------------------------------------------------------------
@@ -3261,10 +3266,7 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo = "";
 	helpInfo += "USER-KIT\n";
 	helpInfo += "  " + displayNameUserKit;
-
-	helpInfo += "\n\nPATHS\n  ";
-	helpInfo += getGroupsPaths();
-	helpInfo += "                            ";
+	helpInfo += "          ";
 #ifdef USE_XML
 	helpInfo += ".xml";
 #else
@@ -3272,6 +3274,11 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo += ".json";
 #endif
 #endif
+	//helpInfo += "                            ";
+
+	helpInfo += "\n\nPATHS\n  ";
+	helpInfo += getGroupsPaths();
+	helpInfo += "                            ";
 
 	helpInfo += "\n";
 	helpInfo += "MOUSE|KEYS    LOAD\n";
