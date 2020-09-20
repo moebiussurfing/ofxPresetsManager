@@ -24,7 +24,7 @@ void groupRandomizer::setSelectorTARGET(ofParameter<int> &index) {
 	ofLogNotice(__FUNCTION__) << "target registered: " << index.getName();
 
 	// TODO:
-	//PRESET_Selected_IndexMain.makeReferenceTo(index);
+	//PRESET_Selected_IndexMain.makeReferenceTo(index);// TODO: it brokes saveing well..
 	//PRESET_Selected_IndexMain.makeReferenceTo(selectorTARGET);
 
 	// TODO:
@@ -224,8 +224,10 @@ int groupRandomizer::doRandomizeWichSelectedPresetCheckChanged()
 //--------------------------------------------------------------
 void groupRandomizer::doRandomizeWichSelectedPreset()
 {
+#ifdef DEBUG_randomTest
 	//ofLogNotice(__FUNCTION__);
 	ofLogNotice(__FUNCTION__) << "---------------------------------------------------";
+#endif
 
 	// we avoid that the random is the same previous preset (TODO:improve). we want force change, not stay in the same. 
 	// bc sometimes the random gets the same current preset.
@@ -234,7 +236,9 @@ void groupRandomizer::doRandomizeWichSelectedPreset()
 
 	int r = doRandomizeWichSelectedPresetCheckChanged();
 
+#ifdef DEBUG_randomTest
 	ofLogNotice(__FUNCTION__) << "dicesTotalAmounts: " << ofToString(dicesTotalAmount);
+#endif
 
 	// TODO:
 	// if there's only one posible dice.. cant avoid repetition. so force avoid toggle to false
@@ -686,15 +690,18 @@ void groupRandomizer::exit()
 //--------------------------------------------------------------
 void groupRandomizer::update()
 {
-	//--
+	//----
 
 	// randomizer timer mode latch
 
 	// callback
+
+	// TODO:
+	// latch mode
 	if (bIsDoneLoad &&
 		MODE_LatchTrig &&
-		!PLAY_RandomizeTimer) {
-
+		!PLAY_RandomizeTimer)
+	{
 		bIsDoneLoad = false;
 		randomizerTimer = ofGetElapsedTimeMillis();
 
@@ -736,17 +743,14 @@ void groupRandomizer::update()
 			}
 
 			// B. short mode
-			else {
+			else
+			{
 				if (timerRandomizer >= randomizeDurationShort)
 				{
 					if (MODE_LatchTrig) {
-						if (bLatchRun) {
-							loadPreset(0);
-						}
+						if (bLatchRun) loadPreset(0);
 					}
-					else {
-						bRandomizeIndex = true;
-					}
+					else bRandomizeIndex = true;
 				}
 			}
 		}
@@ -1247,7 +1251,7 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 		//	//(name != "PRESET")
 		//	)
 		{
-			ofLogNotice(__FUNCTION__) << "name: " <<group.getName() << " " << name << ": " << e;
+			ofLogNotice(__FUNCTION__) << "name: " << group.getName() << " " << name << ": " << e;
 		}
 
 		if (false) {}
@@ -1367,17 +1371,15 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 		else
 		{
 			// check if changed prob sliders
+			bool _doDices = false;
+			for (int i = 0; i < presetsRandomFactor.size(); i++)
 			{
-				bool _doDices = false;
-				for (int i = 0; i < presetsRandomFactor.size(); i++)
-				{
-					if (name == "PROB " + ofToString(i)) {
-						ofLogNotice(__FUNCTION__) << name << " : " << e;
-						_doDices = true;// TODO: would be faster making return on first 'true'
-					}
+				if (name == "PROB " + ofToString(i)) {
+					ofLogNotice(__FUNCTION__) << name << " : " << e;
+					_doDices = true;// TODO: would be faster making return on first 'true'
 				}
-				if (_doDices) doDices();
 			}
+			if (_doDices) doDices();
 		}
 	}
 }

@@ -19,7 +19,7 @@ public:
 	void setSelectorTARGET(ofParameter<int> &index);
 
 	void update();
-	void draw();
+	//void draw();
 	void keyPressed(int key);
 	void exit();
 

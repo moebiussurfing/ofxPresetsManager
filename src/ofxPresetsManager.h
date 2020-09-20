@@ -11,18 +11,15 @@
 /// my idea is to allow use ofParameterGroup's as managed content instead of ofxPanel
 
 //---
-//
-//	TODO:
-//
-///	++++		add randomizer engine to user main group selector
-///					select wich group is the target to randomizer/main group extras
-///	++			add big toggle to edit/live modes: enables undo, autosave, memory mode..etc
-///	++++		open/save dialog to project session single file.
+///
+///	TODO:
+///
+///	++++	fix backward target pointer from group to addon class
+///	++			fix ImGui helper big toggle to useful edit/live modes: enables undo, autosave, memory mode..etc
+///	++++		open/save dialog to project User-Kit session in a single file.
 ///					or allowed to all the groups?
-///	+			add draggable rectangle to move/resize clicker
-//
+///
 ///	++		randomize editor preset
-///				make for multigroup
 ///				preset mini engine. ABC dropdown list for randomizers
 ///				could add also several randomizer settings presets. selectable by dropdown list..
 ///				add limit range min/max to randomize
@@ -30,24 +27,21 @@
 ///				clone using editor toggles to avoid clone disabled toggle params
 ///				mode state to allow overwrite only enabled toggle params
 ///	+++		add engine to create all preset files if it's a new empty project
-///				add setter to enable randomize wich params
+///				add setter to enable some params to randomize
 ///				call populate. disable debug_display red info
-//
-///	+		change file format from xml to json
+///
+///	+		add undo to all the groups
 ///	++		add ofColor to ImGui helpers vs ofFloatColor
 ///	++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
 ///	++		performance: 
 ///				check memory_mode. memory mode to extra groups too
-///				check workflow: when playing randomizer disable autosave
-///				check disable autosave
 ///	+		repair autosave timer. exclude log
-///	+		add workflow to not collide manual preset click with randomizer timer
 ///	+		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
 ///				or add simpler class but compatible with preset files kits
-///	+		could make tween when changing params using lerp or ofxKeyTween...
-///	+		add undo to all the groups
-//
+///	+		could make tween when changing params using ofLerp or ofxKeyTween...
+///	+		add draggable rectangle to move/resize clicker
+///
 //---
 
 #pragma once

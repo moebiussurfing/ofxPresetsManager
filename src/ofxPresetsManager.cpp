@@ -418,6 +418,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	for (int i = 0; i < groups.size(); i++)
 	{
+		// register to "pointer back"
 		groupRandomizers[i].setSelectorTARGET(PRESETS_Selected_Index[i]);
 
 		// set the name for the randomizer settings file
@@ -756,13 +757,13 @@ void ofxPresetsManager::drawPresetClicker()
 
 	//-
 
-	ofColor _colorText;// lines and text color
-	ofColor _colorButton;// bg selected button
-	ofColor _colorBg;// background color
-
 	float _round = 3.0f;
 	float _pad = 3.0f;
 	string _label;
+
+	ofColor _colorText;// lines and text color
+	ofColor _colorButton;// bg selected button
+	ofColor _colorBg;// background color
 
 	//-
 
@@ -3135,6 +3136,10 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 {
 	if (ofxImGui::BeginTree("MAIN CONTROL", settings))
 	{
+		// mode edit
+		ofxImGui::AddParameter(MODE_Editor);
+		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30);// TODO: repair. collides when multiple toggles..
+
 		//---
 
 		// main group
@@ -3150,9 +3155,6 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 		//ImGui::Text(str.c_str());
 
 		//---
-
-		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30);// TODO: repair. collides when multiple toggles..
-		ofxImGui::AddParameter(MODE_Editor);
 
 		//ImGui::SameLine();
 		if (ImGui::TreeNode("PANELS"))
@@ -3275,7 +3277,7 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo = "";
 	helpInfo += "USER-KIT\n";
 	helpInfo += "  " + displayNameUserKit;
-	helpInfo += "         ";
+	helpInfo += "       HH ";
 #ifdef USE_XML
 	helpInfo += ".xml";
 #else
@@ -3287,7 +3289,7 @@ void ofxPresetsManager::buildHelpInfo() {
 
 	helpInfo += "\n\nPATHS\n  ";
 	helpInfo += getGroupsPaths();
-	helpInfo += "                            ";
+	//helpInfo += "                            ";
 
 	// TODO:
 	//bool bKeysinfo = false;
@@ -3299,11 +3301,13 @@ void ofxPresetsManager::buildHelpInfo() {
 	//}
 
 	helpInfo += "\n";
-	helpInfo += "COMMANDS\n";
-	helpInfo += "MOUSE|KEYS        LOAD\n";
-	helpInfo += "CTRL              SAVE/COPY\n";
-	helpInfo += "ALT               SWAP\n";
-	helpInfo += "ARROWS            NAVIGATE";
+	helpInfo += "KEYS\n";
+	helpInfo += "MOUSE|KEYS            LOAD\n";
+	helpInfo += "CTRL                  SAVE/COPY\n";
+	helpInfo += "ALT                   SWAP\n";
+	helpInfo += "ARROWS                NAVIGATE\n";
+	helpInfo += "H                     HELP\n";
+	helpInfo += "G                     GUI";
 }
 
 //--------------------------------------------------------------
