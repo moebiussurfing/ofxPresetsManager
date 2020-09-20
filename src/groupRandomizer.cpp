@@ -882,9 +882,7 @@ void groupRandomizer::keyPressed(int key)
 void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 {
 	// 1. randomizers
-	string str = group.getName();
-	//string str = "RANDOMIZER";
-	//string str = "RANDOMIZERS " + group.getName();
+	string str = "Group: " + group.getName();
 
 	//if (ImGui::TreeNode("GROUP RANDOMIZERS"))
 	//if (ofxImGui::BeginTree(str, settings))
@@ -1249,7 +1247,7 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 		//	//(name != "PRESET")
 		//	)
 		{
-			ofLogNotice(__FUNCTION__) << group.getName() << " " << name << " : " << e;
+			ofLogNotice(__FUNCTION__) << "name: " <<group.getName() << " " << name << ": " << e;
 		}
 
 		if (false) {}
@@ -1275,7 +1273,7 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 		// index preset selector
 		else if (name == PRESET_Selected_IndexMain.getName())
 		{
-			ofLogNotice(__FUNCTION__) << group.getName() << " index: " << PRESET_Selected_IndexMain.get();
+			//ofLogNotice(__FUNCTION__) << group.getName() << " index: " << PRESET_Selected_IndexMain.get();
 
 			// TODO:
 			selectorTARGET = PRESET_Selected_IndexMain;
@@ -1312,7 +1310,6 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 			ofLogNotice(__FUNCTION__) << "MODE TIMER: " << e;
 			if (PLAY_RandomizeTimer) {
 				MODE_LatchTrig = false;
-
 
 				// TODO: new test
 				randomizerTimer = ofGetElapsedTimeMillis();
@@ -1375,13 +1372,11 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 				for (int i = 0; i < presetsRandomFactor.size(); i++)
 				{
 					if (name == "PROB " + ofToString(i)) {
+						ofLogNotice(__FUNCTION__) << name << " : " << e;
 						_doDices = true;// TODO: would be faster making return on first 'true'
 					}
 				}
-				if (_doDices)
-				{
-					doDices();
-				}
+				if (_doDices) doDices();
 			}
 		}
 	}

@@ -252,11 +252,11 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//--
 
-	// randomizer settings
-#ifdef INCLUDE_RANDOMIZER
-	params_RandomizerSettings.add(params_Randomizer);
-	params_RandomizerSettings.add(params_Editor);
-#endif
+//	// randomizer settings
+//#ifdef INCLUDE_RANDOMIZER
+//	params_RandomizerSettings.add(params_Randomizer);
+//	params_RandomizerSettings.add(params_Editor);
+//#endif
 
 	//-
 
@@ -363,10 +363,10 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	//--
 
-	// callback
-#ifdef INCLUDE_RANDOMIZER
-	ofAddListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Control);
-#endif
+//	// callback
+//#ifdef INCLUDE_RANDOMIZER
+//	ofAddListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Control);
+//#endif
 
 	//----
 
@@ -3197,21 +3197,15 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 {
 	//----
 
-	//if (ImGui::TreeNode("BASIC"))
-	if (ofxImGui::BeginTree("BASIC", settings))
-	{
+	if (ImGui::TreeNode("EXTRA")) {
+
 		//-
 
 		if (ImGui::TreeNode("MODES"))
 		{
-			//-
-
 			ofxImGui::AddParameter(autoSave); ImGui::SameLine();
 			//ofxImGui::AddParameter(autoLoad);//ImGui::SameLine();
 			ofxImGui::AddParameter(MODE_MemoryLive);
-
-			//-
-
 			ofxImGui::AddParameter(SHOW_Help); ImGui::SameLine();
 			ofxImGui::AddParameter(bThemDark);
 
@@ -3220,36 +3214,14 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 
 		//--
 
-		// 2. panels toggles
-
-		if (ImGui::TreeNode("EXTRA")) {
-			ofxImGui::AddParameter(SHOW_ImGui);
-			ofxImGui::AddParameter(SHOW_Gui_AdvancedControl);
-
-			//-
-
-			// 2. advanced
-
-			if (SHOW_Gui_AdvancedControl)
-			{
-				// show ALL the addon internal params! mainly to debug all settings or to use without ImGui..
-				ofxImGui::AddGroup(params_Control, settings);
-			}
-
-			ImGui::TreePop();
-		}
-
-		//--
-
 		if (MODE_Editor)
 		{
-			if (ImGui::TreeNode("USER-KIT")) {
-
+			if (ImGui::TreeNode("USER-KIT")) 
+			{
 				// User-Kit name
 				string str;
-				str = "User-Kit:";
-				ImGui::Text(str.c_str());
-				str = displayNameUserKit;
+				str = "Name: ";
+				str += displayNameUserKit;
 				ImGui::Text(str.c_str());
 
 				// button to Open File Dialog as folder
@@ -3257,18 +3229,18 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 
 					ofFileDialogResult openFileResult = ofSystemLoadDialog("Select User-Kit folder", true, ofToDataPath(path_UserKit_Folder, true));
 
-					// Check if the user opened a file
+					// check if the user opened a file
 					if (openFileResult.bSuccess) {
 
 						ofLogNotice(__FUNCTION__) << ("User selected a folder");
 
-						//We have a file, check it and process it
+						// we have a file, check it and process it
 						doFileDialogProcessSelection(openFileResult);
 					}
-					else {
-						ofLogNotice(__FUNCTION__) << ("User hit cancel");
-					}
+					else ofLogNotice(__FUNCTION__) << ("User hit cancel");
 				}
+				
+				ImGui::Dummy(ImVec2(0.0f, 5));
 
 				// monitor custom state
 				//ofxImGui::AddParameter(bPathDirCustom);
@@ -3277,11 +3249,24 @@ void ofxPresetsManager::ImGui_Draw_Basic(ofxImGui::Settings &settings)
 			}
 		}
 
-		//-
+		//--
 
-		ofxImGui::EndTree(settings);
+		//// show extra
+		//if (ImGui::TreeNode("EXTRA")) {
+		//	ofxImGui::AddParameter(SHOW_ImGui);
+		//	ofxImGui::AddParameter(SHOW_Gui_AdvancedControl);
+		//	//-
+		//	// 2. advanced
+		//	if (SHOW_Gui_AdvancedControl)
+		//	{
+		//		// show ALL the addon internal params! mainly to debug all settings or to use without ImGui..
+		//		ofxImGui::AddGroup(params_Control, settings);
+		//	}
+		//	ImGui::TreePop();
+		//}
+
+		ImGui::TreePop();
 	}
-	//ImGui::TreePop();
 }
 
 //--------------------------------------------------------------
@@ -4884,5 +4869,5 @@ void ofxPresetsManager::undoRefreshParams() {
 void ofxPresetsManager::Changed_GuiGROUP_Selected_Index(int & index)
 {
 	GuiGROUP_Selected_Index = (int)ofClamp(GuiGROUP_Selected_Index.get(), 0, GuiGROUP_Selected_Index.getMax());
-	ofLogWarning(__FUNCTION__) << "GuiGROUP_Selected_Index: " << GuiGROUP_Selected_Index;
+	ofLogWarning(__FUNCTION__) << " : " << GuiGROUP_Selected_Index;
 }

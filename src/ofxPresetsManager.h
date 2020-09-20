@@ -78,7 +78,7 @@
 
 //--
 
-#define INCLUDE_RANDOMIZER
+//#define INCLUDE_RANDOMIZER
 
 //--
 
