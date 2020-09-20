@@ -751,12 +751,29 @@ public:
 	//--------------------------------------------------------------
 	void setVisible_Help(bool b)
 	{
-		debugClicker = b;
+		SHOW_Help = b;
+	}
+	//--------------------------------------------------------------
+	void setToggleVisible_Help()
+	{
+		SHOW_Help = !SHOW_Help;
 	}
 	//--------------------------------------------------------------
 	void setPosition_GUI_ImGui(int x, int y)
 	{
 		ImGui_Position = ofVec2f(x, y);
+	}
+	//--------------------------------------------------------------
+	void setVisible_GUI(bool b)
+	{
+		SHOW_ImGui = b;
+		SHOW_ClickPanel = b;
+	}
+	//--------------------------------------------------------------
+	void toggleVisible_GUI()
+	{
+		SHOW_ImGui = !SHOW_ImGui;
+		SHOW_ClickPanel = SHOW_ImGui;
 	}
 	//--------------------------------------------------------------
 	void setVisible_GUI_ImGui(bool b)
@@ -917,7 +934,7 @@ private:
 
 private:
 	bool SHOW_GroupName = true;// draws group name into clicker boxes panel
-	bool debugClicker = true;
+	bool bShowClickerInfo = true;
 
 	//--
 

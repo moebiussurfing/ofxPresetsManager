@@ -15,18 +15,12 @@ void ofApp::setup()
 
 	//--
 
-	// 0. setup your parameters
+	// setup your parameters
 	setupParameters();
 
 	//--
 
-	// 1. (optional) customize path folders at first
-	// presetsManager.setPath_UserKit_Folder("myAddon");
-	// main container folder where all other files will be
-
-	//--
-
-	// 2. add our ofParameterGroup to the preset manager 
+	// add our ofParameterGroup to the preset manager 
 	// also define wich key triggers are associated to each preset. 
 	// the amount of keys will be also the amount of favorites/clickable presets per group
 
@@ -44,13 +38,10 @@ void ofApp::setup()
 
 	//--
 
-	// 3. call setup after adding ofParameterGroup
+	// customize user-kit name: will create this main settings file: 'bin/data/myKit_01.json'
+	// must call setup after adding all ofParameterGroup's
 	std::string name = "myKit_01";
 	presetsManager.setup(name);
-
-	// 4. show clicker
-	presetsManager.setVisible_PresetClicker(true);//user panel clicker
-
 }
 
 //--------------------------------------------------------------
@@ -70,7 +61,7 @@ void ofApp::setupParameters()
 	// 2. we can link some parameters to make them change together
 	// must call makeRefereceTo before params are setted below
 	// note that setted names will be overrided
-	size2.makeReferenceTo(sizeObjects3);
+	//size2.makeReferenceTo(sizeObjects3);
 
 	//--
 
@@ -78,7 +69,7 @@ void ofApp::setupParameters()
 
 	// group0
 	params0.setName("paramsGroup0");// this is our parent group
-	params0.add(color0.set("color0", ofColor(ofColor::red), ofColor(0, 0), ofColor(255, 255)));
+	params0.add(color0.set("color0", ofFloatColor(1, 0, 0, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params0.add(numShapes0.set("numShapes0", 5, 1, 5));
 	params0.add(shapeType0.set("shapeType0", 1, 1, 2));
 	params0.add(separation0.set("separation0", 100, 1, 100));
@@ -90,20 +81,20 @@ void ofApp::setupParameters()
 
 	// group1
 	params1.setName("paramsGroup1");
-	params1.add(color1.set("color1", ofColor(ofColor::green), ofColor(0, 0), ofColor(255, 255)));
+	params1.add(color1.set("color1", ofFloatColor(0, 1, 0, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params1.add(numShapes1.set("numShapes1", 5, 1, 5));
 	params1.add(shapeSide1.set("shapeSide1", 50, 5, 200));
 	params1.add(separation1.set("separation1", 100, 1, 100));
 
 	// group2
 	params2.setName("paramsGroup2");
-	params2.add(color2.set("color2", ofColor(ofColor::yellow), ofColor(0, 0), ofColor(255, 255)));
+	params2.add(color2.set("color2", ofFloatColor(1, 1, 0, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params2.add(size2.set("size2", 50, 5, 200));
 	params2.add(fill2.set("fill2", true));
 
 	// group3
 	params3.setName("paramsGroup3");
-	params3.add(color3.set("color3", ofColor(ofColor::blueViolet), ofColor(0, 0), ofColor(255, 255)));
+	params3.add(color3.set("color3", ofFloatColor(0, 0.5, 1, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params3.add(numObjects3.set("numObjects3", 5, 1, 5));
 	params3.add(sizeObjects3.set("sizeObjects3", 5, 1, 200));
 	params3.add(separationObjects3.set("separationObjects3", 50, 5, 100));
@@ -152,16 +143,26 @@ void ofApp::draw()
 	drawScene2();
 	drawScene3();
 
-	//local gui parameters
-	gui0.draw();
-	gui1.draw();
-	gui2.draw();
-	gui3.draw();
+	if (bGui) {
+		//local gui parameters
+		gui0.draw();
+		gui1.draw();
+		gui2.draw();
+		gui3.draw();
+	}
+
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
+	if (key == 'g') {
+		bGui = !bGui;
+		presetsManager.setVisible_GUI(bGui);
+	}
+	if (key == 'h') {
+		presetsManager.setToggleVisible_Help();
+	}
 }
 
 //--------------------------------------------------------------
@@ -180,12 +181,14 @@ void ofApp::exit()
 	presetsManager.exit();// required to store settings. (maybe required before destruct our class params..)
 }
 
+// scene
+
 //--------------------------------------------------------------
 void ofApp::drawScene0()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(100, 700);
+	ofTranslate(200, 600);
 	ofSetColor(color0.get());
 	ofSetLineWidth(lineWidth0);
 	if (fill0) ofFill();
@@ -222,7 +225,7 @@ void ofApp::drawScene2()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(100, 700);
+	ofTranslate(200, 600);
 	ofSetColor(color2.get());
 	if (fill2) ofFill();
 	else ofNoFill();
@@ -240,17 +243,12 @@ void ofApp::drawScene3()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(400, 700);
-	// ofSetLineWidth(2);
+	ofTranslate(600, 700);
 	ofFill();
 	ofSetColor(color3.get());
 	for (int i = 0; i < numObjects3; ++i)
 	{
-		// ofDrawLine(0, 0, 0, sizeObjects3);
-		// ofDrawLine(0, sizeObjects3, sizeObjects3 / 2, sizeObjects3 / 2);
-		// ofDrawLine(sizeObjects3 / 2, sizeObjects3 / 2, 0, 0);
 		ofDrawRectangle(0, 0, sizeObjects3 * i / 2, sizeObjects3 * i / 2);
-
 		float _tr = i * (separationObjects3 + 20);
 		ofTranslate(_tr, -_tr);
 	}

@@ -14,6 +14,9 @@ public:
 
 	void setup(ofParameterGroup &g, int _numPresets);
 	void setup(ofParameterGroup &g, vector<int> keysList);
+	//void setup(ofParameterGroup &g, vector<int> keysList, ofParameter<int> &index);
+
+	void setSelectorTARGET(ofParameter<int> &index);
 
 	void update();
 	void draw();
@@ -21,6 +24,9 @@ public:
 	void exit();
 
 	ofParameterGroup group;
+	//ofParameter<int> selectorTARGET;
+
+	void doDices();
 
 	//----
 
@@ -37,9 +43,14 @@ public:
 	bool bIsDoneLoad = false;
 	void loadPreset(int p)
 	{
-		ofLogNotice(__FUNCTION__) << "p: " << p;
+		ofLogNotice(__FUNCTION__) << " : " << p;
 		PRESET_Selected_IndexMain = p;
 		bIsDoneLoad = true;// TODO: workaround bc the done-loading happens out of the class..
+
+		////if (selectorTARGET) 
+		//{
+		//	selectorTARGET = PRESET_Selected_IndexMain;
+		//}
 	}
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
 	vector<int> keys;// queued trigger keys for each group ? (all presets) (size of)

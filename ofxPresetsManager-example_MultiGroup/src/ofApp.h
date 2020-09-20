@@ -71,6 +71,7 @@ public:
 	ofxPanel gui1;
 	ofxPanel gui2;
 	ofxPanel gui3;
+	bool bGui = true;
 
 #ifdef USE_WindowApp
 	ofxWindowApp WindowApp;

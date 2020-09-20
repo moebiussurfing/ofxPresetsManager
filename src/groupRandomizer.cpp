@@ -19,6 +19,21 @@ void groupRandomizer::setup(ofParameterGroup &g, vector<int> _keysList)
 	setup(g, keys.size());
 }
 
+//--------------------------------------------------------------
+void groupRandomizer::setSelectorTARGET(ofParameter<int> &index) {
+	//selectorTARGET = index;
+	ofLogNotice(__FUNCTION__) << "target registered: " << index.getName();
+
+	// TODO:
+	PRESET_Selected_IndexMain.makeReferenceTo(index);
+	//PRESET_Selected_IndexMain.makeReferenceTo(selectorTARGET);
+}
+
+////--------------------------------------------------------------
+//void groupRandomizer::setup(ofParameterGroup &g, int _numPresets, ofParameter<int> &index) {
+//	setup(g, _numPresets);
+//	setSelectorTARGET(index);
+//}
 
 //--------------------------------------------------------------
 void groupRandomizer::setup(ofParameterGroup &g, int _numPresets) {
@@ -61,6 +76,8 @@ void groupRandomizer::setup(ofParameterGroup &g, int _numPresets) {
 	//params_Control.add(bLoad);
 	params_Control.add(params_HelperTools);
 
+	params_Control.add(PRESET_Selected_IndexMain);
+
 	ofAddListener(params_Control.parameterChangedE(), this, &groupRandomizer::Changed_Params_Control);
 	ofAddListener(params_Randomizer.parameterChangedE(), this, &groupRandomizer::Changed_Params_Control);
 
@@ -71,6 +88,7 @@ void groupRandomizer::setup(ofParameterGroup &g, int _numPresets) {
 	DISABLE_CALLBACKS = false;
 	//bool b2 = ofxSurfingHelpers::loadGroup(params_RandomizerSettings, path2);
 
+	doDices();
 }
 
 //--------------------------------------------------------------
@@ -1161,6 +1179,20 @@ void groupRandomizer::doSwap(int groupIndex, int fromIndex, int toIndex)
 }
 
 //--------------------------------------------------------------
+void groupRandomizer::doDices()
+{
+	ofLogNotice(__FUNCTION__);
+	// sum total dices/all probs
+	dicesTotalAmount = 0;
+	for (auto &p : presetsRandomFactor) {
+		dicesTotalAmount += p.get();
+	}
+	randomizedDice.setMax(dicesTotalAmount - 1);
+
+	ofLogNotice(__FUNCTION__) << group.getName() << " dicesTotalAmount: " << dicesTotalAmount;
+}
+
+//--------------------------------------------------------------
 void groupRandomizer::doCloneAll()
 {
 	ofLogNotice(__FUNCTION__);
@@ -1199,7 +1231,7 @@ void groupRandomizer::Changed_Params_Control(ofAbstractParameter &e)
 		//	//(name != "PRESET")
 		//	)
 		{
-			ofLogNotice(__FUNCTION__) << name << " : " << e;
+			ofLogNotice(__FUNCTION__) << group.getName() << " " << name << " : " << e;
 		}
 
 		if (false) {}
@@ -1221,6 +1253,16 @@ void groupRandomizer::Changed_Params_Control(ofAbstractParameter &e)
 		//}
 
 		//----
+
+		// index preset selector
+		else if (name == PRESET_Selected_IndexMain.getName())
+		{
+			ofLogNotice(__FUNCTION__) << group.getName() << " index: " << PRESET_Selected_IndexMain.get();
+
+			//selectorTARGET = PRESET_Selected_IndexMain;
+		}
+
+		//--
 
 		// helper tools
 		else if (name == "CLONE >" && bCloneRight)
@@ -1310,23 +1352,16 @@ void groupRandomizer::Changed_Params_Control(ofAbstractParameter &e)
 		{
 			// check if changed prob sliders
 			{
-				bool doDices = false;
+				bool _doDices = false;
 				for (int i = 0; i < presetsRandomFactor.size(); i++)
 				{
 					if (name == "PROB " + ofToString(i)) {
-						doDices = true;// TODO: would be faster making return on first 'true'
+						_doDices = true;// TODO: would be faster making return on first 'true'
 					}
 				}
-				if (doDices)
+				if (_doDices)
 				{
-					// sum total dices/all probs
-					dicesTotalAmount = 0;
-					for (auto &p : presetsRandomFactor) {
-						dicesTotalAmount += p.get();
-					}
-					randomizedDice.setMax(dicesTotalAmount - 1);
-
-					ofLogNotice(__FUNCTION__) << "dicesTotalAmount: " << dicesTotalAmount;
+					doDices();
 				}
 			}
 		}
