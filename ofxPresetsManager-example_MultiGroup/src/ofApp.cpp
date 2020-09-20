@@ -67,9 +67,11 @@ void ofApp::setupParameters()
 
 	// 0. ofParameterGroup's
 
+	float _alpha = 0.4;
+
 	// group0
 	params0.setName("paramsGroup0");// this is our parent group
-	params0.add(color0.set("color0", ofFloatColor(1, 0, 0, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
+	params0.add(color0.set("color0", ofFloatColor(1, 0, 0, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params0.add(show0.set("show0", true));
 	params0.add(numShapes0.set("numShapes0", 5, 1, 5));
 	params0.add(shapeType0.set("shapeType0", 1, 1, 2));
@@ -82,7 +84,7 @@ void ofApp::setupParameters()
 
 	// group1
 	params1.setName("paramsGroup1");
-	params1.add(color1.set("color1", ofFloatColor(0, 1, 0, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
+	params1.add(color1.set("color1", ofFloatColor(0, 1, 0, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params1.add(show1.set("show1", true));
 	params1.add(numShapes1.set("numShapes1", 5, 1, 5));
 	params1.add(shapeSide1.set("shapeSide1", 50, 5, 200));
@@ -90,14 +92,14 @@ void ofApp::setupParameters()
 
 	// group2
 	params2.setName("paramsGroup2");
-	params2.add(color2.set("color2", ofFloatColor(1, 1, 0, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
+	params2.add(color2.set("color2", ofFloatColor(1, 1, 0, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params2.add(show2.set("show2", true));
 	params2.add(size2.set("size2", 50, 5, 200));
 	params2.add(fill2.set("fill2", true));
 
 	// group3
 	params3.setName("paramsGroup3");
-	params3.add(color3.set("color3", ofFloatColor(0, 0.5, 1, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
+	params3.add(color3.set("color3", ofFloatColor(0, 0.5, 1, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params3.add(show3.set("show3", true));
 	params3.add(numObjects3.set("numObjects3", 5, 1, 5));
 	params3.add(size3.set("size3", 5, 1, 200));

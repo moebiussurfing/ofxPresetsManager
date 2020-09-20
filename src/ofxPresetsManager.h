@@ -199,7 +199,7 @@ private:
 
 	//--
 
-	//TODO:
+	// TODO:
 	ofParameter<int> GuiGROUP_Selected_Index;// only this selected group will be showed on gui to edit
 	void Changed_GuiGROUP_Selected_Index(int & index);
 	std::vector<groupRandomizer> groupRandomizers;
@@ -210,7 +210,7 @@ private:
 
 	ofParameter<int> GROUP_Selected_Index;// global group selector. this selector will control all linked groups
 
-	//group main selector
+	// group main selector
 	bool bBuildGroupSelector = true;// to allow auto build a group selector to combine all the added groups to the presets manager
 	bool bAllowGroupSelector = true;// to allow disable main group. not allways we need it..
 

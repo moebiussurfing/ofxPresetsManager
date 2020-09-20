@@ -785,7 +785,7 @@ void ofxPresetsManager::drawPresetClicker()
 	// light theme
 	else {
 		_colorText = ofColor(255, 200);
-		_colorButton = ofColor(0, 200);
+		_colorButton = ofColor(32, 200);
 		_colorBg = ofColor(0, 128);
 	}
 
@@ -3276,8 +3276,9 @@ void ofxPresetsManager::buildHelpInfo() {
 	// build help info
 	helpInfo = "";
 	helpInfo += "USER-KIT\n";
-	helpInfo += "  " + displayNameUserKit;
-	helpInfo += "       HH ";
+	//helpInfo += "  ";
+	helpInfo += displayNameUserKit;
+	helpInfo += "       ";
 #ifdef USE_XML
 	helpInfo += ".xml";
 #else
@@ -3287,7 +3288,7 @@ void ofxPresetsManager::buildHelpInfo() {
 #endif
 	//helpInfo += "                            ";
 
-	helpInfo += "\n\nPATHS\n  ";
+	helpInfo += "\n\nPATHS\n";
 	helpInfo += getGroupsPaths();
 	//helpInfo += "                            ";
 
@@ -3302,12 +3303,13 @@ void ofxPresetsManager::buildHelpInfo() {
 
 	helpInfo += "\n";
 	helpInfo += "KEYS\n";
-	helpInfo += "MOUSE|KEYS            LOAD\n";
-	helpInfo += "CTRL                  SAVE/COPY\n";
-	helpInfo += "ALT                   SWAP\n";
-	helpInfo += "ARROWS                NAVIGATE\n";
-	helpInfo += "H                     HELP\n";
-	helpInfo += "G                     GUI";
+	helpInfo += "MOUSE|KEYS             LOAD\n";
+	helpInfo += "CTRL                   SAVE/COPY\n";
+	helpInfo += "ALT                    SWAP\n";
+	helpInfo += "ARROWS                 NAVIGATE\n";
+	helpInfo += "E                      EDIT\n";
+	helpInfo += "H                      HELP\n";
+	helpInfo += "G                      GUI";
 }
 
 //--------------------------------------------------------------
