@@ -61,7 +61,7 @@ void ofApp::setupParameters()
 	// 2. we can link some parameters to make them change together
 	// must call makeRefereceTo before params are setted below
 	// note that setted names will be overrided
-	//size2.makeReferenceTo(sizeObjects3);
+	//size2.makeReferenceTo(size3);
 
 	//--
 
@@ -100,8 +100,8 @@ void ofApp::setupParameters()
 	params3.add(color3.set("color3", ofFloatColor(0, 0.5, 1, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params3.add(show3.set("show3", true));
 	params3.add(numObjects3.set("numObjects3", 5, 1, 5));
-	params3.add(sizeObjects3.set("sizeObjects3", 5, 1, 200));
-	params3.add(separationObjects3.set("separationObjects3", 50, 5, 100));
+	params3.add(size3.set("size3", 5, 1, 200));
+	params3.add(separation3.set("separation3", 50, 5, 100));
 
 	//--
 
@@ -251,8 +251,8 @@ void ofApp::drawScene3()
 	ofSetColor(color3.get());
 	for (int i = 0; i < numObjects3; ++i)
 	{
-		ofDrawRectangle(0, 0, sizeObjects3 * i / 2, sizeObjects3 * i / 2);
-		float _tr = i * (separationObjects3 + 20);
+		ofDrawRectangle(0, 0, size3 * i / 2, size3 * i / 2);
+		float _tr = i * (separation3 + 20);
 		ofTranslate(_tr, -_tr);
 	}
 	ofPopMatrix();

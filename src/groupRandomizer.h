@@ -25,7 +25,7 @@ public:
 
 private:
 	ofParameterGroup group;
-	//ofParameter<int> selectorTARGET;
+	ofParameter<int> selectorTARGET;
 
 	void doDices();
 

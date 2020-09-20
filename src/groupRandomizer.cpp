@@ -21,12 +21,14 @@ void groupRandomizer::setup(ofParameterGroup &g, vector<int> _keysList)
 
 //--------------------------------------------------------------
 void groupRandomizer::setSelectorTARGET(ofParameter<int> &index) {
-	//selectorTARGET = index;
 	ofLogNotice(__FUNCTION__) << "target registered: " << index.getName();
 
 	// TODO:
-	PRESET_Selected_IndexMain.makeReferenceTo(index);
+	//PRESET_Selected_IndexMain.makeReferenceTo(index);
 	//PRESET_Selected_IndexMain.makeReferenceTo(selectorTARGET);
+
+	// TODO:
+	selectorTARGET = index;
 }
 
 ////--------------------------------------------------------------
@@ -86,7 +88,7 @@ void groupRandomizer::setup(ofParameterGroup &g, int _numPresets) {
 	// startup
 
 	DISABLE_CALLBACKS = false;
-	
+
 	// save randomizers settings
 	ofxSurfingHelpers::loadGroup(params_RandomizerSettings, path_RandomizerSettings);
 
@@ -254,7 +256,7 @@ void groupRandomizer::doRandomizeWichSelectedPreset()
 		}
 	}
 	else ofLogNotice(__FUNCTION__) << "PRESET : " << ofToString(r);
-	
+
 	//--
 
 	// 4. apply preset selection
@@ -695,7 +697,7 @@ void groupRandomizer::update()
 
 		bIsDoneLoad = false;
 		randomizerTimer = ofGetElapsedTimeMillis();
-		
+
 		if (PRESET_Selected_IndexMain != 0)
 		{
 			bLatchRun = true;
@@ -895,10 +897,12 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 		//string str = "User-Kit: " + displayNameUserKit;
 		ImGui::Text(str.c_str());
 
+		ImGui::Dummy(ImVec2(0.0f, 5));
+
 		ofxImGui::AddParameter(PRESET_Selected_IndexMain);
 		//ImGui::SameLine();
 
-		//ImGui::Dummy(ImVec2(0.0f, 10.0f));
+		//ImGui::Dummy(ImVec2(0.0f, 5));
 
 		//--
 
@@ -909,7 +913,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 			ImVec2 button_sz(40, 40);
 			// Manually wrapping
 			// (we should eventually provide this as an automatic layout feature, but for now you can do it manually)
-			
+
 			ImGuiStyle& style = ImGui::GetStyle();
 			int _amtButtons = mainGroupAmtPresetsFav;
 			float _windowVisible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
@@ -946,7 +950,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 			}
 		}
 
-		ImGui::Dummy(ImVec2(0.0f, 10.0f));
+		ImGui::Dummy(ImVec2(0.0f, 5));
 
 		//--
 
@@ -974,7 +978,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		//--
 
-		ImGui::Dummy(ImVec2(0.0f, 10.0f));
+		//ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
 		//--
 
@@ -1014,8 +1018,11 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 		//--
 
 		// 1.0.3 bang randomize
+
+		ImGui::Dummy(ImVec2(0.0f, 5));
+
 		//AddBigButton(bRandomizeIndex, 25);//index
-		ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 25);//preset
+		ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 30);//preset
 
 		//float w = ImGui::GetWindowWidth();
 		//style->FramePadding = ImVec2(4, 2);
@@ -1052,18 +1059,24 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		//--
 
-		// 1.1 randomizers presets
-		ofxImGui::AddGroup(params_Randomizer, settings);
+		ImGui::Dummy(ImVec2(0.0f, 5));
+
+		if (ImGui::TreeNode("EDIT RANDOMIZERS"))
+		{
+			// 1.1 randomizers presets
+			ofxImGui::AddGroup(params_Randomizer, settings);
 
 #ifdef DEBUG_randomTest
-		ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
+			ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
 #endif
-		//--
+			//--
 
-		// 1.2 randomizers editor
-		if (MODE_Editor) 
-		{
-			ofxImGui::AddGroup(params_Editor, settings);
+			// 1.2 randomizers editor
+			if (MODE_Editor)
+			{
+				ofxImGui::AddGroup(params_Editor, settings);
+			}
+			ImGui::TreePop();
 		}
 
 		//-
@@ -1264,7 +1277,8 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 		{
 			ofLogNotice(__FUNCTION__) << group.getName() << " index: " << PRESET_Selected_IndexMain.get();
 
-			//selectorTARGET = PRESET_Selected_IndexMain;
+			// TODO:
+			selectorTARGET = PRESET_Selected_IndexMain;
 		}
 
 		//--
@@ -1380,8 +1394,9 @@ void groupRandomizer::loadPreset(int p)
 	PRESET_Selected_IndexMain = p;
 	bIsDoneLoad = true;// TODO: workaround bc the done-loading happens out of the class..
 
+	// TODO:
 	////if (selectorTARGET) 
 	//{
-	//	selectorTARGET = PRESET_Selected_IndexMain;
+	selectorTARGET = PRESET_Selected_IndexMain;
 	//}
 }

@@ -462,10 +462,10 @@ private:
 	ofParameter<bool> bRandomizeEditorPopulateFavs;// create all presets
 
 	// system to select what params of current selected preset to: clone, randomize etc
-	void setupRandomizerEditor();
 	vector<ofParameter<bool>> editorPresets;
 	ofParameterGroup params_Editor;
 	ofParameterGroup params_Editor_Toggles;
+	void setupRandomizerEditor();
 	void addGroupToEditor(ofParameterGroup& group);// queue all contained params inside the paramGroup and nested too
 	void Changed_Params_Editor(ofAbstractParameter &e);
 	void doRandomizeEditor();// randomize params of current selected preset
@@ -565,7 +565,7 @@ public:
 		}
 	}
 	//--------------------------------------------------------------
-	void loadPreset(int p);// load preset for the main group by code from ofApp
+	//void loadPreset(int p);// load preset for the main group by code from ofApp
 	void loadPreset(int p, int _indexGroup);// load preset for extra groups by code from ofApp
 	void loadPresetGroup(int presetIndex)// load preset for main group by code from ofApp
 	{
@@ -681,9 +681,10 @@ public:
 
 	// helper tools
 
-	void doCloneRight(int pIndex);// clone from selected preset to all others to the right
-	void doCloneAll();// clone all presets from the current selected
-	void doPopulateFavs();// fast populate random presets around all favs
+	//void doCloneRight(int pIndex);// clone from selected preset to all others to the right
+	//void doCloneAll();// clone all presets from the current selected
+	//void doPopulateFavs();// fast populate random presets around all favs
+
 	void doSwap(int groupIndex, int fromIndex, int toIndex);
 
 	//--
@@ -919,13 +920,14 @@ public:
 	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
 	void ImGui_Draw_Selectors(ofxImGui::Settings &settings);
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
-	void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
 	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
+	//void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
 
 private:
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
 	ofParameter<bool> MODE_Browser_NewPreset;
 	ofParameter<bool> SHOW_ClickPanel;// to allow include as toggle parameter into external gui
+	ofParameter<bool> SHOW_BrowserPanel;
 	ofParameter<bool> SHOW_ImGui;
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
 	ofParameter<bool> SHOW_ImGui_Selectors;
@@ -1053,8 +1055,8 @@ private:
 
 	// layout
 	ofVec2f guiPos_InternalControl = ofVec2f(500, 500);
-	int cellSize = 80;
-	ofVec2f clicker_Pos;
+	int cellSize = 80;// default box button size
+	ofVec2f clicker_Pos;// default clicker position
 
 	//--
 
@@ -1167,7 +1169,7 @@ public:
 	ofParameterGroup params_Control;// to use on external gui
 
 private:
-	ofParameter<bool> bSave;
+	//ofParameter<bool> bSave;
 	//ofParameter<bool> bLoad;
 
 	ofParameter<bool> autoSave;

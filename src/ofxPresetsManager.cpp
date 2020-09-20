@@ -118,10 +118,11 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Help.set("SHOW HELP", false);
 	SHOW_Gui_AdvancedControl.set("SHOW ADVANCED", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", true);
+	SHOW_BrowserPanel.set("SHOW BROWSER PANEL", true);
 	MODE_Browser_NewPreset.set("NEW!", false);
 	ENABLE_Keys.set("ENABLE KEYS", true);
 	displayNamePreset = "NO_NAME_PRESET";//browser loaded preset name
-	bSave.set("SAVE", false);
+	//bSave.set("SAVE", false);
 	//bLoad.set("LOAD", false);
 	autoLoad.set("AUTO LOAD", true);
 	autoSave.set("AUTO SAVE", true);
@@ -155,7 +156,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//-
 
 	// exclude from settings
-	bSave.setSerializable(false);
+	//bSave.setSerializable(false);
 	bCloneRight.setSerializable(false);
 	bCloneAll.setSerializable(false);
 	loadToMemory.setSerializable(false);
@@ -179,6 +180,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.setName("GUI");
 	params_Gui.add(SHOW_Gui_AdvancedControl);
 	params_Gui.add(SHOW_ClickPanel);
+	params_Gui.add(SHOW_BrowserPanel);
 	params_Gui.add(SHOW_ImGui);
 	params_Gui.add(SHOW_ImGui_PresetsParams);
 	params_Gui.add(ENABLE_Keys);
@@ -374,6 +376,8 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	ImGui_Setup();
 #endif
 
+	//--
+
 	// TODO: main group only
 #ifdef INCLUDE_ofxUndoSimple
 	undoStringParams = groups[0].toString();
@@ -400,7 +404,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	// main group selector
 	int _last = groups.size() - 1;
-	GROUP_Selected_Index.set("GROUP SELECTOR", 0, 0, groupsSizes[_last] - 1);
+	GROUP_Selected_Index.set("GROUP_LINK", 0, 0, groupsSizes[_last] - 1);
 	params_UserKitSettings.add(GROUP_Selected_Index);
 
 	//----
@@ -422,12 +426,10 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 			std::string _path;
 			_path = path_UserKit_Folder + "/" + path_PresetsFavourites;// current kit-presets presets folder
 			_path += "/" + groups[i].getName();// append group name
-			_path += "/";
+			_path += "/";// the folder
 			ofxSurfingHelpers::CheckFolder(_path);// check parent container folder
-
-			// name
 			_path += groups[i].getName();
-			_path += filename_Randomizers;
+			_path += filename_Randomizers;// the full path with filename
 
 			groupRandomizers[i].setPath_RandomizerSettings(_path);
 		}
@@ -449,6 +451,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	//----
 
 	// custom path
+	// this allows to use different kits for the same project/app
 	params_Custom.setName("CUSTOM PATH");
 	params_Custom.add(bPathDirCustom);
 	params_Custom.add(pathDirCustom);
@@ -2996,7 +2999,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 	// User-Kit name
 	string _name = "ofxPresetsManager : " + displayNameUserKit;
-	
+
 	bool _collapse = true;// TODO: don't do nothing?
 
 	//--
@@ -3148,14 +3151,20 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 
 		//---
 
-		ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30);// TODO: repair
-		//ofxImGui::AddParameter(MODE_Editor);
+		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30);// TODO: repair. collides when multiple toggles..
+		ofxImGui::AddParameter(MODE_Editor);
 
 		//ImGui::SameLine();
+		if (ImGui::TreeNode("PANELS"))
+		{
+			ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
+			if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
+			ofxImGui::AddParameter(SHOW_ClickPanel);
+			ofxImGui::AddParameter(SHOW_BrowserPanel);
 
-		ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
-		if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
-		ofxImGui::AddParameter(SHOW_ClickPanel);
+			ImGui::TreePop();
+		}
+
 
 		//---
 
@@ -3804,29 +3813,23 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_WindowContent(ofxImGui::Settings &settings)
 {
-	// 0. tittle
+	// tittle
 	//ImGui::Text("PRESETS MANAGER");
 	//ImGui::NewLine();
 
 	// main panel
 	ImGui_Draw_MainPanel(settings);
 
-	// 1. basic controls
+	// basic controls
 	if (MODE_Editor) ImGui_Draw_Basic(settings);
 
-	//// 2. preset params preview
-	//ImGui_Draw_PresetPreview(settings);
-
-
-	// 3. randomizers
-	ofxImGui::AddParameter(GuiGROUP_Selected_Index);
-	groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers(settings);
-
+	// randomizers
+	ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected group
+	groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers(settings);// show randomizers of user selected group
 	//ImGui_Draw_GroupRandomizers(settings);
 
-
-	// 4. standalone presets browser
-	if (MODE_Editor) {
+	// standalone presets browser
+	if (MODE_Editor && SHOW_BrowserPanel) {
 		ImGui_Draw_Browser(settings);
 	}
 }

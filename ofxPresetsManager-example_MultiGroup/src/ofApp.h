@@ -56,8 +56,8 @@ public:
 	ofParameter<ofFloatColor> color3;
 	ofParameter<bool> show3;
 	ofParameter<int> numObjects3;
-	ofParameter<float> sizeObjects3;
-	ofParameter<int> separationObjects3;
+	ofParameter<float> size3;
+	ofParameter<int> separation3;
 
     void setupParameters();
 
