@@ -330,7 +330,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		//#define NUM_MAIN_SELECTOR_PRESETS 8
 		//mainSelector.setMax(NUM_MAIN_SELECTOR_PRESETS);
 
-		ofParameterGroup params_GroupMainSelector{ "GROUP" };
+		ofParameterGroup params_GroupMainSelector{ "GROUP LINK" };
 		for (int i = 0; i < PRESETS_Selected_Index.size(); i++)
 		{
 			params_GroupMainSelector.add(PRESETS_Selected_Index[i]);
@@ -423,13 +423,13 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 			std::string _path;
 			_path = path_UserKit_Folder + "/" + path_PresetsFavourites;// current kit-presets presets folder
 			_path += "/" + groups[i].getName();// append group name
-			_path += "/"; 
+			_path += "/";
 			ofxSurfingHelpers::CheckFolder(_path);// check parent container folder
-			
+
 			// name
 			_path += groups[i].getName();
 			_path += filename_Randomizers;
-			
+
 			groupRandomizers[i].setPath_RandomizerSettings(_path);
 		}
 
@@ -737,7 +737,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	bImGui_mouseOver = false;
 #endif
 
-	}
+}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::windowResized(int w, int h)
@@ -962,6 +962,9 @@ void ofxPresetsManager::drawPresetClicker()
 		if (SHOW_GroupName)
 		{
 			string info = groups[i].getName();
+
+			// marl selected group. useful to navigate with arrow keys
+			if (i == GuiGROUP_Selected_Index.get()) info = "* " + info;
 
 			// double font to improve different background colors
 			int gap = 1;
@@ -1789,89 +1792,23 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				GuiGROUP_Selected_Index++;
 			}
 
-			else if (key == OF_KEY_RIGHT)
-			{
-				////browse presets
-				//if (MODE_Browser_NewPreset)
-				//{
-				//	currentFile++;
-				//	if (currentFile > files.size() - 1) currentFile = files.size() - 1;
-				//	displayNamePreset = fileNames[currentFile];
-				//	ofLogNotice(__FUNCTION__) << "[>] LOAD" << endl;
-				//	ofLogNotice(__FUNCTION__) << "Preset Name: " << displayNamePreset;
-				//	doLoadMainGroupPreset(displayNamePreset);
-				//}
-				////browse favorites
-				//else
-				{
-					//int i = PRESET_Selected_IndexMain;
-					//i++;
-					//if (i > mainGroupMemoryFilesPresets.size() - 1) i = mainGroupMemoryFilesPresets.size() - 1;
-					//PRESET_Selected_IndexMain = i;
-
-					//TODO: crashes
-					//TODO: must make a selectors browser engine
-
-					DISABLE_CALLBACKS = true;
-					int i;
-					int _lastGroup = groups.size() - 1;//last group (main selector) index
-					if (_lastGroup < PRESETS_Selected_Index.size())
-						i = PRESETS_Selected_Index[_lastGroup].get();//get selected
-					int _lastIndex = groupsSizes[_lastGroup] - 1;
-					i++;
-					if (i > _lastIndex) i = _lastIndex;
-					DISABLE_CALLBACKS = false;
-
-					if (_lastGroup < PRESETS_Selected_Index.size())
-						PRESETS_Selected_Index[_lastGroup] = i;
-					else cout << "ERROR:" << _lastGroup << endl;
-				}
-			}
-
 			else if (key == OF_KEY_LEFT)
 			{
-				////browse presets
-				//if (MODE_Browser_NewPreset)
-				//{
-				//	currentFile--;
-				//	if (currentFile < 0) currentFile = 0;
-				//	displayNamePreset = fileNames[currentFile];
-				//	ofLogNotice(__FUNCTION__) << "[<] LOAD" << endl;
-				//	ofLogNotice(__FUNCTION__) << "Preset Name: " << displayNamePreset;
-				//	doLoadMainGroupPreset(displayNamePreset);
-				//}
-				////browse favorites
-				//else
-				{
-					//int i = PRESET_Selected_IndexMain;
-					//i--;
-					//if (i < 0) i = 0;
-					//PRESET_Selected_IndexMain = i;
-
-					//DISABLE_CALLBACKS = true;
-					//int _lastGroup = groups.size() - 1;//last group (main selector) index
-					//int i = PRESETS_Selected_Index[_lastGroup];//get selected
-					//i--;
-					//if (i < 0) i = 0;
-					//DISABLE_CALLBACKS = false;
-
-					//PRESETS_Selected_Index[_lastGroup] = i;
-
-
-					DISABLE_CALLBACKS = true;
-					int i;
-					int _lastGroup = groups.size() - 1;//last group (main selector) index
-					if (_lastGroup < PRESETS_Selected_Index.size())
-						i = PRESETS_Selected_Index[_lastGroup].get();//get selected
-					int _lastIndex = groupsSizes[_lastGroup] - 1;
-					i--;
-					if (i < 0) i = 0;
-					DISABLE_CALLBACKS = false;
-
-					if (_lastGroup < PRESETS_Selected_Index.size())
-						PRESETS_Selected_Index[_lastGroup] = i;
-					else cout << "ERROR:" << _lastGroup << endl;
-				}
+				DISABLE_CALLBACKS = true;
+				int sel = GuiGROUP_Selected_Index.get();
+				int i = PRESETS_Selected_Index[sel];
+				i--;
+				DISABLE_CALLBACKS = false;
+				PRESETS_Selected_Index[sel] = (int)ofClamp(i, 0, PRESETS_Selected_Index[sel].getMax());
+			}
+			else if (key == OF_KEY_RIGHT)
+			{
+				DISABLE_CALLBACKS = true;
+				int sel = GuiGROUP_Selected_Index.get();
+				int i = PRESETS_Selected_Index[sel];
+				i++;
+				DISABLE_CALLBACKS = false;
+				PRESETS_Selected_Index[sel] = (int)ofClamp(i, 0, PRESETS_Selected_Index[sel].getMax());
 			}
 		}
 
@@ -2776,12 +2713,12 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 			if (!b) ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets > " << _path;
 #endif
 #endif
-	}
+		}
 		else {
 			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
-}
+	}
 
 	// debug params
 	if (true)
@@ -2794,8 +2731,8 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 #ifdef USE_JSON
 #endif
 #endif
+		}
 	}
-}
 }
 
 //--------------------------------------------------------------
@@ -2853,12 +2790,12 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 				mainGroupMemoryFilesPresets[i] = settings;
 #endif
-		}
+			}
 			else {
 				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
+		}
 	}
-}
 
 	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
@@ -2870,8 +2807,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
+		}
 	}
-}
 }
 
 ////--------------------------------------------------------------
@@ -3369,9 +3306,11 @@ void ofxPresetsManager::buildHelpInfo() {
 	//}
 
 	helpInfo += "\n";
-	helpInfo += "MOUSE|KEYS    LOAD\n";
-	helpInfo += "CTRL          SAVE/COPY\n";
-	helpInfo += "ALT           SWAP";
+	helpInfo += "COMMANDS\n";
+	helpInfo += "MOUSE|KEYS        LOAD\n";
+	helpInfo += "CTRL              SAVE/COPY\n";
+	helpInfo += "ALT               SWAP\n";
+	helpInfo += "ARROWS            NAVIGATE";
 }
 
 //--------------------------------------------------------------
