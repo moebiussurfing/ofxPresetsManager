@@ -14,10 +14,11 @@
 ///
 ///	TODO:
 ///
-///	++++	fix backward target pointer from group to addon class
-///	++			fix ImGui helper big toggle to useful edit/live modes: enables undo, autosave, memory mode..etc
-///	++++		open/save dialog to project User-Kit session in a single file.
-///					or allowed to all the groups?
+///	+++ 	fix helpers: clone
+///	+++		fix backward target pointer from group to addon class
+///	+++		fix ImGui helper big toggle to useful edit/live modes: enables undo, autosave, memory mode..etc
+///	+++		open/save dialog to project User-Kit session in a single file.
+///				or allowed to all the groups?
 ///
 ///	++		randomize editor preset
 ///				preset mini engine. ABC dropdown list for randomizers
@@ -26,7 +27,7 @@
 ///				do nesting toggles to improve view. create a group for related toggles..	
 ///				clone using editor toggles to avoid clone disabled toggle params
 ///				mode state to allow overwrite only enabled toggle params
-///	+++		add engine to create all preset files if it's a new empty project
+///	++		add populator engine to create all preset files if it's a new empty project
 ///				add setter to enable some params to randomize
 ///				call populate. disable debug_display red info
 ///

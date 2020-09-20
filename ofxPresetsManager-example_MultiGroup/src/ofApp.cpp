@@ -66,9 +66,7 @@ void ofApp::setupParameters()
 	//--
 
 	// 0. ofParameterGroup's
-
-	float _alpha = 0.4;
-
+	
 	// group0
 	params0.setName("paramsGroup0");// this is our parent group
 	params0.add(color0.set("color0", ofFloatColor(1, 0, 0, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));

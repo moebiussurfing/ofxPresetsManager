@@ -80,4 +80,6 @@ public:
 #ifdef USE_WindowApp
 	ofxWindowApp WindowApp;
 #endif
+
+	float _alpha = 0.4;
 };
