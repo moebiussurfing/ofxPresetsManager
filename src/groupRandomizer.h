@@ -23,14 +23,27 @@ public:
 	void keyPressed(int key);
 	void exit();
 
+private:
 	ofParameterGroup group;
 	//ofParameter<int> selectorTARGET;
 
 	void doDices();
 
-	//----
+	std::string path_RandomizerSettings;
+public:
+	void setPath_RandomizerSettings(string folder)
+	{
+		ofLogNotice(__FUNCTION__) << "path: " << folder;
+
+		path_RandomizerSettings = folder;
+	}
 
 public:
+	void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
+	
+	//----
+
+private:
 	ofParameterGroup params_HelperTools;
 	ofParameterGroup params_Randomizer;
 	ofParameterGroup params_Control;// to use on external gui
@@ -38,7 +51,6 @@ public:
 
 	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
 	//ofParameterGroup params_Randomizer;
-	void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
 	int mainGroupAmtPresetsFav;// amount of box-clickable handled presets on current favorites/kit
 	bool bIsDoneLoad = false;
 	void loadPreset(int p)
@@ -58,6 +70,8 @@ public:
 	// helper tools
 	ofParameter<bool> bCloneRight;
 	ofParameter<bool> bCloneAll;
+
+public:
 	void doCloneRight(int pIndex);// clone from selected preset to all others to the right
 	void doCloneAll();// clone all presets from the current selected
 	void doPopulateFavs();// fast populate random presets around all favs
@@ -107,10 +121,13 @@ public:
 
 	// randomizer
 
+private:
 	ofParameterGroup params_RandomizerSettings{ "Randomizers" };
-public:
+
+	//public:
 	ofParameter<bool> PLAY_RandomizeTimer; //play randomizer
 	ofParameter<bool> bRandomizeIndex;
+
 private:
 	ofParameter<bool> MODE_DicesProbs;
 	ofParameter<bool> MODE_LatchTrig; // this mode trigs the preset but goes back to preset 0 after duration timer
@@ -123,6 +140,8 @@ public:
 	void setModeRandomizeAvoidRepeat(bool b) {
 		MODE_AvoidRandomRepeat = b;
 	}
+
+private:
 	ofParameter<int> randomizeDuration;
 	ofParameter<int> randomizeDurationShort;
 	ofParameter<float> randomizeDurationBpm;
@@ -150,6 +169,7 @@ private:
 
 public:
 	ofParameter<bool> bRandomizeEditor;
+
 private:
 	ofParameter<bool> bRandomizeEditorAll;// put all toggles/params to true. a randomize will act over all params
 	ofParameter<bool> bRandomizeEditorNone;// put to disabled all toggles
@@ -161,6 +181,7 @@ private:
 	void Changed_Params_Editor(ofAbstractParameter &e);
 	void doRandomizeEditor();// randomize params of current selected preset
 	void doRandomizeEditorGroup(ofParameterGroup& group);// randomize params of current selected preset
+
 	vector<ofParameter<bool>> editorPresets;
 	ofParameterGroup params_Editor;
 	ofParameterGroup params_Editor_Toggles;
@@ -226,7 +247,7 @@ public:
 		doRandomizeEditor();
 	}
 
-
+private:
 	bool DISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
 
 };

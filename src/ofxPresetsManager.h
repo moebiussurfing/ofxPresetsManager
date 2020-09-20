@@ -127,6 +127,7 @@ public:
 
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
+	void drawImGui();
 	void exit();
 	void windowResized(int w, int h);
 
@@ -206,7 +207,7 @@ private:
 
 	//TODO:
 	ofParameter<int> GuiGROUP_Selected_Index;// only this selected group will be showed on gui to edit
-	void ChangedGuiGroup(int & index);
+	void Changed_GuiGROUP_Selected_Index(int & index);
 	std::vector<groupRandomizer> groupRandomizers;
 
 	//--

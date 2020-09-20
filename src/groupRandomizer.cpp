@@ -6,7 +6,7 @@ groupRandomizer::groupRandomizer() {}
 //--------------------------------------------------------------
 groupRandomizer::~groupRandomizer()
 {
-	//exit();
+	exit();
 }
 
 //--------------------------------------------------------------
@@ -86,7 +86,9 @@ void groupRandomizer::setup(ofParameterGroup &g, int _numPresets) {
 	// startup
 
 	DISABLE_CALLBACKS = false;
-	//bool b2 = ofxSurfingHelpers::loadGroup(params_RandomizerSettings, path2);
+	
+	// save randomizers settings
+	ofxSurfingHelpers::loadGroup(params_RandomizerSettings, path_RandomizerSettings);
 
 	doDices();
 }
@@ -170,7 +172,7 @@ int groupRandomizer::doRandomizeWichSelectedPresetCheckChanged()
 		_r = _rr;
 		//_r = _rr + 1;
 
-		//debug
+		// debug
 		ofLogVerbose(__FUNCTION__) << "DEBUG";
 		//for (int i = 0; i < presetsRandomFactor.size(); i++) {
 		for (int i = 0; i < presetsRandomFactor.size(); i++) {
@@ -668,6 +670,9 @@ void groupRandomizer::buildRandomizers()
 //--------------------------------------------------------------
 void groupRandomizer::exit()
 {
+	// save randomizers settings
+	ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path_RandomizerSettings);
+
 	ofRemoveListener(params_Control.parameterChangedE(), this, &groupRandomizer::Changed_Params_Control);
 	ofRemoveListener(params_Randomizer.parameterChangedE(), this, &groupRandomizer::Changed_Params_Control);
 	ofRemoveListener(params_Editor.parameterChangedE(), this, &groupRandomizer::Changed_Params_Editor);
@@ -705,7 +710,7 @@ void groupRandomizer::update()
 		uint32_t _time = ofGetElapsedTimeMillis();
 		timerRandomizer = _time - randomizerTimer;
 
-		cout << __FUNCTION__ << " : " << timerRandomizer << endl;
+		ofLogNotice(__FUNCTION__) << " : " << timerRandomizer;
 
 		if (PRESET_Selected_IndexMain < presetsRandomModeShort.size()) {// avoid out of range
 

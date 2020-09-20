@@ -54,7 +54,14 @@ ofxPresetsManager::ofxPresetsManager()
 	path_ControlSettings = "appSettings";
 
 	// randomizer settings for each kit
-	filename_Randomizers = "settingsRandomizer.xml";
+	filename_Randomizers = "_Randomizer";
+#ifdef USE_XML
+	filename_Randomizers += ".xml";
+#else
+#ifdef USE_JSON
+	filename_Randomizers += ".json";
+#endif
+#endif
 
 	// global app session settings
 	filename_ControlSettings = "settingsControl.xml";
@@ -355,8 +362,8 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	//--
 
-#ifdef INCLUDE_RANDOMIZER
 	// callback
+#ifdef INCLUDE_RANDOMIZER
 	ofAddListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 #endif
 
@@ -368,8 +375,8 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	ImGui_Setup();
 #endif
 
-#ifdef INCLUDE_ofxUndoSimple
 	// TODO: main group only
+#ifdef INCLUDE_ofxUndoSimple
 	undoStringParams = groups[0].toString();
 #endif
 
@@ -402,18 +409,31 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	// TODO:
 	// user gui selector
 	GuiGROUP_Selected_Index.set("GUI GROUP SELECTOR", 0, 0, groups.size() - 1);
-	GuiGROUP_Selected_Index.addListener(this, &ofxPresetsManager::ChangedGuiGroup);
+	GuiGROUP_Selected_Index.addListener(this, &ofxPresetsManager::Changed_GuiGROUP_Selected_Index);
 
 	groupRandomizers.resize(groups.size());
 
-	for (int i = 0; i < groups.size(); i++) 
+	for (int i = 0; i < groups.size(); i++)
 	{
 		groupRandomizers[i].setSelectorTARGET(PRESETS_Selected_Index[i]);
-	
-		//groupRandomizers[i].setup(groups[i], keys[i], PRESETS_Selected_Index[i]);// pass the group and the associated keys
+
+		// set the name for the randomizer settings file
+		if (bSplitGroupFolders.get())
+		{
+			std::string _path;
+			_path = path_UserKit_Folder + "/" + path_PresetsFavourites;// current kit-presets presets folder
+			_path += "/" + groups[i].getName();// append group name
+			_path += "/"; 
+			ofxSurfingHelpers::CheckFolder(_path);// check parent container folder
+			
+			// name
+			_path += groups[i].getName();
+			_path += filename_Randomizers;
+			
+			groupRandomizers[i].setPath_RandomizerSettings(_path);
+		}
+
 		groupRandomizers[i].setup(groups[i], keys[i]);// pass the group and the associated keys
-		//groupRandomizers[i].setup(groups[i], groupsSizes[i] - 1);// pass the group and the amount of presets
-	
 	}
 
 	//----
@@ -682,6 +702,16 @@ void ofxPresetsManager::update(ofEventArgs & args)
 }
 
 //---------------------------------------------------------------------
+void ofxPresetsManager::drawImGui()
+{
+	ImGui_Draw_WindowBegin();
+
+	//draw content
+	bImGui_mouseOver = ImGui_Draw_Window();
+
+	ImGui_Draw_WindowEnd();
+}
+//---------------------------------------------------------------------
 void ofxPresetsManager::draw(ofEventArgs & args)
 {
 	//----
@@ -697,22 +727,17 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 
 	//gui
 
-#ifndef MODE_ImGui_EXTERNAL
 	//draw ImGui
+#ifndef MODE_ImGui_EXTERNAL
 	if (SHOW_ImGui)
 	{
-		ImGui_Draw_WindowBegin();
-
-		//draw content
-		bImGui_mouseOver = ImGui_Draw_Window();
-
-		ImGui_Draw_WindowEnd();
+		drawImGui();
 	}
 #else
 	bImGui_mouseOver = false;
 #endif
 
-}
+	}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::windowResized(int w, int h)
@@ -1751,88 +1776,102 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//----
 
 		//navigate kit/favorites presets
-		if (key == OF_KEY_RIGHT && ENABLE_KeysArrowBrowse)
+		if (ENABLE_KeysArrowBrowse)
 		{
-			////browse presets
-			//if (MODE_Browser_NewPreset)
-			//{
-			//	currentFile++;
-			//	if (currentFile > files.size() - 1) currentFile = files.size() - 1;
-			//	displayNamePreset = fileNames[currentFile];
-			//	ofLogNotice(__FUNCTION__) << "[>] LOAD" << endl;
-			//	ofLogNotice(__FUNCTION__) << "Preset Name: " << displayNamePreset;
-			//	doLoadMainGroupPreset(displayNamePreset);
-			//}
-			////browse favorites
-			//else
+			// browse groups
+			if (key == OF_KEY_UP)
 			{
-				//int i = PRESET_Selected_IndexMain;
-				//i++;
-				//if (i > mainGroupMemoryFilesPresets.size() - 1) i = mainGroupMemoryFilesPresets.size() - 1;
-				//PRESET_Selected_IndexMain = i;
-
-				//TODO: crashes
-				//TODO: must make a selectors browser engine
-
-				DISABLE_CALLBACKS = true;
-				int i;
-				int _lastGroup = groups.size() - 1;//last group (main selector) index
-				if (_lastGroup < PRESETS_Selected_Index.size())
-					i = PRESETS_Selected_Index[_lastGroup].get();//get selected
-				int _lastIndex = groupsSizes[_lastGroup] - 1;
-				i++;
-				if (i > _lastIndex) i = _lastIndex;
-				DISABLE_CALLBACKS = false;
-
-				if (_lastGroup < PRESETS_Selected_Index.size())
-					PRESETS_Selected_Index[_lastGroup] = i;
-				else cout << "ERROR:" << _lastGroup << endl;
+				GuiGROUP_Selected_Index--;
 			}
-		}
 
-		else if (key == OF_KEY_LEFT && ENABLE_KeysArrowBrowse)
-		{
-			////browse presets
-			//if (MODE_Browser_NewPreset)
-			//{
-			//	currentFile--;
-			//	if (currentFile < 0) currentFile = 0;
-			//	displayNamePreset = fileNames[currentFile];
-			//	ofLogNotice(__FUNCTION__) << "[<] LOAD" << endl;
-			//	ofLogNotice(__FUNCTION__) << "Preset Name: " << displayNamePreset;
-			//	doLoadMainGroupPreset(displayNamePreset);
-			//}
-			////browse favorites
-			//else
+			else if (key == OF_KEY_DOWN)
 			{
-				//int i = PRESET_Selected_IndexMain;
-				//i--;
-				//if (i < 0) i = 0;
-				//PRESET_Selected_IndexMain = i;
+				GuiGROUP_Selected_Index++;
+			}
 
-				//DISABLE_CALLBACKS = true;
-				//int _lastGroup = groups.size() - 1;//last group (main selector) index
-				//int i = PRESETS_Selected_Index[_lastGroup];//get selected
-				//i--;
-				//if (i < 0) i = 0;
-				//DISABLE_CALLBACKS = false;
+			else if (key == OF_KEY_RIGHT)
+			{
+				////browse presets
+				//if (MODE_Browser_NewPreset)
+				//{
+				//	currentFile++;
+				//	if (currentFile > files.size() - 1) currentFile = files.size() - 1;
+				//	displayNamePreset = fileNames[currentFile];
+				//	ofLogNotice(__FUNCTION__) << "[>] LOAD" << endl;
+				//	ofLogNotice(__FUNCTION__) << "Preset Name: " << displayNamePreset;
+				//	doLoadMainGroupPreset(displayNamePreset);
+				//}
+				////browse favorites
+				//else
+				{
+					//int i = PRESET_Selected_IndexMain;
+					//i++;
+					//if (i > mainGroupMemoryFilesPresets.size() - 1) i = mainGroupMemoryFilesPresets.size() - 1;
+					//PRESET_Selected_IndexMain = i;
 
-				//PRESETS_Selected_Index[_lastGroup] = i;
+					//TODO: crashes
+					//TODO: must make a selectors browser engine
+
+					DISABLE_CALLBACKS = true;
+					int i;
+					int _lastGroup = groups.size() - 1;//last group (main selector) index
+					if (_lastGroup < PRESETS_Selected_Index.size())
+						i = PRESETS_Selected_Index[_lastGroup].get();//get selected
+					int _lastIndex = groupsSizes[_lastGroup] - 1;
+					i++;
+					if (i > _lastIndex) i = _lastIndex;
+					DISABLE_CALLBACKS = false;
+
+					if (_lastGroup < PRESETS_Selected_Index.size())
+						PRESETS_Selected_Index[_lastGroup] = i;
+					else cout << "ERROR:" << _lastGroup << endl;
+				}
+			}
+
+			else if (key == OF_KEY_LEFT)
+			{
+				////browse presets
+				//if (MODE_Browser_NewPreset)
+				//{
+				//	currentFile--;
+				//	if (currentFile < 0) currentFile = 0;
+				//	displayNamePreset = fileNames[currentFile];
+				//	ofLogNotice(__FUNCTION__) << "[<] LOAD" << endl;
+				//	ofLogNotice(__FUNCTION__) << "Preset Name: " << displayNamePreset;
+				//	doLoadMainGroupPreset(displayNamePreset);
+				//}
+				////browse favorites
+				//else
+				{
+					//int i = PRESET_Selected_IndexMain;
+					//i--;
+					//if (i < 0) i = 0;
+					//PRESET_Selected_IndexMain = i;
+
+					//DISABLE_CALLBACKS = true;
+					//int _lastGroup = groups.size() - 1;//last group (main selector) index
+					//int i = PRESETS_Selected_Index[_lastGroup];//get selected
+					//i--;
+					//if (i < 0) i = 0;
+					//DISABLE_CALLBACKS = false;
+
+					//PRESETS_Selected_Index[_lastGroup] = i;
 
 
-				DISABLE_CALLBACKS = true;
-				int i;
-				int _lastGroup = groups.size() - 1;//last group (main selector) index
-				if (_lastGroup < PRESETS_Selected_Index.size())
-					i = PRESETS_Selected_Index[_lastGroup].get();//get selected
-				int _lastIndex = groupsSizes[_lastGroup] - 1;
-				i--;
-				if (i < 0) i = 0;
-				DISABLE_CALLBACKS = false;
+					DISABLE_CALLBACKS = true;
+					int i;
+					int _lastGroup = groups.size() - 1;//last group (main selector) index
+					if (_lastGroup < PRESETS_Selected_Index.size())
+						i = PRESETS_Selected_Index[_lastGroup].get();//get selected
+					int _lastIndex = groupsSizes[_lastGroup] - 1;
+					i--;
+					if (i < 0) i = 0;
+					DISABLE_CALLBACKS = false;
 
-				if (_lastGroup < PRESETS_Selected_Index.size())
-					PRESETS_Selected_Index[_lastGroup] = i;
-				else cout << "ERROR:" << _lastGroup << endl;
+					if (_lastGroup < PRESETS_Selected_Index.size())
+						PRESETS_Selected_Index[_lastGroup] = i;
+					else cout << "ERROR:" << _lastGroup << endl;
+				}
 			}
 		}
 
@@ -2214,7 +2253,7 @@ void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
 
 						if (PRESETS_Selected_Index[g] == PRESETS_Selected_Index_PRE[g])
 						{
-							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " PRESET " << p << " [NOT CHANGED]";
+							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " PRESET " << p << " NOT CHANGED";
 
 							// browser
 							//if (MODE_Browser_NewPreset)
@@ -2233,7 +2272,7 @@ void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
 
 						else if (PRESETS_Selected_Index[g] != PRESETS_Selected_Index_PRE[g])
 						{
-							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " PRESET " << p << " [CHANGED]";
+							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " PRESET " << p << " CHANGED";
 
 							//-
 
@@ -2284,7 +2323,7 @@ void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
 
 		//	if (PRESET_Selected_IndexMain == PRESET_Selected_IndexMain_PRE)
 		//	{
-		//		ofLogNotice(__FUNCTION__) << groups[0].getName() << " PRESET " << e << " [NOT Changed]";
+		//		ofLogNotice(__FUNCTION__) << groups[0].getName() << " PRESET " << e << " NOT Changed";
 
 		//		//browser
 		//		if (MODE_Browser_NewPreset)
@@ -2628,35 +2667,29 @@ void ofxPresetsManager::save_ControlSettings()
 
 	//---
 
-	try// TODO: test to avoid crashes..?
+	// TODO: test to avoid crashes..?
+	try
 	{
 		// save randomizers settings
 		ofLogVerbose(__FUNCTION__) << endl << params_Control.toString() << endl;
 
-		string path = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_ControlSettings;
+		string path;
 		bool b;
 
+		path = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_ControlSettings;
 		b = ofxSurfingHelpers::saveGroup(params_Control, path);
-		//if (!b) ofLogError(__FUNCTION__) << "CANT SAVE FILE '" << path << "'!";
-		//else ofLogNotice(__FUNCTION__) << "SAVED " << path;
 
 		//-
 
-		// save randomizers settings
-		string path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
-
-		b = ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path2);
-		//if (!b) ofLogError(__FUNCTION__) << "CANT SAVE FILE '" << path2 << "'!";
-		//else ofLogNotice(__FUNCTION__) << "SAVED " << path2;
+		//// save randomizers settings
+		//path = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
+		//b = ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path);
 
 		//--
 
 		// user settings
-		string path3 = filenameMainSettings;
-
-		b = ofxSurfingHelpers::saveGroup(params_UserKitSettings, path3);
-		//if (!b) ofLogError(__FUNCTION__) << "CANT SAVE FILE '" << path3 << "'!";
-		//else ofLogNotice(__FUNCTION__) << "SAVED " << path3;
+		path = filenameMainSettings;
+		b = ofxSurfingHelpers::saveGroup(params_UserKitSettings, path);
 
 		//--
 	}
@@ -2666,7 +2699,7 @@ void ofxPresetsManager::save_ControlSettings()
 		throw;
 	}
 
-	//---
+	//----
 
 	DISABLE_CALLBACKS = false;
 #else
@@ -2743,12 +2776,12 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 			if (!b) ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets > " << _path;
 #endif
 #endif
-		}
+	}
 		else {
 			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
-	}
+}
 
 	// debug params
 	if (true)
@@ -2761,8 +2794,8 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 #ifdef USE_JSON
 #endif
 #endif
-		}
 	}
+}
 }
 
 //--------------------------------------------------------------
@@ -2820,12 +2853,12 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 				mainGroupMemoryFilesPresets[i] = settings;
 #endif
-			}
+		}
 			else {
 				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
-		}
 	}
+}
 
 	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
@@ -2837,8 +2870,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
-		}
 	}
+}
 }
 
 ////--------------------------------------------------------------
@@ -2860,7 +2893,7 @@ void ofxPresetsManager::exit()
 	removeKeysListeners();
 	ofRemoveListener(params_UserKitSettings.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_UserKit);
 	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
-	
+
 	//ofRemoveListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
 	//ofRemoveListener(params_Editor.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Editor);
 
@@ -2868,7 +2901,7 @@ void ofxPresetsManager::exit()
 	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
 	ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
 
-	GuiGROUP_Selected_Index.removeListener(this, &ofxPresetsManager::ChangedGuiGroup);
+	GuiGROUP_Selected_Index.removeListener(this, &ofxPresetsManager::Changed_GuiGROUP_Selected_Index);
 
 	//--
 
@@ -3431,14 +3464,12 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 
 	//--
 
-	// save randomizers settings
-	string path2;
-	bool b2;
-	path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
-
-	b2 = ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path2);
-
-	ofLogNotice(__FUNCTION__) << "Saved " << path2 << " " << (b2 ? "DONE" : "FAILED");
+	//// save randomizers settings
+	//string path2;
+	//bool b2;
+	//path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
+	//b2 = ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path2);
+	//ofLogNotice(__FUNCTION__) << "Saved " << path2 << " " << (b2 ? "DONE" : "FAILED");
 
 	//--
 
@@ -4909,8 +4940,8 @@ void ofxPresetsManager::undoRefreshParams() {
 //#endif
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ChangedGuiGroup(int & index) {
-	//ofLogWarning(__FUNCTION__) << "GuiGROUP_Selected_Index: " << GuiGROUP_Selected_Index;
-	ofLogWarning(__FUNCTION__) << "GuiGROUP_Selected_Index: " << index;
-
+void ofxPresetsManager::Changed_GuiGROUP_Selected_Index(int & index)
+{
+	GuiGROUP_Selected_Index = (int)ofClamp(GuiGROUP_Selected_Index.get(), 0, GuiGROUP_Selected_Index.getMax());
+	ofLogWarning(__FUNCTION__) << "GuiGROUP_Selected_Index: " << GuiGROUP_Selected_Index;
 }

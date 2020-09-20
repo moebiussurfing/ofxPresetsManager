@@ -27,9 +27,10 @@ public:
 	// group0
     ofParameterGroup params0;
     ofParameterGroup params0_Nested;
+	ofParameter<ofFloatColor> color0;// bc ofColor not implemented on ImGui yet
+	ofParameter<bool> show0;
 	ofParameter<bool> fill0;
 	ofParameter<float> lineWidth0;
-	ofParameter<ofFloatColor> color0;// bc ofColor not implemented on ImGui yet
 	ofParameter<int> shapeType0;
 	ofParameter<int> numShapes0;
 	ofParameter<int> separation0;
@@ -38,6 +39,7 @@ public:
 	// group1
 	ofParameterGroup params1;
 	ofParameter<ofFloatColor> color1;
+	ofParameter<bool> show1;
 	ofParameter<int> numShapes1;
 	ofParameter<int> separation1;
 	ofParameter<int> shapeSide1;
@@ -45,15 +47,17 @@ public:
 	// group2
 	ofParameterGroup params2;
 	ofParameter<ofFloatColor> color2;
+	ofParameter<bool> show2;
 	ofParameter<float> size2;
 	ofParameter<bool> fill2;
 	
 	// group3
 	ofParameterGroup params3;	
+	ofParameter<ofFloatColor> color3;
+	ofParameter<bool> show3;
 	ofParameter<int> numObjects3;
 	ofParameter<float> sizeObjects3;
 	ofParameter<int> separationObjects3;
-	ofParameter<ofFloatColor> color3;
 
     void setupParameters();
 

@@ -70,6 +70,7 @@ void ofApp::setupParameters()
 	// group0
 	params0.setName("paramsGroup0");// this is our parent group
 	params0.add(color0.set("color0", ofFloatColor(1, 0, 0, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
+	params0.add(show0.set("show0", true));
 	params0.add(numShapes0.set("numShapes0", 5, 1, 5));
 	params0.add(shapeType0.set("shapeType0", 1, 1, 2));
 	params0.add(separation0.set("separation0", 100, 1, 100));
@@ -82,6 +83,7 @@ void ofApp::setupParameters()
 	// group1
 	params1.setName("paramsGroup1");
 	params1.add(color1.set("color1", ofFloatColor(0, 1, 0, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
+	params1.add(show1.set("show1", true));
 	params1.add(numShapes1.set("numShapes1", 5, 1, 5));
 	params1.add(shapeSide1.set("shapeSide1", 50, 5, 200));
 	params1.add(separation1.set("separation1", 100, 1, 100));
@@ -89,12 +91,14 @@ void ofApp::setupParameters()
 	// group2
 	params2.setName("paramsGroup2");
 	params2.add(color2.set("color2", ofFloatColor(1, 1, 0, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
+	params2.add(show2.set("show2", true));
 	params2.add(size2.set("size2", 50, 5, 200));
 	params2.add(fill2.set("fill2", true));
 
 	// group3
 	params3.setName("paramsGroup3");
 	params3.add(color3.set("color3", ofFloatColor(0, 0.5, 1, 0.7), ofFloatColor(0, 0), ofFloatColor(1, 1)));
+	params3.add(show3.set("show3", true));
 	params3.add(numObjects3.set("numObjects3", 5, 1, 5));
 	params3.add(sizeObjects3.set("sizeObjects3", 5, 1, 200));
 	params3.add(separationObjects3.set("separationObjects3", 50, 5, 100));
@@ -138,19 +142,18 @@ void ofApp::draw()
 	ofBackground(ofColor::darkBlue);
 
 	// scene draw object linked to grouped parameters
-	drawScene0();
-	drawScene1();
-	drawScene2();
-	drawScene3();
+	if (show0) drawScene0();
+	if (show1) drawScene1();
+	if (show2) drawScene2();
+	if (show3) drawScene3();
 
+	// local gui parameters: to show or to edit presets params
 	if (bGui) {
-		//local gui parameters
 		gui0.draw();
 		gui1.draw();
 		gui2.draw();
 		gui3.draw();
 	}
-
 }
 
 //--------------------------------------------------------------
@@ -188,7 +191,7 @@ void ofApp::drawScene0()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(200, 600);
+	ofTranslate(200, 500);
 	ofSetColor(color0.get());
 	ofSetLineWidth(lineWidth0);
 	if (fill0) ofFill();
@@ -208,7 +211,7 @@ void ofApp::drawScene1()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(350, 700 - shapeSide1 / 10);
+	ofTranslate(350, 600 - shapeSide1 / 10);
 	ofSetColor(color1.get());
 	ofFill();
 	for (int i = 0; i < numShapes1; ++i)
@@ -225,7 +228,7 @@ void ofApp::drawScene2()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(200, 600);
+	ofTranslate(200, 500);
 	ofSetColor(color2.get());
 	if (fill2) ofFill();
 	else ofNoFill();
@@ -243,7 +246,7 @@ void ofApp::drawScene3()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(600, 700);
+	ofTranslate(600, 600);
 	ofFill();
 	ofSetColor(color3.get());
 	for (int i = 0; i < numObjects3; ++i)
