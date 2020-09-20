@@ -78,8 +78,8 @@ void groupRandomizer::setup(ofParameterGroup &g, int _numPresets) {
 
 	params_Control.add(PRESET_Selected_IndexMain);
 
-	ofAddListener(params_Control.parameterChangedE(), this, &groupRandomizer::Changed_Params_Control);
-	ofAddListener(params_Randomizer.parameterChangedE(), this, &groupRandomizer::Changed_Params_Control);
+	ofAddListener(params_Control.parameterChangedE(), this, &groupRandomizer::Changed_Control);
+	ofAddListener(params_Randomizer.parameterChangedE(), this, &groupRandomizer::Changed_Control);
 
 	//----
 
@@ -102,14 +102,15 @@ int groupRandomizer::doRandomizeWichSelectedPresetCheckChanged()
 
 	int _r = PRESET_Selected_IndexMain;
 
-	if (MODE_DicesProbs) {
+	if (MODE_DicesProbs)
+	{
 
 		// 1. dice randomize
 
 #ifndef DEBUG_randomTest
 		{
 			// get a random between all possible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
-			// each preset has many dices: more dices 0 more probality to be selected by the randomizer
+			// each preset has many dices: more dices means more probality to be selected by the randomizer
 			randomizedDice = ofRandom(0, dicesTotalAmount);
 
 			ofLogVerbose(__FUNCTION__) << "random: " << randomizedDice.get() << "/" << dicesTotalAmount;
@@ -134,7 +135,6 @@ int groupRandomizer::doRandomizeWichSelectedPresetCheckChanged()
 		// 3. check if dice is inside both ranges. to select preset (_rr) associated to dice 
 
 		int _rr = 0;
-		//for (int i = 0; i < presetsRandomFactor.size(); i++) {
 		for (int i = 0; i <= presetsRandomFactor.size(); i++) {
 
 			// define upper/lower limits for each dices/preset
@@ -144,8 +144,8 @@ int groupRandomizer::doRandomizeWichSelectedPresetCheckChanged()
 			if (i == 0) start = 0;
 			else start = randomFactorsDices[i - 1];
 
-			//TODO:
-			//bug on last preset..
+			// TODO:
+			// bug on last preset..
 
 			//if (i == presetsRandomFactor.size() - 1)
 			//	end = presetsRandomFactor.size()-1;
@@ -157,7 +157,8 @@ int groupRandomizer::doRandomizeWichSelectedPresetCheckChanged()
 			else end = dicesTotalAmount;
 
 #ifdef DEBUG_randomTest
-			ofLogNotice(__FUNCTION__) << (start == end ? "\t\t\t\t" : "") << "[" << i << "] " << start << "-" << end;
+			//ofLogNotice(__FUNCTION__) << "[" << i << "] " << start << "-" << end;
+			ofLogNotice(__FUNCTION__) << (start == end ? "\t\t\t\t\t" : "") << "[" << i << "] " << start << "-" << end;// this are empty probs
 #endif
 			// check if dice is inside both limits
 			if (randomizedDice >= start && randomizedDice < end)
@@ -165,6 +166,7 @@ int groupRandomizer::doRandomizeWichSelectedPresetCheckChanged()
 				_rr = i - 1;
 			}
 		}
+
 #ifdef DEBUG_randomTest
 		ofLogNotice(__FUNCTION__) << "dice: " << randomizedDice << "  ->  index preset: [" << _rr << "]";
 		//ofLogNotice(__FUNCTION__) << "preset: " << _rr + 1;
@@ -174,14 +176,14 @@ int groupRandomizer::doRandomizeWichSelectedPresetCheckChanged()
 
 		// debug
 		ofLogVerbose(__FUNCTION__) << "DEBUG";
-		//for (int i = 0; i < presetsRandomFactor.size(); i++) {
 		for (int i = 0; i < presetsRandomFactor.size(); i++) {
 #ifdef DEBUG_randomTest
 			ofLogNotice(__FUNCTION__) << "randomFactorsDices: [" << i << "] " << randomFactorsDices[i];
 			// << "-" << randomFactorsDices[i + 1] << endl;
 #endif
 		}
-		//last
+
+		// last
 #ifdef DEBUG_randomTest
 		ofLogNotice(__FUNCTION__) << "randomFactorsDices: [" << presetsRandomFactor.size() << "] " << dicesTotalAmount;
 #endif
@@ -198,6 +200,7 @@ int groupRandomizer::doRandomizeWichSelectedPresetCheckChanged()
 		//	dicesTotalAmount += p.get();
 		//}
 	}
+
 	//else {
 	//	int numTryes = 0;
 	//	//avoid jump to same current preset
@@ -239,7 +242,7 @@ void groupRandomizer::doRandomizeWichSelectedPreset()
 	{
 		int numTryes = 0;
 		ofLogNotice(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes);
-		ofLogNotice(__FUNCTION__) << "PRESET Random is: " << ofToString(r);
+		ofLogNotice(__FUNCTION__) << "PRESET : " << ofToString(r);
 
 		while (r == _PRESET_selected_PRE && dicesTotalAmount > 1 && numTryes < 5) //while preset index not changed. TODO: avoid make more than 5 randoms..
 		{
@@ -250,12 +253,12 @@ void groupRandomizer::doRandomizeWichSelectedPreset()
 			ofLogWarning(__FUNCTION__) << "RETRY !";
 		}
 	}
-
+	else ofLogNotice(__FUNCTION__) << "PRESET : " << ofToString(r);
+	
 	//--
 
 	// 4. apply preset selection
 
-	ofLogNotice(__FUNCTION__) << "PRESET > " << ofToString(r);
 	loadPreset(r);
 
 	//int __r = (int)ofRandom(1.0f, 9.0f);
@@ -611,11 +614,11 @@ void groupRandomizer::setupRandomizerEditor()
 	bRandomizeEditorNone.set("NONE", false);
 
 	params_Editor.clear();
-	params_Editor.setName("PRESET EDIT");
+	params_Editor.setName("RANDOM EDIT");
 	params_Editor.add(bRandomizeEditor);
 	params_Editor.add(bRandomizeEditorAll);
 	params_Editor.add(bRandomizeEditorNone);
-	params_Editor.add(bRandomizeEditorPopulateFavs);
+	//params_Editor.add(bRandomizeEditorPopulateFavs);// TODO: not implemented
 	params_Editor_Toggles.setName("PRESET PARAMETERS");
 	params_Editor_Toggles.clear();
 
@@ -654,7 +657,7 @@ void groupRandomizer::setupRandomizerEditor()
 	//--
 
 	// callback
-	ofAddListener(params_Editor.parameterChangedE(), this, &groupRandomizer::Changed_Params_Editor);
+	ofAddListener(params_Editor.parameterChangedE(), this, &groupRandomizer::Changed_Editor);
 }
 
 //--------------------------------------------------------------
@@ -673,9 +676,9 @@ void groupRandomizer::exit()
 	// save randomizers settings
 	ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path_RandomizerSettings);
 
-	ofRemoveListener(params_Control.parameterChangedE(), this, &groupRandomizer::Changed_Params_Control);
-	ofRemoveListener(params_Randomizer.parameterChangedE(), this, &groupRandomizer::Changed_Params_Control);
-	ofRemoveListener(params_Editor.parameterChangedE(), this, &groupRandomizer::Changed_Params_Editor);
+	ofRemoveListener(params_Control.parameterChangedE(), this, &groupRandomizer::Changed_Control);
+	ofRemoveListener(params_Randomizer.parameterChangedE(), this, &groupRandomizer::Changed_Control);
+	ofRemoveListener(params_Editor.parameterChangedE(), this, &groupRandomizer::Changed_Editor);
 }
 
 //--------------------------------------------------------------
@@ -710,7 +713,7 @@ void groupRandomizer::update()
 		uint32_t _time = ofGetElapsedTimeMillis();
 		timerRandomizer = _time - randomizerTimer;
 
-		ofLogNotice(__FUNCTION__) << " : " << timerRandomizer;
+		//ofLogNotice(__FUNCTION__) << " : " << timerRandomizer;
 
 		if (PRESET_Selected_IndexMain < presetsRandomModeShort.size()) {// avoid out of range
 
@@ -769,7 +772,7 @@ void groupRandomizer::update()
 	else {
 		randomizerProgress = 0;
 	}
-	_prog = randomizerProgress / 100.f;
+	_prog = MIN(100, randomizerProgress / 100.f);
 
 	//--
 
@@ -832,7 +835,7 @@ void groupRandomizer::setupRandomizer()
 	}
 
 	params_Randomizer.clear();
-	params_Randomizer.setName("FAVOURITES");
+	params_Randomizer.setName("RANDOM SELECTED");
 	params_Randomizer.add(PLAY_RandomizeTimer);
 	params_Randomizer.add(bRandomizeIndex);
 	params_Randomizer.add(randomizeDuration);
@@ -878,10 +881,12 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 {
 	// 1. randomizers
 	string str = group.getName();
+	//string str = "RANDOMIZER";
+	//string str = "RANDOMIZERS " + group.getName();
 
 	//if (ImGui::TreeNode("GROUP RANDOMIZERS"))
-	if (ofxImGui::BeginTree("RANDOMIZERS " + str, settings))
-		//if (ofxImGui::BeginTree("GROUP RANDOMIZERS", settings))
+	//if (ofxImGui::BeginTree(str, settings))
+	if (ofxImGui::BeginTree("RANDOMIZER", settings))
 	{
 		//---
 
@@ -899,20 +904,21 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		// preset clicker matrix buttons
 		{
+			//ImGui::Text("PRESET SELECTOR:");
 			// toggle button matrix
 			ImVec2 button_sz(40, 40);
 			// Manually wrapping
 			// (we should eventually provide this as an automatic layout feature, but for now you can do it manually)
-			//ImGui::Text("PRESET SELECTOR:");
+			
 			ImGuiStyle& style = ImGui::GetStyle();
 			int _amtButtons = mainGroupAmtPresetsFav;
 			float _windowVisible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+
 			for (int n = 0; n < _amtButtons; n++)
 			{
 				ImGui::PushID(n);
 
 				string name = ofToString((char)(keys[n]));
-				//string name = ofToString((char)(keys[0][n]));
 
 				// customize colors
 				{
@@ -944,30 +950,30 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		//--
 
-		// main helpers
-		{
-			if (ImGui::Button("CLONE ALL"))
-			{
-				bCloneAll = true;
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("CLONE >"))
-			{
-				bCloneRight = true;
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("POPULATE!"))
-			{
-				// populate all favs
-				doPopulateFavs();
-				// create browser files too
-				doGetFavsToFilesBrowser();
-			}
-		}
+		// TODO: not implemented bc must be backward..
+		//// main helpers
+		//{
+		//	if (ImGui::Button("CLONE ALL"))
+		//	{
+		//		bCloneAll = true;
+		//	}
+		//	ImGui::SameLine();
+		//	if (ImGui::Button("CLONE >"))
+		//	{
+		//		bCloneRight = true;
+		//	}
+		//	ImGui::SameLine();
+		//	if (ImGui::Button("POPULATE!"))
+		//	{
+		//		// populate all favs
+		//		doPopulateFavs();
+		//		// create browser files too
+		//		doGetFavsToFilesBrowser();
+		//	}
+		//}
 
 		//--
 
-		//ImGui::Spacing(0, 10.0f);
 		ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
 		//--
@@ -994,7 +1000,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		//--
 
-		//// 1.0.2 draw progress bar for the randomizer timer
+		// 1.0.2 draw progress bar for the randomizer timer
 
 		ImGui::PushID("prog");
 		const ImVec4 color = style->Colors[ImGuiCol_ButtonHovered];//we can force change this color on theme... only used here
@@ -1019,37 +1025,34 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 		//style->ItemInnerSpacing = ImVec2(2, 4);
 		//float wHalf = (ImGui::GetWindowWidth() * 0.5f) - ( 4 + 6 + 6 +4);
 
+		//--
 
-		// TODO: undo engine
-		if (MODE_Editor)
-		{
-			float wHalf = 100;
-			if (ImGui::Button("UNDO", ImVec2(wHalf, 20)))
-			{
-				//ofLogNotice(__FUNCTION__) << "UNDO <-";
-				//undoStringParams.undo();
-				//undoRefreshParams();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("REDO", ImVec2(wHalf, 20)))
-			{
-				//ofLogNotice(__FUNCTION__) << "REDO ->";
-				//undoStringParams.redo();
-				//undoRefreshParams();
-			}
-			//string str = "";
-			//str += ofToString(undoStringParams.getUndoLength()) + "/";
-			//str += ofToString(undoStringParams.getRedoLength());
-			//ImGui::Text(str.c_str());
-		}
+		//// TODO: undo engine
+		//if (MODE_Editor)
+		//{
+		//	float wHalf = 100;
+		//	if (ImGui::Button("UNDO", ImVec2(wHalf, 20)))
+		//	{
+		//		//ofLogNotice(__FUNCTION__) << "UNDO <-";
+		//		//undoStringParams.undo();
+		//		//undoRefreshParams();
+		//	}
+		//	ImGui::SameLine();
+		//	if (ImGui::Button("REDO", ImVec2(wHalf, 20)))
+		//	{
+		//		//ofLogNotice(__FUNCTION__) << "REDO ->";
+		//		//undoStringParams.redo();
+		//		//undoRefreshParams();
+		//	}
+		//	//string str = "";
+		//	//str += ofToString(undoStringParams.getUndoLength()) + "/";
+		//	//str += ofToString(undoStringParams.getRedoLength());
+		//	//ImGui::Text(str.c_str());
+		//}
 
 		//--
 
 		// 1.1 randomizers presets
-		//const bool b = true;
-		//settings.windowBlock = false;//-> this hides next group
-		//ImGui::SetNextWindowCollapsed(true, ImGuiCond_Appearing);//not working..
-		//ImGui::SetNextWindowCollapsed(true, ImGuiCond_Always);
 		ofxImGui::AddGroup(params_Randomizer, settings);
 
 #ifdef DEBUG_randomTest
@@ -1058,7 +1061,8 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 		//--
 
 		// 1.2 randomizers editor
-		if (MODE_Editor) {
+		if (MODE_Editor) 
+		{
 			ofxImGui::AddGroup(params_Editor, settings);
 		}
 
@@ -1071,7 +1075,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 
 //--------------------------------------------------------------
-void groupRandomizer::Changed_Params_Editor(ofAbstractParameter &e)
+void groupRandomizer::Changed_Editor(ofAbstractParameter &e)
 {
 	if (!DISABLE_CALLBACKS)
 	{
@@ -1186,7 +1190,6 @@ void groupRandomizer::doSwap(int groupIndex, int fromIndex, int toIndex)
 //--------------------------------------------------------------
 void groupRandomizer::doDices()
 {
-	ofLogNotice(__FUNCTION__);
 	// sum total dices/all probs
 	dicesTotalAmount = 0;
 	for (auto &p : presetsRandomFactor) {
@@ -1219,11 +1222,8 @@ void groupRandomizer::doCloneAll()
 	//}
 }
 
-
-
-
 //--------------------------------------------------------------
-void groupRandomizer::Changed_Params_Control(ofAbstractParameter &e)
+void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 {
 	if (!DISABLE_CALLBACKS)
 	{
@@ -1286,7 +1286,7 @@ void groupRandomizer::Changed_Params_Control(ofAbstractParameter &e)
 		//--
 
 		// randomizer
-		else if (name == "RANDOMIZE INDEX" && bRandomizeIndex)
+		else if (name == bRandomizeIndex.getName() && bRandomizeIndex)
 		{
 			ofLogNotice(__FUNCTION__) << "RANDOMIZE !";
 			bRandomizeIndex = false;
@@ -1371,4 +1371,17 @@ void groupRandomizer::Changed_Params_Control(ofAbstractParameter &e)
 			}
 		}
 	}
+}
+
+//--------------------------------------------------------------
+void groupRandomizer::loadPreset(int p)
+{
+	ofLogNotice(__FUNCTION__) << group.getName() << " : " << p;
+	PRESET_Selected_IndexMain = p;
+	bIsDoneLoad = true;// TODO: workaround bc the done-loading happens out of the class..
+
+	////if (selectorTARGET) 
+	//{
+	//	selectorTARGET = PRESET_Selected_IndexMain;
+	//}
 }

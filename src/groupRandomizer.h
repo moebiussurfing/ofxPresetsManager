@@ -3,7 +3,7 @@
 #include "ofxSurfingHelpers.h"
 #include "ofxImGui.h"
 
-#define DEBUG_randomTest
+//#define DEBUG_randomTest
 
 class groupRandomizer
 {
@@ -47,23 +47,13 @@ private:
 	ofParameterGroup params_HelperTools;
 	ofParameterGroup params_Randomizer;
 	ofParameterGroup params_Control;// to use on external gui
-	void Changed_Params_Control(ofAbstractParameter &e);
+	void Changed_Control(ofAbstractParameter &e);
 
 	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
 	//ofParameterGroup params_Randomizer;
 	int mainGroupAmtPresetsFav;// amount of box-clickable handled presets on current favorites/kit
 	bool bIsDoneLoad = false;
-	void loadPreset(int p)
-	{
-		ofLogNotice(__FUNCTION__) << " : " << p;
-		PRESET_Selected_IndexMain = p;
-		bIsDoneLoad = true;// TODO: workaround bc the done-loading happens out of the class..
-
-		////if (selectorTARGET) 
-		//{
-		//	selectorTARGET = PRESET_Selected_IndexMain;
-		//}
-	}
+	void loadPreset(int p);
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
 	vector<int> keys;// queued trigger keys for each group ? (all presets) (size of)
 
@@ -178,7 +168,7 @@ private:
 	// system to select what params of current selected preset to: clone, randomize etc
 	void setupRandomizerEditor();
 	void addGroupToEditor(ofParameterGroup& group);// queue all contained params inside the paramGroup and nested too
-	void Changed_Params_Editor(ofAbstractParameter &e);
+	void Changed_Editor(ofAbstractParameter &e);
 	void doRandomizeEditor();// randomize params of current selected preset
 	void doRandomizeEditorGroup(ofParameterGroup& group);// randomize params of current selected preset
 

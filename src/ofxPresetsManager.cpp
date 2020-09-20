@@ -220,7 +220,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//params_Custom.add(pathDirCustom);
 	//params_UserKitSettings.add(params_Custom);
 
-	//ofAddListener(params_UserKitSettings.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_UserKit);
+	//ofAddListener(params_UserKitSettings.parameterChangedE(), this, &ofxPresetsManager::Changed_UserKit);
 
 	//--
 
@@ -230,7 +230,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//params_Control.add(bLoad);
 	params_Control.add(params_HelperTools);
 
-	ofAddListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
+	ofAddListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Control);
 
 	//--
 
@@ -330,7 +330,6 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		//#define NUM_MAIN_SELECTOR_PRESETS 8
 		//mainSelector.setMax(NUM_MAIN_SELECTOR_PRESETS);
 
-		ofParameterGroup params_GroupMainSelector{ "GROUP LINK" };
 		for (int i = 0; i < PRESETS_Selected_Index.size(); i++)
 		{
 			params_GroupMainSelector.add(PRESETS_Selected_Index[i]);
@@ -346,7 +345,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		// store the main slector only!
 		int _last = groups.size() - 1;
 		GROUP_Selected_Index.setMax(groupsSizes[_last] - 1);
-		GROUP_Selected_Index.makeReferenceTo(PRESETS_Selected_Index[_last]);//link
+		GROUP_Selected_Index.makeReferenceTo(PRESETS_Selected_Index[_last]);// TODO: link
 
 		// excludes all selectors except the main one. the other will be saved as preset
 		params_PRESETS_Selected.setSerializable(false);
@@ -364,7 +363,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	// callback
 #ifdef INCLUDE_RANDOMIZER
-	ofAddListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
+	ofAddListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Control);
 #endif
 
 	//----
@@ -455,7 +454,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Custom.add(pathDirCustom);
 	params_UserKitSettings.add(params_Custom);
 
-	ofAddListener(params_UserKitSettings.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_UserKit);
+	ofAddListener(params_UserKitSettings.parameterChangedE(), this, &ofxPresetsManager::Changed_UserKit);
 
 	//-------
 
@@ -1189,7 +1188,7 @@ void ofxPresetsManager::add(ofParameterGroup _params, initializer_list<int> _key
 //--------------------------------------------------------------
 void ofxPresetsManager::save(int presetIndex, int guiIndex)
 {
-	ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex;
+	ofLogVerbose(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex;
 
 	if (((guiIndex >= 0) && (guiIndex < (int)groups.size())) &&
 		(presetIndex >= 0) && (presetIndex < groupsSizes[guiIndex]))
@@ -1201,7 +1200,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 		bool b = ofxSurfingHelpers::saveGroup(groups[guiIndex], _path);
 
-		if (b) ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " " << guiIndex << " " << _path;
+		if (b) ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex << " " << _path;
 		else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " " << _path;
 	}
 
@@ -1355,7 +1354,7 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 //--------------------------------------------------------------
 void ofxPresetsManager::load(int presetIndex, int guiIndex)
 {
-	ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex;
+	ofLogVerbose(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex;
 
 	if (((guiIndex >= 0) && (guiIndex < (int)groups.size())) &&
 		(presetIndex >= 0) && (presetIndex < groupsSizes[guiIndex]))
@@ -1370,7 +1369,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 			// file not found so create one file instead
 			save(presetIndex, guiIndex);
 		}
-		else ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " " << guiIndex << " " << _path;
+		else ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex << " " << _path;
 
 		// TODO: ? already marked?
 		// mark selected
@@ -2123,7 +2122,7 @@ void ofxPresetsManager::setToggleKeysControl(bool active)
 //#endif
 
 //--------------------------------------------------------------
-void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
+void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 {
 	if (!DISABLE_CALLBACKS)
 	{
@@ -2190,7 +2189,7 @@ void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
 
 						if (PRESETS_Selected_Index[g] == PRESETS_Selected_Index_PRE[g])
 						{
-							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " PRESET " << p << " NOT CHANGED";
+							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " NOT CHANGED";
 
 							// browser
 							//if (MODE_Browser_NewPreset)
@@ -2209,7 +2208,7 @@ void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
 
 						else if (PRESETS_Selected_Index[g] != PRESETS_Selected_Index_PRE[g])
 						{
-							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " PRESET " << p << " CHANGED";
+							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " CHANGED";
 
 							//-
 
@@ -2307,7 +2306,7 @@ void ofxPresetsManager::Changed_Params_UserKit(ofAbstractParameter &e)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::Changed_Params_Control(ofAbstractParameter &e)
+void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 {
 	if (!DISABLE_CALLBACKS)
 	{
@@ -2828,10 +2827,10 @@ void ofxPresetsManager::exit()
 
 	// destroy callbacks
 	removeKeysListeners();
-	ofRemoveListener(params_UserKitSettings.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_UserKit);
-	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
+	ofRemoveListener(params_UserKitSettings.parameterChangedE(), this, &ofxPresetsManager::Changed_UserKit);
+	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Control);
 
-	//ofRemoveListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Control);
+	//ofRemoveListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Control);
 	//ofRemoveListener(params_Editor.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Editor);
 
 	// TODO: required?
@@ -2997,8 +2996,8 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 	// User-Kit name
 	string _name = "ofxPresetsManager : " + displayNameUserKit;
-	//string _name = "ofxPresetsManager : " + groups[0].getName();
-	bool _collapse = false;
+	
+	bool _collapse = true;// TODO: don't do nothing?
 
 	//--
 
@@ -3149,8 +3148,8 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 
 		//---
 
-		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30);//TODO: repair
-		ofxImGui::AddParameter(MODE_Editor);
+		ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30);// TODO: repair
+		//ofxImGui::AddParameter(MODE_Editor);
 
 		//ImGui::SameLine();
 

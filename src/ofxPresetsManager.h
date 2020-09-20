@@ -61,7 +61,7 @@
 //#define MODE_ImGui_EXTERNAL			// this must be defined here and (but not only) in ofApp (too)!!
 //										// will handle the gui outisde the addon, here the parameters only!
 #define INCLUDE_IMGUI_CUSTOM_FONT		// customize ImGui font
-#define INCLUDE_ofxUndoSimple			// undo engine to store after randomize preset parameters (& recall)
+//#define INCLUDE_ofxUndoSimple			// undo engine to store after randomize preset parameters (& recall)
 //#define USE_ofxImGuiSimple			// TEST with an alternative ImGui addon
 //#define USE_JSON						// file settings format
 //										   
@@ -209,6 +209,8 @@ private:
 	ofParameter<int> GuiGROUP_Selected_Index;// only this selected group will be showed on gui to edit
 	void Changed_GuiGROUP_Selected_Index(int & index);
 	std::vector<groupRandomizer> groupRandomizers;
+
+	ofParameterGroup params_GroupMainSelector{ "GROUP_LINK" };
 
 	//--
 
@@ -1148,8 +1150,8 @@ private:
 	// callbacks
 
 private:
-	void Changed_Params_Control(ofAbstractParameter &e);
-	void Changed_Params_UserKit(ofAbstractParameter &e);
+	void Changed_Control(ofAbstractParameter &e);
+	void Changed_UserKit(ofAbstractParameter &e);
 
 	//-
 
