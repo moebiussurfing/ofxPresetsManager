@@ -19,17 +19,17 @@ void groupRandomizer::setup(ofParameterGroup &g, vector<int> _keysList)
 	setup(g, keys.size());
 }
 
-//--------------------------------------------------------------
-void groupRandomizer::setSelectorTARGET(ofParameter<int> &index) {
-	ofLogNotice(__FUNCTION__) << "target registered: " << index.getName();
-
-	// TODO:
-	//PRESET_Selected_IndexMain.makeReferenceTo(index);// TODO: it brokes saveing well..
-	//PRESET_Selected_IndexMain.makeReferenceTo(selectorTARGET);
-
-	// TODO:
-	selectorTARGET = index;
-}
+////--------------------------------------------------------------
+//void groupRandomizer::setSelectorTARGET(ofParameter<int> &index) {
+//	ofLogNotice(__FUNCTION__) << "target registered: " << index.getName();
+//
+//	// TODO:
+//	//PRESET_Selected_IndexMain.makeReferenceTo(index);// TODO: it brokes saveing well..
+//	//PRESET_Selected_IndexMain.makeReferenceTo(selectorTARGET);
+//
+//	// TODO:
+//	//selectorTARGET = index;
+//}
 
 ////--------------------------------------------------------------
 //void groupRandomizer::setup(ofParameterGroup &g, int _numPresets, ofParameter<int> &index) {
@@ -45,7 +45,9 @@ void groupRandomizer::setup(ofParameterGroup &g, int _numPresets) {
 
 	// update control gui panel params
 	mainGroupAmtPresetsFav = _numPresets;
-	PRESET_Selected_IndexMain.set("PRESET", 0, 0, mainGroupAmtPresetsFav - 1);
+
+	PRESET_Selected_IndexMain.set(g.getName(), 0, 0, mainGroupAmtPresetsFav - 1);
+	//PRESET_Selected_IndexMain.set("PRESET", 0, 0, mainGroupAmtPresetsFav - 1);
 	//PRESET_Selected_IndexMain.setMax(mainGroupAmtPresetsFav - 1);
 
 	// list keys
@@ -96,7 +98,7 @@ void groupRandomizer::setup(ofParameterGroup &g, int _numPresets) {
 }
 
 //--------------------------------------------------------------
-int groupRandomizer::doRandomizeWichSelectedPresetCheckChanged()
+int groupRandomizer::doRandomIndexChanged()
 {
 	ofLogVerbose(__FUNCTION__);
 
@@ -222,7 +224,7 @@ int groupRandomizer::doRandomizeWichSelectedPresetCheckChanged()
 }
 
 //--------------------------------------------------------------
-void groupRandomizer::doRandomizeWichSelectedPreset()
+void groupRandomizer::doRandomIndex()
 {
 #ifdef DEBUG_randomTest
 	//ofLogNotice(__FUNCTION__);
@@ -234,7 +236,7 @@ void groupRandomizer::doRandomizeWichSelectedPreset()
 
 	int _PRESET_selected_PRE = PRESET_Selected_IndexMain;
 
-	int r = doRandomizeWichSelectedPresetCheckChanged();
+	int r = doRandomIndexChanged();
 
 #ifdef DEBUG_randomTest
 	ofLogNotice(__FUNCTION__) << "dicesTotalAmounts: " << ofToString(dicesTotalAmount);
@@ -247,19 +249,21 @@ void groupRandomizer::doRandomizeWichSelectedPreset()
 	if (MODE_AvoidRandomRepeat)
 	{
 		int numTryes = 0;
-		ofLogNotice(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes);
-		ofLogNotice(__FUNCTION__) << "PRESET : " << ofToString(r);
+		ofLogVerbose(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes);
+		ofLogVerbose(__FUNCTION__) << "PRESET : " << ofToString(r);
 
 		while (r == _PRESET_selected_PRE && dicesTotalAmount > 1 && numTryes < 5) //while preset index not changed. TODO: avoid make more than 5 randoms..
 		{
-			r = doRandomizeWichSelectedPresetCheckChanged();
-			ofLogWarning(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes) << " NOT changed!";
-			ofLogNotice(__FUNCTION__) << "PRESET Previous was : " << ofToString(_PRESET_selected_PRE);
-			ofLogNotice(__FUNCTION__) << "PRESET New Random is: " << ofToString(r);
-			ofLogWarning(__FUNCTION__) << "RETRY !";
+			r = doRandomIndexChanged();
+			ofLogVerbose(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes) << " NOT changed!";
+			ofLogVerbose(__FUNCTION__) << "PRESET Previous was : " << ofToString(_PRESET_selected_PRE);
+			ofLogVerbose(__FUNCTION__) << "PRESET New Random is: " << ofToString(r);
+			ofLogVerbose(__FUNCTION__) << "RETRY !";
 		}
 	}
-	else ofLogNotice(__FUNCTION__) << "PRESET : " << ofToString(r);
+	else ofLogVerbose(__FUNCTION__) << "PRESET : " << ofToString(r);
+
+	ofLogNotice(__FUNCTION__) << "Randomize " + group.getName() + "PRESET : " << ofToString(r);
 
 	//--
 
@@ -415,13 +419,13 @@ void groupRandomizer::addGroupToEditor(ofParameterGroup& group) {
 }
 
 //--------------------------------------------------------------
-void groupRandomizer::doRandomizeEditor() {
+void groupRandomizer::doRandomPreset() {
 	ofLogNotice(__FUNCTION__);
 
 	//if(params_Editor_Toggles.size() == 0) params_Editor_Toggles
 
 	ofParameterGroup _group = group;
-	doRandomizeEditorGroup(_group);
+	doRandomGroup(_group);
 
 #ifdef INCLUDE_ofxUndoSimple
 	if (MODE_Editor.get())
@@ -430,7 +434,7 @@ void groupRandomizer::doRandomizeEditor() {
 }
 
 //--------------------------------------------------------------
-void groupRandomizer::doRandomizeEditorGroup(ofParameterGroup& group) {
+void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 	for (auto parameter : group)
 	{
 		if (parameter->isSerializable())// avoid not serailizable params that will crash
@@ -440,7 +444,7 @@ void groupRandomizer::doRandomizeEditorGroup(ofParameterGroup& group) {
 			if (parameterGroup)
 			{
 				//cout << "parameterGroup: " << ofToString(parameterGroup->getName()) << endl;
-				doRandomizeEditorGroup(*parameterGroup);
+				doRandomGroup(*parameterGroup);
 				continue;
 			}
 
@@ -871,12 +875,12 @@ void groupRandomizer::keyPressed(int key)
 		}
 		else if (key == 'r')
 		{
-			doRandomizeWichSelectedPreset();
+			doRandomIndex();
 		}
 
 		else if (key == 'E')
 		{
-			doRandomizeEditor();
+			doRandomPreset();
 		}
 	}
 }
@@ -886,7 +890,7 @@ void groupRandomizer::keyPressed(int key)
 void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 {
 	// 1. randomizers
-	string str = "Group: " + group.getName();
+	string str;
 
 	//if (ImGui::TreeNode("GROUP RANDOMIZERS"))
 	//if (ofxImGui::BeginTree(str, settings))
@@ -897,14 +901,43 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 		// preset selector
 
 		//string str = "User-Kit: " + displayNameUserKit;
+		str = "Group  " + group.getName();
 		ImGui::Text(str.c_str());
-
-		ImGui::Dummy(ImVec2(0.0f, 5));
+		str = "Preset " + ofToString(PRESET_Selected_IndexMain.get());
+		ImGui::Text(str.c_str());
 
 		ofxImGui::AddParameter(PRESET_Selected_IndexMain);
 		//ImGui::SameLine();
-
 		//ImGui::Dummy(ImVec2(0.0f, 5));
+		//ImGui::Dummy(ImVec2(0.0f, 5));
+
+		//--
+
+		// TODO: not implemented bc must be backward..
+		// main helpers
+		{
+			ImGui::Dummy(ImVec2(0.0f, 5));
+
+			if (ImGui::Button("CLONE ALL"))
+			{
+				bCloneAll = true;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("CLONE >"))
+			{
+				bCloneRight = true;
+			}
+			//ImGui::SameLine();
+			//if (ImGui::Button("POPULATE!"))
+			//{
+			//	// populate all favs
+			//	doPopulateFavs();
+			//	// create browser files too
+			//	doGetFavsToFilesBrowser();
+			//}
+		}
+
+		ImGui::Dummy(ImVec2(0.0f, 5));
 
 		//--
 
@@ -956,30 +989,6 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		//--
 
-		// TODO: not implemented bc must be backward..
-		//// main helpers
-		//{
-		//	if (ImGui::Button("CLONE ALL"))
-		//	{
-		//		bCloneAll = true;
-		//	}
-		//	ImGui::SameLine();
-		//	if (ImGui::Button("CLONE >"))
-		//	{
-		//		bCloneRight = true;
-		//	}
-		//	ImGui::SameLine();
-		//	if (ImGui::Button("POPULATE!"))
-		//	{
-		//		// populate all favs
-		//		doPopulateFavs();
-		//		// create browser files too
-		//		doGetFavsToFilesBrowser();
-		//	}
-		//}
-
-		//--
-
 		//ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
 		//--
@@ -991,7 +1000,8 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 		//--
 
 		// 1.0.1 play randomizer index
-		ofxSurfingHelpers::AddBigToggle(PLAY_RandomizeTimer, 30);
+		//ofxSurfingHelpers::AddBigToggle(PLAY_RandomizeTimer, 30);
+		ofxImGui::AddParameter(PLAY_RandomizeTimer);
 
 		//-
 
@@ -1023,8 +1033,8 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		ImGui::Dummy(ImVec2(0.0f, 5));
 
-		//AddBigButton(bRandomizeIndex, 25);//index
-		ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 30);//preset
+		//ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 30);//preset
+		ofxImGui::AddParameter(bRandomizeEditor);
 
 		//float w = ImGui::GetWindowWidth();
 		//style->FramePadding = ImVec2(4, 2);
@@ -1104,7 +1114,7 @@ void groupRandomizer::Changed_Editor(ofAbstractParameter &e)
 		{
 			bRandomizeEditor = false;
 
-			doRandomizeEditor();
+			doRandomPreset();
 		}
 		else if (name == bRandomizeEditorAll.getName() && bRandomizeEditorAll)//all
 		{
@@ -1125,82 +1135,104 @@ void groupRandomizer::Changed_Editor(ofAbstractParameter &e)
 		else if (name == bRandomizeEditorPopulateFavs.getName() && bRandomizeEditorPopulateFavs)//populate random all favs
 		{
 			bRandomizeEditorPopulateFavs = false;
-			doPopulateFavs();
+			//doPopulateFavs();
 		}
 	}
 }
 
 // helpers
 
-//--------------------------------------------------------------
-void groupRandomizer::doCloneRight(int pIndex)
-{
-	ofLogNotice(__FUNCTION__) << "from preset: " << pIndex;
+////--------------------------------------------------------------
+//void groupRandomizer::doCloneRight(int pIndex)
+//{
+//	ofLogNotice(__FUNCTION__) << "from preset: " << pIndex;
+//
+//	//CheckAllFolders();
+//
+//	//for (int i = pIndex + 1; i < mainGroupAmtPresetsFav; i++)
+//	//{
+//	//	save(i, 0);
+//	//}
+//}
+//
+////--------------------------------------------------------------
+//void groupRandomizer::doCloneAll()
+//{
+//	ofLogNotice(__FUNCTION__);
+//
+//	//CheckAllFolders();
+//
+//	////auto save current preset
+//	//if (autoSave)
+//	//{
+//	//	ofLogVerbose(__FUNCTION__) << "autosave preset: " << PRESET_Selected_IndexMain.get();
+//	//	//doSave(PRESET_Selected_IndexMain);
+//	//	save(PRESET_Selected_IndexMain, 0);
+//	//}
+//
+//	////clone all
+//	//for (int i = 0; i < mainGroupAmtPresetsFav; i++)
+//	//{
+//	//	save(i, 0);
+//	//}
+//}
 
-	//CheckAllFolders();
+////--------------------------------------------------------------
+//void groupRandomizer::doPopulateFavs()
+//{
+//	ofLogNotice(__FUNCTION__);
+//
+//	//CheckAllFolders();//? required
+//
+//	//for (int i = 0; i < mainGroupAmtPresetsFav; i++)
+//	//{
+//	//	doRandomPreset();
+//	//	save(i, 0);
+//	//}
+//}
 
-	//for (int i = pIndex + 1; i < mainGroupAmtPresetsFav; i++)
-	//{
-	//	save(i, 0);
-	//}
-}
-
-//--------------------------------------------------------------
-void groupRandomizer::doPopulateFavs()
-{
-	ofLogNotice(__FUNCTION__);
-
-	//CheckAllFolders();//? required
-
-	//for (int i = 0; i < mainGroupAmtPresetsFav; i++)
-	//{
-	//	doRandomizeEditor();
-	//	save(i, 0);
-	//}
-}
-
-//--------------------------------------------------------------
-void groupRandomizer::doSwap(int groupIndex, int fromIndex, int toIndex)
-{
-	ofLogNotice(__FUNCTION__) << "group:" << groupIndex << " : " << fromIndex << "->" << toIndex;
-
-	//string srcName = getPresetPath(groups[groupIndex].getName(), fromIndex);
-	//string dstName = getPresetPath(groups[groupIndex].getName(), toIndex);
-
-	//ofLogNotice(__FUNCTION__) << "Source: " << fromIndex;
-	//ofLogNotice(__FUNCTION__) << "Dest  : " << toIndex;
-	//ofLogNotice(__FUNCTION__) << "Source: " << srcName;
-	//ofLogNotice(__FUNCTION__) << "Dest  : " << dstName;
-
-	////1. save source preset (from memory) to temp file
-	//string _pathSrc = "tempSrc.xml";
-	//ofXml _settingsSrc;
-	//ofSerialize(_settingsSrc, groups[groupIndex]);
-	//_settingsSrc.save(_pathSrc);
-
-	////2. load destination "from kit" to memory
-	//std::string _pathDest = getPresetPath(groups[groupIndex].getName(), toIndex);
-	//ofXml _settingsDest;
-	//_settingsDest.load(_pathDest);
-	//ofDeserialize(_settingsDest, groups[groupIndex]);
-
-	////3. save destination preset (from memory) to temp file
-	//ofXml _settingsDst2;
-	//ofSerialize(_settingsDst2, groups[groupIndex]);
-
-	////4. using files
-	////save source (from dest)
-	//_settingsDst2.save(srcName);
-	//_settingsSrc.save(dstName);
-
-	////5. delete temp file
-	//ofFile _file;
-	//_file.removeFile(_pathSrc);
-
-	////workflow
-	////6. auto load source (the same preset was selected befor swap clicked!)
-	//PRESETS_Selected_Index[groupIndex] = toIndex;
-}
+////--------------------------------------------------------------
+//void groupRandomizer::doSwap(int groupIndex, int fromIndex, int toIndex)
+//{
+//	ofLogNotice(__FUNCTION__) << "group:" << groupIndex << " : " << fromIndex << "->" << toIndex;
+//
+//	//string srcName = getPresetPath(groups[groupIndex].getName(), fromIndex);
+//	//string dstName = getPresetPath(groups[groupIndex].getName(), toIndex);
+//
+//	//ofLogNotice(__FUNCTION__) << "Source: " << fromIndex;
+//	//ofLogNotice(__FUNCTION__) << "Dest  : " << toIndex;
+//	//ofLogNotice(__FUNCTION__) << "Source: " << srcName;
+//	//ofLogNotice(__FUNCTION__) << "Dest  : " << dstName;
+//
+//	////1. save source preset (from memory) to temp file
+//	//string _pathSrc = "tempSrc.xml";
+//	//ofXml _settingsSrc;
+//	//ofSerialize(_settingsSrc, groups[groupIndex]);
+//	//_settingsSrc.save(_pathSrc);
+//
+//	////2. load destination "from kit" to memory
+//	//std::string _pathDest = getPresetPath(groups[groupIndex].getName(), toIndex);
+//	//ofXml _settingsDest;
+//	//_settingsDest.load(_pathDest);
+//	//ofDeserialize(_settingsDest, groups[groupIndex]);
+//
+//	////3. save destination preset (from memory) to temp file
+//	//ofXml _settingsDst2;
+//	//ofSerialize(_settingsDst2, groups[groupIndex]);
+//
+//	////4. using files
+//	////save source (from dest)
+//	//_settingsDst2.save(srcName);
+//	//_settingsSrc.save(dstName);
+//
+//	////5. delete temp file
+//	//ofFile _file;
+//	//_file.removeFile(_pathSrc);
+//
+//	////workflow
+//	////6. auto load source (the same preset was selected befor swap clicked!)
+//	//PRESETS_Selected_Index[groupIndex] = toIndex;
+//}
 
 //--------------------------------------------------------------
 void groupRandomizer::doDices()
@@ -1216,28 +1248,6 @@ void groupRandomizer::doDices()
 }
 
 //--------------------------------------------------------------
-void groupRandomizer::doCloneAll()
-{
-	ofLogNotice(__FUNCTION__);
-
-	//CheckAllFolders();
-
-	////auto save current preset
-	//if (autoSave)
-	//{
-	//	ofLogVerbose(__FUNCTION__) << "autosave preset: " << PRESET_Selected_IndexMain.get();
-	//	//doSave(PRESET_Selected_IndexMain);
-	//	save(PRESET_Selected_IndexMain, 0);
-	//}
-
-	////clone all
-	//for (int i = 0; i < mainGroupAmtPresetsFav; i++)
-	//{
-	//	save(i, 0);
-	//}
-}
-
-//--------------------------------------------------------------
 void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 {
 	if (!DISABLE_CALLBACKS)
@@ -1245,8 +1255,6 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 		string name = e.getName();
 
 		//if ((name != "exclude") //&&
-		//	//(name != ImGui_Position.getName()) &&
-		//	//(name != ImGui_Size.getName())// &&
 		//	//(name != "DICE") &&
 		//	//(name != "PRESET")
 		//	)
@@ -1256,31 +1264,15 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 
 		if (false) {}
 
-		////--
-
-		//// mode edit: when false, we disabled autosave to allow performance do faster
-		//else if (name == MODE_Editor.getName())
-		//{
-		//	ofLogNotice(__FUNCTION__) << "MODE EDITOR: " << (MODE_Editor.get() ? "TRUE" : "FALSE");
-
-		//	autoSave = MODE_Editor.get();
-
-		//	//--
-
-		//	//// TODO:
-		//	//// refresh in other another better place?...
-		//	//buildHelpInfo();
-		//}
-
 		//----
 
 		// index preset selector
 		else if (name == PRESET_Selected_IndexMain.getName())
 		{
-			//ofLogNotice(__FUNCTION__) << group.getName() << " index: " << PRESET_Selected_IndexMain.get();
+			ofLogNotice(__FUNCTION__) << group.getName() << " index: " << PRESET_Selected_IndexMain.get();
 
 			// TODO:
-			selectorTARGET = PRESET_Selected_IndexMain;
+			//selectorTARGET = PRESET_Selected_IndexMain;
 		}
 
 		//--
@@ -1288,15 +1280,15 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 		// helper tools
 		else if (name == "CLONE >" && bCloneRight)
 		{
-			ofLogNotice(__FUNCTION__) << "CLONE >: " << e;
-			bCloneRight = false;
-			doCloneRight(PRESET_Selected_IndexMain);
+			ofLogNotice(__FUNCTION__) << group.getName() << "CLONE >: " << e;
+			//bCloneRight = false;
+			//doCloneRight(PRESET_Selected_IndexMain);
 		}
 		else if (name == "CLONE ALL" && bCloneAll)
 		{
-			ofLogNotice(__FUNCTION__) << "CLONE ALL: " << e;
-			bCloneAll = false;
-			doCloneAll();
+			ofLogNotice(__FUNCTION__) << group.getName() << "CLONE ALL: " << e;
+			//bCloneAll = false;
+			//doCloneAll();
 		}
 
 		//--
@@ -1304,14 +1296,14 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 		// randomizer
 		else if (name == bRandomizeIndex.getName() && bRandomizeIndex)
 		{
-			ofLogNotice(__FUNCTION__) << "RANDOMIZE !";
+			ofLogNotice(__FUNCTION__) << group.getName() << "RANDOMIZE !";
 			bRandomizeIndex = false;
-			doRandomizeWichSelectedPreset();
+			doRandomIndex();
 		}
 		// play randomizer
 		else if (name == PLAY_RandomizeTimer.getName())
 		{
-			ofLogNotice(__FUNCTION__) << "MODE TIMER: " << e;
+			ofLogNotice(__FUNCTION__) << group.getName()<< "MODE TIMER: " << e;
 			if (PLAY_RandomizeTimer) {
 				MODE_LatchTrig = false;
 
@@ -1338,7 +1330,7 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 		{
 			ofLogNotice(__FUNCTION__) << "DURATION: " << e;
 
-			randomizeDurationBpm = 60000.f / randomizeDuration;
+			randomizeDurationBpm = (MAX_DURATION_RATIO * 60000.f) / randomizeDuration;
 
 			//randomizeSpeedF = -((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
 			////randomizeSpeedF = 1 + (randomizeDuration / (float)randomize_MAX_DURATION);
@@ -1348,14 +1340,14 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 			ofLogNotice(__FUNCTION__) << "BPM: " << e;
 
 			// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
-			randomizeDuration = 60000.f / randomizeDurationBpm;
+			randomizeDuration = (MAX_DURATION_RATIO * 60000.f) / randomizeDurationBpm;
 			randomizeDurationShort = randomizeDuration / 4.f;
 		}
 #ifdef DEBUG_randomTest
 		else if (name == "DICE")// when debug enabled: set dice by user to test
 		{
 			ofLogNotice(__FUNCTION__) << "DICE: " << e;
-			doRandomizeWichSelectedPreset();
+			doRandomIndex();
 		}
 #endif
 		else if (name == "RESET DICES" && bResetDices)
@@ -1367,7 +1359,7 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 
 		//--
 
-		// all other widgets/params
+		// all other widgets/params that are populate on the thw fly, not hardcoded
 		else
 		{
 			// check if changed prob sliders
@@ -1394,6 +1386,33 @@ void groupRandomizer::loadPreset(int p)
 	// TODO:
 	////if (selectorTARGET) 
 	//{
-	selectorTARGET = PRESET_Selected_IndexMain;
+	//selectorTARGET = PRESET_Selected_IndexMain;
 	//}
 }
+
+////--------------------------------------------------------------
+//void groupRandomizer::doCheckPresetsFolderIsEmpty()
+//{
+//	//string _path = path_UserKit_Folder + "/" + path_PresetsFavourites;
+//	//ofLogNotice(__FUNCTION__) << "Check that not empty folder at path: " << _path;
+//	//ofDirectory dataDirectory(ofToDataPath(_path, true));
+//
+//	//check if folder exist
+//	if (!dataDirectory.isDirectory())
+//	{
+//		ofLogError(__FUNCTION__) << "FOLDER DOES NOT EXIST!";
+//	}
+//
+//	//check if folder is empty
+//	if (dataDirectory.size() == 0) {
+//		ofLogNotice(__FUNCTION__) << "Folder " << _path << " is empty. Force populate favourites files...";
+//
+//		//populate all favs
+//		doPopulateFavs();
+//		//create browser files too
+//		doGetFavsToFilesBrowser();
+//	}
+//
+//	//verify if files are created
+//	ofLogNotice(__FUNCTION__) << ofToString(dataDirectory.size()) << " file preset at folder " << _path;
+//}

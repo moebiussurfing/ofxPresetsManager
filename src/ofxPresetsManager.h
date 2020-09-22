@@ -10,7 +10,8 @@
 /// all modifications and new features by moebiussurfing
 /// my idea is to allow use ofParameterGroup's as managed content instead of ofxPanel
 
-//---
+
+///---
 ///
 ///	TODO:
 ///
@@ -43,7 +44,8 @@
 ///	+		could make tween when changing params using ofLerp or ofxKeyTween...
 ///	+		add draggable rectangle to move/resize clicker
 ///
-//---
+///---
+
 
 #pragma once
 
@@ -70,10 +72,6 @@
 
 
 #include "ofxSurfingConstants.h" // -> defines (modes) are here "to share between addons" in one place
-
-//--
-
-//#define INCLUDE_RANDOMIZER
 
 //--
 
@@ -114,6 +112,31 @@
 //TODO: removable ofBaseApp? or it's mandatory for auto update()?
 class ofxPresetsManager : public ofBaseApp
 {
+
+	//-
+	// TODO: test events
+//public:
+	//std::vector<ofEventListener> listeners;
+	//ofEventListener listeners[NUM_MAX_GROUPS];
+	//ofEventListener listener;
+	//ofEventListeners listeners;
+	//void myCallbackListener() {
+	//	cout << __FUNCTION__ << endl;
+	//}
+	//void myCallbackListener(int & i) {
+	//void myCallbackListener(const void * sender, int & i) {
+	//	
+	//	ofParameter<int> * p = (ofParameter<int> *) sender;
+	//	string toggleName = p->getName();
+	//	cout << __FUNCTION__ <<" "<< toggleName << endl;
+	//	cout << __FUNCTION__ << " " << i << endl;
+	//	loadPreset(i, 0);
+	//}
+	//ofNotifyEvent(newIntEvent, intCounter, this);
+	//ofEvent<int> newIntEvent;
+	//void newInt(int & i);
+	//-
+
 	//--
 
 public:
@@ -196,7 +219,7 @@ private:
 	// preset selectors to each added group
 	std::vector<ofParameter<int>> PRESETS_Selected_Index;
 	std::vector<int> PRESETS_Selected_Index_PRE;// remember previous selector
-	ofParameterGroup params_PRESETS_Selected{ "Preset Selectors" };// group all selectors
+	ofParameterGroup params_Selectors{ "Preset Selectors" };// group all selectors
 
 	//--
 
@@ -404,79 +427,6 @@ private:
 #endif
 #endif
 
-	//----
-
-	// randomizer
-
-	ofParameterGroup params_RandomizerSettings{ "Randomizers" };
-public:
-	ofParameter<bool> PLAY_RandomizeTimer; //play randomizer
-	ofParameter<bool> bRandomizeIndex;
-private:
-	ofParameter<bool> MODE_DicesProbs;
-	ofParameter<bool> MODE_LatchTrig; // this mode trigs the preset but goes back to preset 0 after duration timer
-	ofParameter<bool> MODE_AvoidRandomRepeat; // this mode re makes randomize again if new index preset it's the same!
-	ofParameter<bool> bResetDices;
-	ofParameter<int> randomizedDice; // to test
-	bool bLatchRun = false;
-
-public:
-	void setModeRandomizeAvoidRepeat(bool b) {
-		MODE_AvoidRandomRepeat = b;
-	}
-	ofParameter<int> randomizeDuration;
-	ofParameter<int> randomizeDurationShort;
-	ofParameter<float> randomizeDurationBpm;
-	//ofParameter<float> randomizeSpeedF;// speed scaler. not used
-
-private:
-	int randomizeSpeed;// real time duration
-	uint32_t randomizerTimer;
-	int randomize_MAX_DURATION = 6000;
-	int randomize_MAX_DURATION_SHORT = 6000 / 2.f;
-	vector<ofParameter<int>> presetsRandomFactor;// probability of every preset
-	vector<ofParameter<bool>> presetsRandomModeShort;// mode short for ebvery preset
-	vector<int> randomFactorsDices;
-
-	void buildRandomizers();
-	void setupRandomizer();// engine to get a random between all posible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
-	void doRandomizeWichSelectedPreset();// randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
-	int doRandomizeWichSelectedPresetCheckChanged();
-	void doResetDices();// reset all probs to 0
-	int dicesTotalAmount;// total dices summing the prob of any preset probability (PROB1 + PROB2 + ...)
-
-	int timerRandomizer;
-
-	//--
-
-public:
-	ofParameter<bool> bRandomizeEditor;
-private:
-	ofParameter<bool> bRandomizeEditorAll;// put all toggles/params to true. a randomize will act over all params
-	ofParameter<bool> bRandomizeEditorNone;// put to disabled all toggles
-	ofParameter<bool> bRandomizeEditorPopulateFavs;// create all presets
-
-	// system to select what params of current selected preset to: clone, randomize etc
-	vector<ofParameter<bool>> editorPresets;
-	ofParameterGroup params_Editor;
-	ofParameterGroup params_Editor_Toggles;
-	void setupRandomizerEditor();
-	void addGroupToEditor(ofParameterGroup& group);// queue all contained params inside the paramGroup and nested too
-	void Changed_Params_Editor(ofAbstractParameter &e);
-	void doRandomizeEditor();// randomize params of current selected preset
-	void doRandomizeEditorGroup(ofParameterGroup& group);// randomize params of current selected preset
-
-	//--
-
-public:
-	ofParameterGroup params_randomizer;
-
-	//--
-
-private:
-	ofParameter<int> randomizerProgress{ "%", 0, 0, 100 };
-	float _prog;
-
 	//--
 
 	//----
@@ -490,44 +440,43 @@ private:
 public:
 
 	//--------------------------------------------------------------
-	void setPlayRandomizerTimer(bool b)// play randomizer timer
+	void setPlayRandomizerTimer(bool b, int groupIndex)// play randomizer timer
 	{
-		PLAY_RandomizeTimer = b;
-		if (b) doRandomizeWichSelectedPreset();
+		groupRandomizers[groupIndex].setPlayRandomizerTimer(b);
 	}
 	//--------------------------------------------------------------
-	void setTogglePlayRandomizerPreset()// toggle randomizer timer
+	void setTogglePlayRandomizerPreset(int groupIndex)// toggle randomizer timer
 	{
-		PLAY_RandomizeTimer = !PLAY_RandomizeTimer;
+		groupRandomizers[groupIndex].setTogglePlayRandomizerPreset();
 	}
 	//--------------------------------------------------------------
-	void setRandomizerDuration(float t)
-	{
-		randomizeDuration = t;
-		randomizeDurationBpm = 60000.f / randomizeDuration;
+	void doRandomizePresetSelected(int groupIndex) {// randomize params of current selected preset
+		groupRandomizers[groupIndex].doRandomizePresetSelected();
 	}
-	//--------------------------------------------------------------
-	void setRandomizerDurationShort(float t)
-	{
-		randomizeDurationShort = t;
-	}
-	//--------------------------------------------------------------
-	void setRandomizerBpm(float bpm)
-	{
-		randomizeDurationBpm = bpm;
-		// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
-		randomizeDuration = 60000.f / bpm;
-		randomizeDurationShort = randomizeDuration / 2.f;
-	}
-	//--------------------------------------------------------------
-	void doRandomizePresetFromFavs()// trig randomize and select one of the favs presets
-	{
-		bRandomizeIndex = true;
-	}
-	//--------------------------------------------------------------
-	void doRandomizePresetSelected() {// randomize params of current selected preset
-		doRandomizeEditor();
-	}
+	////--------------------------------------------------------------
+	//void setRandomizerDuration(float t)
+	//{
+	//	randomizeDuration = t;
+	//	randomizeDurationBpm = 60000.f / randomizeDuration;
+	//}
+	////--------------------------------------------------------------
+	//void setRandomizerDurationShort(float t)
+	//{
+	//	randomizeDurationShort = t;
+	//}
+	////--------------------------------------------------------------
+	//void setRandomizerBpm(float bpm)
+	//{
+	//	randomizeDurationBpm = bpm;
+	//	// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
+	//	randomizeDuration = 60000.f / bpm;
+	//	randomizeDurationShort = randomizeDuration / 2.f;
+	//}
+	////--------------------------------------------------------------
+	//void doRandomizePresetFromFavs()// trig randomize and select one of the favs presets
+	//{
+	//	bRandomizeIndex = true;
+	//}
 
 	//----
 
@@ -541,44 +490,46 @@ public:
 
 	// presets browsing
 
+	////--------------------------------------------------------------
+	//void load_Next()// for main group
+	//{
+	//	PRESET_Selected_IndexMain++;
+	//	if (PRESET_Selected_IndexMain >= mainGroupAmtPresetsFav - 1)
+	//	{
+	//		PRESET_Selected_IndexMain = mainGroupAmtPresetsFav - 1;
+	//	}
+	//}
+	////--------------------------------------------------------------
+	//void load_Previous()// for main group
+	//{
+	//	PRESET_Selected_IndexMain--;
+	//	if (PRESET_Selected_IndexMain < 0)
+	//	{
+	//		PRESET_Selected_IndexMain = 0;
+	//	}
+	//}
+
 	//--------------------------------------------------------------
-	void load_Next()// for main group
-	{
-		PRESET_Selected_IndexMain++;
-		if (PRESET_Selected_IndexMain >= mainGroupAmtPresetsFav - 1)
-		{
-			PRESET_Selected_IndexMain = mainGroupAmtPresetsFav - 1;
-		}
-	}
-	//--------------------------------------------------------------
-	void load_Previous()// for main group
-	{
-		PRESET_Selected_IndexMain--;
-		if (PRESET_Selected_IndexMain < 0)
-		{
-			PRESET_Selected_IndexMain = 0;
-		}
-	}
-	//--------------------------------------------------------------
-	//void loadPreset(int p);// load preset for the main group by code from ofApp
 	void loadPreset(int p, int _indexGroup);// load preset for extra groups by code from ofApp
-	void loadPresetGroup(int presetIndex)// load preset for main group by code from ofApp
-	{
-		int groupIndex = groups.size() - 1;
-		ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
-		load(presetIndex, groupIndex);
-	}
 	void savePreset(int p, int _indexGroup);// save preset for extra groups by code from ofApp
+
+	////void loadPreset(int p);// load preset for the main group by code from ofApp
+	//void loadPresetGroup(int presetIndex)// load preset for main group by code from ofApp
+	//{
+	//	int groupIndex = groups.size() - 1;
+	//	ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
+	//	load(presetIndex, groupIndex);
+	//}
 
 	//--
 
 	// for external layout or other workflow purposes
 
-	//--------------------------------------------------------------
-	int getCurrentPreset()// get index of selected preset
-	{
-		return PRESET_Selected_IndexMain;
-	}
+	////--------------------------------------------------------------
+	//int getCurrentPreset()// get index of selected preset
+	//{
+	//	return PRESET_Selected_IndexMain;
+	//}
 	//--------------------------------------------------------------
 	int getCurrentPreset(int _group)// get index of selected preset on the group
 	{
@@ -587,11 +538,11 @@ public:
 		return _presetIndex;
 	}
 
-	//--------------------------------------------------------------
-	int getAmoutPresetsMain()// get main group amount of presets
-	{
-		return mainGroupAmtPresetsFav;
-	}
+	////--------------------------------------------------------------
+	//int getAmoutPresetsMain()// get main group amount of presets
+	//{
+	//	return mainGroupAmtPresetsFav;
+	//}
 
 	//--------------------------------------------------------------
 	int getAmountGroups()
@@ -676,9 +627,9 @@ public:
 
 	// helper tools
 
-	//void doCloneRight(int pIndex);// clone from selected preset to all others to the right
-	//void doCloneAll();// clone all presets from the current selected
-	//void doPopulateFavs();// fast populate random presets around all favs
+	void doCloneRight(int gIndex);// clone from selected preset to all others to the right
+	void doCloneAll(int gIndex);// clone all presets from the current selected
+	void doPopulateFavs(int gIndex);// fast populate random presets around all favs
 
 	void doSwap(int groupIndex, int fromIndex, int toIndex);
 
@@ -890,7 +841,7 @@ public:
 
 public:
 	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
-	
+
 //vector<ofParameter<int>> PRESETS_Selected_Index;// extra groups preset selector (current)
 
 private:
@@ -912,7 +863,7 @@ public:
 public:
 	void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
 	void ImGui_Draw_MainPanel(ofxImGui::Settings &settings);
-	void ImGui_Draw_Basic(ofxImGui::Settings &settings);
+	void ImGui_Draw_Extra(ofxImGui::Settings &settings);
 	void ImGui_Draw_Selectors(ofxImGui::Settings &settings);
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
 	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
@@ -1076,15 +1027,14 @@ public:
 	}
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsPresetSelectors() {
-		return params_PRESETS_Selected;
+		return params_Selectors;
 	}
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsRandomizers() {
 		ofParameterGroup _g{ "RANDOMIZERS" };
-		_g.add(PLAY_RandomizeTimer);
-		_g.add(randomizeDuration);
-		_g.add(randomizeDurationShort);
-		_g.add(randomizerProgress);
+		for (int i = 0; i < groups.size(); i++) {
+			_g.add(groupRandomizers[i].getParamsRandomizers());
+		}
 		return _g;
 	}
 
@@ -1111,7 +1061,7 @@ private:
 	// swap selected preset with the currently clicked (i.e: 4 -> 7  &  4 <- 7)
 	int modKeySwap;// swap mod key 
 	bool bKeySwap;// swap mod key state
-	
+
 public:
 	// switch on or off the control with the keys
 	void setToggleKeysControl(bool active);
@@ -1164,22 +1114,16 @@ public:
 	ofParameterGroup params_Control;// to use on external gui
 
 private:
-	//ofParameter<bool> bSave;
-	//ofParameter<bool> bLoad;
-
 	ofParameter<bool> autoSave;
 	ofParameter<bool> autoLoad;
-
-	ofParameter<bool> bCloneRight;
-	ofParameter<bool> bCloneAll;
 
 	// internal groups
 	ofParameterGroup params_UserKitSettings;
 	ofParameterGroup params_Gui;
 	ofParameterGroup params_Options;
-	ofParameterGroup params_HelperTools;
 	ofParameterGroup params_Randomizer;
 	ofParameterGroup params_Custom;
+	//ofParameterGroup params_HelperTools;
 
 	//----
 

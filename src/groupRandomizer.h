@@ -9,14 +9,18 @@ class groupRandomizer
 {
 
 public:
+	//void doCheckPresetsFolderIsEmpty();
+	
+	
 	groupRandomizer();
 	~groupRandomizer();
+
 
 	void setup(ofParameterGroup &g, int _numPresets);
 	void setup(ofParameterGroup &g, vector<int> keysList);
 	//void setup(ofParameterGroup &g, vector<int> keysList, ofParameter<int> &index);
 
-	void setSelectorTARGET(ofParameter<int> &index);
+	//void setSelectorTARGET(ofParameter<int> &index);
 
 	void update();
 	//void draw();
@@ -25,7 +29,7 @@ public:
 
 private:
 	ofParameterGroup group;
-	ofParameter<int> selectorTARGET;
+	//ofParameter<int> selectorTARGET;
 
 	void doDices();
 
@@ -41,6 +45,8 @@ public:
 public:
 	void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
 	
+	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
+	
 	//----
 
 private:
@@ -49,7 +55,6 @@ private:
 	ofParameterGroup params_Control;// to use on external gui
 	void Changed_Control(ofAbstractParameter &e);
 
-	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
 	//ofParameterGroup params_Randomizer;
 	int mainGroupAmtPresetsFav;// amount of box-clickable handled presets on current favorites/kit
 	bool bIsDoneLoad = false;
@@ -57,15 +62,33 @@ private:
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
 	vector<int> keys;// queued trigger keys for each group ? (all presets) (size of)
 
+	//-
+
 	// helper tools
+public:
 	ofParameter<bool> bCloneRight;
 	ofParameter<bool> bCloneAll;
+	// easy callbacks to avoid listeners..
+	bool is_bCloneRight() {
+		if (bCloneRight) {
+			bCloneRight = false;
+			return true;
+		}
+		else return false;
+	}
+	bool is_bCloneAll() {
+		if (bCloneAll) {
+			bCloneAll = false;
+			return true;
+		}
+		else return false;
+	}
 
-public:
-	void doCloneRight(int pIndex);// clone from selected preset to all others to the right
-	void doCloneAll();// clone all presets from the current selected
-	void doPopulateFavs();// fast populate random presets around all favs
-	void doSwap(int groupIndex, int fromIndex, int toIndex);
+//public:
+	//void doCloneRight(int pIndex);// clone from selected preset to all others to the right
+	//void doCloneAll();// clone all presets from the current selected
+	//void doPopulateFavs();// fast populate random presets around all favs
+	//void doSwap(int groupIndex, int fromIndex, int toIndex);
 
 	// helpers
 public:
@@ -114,9 +137,9 @@ public:
 private:
 	ofParameterGroup params_RandomizerSettings{ "Randomizers" };
 
-	//public:
+	public:
 	ofParameter<bool> PLAY_RandomizeTimer; //play randomizer
-	ofParameter<bool> bRandomizeIndex;
+	ofParameter<bool> bRandomizeIndex;// trig randomize index
 
 private:
 	ofParameter<bool> MODE_DicesProbs;
@@ -140,7 +163,8 @@ private:
 private:
 	int randomizeSpeed;// real time duration
 	uint32_t randomizerTimer;
-	int randomize_MAX_DURATION = 6000;
+	float MAX_DURATION_RATIO = 2.0f;
+	int randomize_MAX_DURATION = MAX_DURATION_RATIO * 6000;
 	int randomize_MAX_DURATION_SHORT = 6000 / 2.f;
 	vector<ofParameter<int>> presetsRandomFactor;// probability of every preset
 	vector<ofParameter<bool>> presetsRandomModeShort;// mode short for ebvery preset
@@ -148,8 +172,8 @@ private:
 
 	void buildRandomizers();
 	void setupRandomizer();// engine to get a random between all posible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
-	void doRandomizeWichSelectedPreset();// randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
-	int doRandomizeWichSelectedPresetCheckChanged();
+	void doRandomIndex();// randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
+	int doRandomIndexChanged();
 	void doResetDices();// reset all probs to 0
 	int dicesTotalAmount;// total dices summing the prob of any preset probability (PROB1 + PROB2 + ...)
 
@@ -169,8 +193,8 @@ private:
 	void setupRandomizerEditor();
 	void addGroupToEditor(ofParameterGroup& group);// queue all contained params inside the paramGroup and nested too
 	void Changed_Editor(ofAbstractParameter &e);
-	void doRandomizeEditor();// randomize params of current selected preset
-	void doRandomizeEditorGroup(ofParameterGroup& group);// randomize params of current selected preset
+	void doRandomPreset();// randomize params of current selected preset
+	void doRandomGroup(ofParameterGroup& group);// randomize params of current selected preset
 
 	vector<ofParameter<bool>> editorPresets;
 	ofParameterGroup params_Editor;
@@ -201,7 +225,7 @@ public:
 	void setPlayRandomizerTimer(bool b)// play randomizer timer
 	{
 		PLAY_RandomizeTimer = b;
-		if (b) doRandomizeWichSelectedPreset();
+		if (b) doRandomIndex();
 	}
 	//--------------------------------------------------------------
 	void setTogglePlayRandomizerPreset()// toggle randomizer timer
@@ -234,9 +258,17 @@ public:
 	}
 	//--------------------------------------------------------------
 	void doRandomizePresetSelected() {// randomize params of current selected preset
-		doRandomizeEditor();
+		doRandomPreset();
 	}
-
+	//--------------------------------------------------------------
+	ofParameterGroup getParamsRandomizers() {
+		ofParameterGroup _g{ "RANDOMIZERS" };
+		_g.add(PLAY_RandomizeTimer);
+		_g.add(randomizeDuration);
+		_g.add(randomizeDurationShort);
+		_g.add(randomizerProgress);
+		return _g;
+	}
 private:
 	bool DISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
 
