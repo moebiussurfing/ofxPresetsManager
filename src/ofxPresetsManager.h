@@ -195,13 +195,13 @@ private:
 	void load(int presetIndex, string guiName);
 
 	// get the last loaded preset
-	int getPresetIndex(int guiIndex) const;
-	int getPresetIndex(string guiName) const;
+	int getPresetIndex(int groupIndex) const;
+	int getPresetIndex(string groupName) const;
 
 	int getGuiIndex(string name) const;// get index for a name of group
-	string getPresetPath(string guiName, int presetIndex);// get path of a preset of a group
+	string getPresetPath(string groupName, int presetIndex);// get path of a preset of a group
 
-	string getGroupPath(string guiName);// get path of a group. for external monitor only
+	string getGroupPath(string groupName);// get path of a group. for external monitor only
 	string getGroupPath(int index);// get path of a group. for external monitor only
 
 	//--
@@ -223,16 +223,17 @@ private:
 
 	//--
 
-	// TODO:
+	// select active group to show on randomize editor
 	ofParameter<int> GuiGROUP_Selected_Index;// only this selected group will be showed on gui to edit
 	void Changed_GuiGROUP_Selected_Index(int & index);
 	std::vector<groupRandomizer> groupRandomizers;
 
+	// selector for last group: is the main group link
 	ofParameterGroup params_GroupMainSelector{ "GROUP_LINK" };
 
 	//--
 
-	ofParameter<int> GROUP_Selected_Index;// global group selector. this selector will control all linked groups
+	ofParameter<int> GROUP_LINK_Selected_Index;// global group selector. this selector will control all linked groups
 
 	// group main selector
 	bool bBuildGroupSelector = true;// to allow auto build a group selector to combine all the added groups to the presets manager
@@ -442,15 +443,22 @@ public:
 	//--------------------------------------------------------------
 	void setPlayRandomizerTimer(bool b, int groupIndex)// play randomizer timer
 	{
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex ;
 		groupRandomizers[groupIndex].setPlayRandomizerTimer(b);
 	}
 	//--------------------------------------------------------------
 	void setTogglePlayRandomizerPreset(int groupIndex)// toggle randomizer timer
 	{
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex ;
 		groupRandomizers[groupIndex].setTogglePlayRandomizerPreset();
 	}
 	//--------------------------------------------------------------
 	void doRandomizePresetSelected(int groupIndex) {// randomize params of current selected preset
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex ;
+
+		// check if minimum one parameter is enabled
+		groupRandomizers[groupIndex].doCheckRandomReady();
+
 		groupRandomizers[groupIndex].doRandomizePresetSelected();
 	}
 	////--------------------------------------------------------------
@@ -629,7 +637,8 @@ public:
 
 	void doCloneRight(int gIndex);// clone from selected preset to all others to the right
 	void doCloneAll(int gIndex);// clone all presets from the current selected
-	void doPopulateFavs(int gIndex);// fast populate random presets around all favs
+	void doPopulateFavs(int gIndex);// fast populate random presets of selected group
+	void doPopulateFavsALL();// fast populate random presets around all favs
 
 	void doSwap(int groupIndex, int fromIndex, int toIndex);
 
@@ -663,7 +672,7 @@ private:
 	void doStandalonePresetSave(string name);
 	bool doStandaloneRefreshPresets();
 	void buildStandalonePresets();// standalone presets splitted from favourites presets
-	//void doCheckPresetsFolderIsEmpty();
+	void doCheckPresetsFolderIsEmpty();
 
 	//----
 

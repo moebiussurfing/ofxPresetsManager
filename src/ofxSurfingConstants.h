@@ -10,7 +10,7 @@
 //----
 
 #define USE_IM_GUI
-#define USE_ofxGui
+//#define USE_ofxGui
 
 //----
 
