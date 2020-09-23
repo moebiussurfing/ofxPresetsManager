@@ -6,9 +6,10 @@
 
 #include "ofxGui.h"
 
+#include "ofxSurfingConstants.h"
 #include "ofxSurfingHelpers.h"	// optional: to use setThemeDark_ofxGui only
-#define USE_WindowApp			// optional: to handle app window only
 
+#define USE_WindowApp			// optional: to handle app window only
 #ifdef USE_WindowApp
 #include "ofxWindowApp.h"
 #endif
@@ -80,4 +81,6 @@ public:
 #ifdef USE_WindowApp
 	ofxWindowApp WindowApp;
 #endif
+
+	float _alpha = 0.4;
 };
