@@ -115,6 +115,11 @@ class ofxPresetsManager : public ofBaseApp
 {
 
 public:
+	//ofParameter<ofColor> c;
+
+	//-
+
+public:
 	// mini preview rectangles positions and sizes
 	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
 	string path_RectanglePresetClicker = "_RectanglePresetClicker";
@@ -233,7 +238,7 @@ private:
 	// preset selectors to each added group
 	std::vector<ofParameter<int>> PRESETS_Selected_Index;
 	std::vector<int> PRESETS_Selected_Index_PRE;// remember previous selector
-	ofParameterGroup params_Selectors{ "PRESET SELECTORS" };// group all selectors
+	ofParameterGroup params_GroupsSelectors{ "PRESET SELECTORS" };// group all selectors
 
 	//--
 
@@ -907,7 +912,7 @@ public:
 	void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
 	void ImGui_Draw_MainPanel(ofxImGui::Settings &settings);
 	void ImGui_Draw_Extra(ofxImGui::Settings &settings);
-	void ImGui_Draw_Selectors(ofxImGui::Settings &settings);
+	void ImGui_Draw_GroupsSelectors(ofxImGui::Settings &settings);
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
 	void ImGui_Draw_PresetParameters(ofxImGui::Settings &settings);
 	//void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
@@ -1070,7 +1075,7 @@ public:
 	}
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsPresetSelectors() {
-		return params_Selectors;
+		return params_GroupsSelectors;
 	}
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsRandomizers() {

@@ -28,7 +28,8 @@ public:
 	// group0
     ofParameterGroup params0;
     ofParameterGroup params0_Nested;
-	ofParameter<ofFloatColor> color0;// bc ofColor not implemented on ImGui yet
+	ofParameter<ofColor> color0;// bc ofColor not implemented on ImGui yet
+	//ofParameter<ofFloatColor> color0;// bc ofColor not implemented on ImGui yet
 	ofParameter<bool> show0;
 	ofParameter<bool> fill0;
 	ofParameter<float> lineWidth0;
@@ -39,7 +40,8 @@ public:
 	
 	// group1
 	ofParameterGroup params1;
-	ofParameter<ofFloatColor> color1;
+	ofParameter<ofColor> color1;
+	//ofParameter<ofFloatColor> color1;
 	ofParameter<bool> show1;
 	ofParameter<int> numShapes1;
 	ofParameter<int> separation1;
@@ -47,14 +49,14 @@ public:
 	
 	// group2
 	ofParameterGroup params2;
-	ofParameter<ofFloatColor> color2;
+	ofParameter<ofColor> color2;
 	ofParameter<bool> show2;
 	ofParameter<float> size2;
 	ofParameter<bool> fill2;
 	
 	// group3
 	ofParameterGroup params3;	
-	ofParameter<ofFloatColor> color3;
+	ofParameter<ofColor> color3;
 	ofParameter<bool> show3;
 	ofParameter<int> numObjects3;
 	ofParameter<float> size3;
@@ -82,5 +84,6 @@ public:
 	ofxWindowApp WindowApp;
 #endif
 
-	float _alpha = 0.4;
+	float _alpha = 255/0.4f;
+	//float _alpha = 0.4;
 };

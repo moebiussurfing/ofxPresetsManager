@@ -299,7 +299,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		GROUP_LINK_Selected_Index.makeReferenceTo(PRESETS_Selected_Index[_last]);// TODO: link
 
 		// excludes all selectors except the main one. the other will be saved as preset
-		params_Selectors.setSerializable(false);
+		params_GroupsSelectors.setSerializable(false);
 	}
 
 	//--
@@ -346,7 +346,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	// user-kit
 	params_UserKitSettings.setName("USER-KIT");
-	params_UserKitSettings.add(params_Selectors);//includes all selectors
+	params_UserKitSettings.add(params_GroupsSelectors);//includes all selectors
 
 	// main group link selector
 	int _last = groups.size() - 1;
@@ -396,7 +396,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		_g.add(groupRandomizers[i].PLAY_RandomizeTimer);// play
 		_g.add(groupRandomizers[i].randomizeDurationBpm);// bpm
 		//_g.add(groupRandomizers[i].bRandomizeIndex);// random index
-		params_Selectors.add(_g);
+		params_GroupsSelectors.add(_g);
 	}
 
 	//----
@@ -972,7 +972,7 @@ void ofxPresetsManager::add(ofParameterGroup _params, int _amountPresets)
 	ofParameter<int> p{ groups[_size].getName(), 0, 0,  _amountPresets - 1 };
 	//p.setSerializable(false);// exclude saving all slectors except last one, that will be enalbed at setup
 	PRESETS_Selected_Index.push_back(p);
-	//params_Selectors.add(PRESETS_Selected_Index[_size]);// add this new param (lastone)
+	//params_GroupsSelectors.add(PRESETS_Selected_Index[_size]);// add this new param (lastone)
 
 	//-
 
@@ -2686,7 +2686,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		_name = "SELECTORS";
 		if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
 		{
-			ImGui_Draw_Selectors(mainSettings);
+			ImGui_Draw_GroupsSelectors(mainSettings);
 		}
 		ofxImGui::EndWindow(mainSettings);
 	}
@@ -2713,10 +2713,10 @@ void ofxPresetsManager::ImGui_Draw_PresetParameters(ofxImGui::Settings &settings
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_Selectors(ofxImGui::Settings &settings)
+void ofxPresetsManager::ImGui_Draw_GroupsSelectors(ofxImGui::Settings &settings)
 {
 	// 0.1 sliders preset selectors
-	ofxImGui::AddGroup(params_Selectors, settings);
+	ofxImGui::AddGroup(params_GroupsSelectors, settings);
 }
 
 //--------------------------------------------------------------
@@ -2724,9 +2724,12 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 {
 	if (ofxImGui::BeginTree("MAIN CONTROL", settings))
 	{
+
+		//ofxImGui::AddParameter(c);
+		
 		// mode edit
-		ofxImGui::AddParameter(MODE_Editor);
-		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30);// TODO: repair. collides when multiple toggles..
+		//ofxImGui::AddParameter(MODE_Editor);
+		ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30);// TODO: repair. collides when multiple toggles..
 
 		//---
 
@@ -2734,10 +2737,8 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 		if (ImGui::TreeNode("PANELS"))
 		{
 			ofxImGui::AddParameter(SHOW_ClickPanel);
-			ImGui::SameLine(); 
-			ofxImGui::AddParameter(MODE_EditPresetClicker);
-			ImGui::SameLine(); 
-			ofxImGui::AddParameter(bg_EditPresetClicker);
+			ImGui::SameLine(); ofxImGui::AddParameter(MODE_EditPresetClicker);
+			ImGui::SameLine(); ofxImGui::AddParameter(bg_EditPresetClicker);
 			
 			if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
 			ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
@@ -2751,7 +2752,6 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 
 		//--
 
-		//ImGui::TreePop();
 		ofxImGui::EndTree(settings);
 	}
 }
@@ -2901,19 +2901,18 @@ void ofxPresetsManager::buildDefaultUserKit() {
 	buildHelpInfo();
 }
 
-// TODO:
 //--------------------------------------------------------------
 void ofxPresetsManager::buildCustomUserKit() {
 
-	setPath_UserKit_Folder(pathDirCustom);//creates subfolders for each group
+	setPath_UserKit_Folder(pathDirCustom);// creates subfolders for each group
 
 	//-
 
 	// reduce to name only
 	string str = path_UserKit_Folder;
-	std::string temp = R"(\)";//use '\' as splitter...should use '/' too bc Windows/macOS compatibility..
+	std::string temp = R"(\)";// use '\' as splitter...should use '/' too bc Windows/macOS compatibility..
 	auto ss = ofSplitString(path_UserKit_Folder, temp);
-	displayNameUserKit = ss[ss.size() - 1];//get last word and use as name
+	displayNameUserKit = ss[ss.size() - 1];// get last word and use as name
 
 	//-
 
