@@ -80,9 +80,17 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//----
 
+	// reset mini previews layout
+	float _size = 80;
+	float _xx = 200;
+	float _yy = ofGetHeight() - getPresetClicker_Height() - _size - 20;
+	float _ratio = 1.25;
+	//float _pad = 30;
+	MODE_EditPresetClicker.set("EDIT CLICKER", false);
+
 	// layout
-	setSizeBox_PresetClicker(80);
-	setPosition_PresetClicker(200, ofGetHeight() - getPresetClicker_Height() - 100);
+	setSizeBox_PresetClicker(_size);
+	setPosition_PresetClicker(_xx, _yy);
 
 	//--
 
@@ -196,11 +204,14 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//--
 
-	// gui font
+	// gui box clicker font
 	string str;
+	//sizeTTF = 8;
+	//str = "telegrama_render.otf";
+	//str = "iAWriterMonoS-Bold.ttf";
+	sizeTTF = 10;
 	str = "overpass-mono-bold.otf";
 	myTTF = "assets/fonts/" + str;
-	sizeTTF = 10;
 	bool bLoaded = myFont.load(myTTF, sizeTTF, true, true);
 	if (!bLoaded) bLoaded = myFont.load(OF_TTF_SANS, sizeTTF, true, true);
 
@@ -223,6 +234,7 @@ ofxPresetsManager::ofxPresetsManager()
 	TIME_SAMPLE_GET_INSTANCE()->setEnabled(true);
 	TIME_SAMPLE_DISABLE();
 #endif
+
 }
 
 //----
@@ -338,6 +350,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Gui.add(SHOW_ImGui_Selectors);
 	params_Gui.add(SHOW_ImGui_PresetsParams);
 	params_Gui.add(SHOW_Help);
+	params_Gui.add(MODE_EditPresetClicker);
 
 	params_Control.add(params_Options);
 	params_Control.add(params_Gui);
@@ -448,6 +461,24 @@ void ofxPresetsManager::startup()
 
 	setVisible_GUI_Internal(false);
 	windowResized(ofGetWidth(), ofGetHeight());
+
+	//-
+
+	// clicker_Pos
+	_RectClick_Pad = 10;
+	_RectClick_w = getGroupNamesWidth();
+	//_ratio = ndiReceiveTexture.getHeight() / ndiReceiveTexture.getWidth();
+
+	rectanglePresetClicker.width = getPresetClicker_Width() + 2 * _RectClick_Pad + _RectClick_w;
+	rectanglePresetClicker.height = getPresetClicker_Height() + 2 * _RectClick_Pad;
+	rectanglePresetClicker.x = getPresetClicker_Position().x - _RectClick_Pad - _RectClick_w;
+	rectanglePresetClicker.y = getPresetClicker_Position().y - _RectClick_Pad;
+	_rectRatio = rectanglePresetClicker.width / rectanglePresetClicker.height;
+
+	// load settings
+	rectanglePresetClicker.loadSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/", false);
+	clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
+	clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
 
 	//--
 
@@ -632,7 +663,7 @@ void ofxPresetsManager::drawPresetClicker()
 	// light theme
 	else {
 		_colorText = ofColor(255, 128);
-		_colorButton = ofColor(24, 200);
+		_colorButton = ofColor(0, 150);
 		_colorBg = ofColor(0, 128);
 	}
 
@@ -643,6 +674,26 @@ void ofxPresetsManager::drawPresetClicker()
 	//----
 
 	ofPushStyle();
+
+	//----
+
+	// rectangle editor
+	ofFill();
+	ofSetColor(_colorBg);
+	rectanglePresetClicker.draw();
+	ofDrawRectRounded(rectanglePresetClicker, _round);
+
+	// get clicker position from being edited rectangle
+	if (MODE_EditPresetClicker) {
+		_RectClick_w = getGroupNamesWidth();
+		clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
+		clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
+		//rectanglePresetClicker.width = MIN(getPresetClicker_Width() + 2 * _RectClick_Pad + _RectClick_w, 1000);
+		//rectanglePresetClicker.height = rectanglePresetClicker.width / _rectRatio;
+	}
+
+	//--
+
 	ofPushMatrix();
 	ofTranslate(clicker_Pos);
 
@@ -848,7 +899,8 @@ void ofxPresetsManager::drawPresetClicker()
 			if (bShowClickerInfo && ENABLE_Keys && (i == 0))
 			{
 				string ss = helpInfo;
-				int pad = 22;
+				int _padx = 22;
+				int _pady = 30;
 				int x = 0;
 				int y = 0;
 
@@ -856,20 +908,20 @@ void ofxPresetsManager::drawPresetClicker()
 				if (!bLateralPosition)
 				{
 					float hh = ofxSurfingHelpers::getHeightBBtextBoxed(myFont, ss);
-					x += 4 + pad;
-					y -= hh + pad;
+					x += 4 + _padx;
+					y -= hh + _pady;
 				}
 
 				// B. lateral position right to the boxes
 				else
 				{
 					float _w;
-					y = ySave + pad;
+					y = ySave + _pady;
 
 					if (!bLeftPosition)// on the right
 					{
 						_w = getPresetClicker_Width();
-						x = _w + pad + 30;
+						x = _w + _padx + 30;
 					}
 					else {// on the left
 						if (myFont.isLoaded())
@@ -1502,7 +1554,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		// randomizers
 
 		// timer to randomize and choice a random preset from the kit
-		else if (key == ' ')
+		else if (eventArgs.hasModifier(OF_KEY_CONTROL) && eventArgs.codepoint == ' ')
 		{
 			for (int i = 0; i < groups.size(); i++) {
 				setTogglePlayRandomizerPreset(GuiGROUP_Selected_Index);
@@ -2011,6 +2063,18 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 			//buildHelpInfo();
 		}
 
+		if (name == MODE_EditPresetClicker.getName())
+		{
+			if (MODE_EditPresetClicker.get())
+			{
+				rectanglePresetClicker.enableEdit();
+			}
+			else
+			{
+				rectanglePresetClicker.disableEdit();
+			}
+		}
+
 		//----
 
 		else if (name == "LOAD TO MEMORY" && loadToMemory)
@@ -2334,7 +2398,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #endif
 		}
 	}
-		}
+}
 
 ////--------------------------------------------------------------
 //void ofxPresetsManager::addGroup_TARGET(ofParameterGroup &g)
@@ -2403,6 +2467,8 @@ void ofxPresetsManager::exit()
 
 	// all app settings
 	save_ControlSettings();
+
+	rectanglePresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/", false);
 
 	//--
 
@@ -2500,6 +2566,8 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	ofVec2f _pos;
 	ofVec2f _size;
 
+	int _pad = 2;// _padx between ImGui panels
+
 	_pos.set(ImGui_Position.get().x, ImGui_Position.get().y);
 	_size.set(ImGui_Size.get().x, ImGui_Size.get().y);
 
@@ -2571,7 +2639,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	if (SHOW_ImGui_PresetsParams) {
 
 		_size = ofVec2f(400, 800);
-		_pos = _pos - ofVec2f(_size.x + 10, 0);
+		_pos = _pos - ofVec2f(_size.x + _pad, 0);
 
 		mainSettings.windowPos = _pos;
 		mainSettings.windowSize = _size;
@@ -2597,7 +2665,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	if (SHOW_ImGui_Selectors) {
 
 		_size = ofVec2f(350, 500);
-		_pos = _pos - ofVec2f(_size.x + 10, 0);
+		_pos = _pos - ofVec2f(_size.x + _pad, 0);
 
 		mainSettings.windowPos = _pos;
 		mainSettings.windowSize = _size;
@@ -2657,6 +2725,9 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 		if (ImGui::TreeNode("PANELS"))
 		{
 			ofxImGui::AddParameter(SHOW_ClickPanel);
+			ImGui::SameLine(); 
+			ofxImGui::AddParameter(MODE_EditPresetClicker);
+			
 			if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
 			ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
 			ofxImGui::AddParameter(SHOW_BrowserPanel);
@@ -2687,7 +2758,10 @@ void ofxPresetsManager::ImGui_Draw_Extra(ofxImGui::Settings &settings)
 		{
 			ofxImGui::AddParameter(autoSave); ImGui::SameLine();
 			//ofxImGui::AddParameter(autoLoad);//ImGui::SameLine();
-			ofxImGui::AddParameter(MODE_MemoryLive);
+			ofxImGui::AddParameter(MODE_MemoryLive); 
+			//ImGui::SameLine();
+			//ofxImGui::AddParameter(MODE_EditPresetClicker);
+
 			ofxImGui::AddParameter(SHOW_Help); ImGui::SameLine();
 			ofxImGui::AddParameter(bThemDark);
 
@@ -2783,14 +2857,14 @@ void ofxPresetsManager::buildHelpInfo() {
 
 	helpInfo += "\n";
 	helpInfo += "KEYS\n";
-	helpInfo += "MOUSE|KEYS             LOAD\n";
-	helpInfo += "CTRL                   SAVE/COPY\n";
-	helpInfo += "ALT                    SWAP\n";
-	helpInfo += "ARROWS                 NAVIGATE\n";
-	helpInfo += "E                      EDIT\n";
-	helpInfo += "H                      HELP\n";
-	helpInfo += "P                      CLICKER\n";
-	helpInfo += "G                      GUI";
+	helpInfo += "&MOUSE           LOAD\n";
+	helpInfo += "CTRL             SAVE/COPY\n";
+	helpInfo += "ALT              SWAP\n";
+	helpInfo += "ARROWS           NAVIGATE\n";
+	helpInfo += "E                EDIT\n";
+	helpInfo += "H                HELP\n";
+	helpInfo += "P                CLICKER\n";
+	helpInfo += "G                GUI";
 }
 
 //--------------------------------------------------------------

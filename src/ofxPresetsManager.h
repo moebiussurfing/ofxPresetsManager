@@ -72,6 +72,7 @@
 
 
 #include "ofxSurfingConstants.h" // -> defines (modes) are here "to share between addons" in one place
+#include "ofxInteractiveRect.h"
 
 //--
 
@@ -113,7 +114,19 @@
 class ofxPresetsManager : public ofBaseApp
 {
 
+public:
+	// mini preview rectangles positions and sizes
+	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
+	string path_RectanglePresetClicker = "_RectanglePresetClicker";
+	ofParameter<bool> MODE_EditPresetClicker;
+	ofParameter<float> _rectRatio;
+	//ofParameter<bool> bLockRatio;
+	//ofParameter<bool> bResetRects;
+	float _RectClick_w;
+	float _RectClick_Pad;
+
 	//-
+
 	// TODO: test events
 //public:
 	//std::vector<ofEventListener> listeners;
@@ -135,6 +148,7 @@ class ofxPresetsManager : public ofBaseApp
 	//ofNotifyEvent(newIntEvent, intCounter, this);
 	//ofEvent<int> newIntEvent;
 	//void newInt(int & i);
+
 	//-
 
 	//--
@@ -219,7 +233,7 @@ private:
 	// preset selectors to each added group
 	std::vector<ofParameter<int>> PRESETS_Selected_Index;
 	std::vector<int> PRESETS_Selected_Index_PRE;// remember previous selector
-	ofParameterGroup params_Selectors{ "Preset Selectors" };// group all selectors
+	ofParameterGroup params_Selectors{ "PRESET SELECTORS" };// group all selectors
 
 	//--
 
@@ -323,6 +337,12 @@ public:
 	float getPresetClicker_Height()
 	{
 		return getAmountGroups() * cellSize;
+	}
+	//--------------------------------------------------------------
+	glm::vec2 getPresetClicker_Position()
+	{
+		glm::vec2 p = glm::vec2(clicker_Pos.x, clicker_Pos.y);
+		return p;
 	}
 	////--------------------------------------------------------------
 	//void setPosition_DEBUG(int x, int y);// where to display if we get errors (ie: data files not found) on startup
@@ -443,18 +463,18 @@ public:
 	//--------------------------------------------------------------
 	void setPlayRandomizerTimer(bool b, int groupIndex)// play randomizer timer
 	{
-		ofLogNotice(__FUNCTION__) << "group: " << groupIndex ;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
 		groupRandomizers[groupIndex].setPlayRandomizerTimer(b);
 	}
 	//--------------------------------------------------------------
 	void setTogglePlayRandomizerPreset(int groupIndex)// toggle randomizer timer
 	{
-		ofLogNotice(__FUNCTION__) << "group: " << groupIndex ;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
 		groupRandomizers[groupIndex].setTogglePlayRandomizerPreset();
 	}
 	//--------------------------------------------------------------
 	void doRandomizePresetSelected(int groupIndex) {// randomize params of current selected preset
-		ofLogNotice(__FUNCTION__) << "group: " << groupIndex ;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
 
 		// check if minimum one parameter is enabled
 		groupRandomizers[groupIndex].doCheckRandomReady();
@@ -796,6 +816,20 @@ public:
 	bool isVisible_PresetClicker()
 	{
 		return SHOW_ClickPanel;
+	}
+	//--------------------------------------------------------------
+	float getGroupNamesWidth() {
+		float _maxw = 0;
+		for (int i = 0; i < groups.size(); i++)
+		{
+			float _w;
+			string info = groups[i].getName() + "* ";
+			if (myFont.isLoaded()) { _w = myFont.getStringBoundingBox(info, 0, 0).width; }
+			else { _w = 200; }
+
+			if (_w > _maxw) _maxw = _w;
+		}
+		return _maxw + 22;
 	}
 
 	//----

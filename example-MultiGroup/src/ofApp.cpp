@@ -90,14 +90,14 @@ void ofApp::setupParameters()
 
 	// group2
 	params2.setName("paramsGroup2");
-	params2.add(color2.set("color2", ofFloatColor(1, 1, 0, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));
+	params2.add(color2.set("color2", ofFloatColor(0, 0, 1, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params2.add(show2.set("show2", true));
 	params2.add(size2.set("size2", 50, 5, 200));
 	params2.add(fill2.set("fill2", true));
 
 	// group3
 	params3.setName("paramsGroup3");
-	params3.add(color3.set("color3", ofFloatColor(0, 0.5, 1, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));
+	params3.add(color3.set("color3", ofFloatColor(1, 1, 0, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params3.add(show3.set("show3", true));
 	params3.add(numObjects3.set("numObjects3", 5, 1, 5));
 	params3.add(size3.set("size3", 5, 1, 200));
@@ -192,7 +192,7 @@ void ofApp::drawScene0()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(200, 500);
+	ofTranslate(400, 200);
 	ofSetColor(color0.get());
 	ofSetLineWidth(lineWidth0);
 	if (fill0) ofFill();
@@ -212,7 +212,7 @@ void ofApp::drawScene1()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(350, 600 - shapeSide1 / 10);
+	ofTranslate(400, 400 - shapeSide1 / 10);
 	ofSetColor(color1.get());
 	ofFill();
 	for (int i = 0; i < numShapes1; ++i)
@@ -229,7 +229,7 @@ void ofApp::drawScene2()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(200, 500);
+	ofTranslate(400, 600);
 	ofSetColor(color2.get());
 	if (fill2) ofFill();
 	else ofNoFill();
@@ -247,7 +247,7 @@ void ofApp::drawScene3()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(600, 600);
+	ofTranslate(400, 800);
 	ofFill();
 	ofSetColor(color3.get());
 	for (int i = 0; i < numObjects3; ++i)
