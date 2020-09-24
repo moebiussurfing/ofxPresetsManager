@@ -78,20 +78,6 @@ ofxPresetsManager::ofxPresetsManager()
 	//// root folder
 	//path_Root = "myAddon";
 
-	//----
-
-	// reset mini previews layout
-	float _size = 80;
-	float _xx = 200;
-	float _yy = ofGetHeight() - getPresetClicker_Height() - _size - 20;
-	float _ratio = 1.25;
-	//float _pad = 30;
-	MODE_EditPresetClicker.set("EDIT CLICKER", false);
-
-	// layout
-	setSizeBox_PresetClicker(_size);
-	setPosition_PresetClicker(_xx, _yy);
-
 	//--
 
 	modeKeySave = OF_KEY_CONTROL;
@@ -351,6 +337,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Gui.add(SHOW_ImGui_PresetsParams);
 	params_Gui.add(SHOW_Help);
 	params_Gui.add(MODE_EditPresetClicker);
+	params_Gui.add(bg_EditPresetClicker);
 
 	params_Control.add(params_Options);
 	params_Control.add(params_Gui);
@@ -407,7 +394,8 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		_g.add(PRESETS_Selected_Index[i]);// selector
 		//_g.add(groupRandomizers[i].getParamsRandomizers());// all params
 		_g.add(groupRandomizers[i].PLAY_RandomizeTimer);// play
-		_g.add(groupRandomizers[i].bRandomizeIndex);// random index
+		_g.add(groupRandomizers[i].randomizeDurationBpm);// bpm
+		//_g.add(groupRandomizers[i].bRandomizeIndex);// random index
 		params_Selectors.add(_g);
 	}
 
@@ -462,7 +450,21 @@ void ofxPresetsManager::startup()
 	setVisible_GUI_Internal(false);
 	windowResized(ofGetWidth(), ofGetHeight());
 
-	//-
+	//----
+
+	// preset clicker
+
+	MODE_EditPresetClicker.set("EDIT CLICKER", false);
+	bg_EditPresetClicker.set("BG CLICKER", false);
+	
+	// reset mini previews layout
+	float _size = 80;
+	setSizeBox_PresetClicker(_size);
+	float _xx = 200;
+	float _yy = ofGetHeight() - getPresetClicker_Height() - 20;
+
+	// layout
+	setPosition_PresetClicker(_xx, _yy);
 
 	// clicker_Pos
 	_RectClick_Pad = 10;
@@ -663,7 +665,7 @@ void ofxPresetsManager::drawPresetClicker()
 	// light theme
 	else {
 		_colorText = ofColor(255, 128);
-		_colorButton = ofColor(0, 150);
+		_colorButton = ofColor(0, 200);
 		_colorBg = ofColor(0, 128);
 	}
 
@@ -677,11 +679,13 @@ void ofxPresetsManager::drawPresetClicker()
 
 	//----
 
-	// rectangle editor
-	ofFill();
-	ofSetColor(_colorBg);
-	rectanglePresetClicker.draw();
-	ofDrawRectRounded(rectanglePresetClicker, _round);
+	// bg rectangle editor
+	if (bg_EditPresetClicker) {
+		ofFill();
+		ofSetColor(_colorBg);
+		rectanglePresetClicker.draw();
+		ofDrawRectRounded(rectanglePresetClicker, _round);
+	}
 
 	// get clicker position from being edited rectangle
 	if (MODE_EditPresetClicker) {
@@ -1560,6 +1564,11 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				setTogglePlayRandomizerPreset(GuiGROUP_Selected_Index);
 			}
 		}
+		else if (eventArgs.hasModifier(OF_KEY_ALT) && eventArgs.codepoint == 'E')
+		{
+			MODE_EditPresetClicker = !MODE_EditPresetClicker;
+		}
+		// random index
 		else if (key == 'R')
 		{
 			doRandomizePresetSelected(GuiGROUP_Selected_Index);
@@ -2651,7 +2660,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		_name = "ofxPresetsManager";
 		if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
 		{
-			ImGui_Draw_PresetPreview(mainSettings);
+			ImGui_Draw_PresetParameters(mainSettings);
 		}
 		ofxImGui::EndWindow(mainSettings);
 	}
@@ -2691,7 +2700,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 // ImGui pure content
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_PresetPreview(ofxImGui::Settings &settings)
+void ofxPresetsManager::ImGui_Draw_PresetParameters(ofxImGui::Settings &settings)
 {
 	if (ofxImGui::BeginTree("PRESETS PARAMETERS", settings))
 	{
@@ -2727,6 +2736,8 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 			ofxImGui::AddParameter(SHOW_ClickPanel);
 			ImGui::SameLine(); 
 			ofxImGui::AddParameter(MODE_EditPresetClicker);
+			ImGui::SameLine(); 
+			ofxImGui::AddParameter(bg_EditPresetClicker);
 			
 			if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
 			ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);

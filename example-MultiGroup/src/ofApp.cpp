@@ -172,11 +172,11 @@ void ofApp::keyPressed(int key)
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h)
 {
-	// customize layout
-	// bottom and centered
-	presetsManager.setSizeBox_PresetClicker(60);
-	int _w = presetsManager.getPresetClicker_Width();
-	presetsManager.setPosition_PresetClicker(ofGetWidth() / 2.f - _w / 2.f, ofGetHeight() - presetsManager.getPresetClicker_Height() - 20);
+	//// customize layout
+	//// bottom and centered
+	//presetsManager.setSizeBox_PresetClicker(60);
+	//int _w = presetsManager.getPresetClicker_Width();
+	//presetsManager.setPosition_PresetClicker(ofGetWidth() / 2.f - _w / 2.f, ofGetHeight() - presetsManager.getPresetClicker_Height() - 20);
 }
 
 //--------------------------------------------------------------

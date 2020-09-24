@@ -120,7 +120,7 @@ public:
 	string path_RectanglePresetClicker = "_RectanglePresetClicker";
 	ofParameter<bool> MODE_EditPresetClicker;
 	ofParameter<float> _rectRatio;
-	//ofParameter<bool> bLockRatio;
+	ofParameter<bool> bg_EditPresetClicker;
 	//ofParameter<bool> bResetRects;
 	float _RectClick_w;
 	float _RectClick_Pad;
@@ -909,7 +909,7 @@ public:
 	void ImGui_Draw_Extra(ofxImGui::Settings &settings);
 	void ImGui_Draw_Selectors(ofxImGui::Settings &settings);
 	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
-	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
+	void ImGui_Draw_PresetParameters(ofxImGui::Settings &settings);
 	//void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
 
 private:

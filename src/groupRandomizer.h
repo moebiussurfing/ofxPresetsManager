@@ -140,6 +140,7 @@ private:
 public:
 	ofParameter<bool> PLAY_RandomizeTimer; //play randomizer
 	ofParameter<bool> bRandomizeIndex;// trig randomize index
+	ofParameter<float> randomizeDurationBpm; // bpm
 
 private:
 	ofParameter<bool> MODE_DicesProbs;
@@ -152,7 +153,6 @@ private:
 private:
 	ofParameter<int> randomizeDuration;
 	ofParameter<int> randomizeDurationShort;
-	ofParameter<float> randomizeDurationBpm;
 
 private:
 	int randomizeSpeed;// real time duration
