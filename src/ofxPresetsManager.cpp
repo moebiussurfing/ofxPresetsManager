@@ -1285,7 +1285,7 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 		if (!b) {
 			ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " " << _path;
 
-			//file not found so create one file instead
+			// file not found so create one file instead
 			save(presetIndex, guiIndex);
 		}
 
@@ -1971,6 +1971,7 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 		//--
 
 		// presets selectors
+
 		if (!DISABLE_CALLBACKS_SELECTORS)
 		{
 			// exclude group 0
@@ -1986,11 +1987,11 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 
 						//-
 
-						// 1. main group selected preset NOT CHANGED
+						// 1. group selected preset NOT CHANGED
 
 						if (PRESETS_Selected_Index[g] == PRESETS_Selected_Index_PRE[g])
 						{
-							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " Not Changed";
+							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " not changed";
 
 							// browser
 							//if (MODE_Browser_NewPreset)
@@ -2005,11 +2006,11 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 
 						//--
 
-						// 2. main group selected preset CHANGED
+						// 2. group selected preset CHANGED
 
 						else if (PRESETS_Selected_Index[g] != PRESETS_Selected_Index_PRE[g])
 						{
-							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " Changed";
+							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " changed";
 
 							//-
 
@@ -2067,9 +2068,9 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 
 			//--
 
-			//// TODO:
-			//// refresh in other another better place?...
-			//buildHelpInfo();
+			for (int i = 0; i < groups.size(); i++) {
+				groupRandomizers[i].setModeEditor(MODE_Editor);
+			}
 		}
 
 		if (name == MODE_EditPresetClicker.getName())
@@ -2645,7 +2646,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	// window for all group parameters contained into presetsManager
 	// all parameters in all added groups
 
-	if (SHOW_ImGui_PresetsParams) {
+	if (SHOW_ImGui_PresetsParams && MODE_Editor) {
 
 		_size = ofVec2f(400, 800);
 		_pos = _pos - ofVec2f(_size.x + _pad, 0);
@@ -2733,18 +2734,21 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 
 		//---
 
-		//ImGui::SameLine();
-		if (ImGui::TreeNode("PANELS"))
-		{
-			ofxImGui::AddParameter(SHOW_ClickPanel);
-			ImGui::SameLine(); ofxImGui::AddParameter(MODE_EditPresetClicker);
-			ImGui::SameLine(); ofxImGui::AddParameter(bg_EditPresetClicker);
-			
-			if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
-			ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
-			ofxImGui::AddParameter(SHOW_BrowserPanel);
+		// panels
+		if (MODE_Editor) {
+			//ImGui::SameLine();
+			if (ImGui::TreeNode("PANELS"))
+			{
+				ofxImGui::AddParameter(SHOW_ClickPanel);
+				ImGui::SameLine(); ofxImGui::AddParameter(MODE_EditPresetClicker);
+				ImGui::SameLine(); ofxImGui::AddParameter(bg_EditPresetClicker);
 
-			ImGui::TreePop();
+				if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
+				ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
+				ofxImGui::AddParameter(SHOW_BrowserPanel);
+
+				ImGui::TreePop();
+			}
 		}
 
 		// extra
@@ -3586,6 +3590,7 @@ void ofxPresetsManager::doCheckPresetsFolderIsEmpty()
 			CheckFolder(_path);
 
 			ofDirectory dataDirectory(ofToDataPath(_path, true));
+
 			// check if folder is empty
 			if (dataDirectory.size() == 0) {// if there's no files into folder
 				ofLogNotice(__FUNCTION__) << "Folder " << _path << " is empty. Force populate favourites files...";

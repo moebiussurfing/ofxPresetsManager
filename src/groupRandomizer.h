@@ -273,6 +273,9 @@ public:
 	void setModeRandomizeAvoidRepeat(bool b) {
 		MODE_AvoidRandomRepeat = b;
 	}
+	void setModeEditor(bool b) {
+		MODE_Editor = b;
+	}
 
 private:
 	bool DISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly

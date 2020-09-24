@@ -981,6 +981,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		// TODO: not implemented bc must be backward..
 		// main helpers
+		if (MODE_Editor)
 		{
 			if (ImGui::Button("CLONE ALL"))
 			{
@@ -1051,12 +1052,14 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		//--
 
-		// 1.0.3 bang randomize
+		if (MODE_Editor) {
+			// 1.0.3 bang randomize
 
-		ImGui::Dummy(ImVec2(0.0f, 5));
+			ImGui::Dummy(ImVec2(0.0f, 5));
 
-		//ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 30);//preset
-		ofxImGui::AddParameter(bRandomizeEditor);
+			//ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 30);//preset
+			ofxImGui::AddParameter(bRandomizeEditor);// trig random current preset: will randomize all enabled toggle parameters
+		}
 
 		//--
 
@@ -1085,26 +1088,29 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		//--
 
-		ImGui::Dummy(ImVec2(0.0f, 5));
+		if (MODE_Editor) {
 
-		if (ImGui::TreeNode("EDIT RANDOMIZERS"))
-		{
-			// 1.1 randomizers presets
-			//if (MODE_DicesProbs) 
+			ImGui::Dummy(ImVec2(0.0f, 5));
+
+			if (ImGui::TreeNode("EDIT RANDOMIZERS"))
+			{
+				// 1.1 randomizers presets
+				//if (MODE_DicesProbs) 
 				ofxImGui::AddGroup(params_Randomizer, settings);
 
 #ifdef DEBUG_randomTest
-			ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
+				ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
 #endif
-			//--
+				//--
 
-			// 1.2 randomizers editor
+				// 1.2 randomizers editor
 
-			if (MODE_Editor)
-			{
-				ofxImGui::AddGroup(params_Editor, settings);
+				if (MODE_Editor)
+				{
+					ofxImGui::AddGroup(params_Editor, settings);
+				}
+				ImGui::TreePop();
 			}
-			ImGui::TreePop();
 		}
 
 		//-
