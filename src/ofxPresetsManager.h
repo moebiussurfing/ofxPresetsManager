@@ -181,6 +181,7 @@ public:
 public:
 	// TODO: should use &reference? it's better?
 	void add(ofParameterGroup params, initializer_list<int> keysList);// adds and define keys to trig presets too
+	void add(ofParameterGroup params, vector<int> keysList);// adds and define keys to trig presets too
 
 private:
 	// TODO: BUG:
@@ -257,8 +258,11 @@ private:
 	// group main selector
 	bool bBuildGroupSelector = true;// to allow auto build a group selector to combine all the added groups to the presets manager
 	bool bAllowGroupSelector = true;// to allow disable main group. not allways we need it..
-
+	int groupLinkSize = 10;// ammount of presets we want to the group link
 public:
+	void setGroupLinkSize(int size) {// customize group link presets
+		groupLinkSize = size;
+	}
 	void setEnableMainGroupSelector(bool b) {// disable the use of main group selector. must call before setup. enabled by default
 		bAllowGroupSelector = b;
 	}
@@ -278,6 +282,7 @@ public:
 
 	// B. easy callback 
 	// to faster ofApp integration 
+	// to check in update() as callback
 public:
 	//--------------------------------------------------------------
 	bool isDoneLoad()
@@ -289,23 +294,26 @@ public:
 		}
 		return false;
 	}
-	//// to check in update() as callback
-	//bool isDoneLoad()
-	//{
-	//    bool isDone = false;
-	//    if (DONE_load)
-	//    {
-	//        DONE_load = false;
-	//        isDone = true;
-	//    }
-	//    else
-	//    {
-	//        isDone = false;
-	//    }
-	//    return isDone;
-	//}
 private:
 	bool bIsDoneLoad = false;
+
+	//-
+
+public:
+	//--------------------------------------------------------------
+	bool isDoneSave()
+	{
+		if (bIsDoneSave)
+		{
+			bIsDoneSave = false;
+			return true;
+		}
+		return false;
+	}
+private:
+	bool bIsDoneSave = false;
+
+	//--
 
 	//----
 	//
@@ -466,45 +474,52 @@ private:
 public:
 
 	//--------------------------------------------------------------
-	void setPlayRandomizerTimer(bool b, int groupIndex)// play randomizer timer
+	void setPlayRandomizerTimer(bool b, int groupIndex = -1)// play randomizer timer
 	{
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
 		groupRandomizers[groupIndex].setPlayRandomizerTimer(b);
 	}
 	//--------------------------------------------------------------
-	void setTogglePlayRandomizerPreset(int groupIndex)// toggle randomizer timer
+	void setTogglePlayRandomizerPreset(int groupIndex = -1)// toggle randomizer timer
 	{
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
 		groupRandomizers[groupIndex].setTogglePlayRandomizerPreset();
 	}
 	//--------------------------------------------------------------
-	void doRandomizePresetSelected(int groupIndex) {// randomize params of current selected preset
+	void doRandomizePresetSelected(int groupIndex = -1) {// randomize params of current selected preset
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
-
 		// check if minimum one parameter is enabled
 		groupRandomizers[groupIndex].doCheckRandomReady();
-
 		groupRandomizers[groupIndex].doRandomizePresetSelected();
 	}
-	////--------------------------------------------------------------
-	//void setRandomizerDuration(float t)
-	//{
-	//	randomizeDuration = t;
-	//	randomizeDurationBpm = 60000.f / randomizeDuration;
-	//}
-	////--------------------------------------------------------------
-	//void setRandomizerDurationShort(float t)
-	//{
-	//	randomizeDurationShort = t;
-	//}
-	////--------------------------------------------------------------
-	//void setRandomizerBpm(float bpm)
-	//{
-	//	randomizeDurationBpm = bpm;
-	//	// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
-	//	randomizeDuration = 60000.f / bpm;
-	//	randomizeDurationShort = randomizeDuration / 2.f;
-	//}
+	//--------------------------------------------------------------
+	void setRandomizerDuration(float t, int groupIndex = -1)
+	{
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
+		groupRandomizers[groupIndex].randomizeDuration = t;
+		groupRandomizers[groupIndex].randomizeDurationBpm = 60000.f / groupRandomizers[groupIndex].randomizeDuration;
+	}
+	//--------------------------------------------------------------
+	void setRandomizerDurationShort(float t, int groupIndex = -1)
+	{
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
+		groupRandomizers[groupIndex].randomizeDurationShort = t;
+	}
+	//--------------------------------------------------------------
+	void setRandomizerBpm(float bpm, int groupIndex = -1)
+	{
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
+		groupRandomizers[groupIndex].randomizeDurationBpm = bpm;
+		// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
+		groupRandomizers[groupIndex].randomizeDuration = 60000.f / bpm;
+		groupRandomizers[groupIndex].randomizeDurationShort = groupRandomizers[groupIndex].randomizeDuration / 2.f;
+	}
 	////--------------------------------------------------------------
 	//void doRandomizePresetFromFavs()// trig randomize and select one of the favs presets
 	//{
@@ -513,7 +528,6 @@ public:
 
 	//----
 
-public:
 
 	//----
 	//
@@ -521,8 +535,23 @@ public:
 	//
 	//----
 
-	// presets browsing
+public:
+	//--------------------------------------------------------------
+	void loadPreset(int p, int _indexGroup);// load preset for extra groups by code from ofApp
+	void savePreset(int p, int _indexGroup);// save preset for extra groups by code from ofApp
 
+	//--
+
+public:
+	//--------------------------------------------------------------
+	void saveCurrentPreset(int groupIndex = -1) {
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+
+		ofLogNotice(__FUNCTION__) << "SAVE PRESET  group: " << groupIndex <<" preset: " << PRESETS_Selected_Index[groupIndex].get();
+		save(PRESETS_Selected_Index[groupIndex].get(), groupIndex);
+	}
+
+	// presets browsing
 	////--------------------------------------------------------------
 	//void load_Next()// for main group
 	//{
@@ -542,18 +571,6 @@ public:
 	//	}
 	//}
 
-	//--------------------------------------------------------------
-	void loadPreset(int p, int _indexGroup);// load preset for extra groups by code from ofApp
-	void savePreset(int p, int _indexGroup);// save preset for extra groups by code from ofApp
-
-	////void loadPreset(int p);// load preset for the main group by code from ofApp
-	//void loadPresetGroup(int presetIndex)// load preset for main group by code from ofApp
-	//{
-	//	int groupIndex = groups.size() - 1;
-	//	ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
-	//	load(presetIndex, groupIndex);
-	//}
-
 	//--
 
 	// for external layout or other workflow purposes
@@ -563,6 +580,7 @@ public:
 	//{
 	//	return PRESET_Selected_IndexMain;
 	//}
+
 	//--------------------------------------------------------------
 	int getCurrentPreset(int _group)// get index of selected preset on the group
 	{
@@ -894,15 +912,6 @@ public:
 
 private:
 	int PRESET_Selected_IndexMain_PRE = -1;// used as callback
-
-	//--
-
-public:
-	//--------------------------------------------------------------
-	void saveCurrentPreset() {
-		ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_Selected_IndexMain.get();
-		save(PRESET_Selected_IndexMain, 0);
-	}
 
 	//----
 

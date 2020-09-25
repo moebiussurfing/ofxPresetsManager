@@ -138,9 +138,12 @@ private:
 	ofParameterGroup params_RandomizerSettings{ "Randomizers" };
 
 public:
+//private:
 	ofParameter<bool> PLAY_RandomizeTimer; //play randomizer
 	ofParameter<bool> bRandomizeIndex;// trig randomize index
 	ofParameter<float> randomizeDurationBpm; // bpm
+	ofParameter<int> randomizeDuration;
+	ofParameter<int> randomizeDurationShort;
 
 private:
 	ofParameter<bool> MODE_DicesProbs;
@@ -149,10 +152,6 @@ private:
 	ofParameter<bool> bResetDices;
 	ofParameter<int> randomizedDice; // to test
 	bool bLatchRun = false;
-
-private:
-	ofParameter<int> randomizeDuration;
-	ofParameter<int> randomizeDurationShort;
 
 private:
 	int randomizeSpeed;// real time duration

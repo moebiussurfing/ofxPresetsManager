@@ -29,7 +29,6 @@ public:
     ofParameterGroup params0;
     ofParameterGroup params0_Nested;
 	ofParameter<ofColor> color0;// bc ofColor not implemented on ImGui yet
-	//ofParameter<ofFloatColor> color0;// bc ofColor not implemented on ImGui yet
 	ofParameter<bool> show0;
 	ofParameter<bool> fill0;
 	ofParameter<float> lineWidth0;
@@ -41,7 +40,6 @@ public:
 	// group1
 	ofParameterGroup params1;
 	ofParameter<ofColor> color1;
-	//ofParameter<ofFloatColor> color1;
 	ofParameter<bool> show1;
 	ofParameter<int> numShapes1;
 	ofParameter<int> separation1;
@@ -85,5 +83,4 @@ public:
 #endif
 
 	float _alpha = 255/0.4f;
-	//float _alpha = 0.4;
 };
