@@ -1,6 +1,4 @@
-ofxDEBUG_errors
 ofxGui
 ofxImGui
 ofxPresetsManager
 ofxSurfingHelpers
-ofxWindowApp

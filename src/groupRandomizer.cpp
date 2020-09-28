@@ -817,14 +817,14 @@ void groupRandomizer::setupRandomizerIndex()
 	bRandomizeIndex.set("RANDOMIZE INDEX", false);
 	PLAY_RandomizeTimer.set("PLAY RANDOMIZER", false);
 	PLAY_RandomizeTimer.setSerializable(false);
-	MODE_DicesProbs.set("MODE USE PROBS/DICES", true);
+	MODE_DicesProbs.set("MODE USE PROBS", true);
 	MODE_LatchTrig.set("MODE LATCH", false);
 	MODE_AvoidRandomRepeat.set("MODE AVOID REPEAT", false);
 	randomizeDuration.set("t DURATION", 1000, 10, randomize_MAX_DURATION);
 	randomizeDurationShort.set("t SHORT", 250, 10, randomize_MAX_DURATION_SHORT);
 	randomizeDurationBpm.set("t BPM", 120, 10, 400);
 	randomizedDice.set("DICE", 0, 0, amountPresets - 1);
-	bResetDices.set("RESET DICES", false);
+	bResetDices.set("RESET PROBS", false);
 
 	// exclude
 	bRandomizeIndex.setSerializable(false);
@@ -866,14 +866,14 @@ void groupRandomizer::setupRandomizerIndex()
 	params_Randomizer.setName("RANDOM SELECTED");
 	params_Randomizer.add(PLAY_RandomizeTimer);
 	params_Randomizer.add(bRandomizeIndex);
+	params_Randomizer.add(randomizeDurationBpm);
 	params_Randomizer.add(randomizeDuration);
 	params_Randomizer.add(randomizeDurationShort);
-	params_Randomizer.add(randomizeDurationBpm);
 	params_Randomizer.add(MODE_DicesProbs);
 	params_Randomizer.add(MODE_LatchTrig);
 	params_Randomizer.add(MODE_AvoidRandomRepeat);
-	params_Randomizer.add(_gOdds);
-	params_Randomizer.add(_gShort);
+	params_Randomizer.add(_gOdds);// probs
+	params_Randomizer.add(_gShort);// toggles
 	params_Randomizer.add(bResetDices);
 #ifdef DEBUG_randomTest
 	params_Randomizer.add(randomizedDice);
@@ -903,21 +903,26 @@ void groupRandomizer::keyPressed(int key)
 }
 
 //--------------------------------------------------------------
-void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
+void groupRandomizer::ImGui_Draw_GroupRandomizers()
 {
 	// 1. randomizers
 	string str;
+	str = "GROUP " + group.getName();
 
-	if (ofxImGui::BeginTree("SELECTED GROUP", settings))
+	ofxImGui::Settings settings;
+
+	if (ofxImGui::BeginWindow(str.c_str(), settings))
 	{
 		//---
 
 		// preset selector
 
-		//string str = "User-Kit: " + displayNameUserKit;
-		str = "Group   " + group.getName();
-		ImGui::Text(str.c_str());
-		str = "Preset  " + ofToString(PRESET_Selected_IndexMain.get());
+		ImGui::Dummy(ImVec2(0.0f, 5));
+
+		////string str = "User-Kit: " + displayNameUserKit;
+		//str = "  Group    " + group.getName();
+		//ImGui::Text(str.c_str());
+		str = "  Preset   " + ofToString(PRESET_Selected_IndexMain.get());
 		ImGui::Text(str.c_str());
 
 		ImGui::Dummy(ImVec2(0.0f, 5));
@@ -968,6 +973,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 				float last_button_x2 = ImGui::GetItemRectMax().x;
 				float next_button_x2 = last_button_x2 + style.ItemSpacing.x + button_sz.x; // Expected position if next button was on same line
 				if (n + 1 < _amtButtons && next_button_x2 < _windowVisible_x2) ImGui::SameLine();
+
 				ImGui::PopID();
 			}
 		}
@@ -978,6 +984,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		// TODO: not implemented bc must be backward..
 		// main helpers
+		if (MODE_Editor)
 		{
 			if (ImGui::Button("CLONE ALL"))
 			{
@@ -990,11 +997,11 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 				bCloneRight = true;
 			}
 
+			// TODO:
 			//ImGui::SameLine();
 			//if (ImGui::Button("POPULATE ALL!"))
 			//{
 			//	bPopulateAll = true;
-
 			//	//// populate all favs
 			//	//doPopulateFavs();
 			//	//// create browser files too
@@ -1011,7 +1018,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 		//--
 
 		ImGui::Dummy(ImVec2(0.0f, 10));
-		
+
 		str = "RANDOMIZER";
 		ImGui::Text(str.c_str());
 		ImGui::Dummy(ImVec2(0.0f, 5));
@@ -1048,12 +1055,14 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		//--
 
-		// 1.0.3 bang randomize
+		if (MODE_Editor) {
+			// 1.0.3 bang randomize
 
-		ImGui::Dummy(ImVec2(0.0f, 5));
+			ImGui::Dummy(ImVec2(0.0f, 5));
 
-		//ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 30);//preset
-		ofxImGui::AddParameter(bRandomizeEditor);
+			//ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 30);//preset
+			ofxImGui::AddParameter(bRandomizeEditor);// trig random current preset: will randomize all enabled toggle parameters
+		}
 
 		//--
 
@@ -1082,32 +1091,32 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		//--
 
-		ImGui::Dummy(ImVec2(0.0f, 5));
+		if (MODE_Editor) {
 
-		if (ImGui::TreeNode("EDIT RANDOMIZERS"))
-		{
-			// 1.1 randomizers presets
+			ImGui::Dummy(ImVec2(0.0f, 5));
 
-			ofxImGui::AddGroup(params_Randomizer, settings);
+			if (ImGui::TreeNode("EDIT RANDOMIZERS"))
+			{
+				// 1.1 randomizers presets
+				//if (MODE_DicesProbs) 
+				ofxImGui::AddGroup(params_Randomizer, settings);
 
 #ifdef DEBUG_randomTest
-			ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
+					ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
 #endif
-			//--
+				//--
 
-			// 1.2 randomizers editor
+				// 1.2 randomizers editor
 
-			if (MODE_Editor)
-			{
-				ofxImGui::AddGroup(params_Editor, settings);
+				if (MODE_Editor)
+				{
+					ofxImGui::AddGroup(params_Editor, settings);
+				}
+				ImGui::TreePop();
 			}
-			ImGui::TreePop();
 		}
-
-		//-
-
-		ofxImGui::EndTree(settings);
 	}
+	ofxImGui::EndWindow(settings);
 }
 
 //--------------------------------------------------------------
@@ -1273,7 +1282,7 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 			doRandomIndex();
 		}
 #endif
-		else if (name == "RESET DICES" && bResetDices)
+		else if (name == bResetDices.getName() && bResetDices)
 		{
 			ofLogNotice(__FUNCTION__) << "RESET DICES: " << e;
 			doResetDices();

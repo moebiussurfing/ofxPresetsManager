@@ -42,7 +42,7 @@ public:
 	}
 
 public:
-	void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
+	void ImGui_Draw_GroupRandomizers();
 
 	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
 
@@ -138,8 +138,12 @@ private:
 	ofParameterGroup params_RandomizerSettings{ "Randomizers" };
 
 public:
+//private:
 	ofParameter<bool> PLAY_RandomizeTimer; //play randomizer
 	ofParameter<bool> bRandomizeIndex;// trig randomize index
+	ofParameter<float> randomizeDurationBpm; // bpm
+	ofParameter<int> randomizeDuration;
+	ofParameter<int> randomizeDurationShort;
 
 private:
 	ofParameter<bool> MODE_DicesProbs;
@@ -148,11 +152,6 @@ private:
 	ofParameter<bool> bResetDices;
 	ofParameter<int> randomizedDice; // to test
 	bool bLatchRun = false;
-
-private:
-	ofParameter<int> randomizeDuration;
-	ofParameter<int> randomizeDurationShort;
-	ofParameter<float> randomizeDurationBpm;
 
 private:
 	int randomizeSpeed;// real time duration
@@ -272,6 +271,9 @@ public:
 public:
 	void setModeRandomizeAvoidRepeat(bool b) {
 		MODE_AvoidRandomRepeat = b;
+	}
+	void setModeEditor(bool b) {
+		MODE_Editor = b;
 	}
 
 private:

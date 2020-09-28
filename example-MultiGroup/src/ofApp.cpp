@@ -51,12 +51,12 @@ void ofApp::setupParameters()
 
 	// some useful OF tips with parameters
 
-	// 1. we can exclude some parameters that we don't want to handle into presets
-	// ie: exclude all colors
-	color0.setSerializable(false);
-	color1.setSerializable(false);
-	color2.setSerializable(false);
-	color3.setSerializable(false);
+	//// 1. we can exclude some parameters that we don't want to handle into presets
+	//// ie: exclude all colors
+	//color0.setSerializable(false);
+	//color1.setSerializable(false);
+	//color2.setSerializable(false);
+	//color3.setSerializable(false);
 
 	// 2. we can link some parameters to make them change together
 	// must call makeRefereceTo before params are setted below
@@ -69,8 +69,8 @@ void ofApp::setupParameters()
 	
 	// group0
 	params0.setName("paramsGroup0");// this is our parent group
-	params0.add(color0.set("color0", ofFloatColor(1, 0, 0, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params0.add(show0.set("show0", true));
+	params0.add(color0.set("color0", ofColor(255, 0, 0, _alpha), ofColor(0, 0), ofColor(255, 255)));
 	params0.add(numShapes0.set("numShapes0", 5, 1, 5));
 	params0.add(shapeType0.set("shapeType0", 1, 1, 2));
 	params0.add(separation0.set("separation0", 100, 1, 100));
@@ -82,23 +82,23 @@ void ofApp::setupParameters()
 
 	// group1
 	params1.setName("paramsGroup1");
-	params1.add(color1.set("color1", ofFloatColor(0, 1, 0, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params1.add(show1.set("show1", true));
+	params1.add(color1.set("color1", ofColor(255, 0, 0, _alpha), ofColor(0, 0), ofColor(255, 255)));
 	params1.add(numShapes1.set("numShapes1", 5, 1, 5));
 	params1.add(shapeSide1.set("shapeSide1", 50, 5, 200));
 	params1.add(separation1.set("separation1", 100, 1, 100));
 
 	// group2
 	params2.setName("paramsGroup2");
-	params2.add(color2.set("color2", ofFloatColor(1, 1, 0, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params2.add(show2.set("show2", true));
+	params2.add(color2.set("color2", ofColor(255, 0, 0, _alpha), ofColor(0, 0), ofColor(255, 255)));
 	params2.add(size2.set("size2", 50, 5, 200));
 	params2.add(fill2.set("fill2", true));
 
 	// group3
 	params3.setName("paramsGroup3");
-	params3.add(color3.set("color3", ofFloatColor(0, 0.5, 1, _alpha), ofFloatColor(0, 0), ofFloatColor(1, 1)));
 	params3.add(show3.set("show3", true));
+	params3.add(color3.set("color3", ofColor(255, 0, 0, _alpha), ofColor(0, 0), ofColor(255, 255)));
 	params3.add(numObjects3.set("numObjects3", 5, 1, 5));
 	params3.add(size3.set("size3", 5, 1, 200));
 	params3.add(separation3.set("separation3", 50, 5, 100));
@@ -112,7 +112,7 @@ void ofApp::setupParameters()
 
 	int x = 5;
 	int y = 10;
-	int w = 200 + 5;
+	int w = 200 + 3;
 
 	gui0.setup("ofApp0");
 	gui0.add(params0);
@@ -172,11 +172,11 @@ void ofApp::keyPressed(int key)
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h)
 {
-	// customize layout
-	// bottom and centered
-	presetsManager.setSizeBox_PresetClicker(60);
-	int _w = presetsManager.getPresetClicker_Width();
-	presetsManager.setPosition_PresetClicker(ofGetWidth() / 2.f - _w / 2.f, ofGetHeight() - presetsManager.getPresetClicker_Height() - 20);
+	//// customize layout
+	//// bottom and centered
+	//presetsManager.setSizeBox_PresetClicker(60);
+	//int _w = presetsManager.getPresetClicker_Width();
+	//presetsManager.setPosition_PresetClicker(ofGetWidth() / 2.f - _w / 2.f, ofGetHeight() - presetsManager.getPresetClicker_Height() - 20);
 }
 
 //--------------------------------------------------------------
@@ -192,7 +192,7 @@ void ofApp::drawScene0()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(200, 500);
+	ofTranslate(400, 200);
 	ofSetColor(color0.get());
 	ofSetLineWidth(lineWidth0);
 	if (fill0) ofFill();
@@ -212,7 +212,7 @@ void ofApp::drawScene1()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(350, 600 - shapeSide1 / 10);
+	ofTranslate(400, 400 - shapeSide1 / 10);
 	ofSetColor(color1.get());
 	ofFill();
 	for (int i = 0; i < numShapes1; ++i)
@@ -229,7 +229,7 @@ void ofApp::drawScene2()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(200, 500);
+	ofTranslate(400, 600);
 	ofSetColor(color2.get());
 	if (fill2) ofFill();
 	else ofNoFill();
@@ -247,7 +247,7 @@ void ofApp::drawScene3()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(600, 600);
+	ofTranslate(400, 800);
 	ofFill();
 	ofSetColor(color3.get());
 	for (int i = 0; i < numObjects3; ++i)

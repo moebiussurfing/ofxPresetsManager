@@ -55,33 +55,28 @@
 //
 //	DEFINES
 //
-//#define MODE_ImGui_EXTERNAL			// this must be defined here and (but not only) in ofApp (too)!!
-//										// will handle the gui outisde the addon, here the parameters only!
-#define INCLUDE_IMGUI_CUSTOM_FONT		// customize ImGui font
-//#define INCLUDE_ofxUndoSimple			// undo engine to store after randomize preset parameters (& recall)
-//#define USE_ofxImGuiSimple			// TEST with an alternative ImGui addon
-//#define USE_JSON						// file settings format
+#define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT		// customize ImGui font
+//#define INCLUDE_ofxUndoSimple					// undo engine to store after randomize preset parameters (& recall)
+//#define USE_JSON								// file settings format
 //										   
 //	DEBUG									   
 //										   
-//#define INCLUDE_PERFORMANCE_MEASURES	// measure performance ofxTimeMeasurements
-//#define DEBUG_randomTest				// uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
-//#define DEBUG_BLOCK_SAVE_SETTINGS		// disable save settings//enable this bc sometimes there's crashes on exit
+//#define INCLUDE_PERFORMANCE_MEASURES			// measure performance ofxTimeMeasurements
+//#define DEBUG_randomTest						// uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
+//#define DEBUG_BLOCK_SAVE_SETTINGS				// disable save settings//enable this bc sometimes there's crashes on exit
 //
 //--------------------------------------
 
 
 #include "ofxSurfingConstants.h" // -> defines (modes) are here "to share between addons" in one place
+#include "ofxInteractiveRect.h"
 
 //--
 
 // gui
-#ifdef USE_ofxImGuiSimple// alternative to official addon
-#include "ofxImGuiSimple.h"
-#include "Helpers.h"
-#else
+// uasing alternative branch: https://github.com/MacFurax/ofxImGui/tree/docking
+// this branch allows docking, layout store/recall, some extra widgets 
 #include "ofxImGui.h"
-#endif
 
 // undo engine
 #ifdef INCLUDE_ofxUndoSimple
@@ -113,7 +108,24 @@
 class ofxPresetsManager : public ofBaseApp
 {
 
+public:
+	//ofParameter<ofColor> c;
+
 	//-
+
+public:
+	// mini preview rectangles positions and sizes
+	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
+	string path_RectanglePresetClicker = "_RectanglePresetClicker";
+	ofParameter<bool> MODE_EditPresetClicker;
+	ofParameter<float> _rectRatio;
+	ofParameter<bool> bg_EditPresetClicker;
+	//ofParameter<bool> bResetRects;
+	float _RectClick_w;
+	float _RectClick_Pad;
+
+	//-
+
 	// TODO: test events
 //public:
 	//std::vector<ofEventListener> listeners;
@@ -135,6 +147,7 @@ class ofxPresetsManager : public ofBaseApp
 	//ofNotifyEvent(newIntEvent, intCounter, this);
 	//ofEvent<int> newIntEvent;
 	//void newInt(int & i);
+
 	//-
 
 	//--
@@ -162,6 +175,7 @@ public:
 public:
 	// TODO: should use &reference? it's better?
 	void add(ofParameterGroup params, initializer_list<int> keysList);// adds and define keys to trig presets too
+	void add(ofParameterGroup params, vector<int> keysList);// adds and define keys to trig presets too
 
 private:
 	// TODO: BUG:
@@ -219,7 +233,7 @@ private:
 	// preset selectors to each added group
 	std::vector<ofParameter<int>> PRESETS_Selected_Index;
 	std::vector<int> PRESETS_Selected_Index_PRE;// remember previous selector
-	ofParameterGroup params_Selectors{ "Preset Selectors" };// group all selectors
+	ofParameterGroup params_GroupsSelectors{ "PRESET SELECTORS" };// group all selectors
 
 	//--
 
@@ -238,8 +252,11 @@ private:
 	// group main selector
 	bool bBuildGroupSelector = true;// to allow auto build a group selector to combine all the added groups to the presets manager
 	bool bAllowGroupSelector = true;// to allow disable main group. not allways we need it..
-
+	int groupLinkSize = 10;// ammount of presets we want to the group link
 public:
+	void setGroupLinkSize(int size) {// customize group link presets
+		groupLinkSize = size;
+	}
 	void setEnableMainGroupSelector(bool b) {// disable the use of main group selector. must call before setup. enabled by default
 		bAllowGroupSelector = b;
 	}
@@ -259,6 +276,7 @@ public:
 
 	// B. easy callback 
 	// to faster ofApp integration 
+	// to check in update() as callback
 public:
 	//--------------------------------------------------------------
 	bool isDoneLoad()
@@ -270,23 +288,26 @@ public:
 		}
 		return false;
 	}
-	//// to check in update() as callback
-	//bool isDoneLoad()
-	//{
-	//    bool isDone = false;
-	//    if (DONE_load)
-	//    {
-	//        DONE_load = false;
-	//        isDone = true;
-	//    }
-	//    else
-	//    {
-	//        isDone = false;
-	//    }
-	//    return isDone;
-	//}
 private:
 	bool bIsDoneLoad = false;
+
+	//-
+
+public:
+	//--------------------------------------------------------------
+	bool isDoneSave()
+	{
+		if (bIsDoneSave)
+		{
+			bIsDoneSave = false;
+			return true;
+		}
+		return false;
+	}
+private:
+	bool bIsDoneSave = false;
+
+	//--
 
 	//----
 	//
@@ -323,6 +344,12 @@ public:
 	float getPresetClicker_Height()
 	{
 		return getAmountGroups() * cellSize;
+	}
+	//--------------------------------------------------------------
+	glm::vec2 getPresetClicker_Position()
+	{
+		glm::vec2 p = glm::vec2(clicker_Pos.x, clicker_Pos.y);
+		return p;
 	}
 	////--------------------------------------------------------------
 	//void setPosition_DEBUG(int x, int y);// where to display if we get errors (ie: data files not found) on startup
@@ -441,45 +468,52 @@ private:
 public:
 
 	//--------------------------------------------------------------
-	void setPlayRandomizerTimer(bool b, int groupIndex)// play randomizer timer
+	void setPlayRandomizerTimer(bool b, int groupIndex = -1)// play randomizer timer
 	{
-		ofLogNotice(__FUNCTION__) << "group: " << groupIndex ;
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
 		groupRandomizers[groupIndex].setPlayRandomizerTimer(b);
 	}
 	//--------------------------------------------------------------
-	void setTogglePlayRandomizerPreset(int groupIndex)// toggle randomizer timer
+	void setTogglePlayRandomizerPreset(int groupIndex = -1)// toggle randomizer timer
 	{
-		ofLogNotice(__FUNCTION__) << "group: " << groupIndex ;
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
 		groupRandomizers[groupIndex].setTogglePlayRandomizerPreset();
 	}
 	//--------------------------------------------------------------
-	void doRandomizePresetSelected(int groupIndex) {// randomize params of current selected preset
-		ofLogNotice(__FUNCTION__) << "group: " << groupIndex ;
-
+	void doRandomizePresetSelected(int groupIndex = -1) {// randomize params of current selected preset
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
 		// check if minimum one parameter is enabled
 		groupRandomizers[groupIndex].doCheckRandomReady();
-
 		groupRandomizers[groupIndex].doRandomizePresetSelected();
 	}
-	////--------------------------------------------------------------
-	//void setRandomizerDuration(float t)
-	//{
-	//	randomizeDuration = t;
-	//	randomizeDurationBpm = 60000.f / randomizeDuration;
-	//}
-	////--------------------------------------------------------------
-	//void setRandomizerDurationShort(float t)
-	//{
-	//	randomizeDurationShort = t;
-	//}
-	////--------------------------------------------------------------
-	//void setRandomizerBpm(float bpm)
-	//{
-	//	randomizeDurationBpm = bpm;
-	//	// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
-	//	randomizeDuration = 60000.f / bpm;
-	//	randomizeDurationShort = randomizeDuration / 2.f;
-	//}
+	//--------------------------------------------------------------
+	void setRandomizerDuration(float t, int groupIndex = -1)
+	{
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
+		groupRandomizers[groupIndex].randomizeDuration = t;
+		groupRandomizers[groupIndex].randomizeDurationBpm = 60000.f / groupRandomizers[groupIndex].randomizeDuration;
+	}
+	//--------------------------------------------------------------
+	void setRandomizerDurationShort(float t, int groupIndex = -1)
+	{
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
+		groupRandomizers[groupIndex].randomizeDurationShort = t;
+	}
+	//--------------------------------------------------------------
+	void setRandomizerBpm(float bpm, int groupIndex = -1)
+	{
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
+		groupRandomizers[groupIndex].randomizeDurationBpm = bpm;
+		// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
+		groupRandomizers[groupIndex].randomizeDuration = 60000.f / bpm;
+		groupRandomizers[groupIndex].randomizeDurationShort = groupRandomizers[groupIndex].randomizeDuration / 2.f;
+	}
 	////--------------------------------------------------------------
 	//void doRandomizePresetFromFavs()// trig randomize and select one of the favs presets
 	//{
@@ -488,7 +522,6 @@ public:
 
 	//----
 
-public:
 
 	//----
 	//
@@ -496,8 +529,23 @@ public:
 	//
 	//----
 
-	// presets browsing
+public:
+	//--------------------------------------------------------------
+	void loadPreset(int p, int _indexGroup);// load preset for extra groups by code from ofApp
+	void savePreset(int p, int _indexGroup);// save preset for extra groups by code from ofApp
 
+	//--
+
+public:
+	//--------------------------------------------------------------
+	void saveCurrentPreset(int groupIndex = -1) {
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+
+		ofLogNotice(__FUNCTION__) << "SAVE PRESET  group: " << groupIndex <<" preset: " << PRESETS_Selected_Index[groupIndex].get();
+		save(PRESETS_Selected_Index[groupIndex].get(), groupIndex);
+	}
+
+	// presets browsing
 	////--------------------------------------------------------------
 	//void load_Next()// for main group
 	//{
@@ -517,18 +565,6 @@ public:
 	//	}
 	//}
 
-	//--------------------------------------------------------------
-	void loadPreset(int p, int _indexGroup);// load preset for extra groups by code from ofApp
-	void savePreset(int p, int _indexGroup);// save preset for extra groups by code from ofApp
-
-	////void loadPreset(int p);// load preset for the main group by code from ofApp
-	//void loadPresetGroup(int presetIndex)// load preset for main group by code from ofApp
-	//{
-	//	int groupIndex = groups.size() - 1;
-	//	ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
-	//	load(presetIndex, groupIndex);
-	//}
-
 	//--
 
 	// for external layout or other workflow purposes
@@ -538,6 +574,7 @@ public:
 	//{
 	//	return PRESET_Selected_IndexMain;
 	//}
+
 	//--------------------------------------------------------------
 	int getCurrentPreset(int _group)// get index of selected preset on the group
 	{
@@ -797,6 +834,20 @@ public:
 	{
 		return SHOW_ClickPanel;
 	}
+	//--------------------------------------------------------------
+	float getGroupNamesWidth() {
+		float _maxw = 0;
+		for (int i = 0; i < groups.size(); i++)
+		{
+			float _w;
+			string info = groups[i].getName() + "* ";
+			if (myFont.isLoaded()) { _w = myFont.getStringBoundingBox(info, 0, 0).width; }
+			else { _w = 200; }
+
+			if (_w > _maxw) _maxw = _w;
+		}
+		return _maxw + 22;
+	}
 
 	//----
 
@@ -856,34 +907,32 @@ public:
 private:
 	int PRESET_Selected_IndexMain_PRE = -1;// used as callback
 
-	//--
-
-public:
-	//--------------------------------------------------------------
-	void saveCurrentPreset() {
-		ofLogNotice(__FUNCTION__) << "SAVE PRESET: " << PRESET_Selected_IndexMain.get();
-		save(PRESET_Selected_IndexMain, 0);
-	}
-
 	//----
 
 	// ImGui
 
 public:
-	void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
-	void ImGui_Draw_MainPanel(ofxImGui::Settings &settings);
-	void ImGui_Draw_Extra(ofxImGui::Settings &settings);
-	void ImGui_Draw_Selectors(ofxImGui::Settings &settings);
-	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
-	void ImGui_Draw_PresetPreview(ofxImGui::Settings &settings);
+	void ImGui_Draw_WindowContent();
+	void ImGui_Draw_MainPanel();
+	void ImGui_Draw_Extra();
+	void ImGui_Draw_GroupsSelectors();
+	void ImGui_Draw_Browser();
+	void ImGui_Draw_PresetParameters();
+	//void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
+	//void ImGui_Draw_MainPanel(ofxImGui::Settings &settings);
+	//void ImGui_Draw_Extra(ofxImGui::Settings &settings);
+	//void ImGui_Draw_GroupsSelectors(ofxImGui::Settings &settings);
+	//void ImGui_Draw_Browser(ofxImGui::Settings &settings);
+	//void ImGui_Draw_PresetParameters(ofxImGui::Settings &settings);
 	//void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
 
 private:
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
 	ofParameter<bool> MODE_Browser_NewPreset;
 	ofParameter<bool> SHOW_ClickPanel;// to allow include as toggle parameter into external gui
-	ofParameter<bool> SHOW_BrowserPanel;
 	ofParameter<bool> SHOW_ImGui;
+	ofParameter<bool> SHOW_BrowserPanel;
+	ofParameter<bool> SHOW_RandomizerPanel;
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
 	ofParameter<bool> SHOW_ImGui_Selectors;
 	ofParameter<bool> SHOW_Help;
@@ -904,18 +953,11 @@ private:
 
 	//--
 
-private:
-#ifdef USE_ofxImGuiSimple
-	ofxImGuiSimple gui_ImGui;
-#else
-
-#ifndef MODE_ImGui_EXTERNAL
 	ofxImGui::Gui gui_ImGui;
 	void ImGui_Setup();
 	void ImGui_Draw_WindowBegin();
 	void ImGui_Draw_WindowEnd();
-	bool ImGui_Draw_Window();
-#endif
+	void ImGui_Draw_Window();
 
 	ofParameter<glm::vec2> ImGui_Position;// ImGui browser panel position. 
 	ofParameter<glm::vec2> ImGui_Size;// ImGui browser panel position. 
@@ -1002,8 +1044,6 @@ public:
 		doStandaloneRefreshPresets();
 	}
 
-#endif
-
 	//----
 
 private:
@@ -1036,7 +1076,7 @@ public:
 	}
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsPresetSelectors() {
-		return params_Selectors;
+		return params_GroupsSelectors;
 	}
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsRandomizers() {

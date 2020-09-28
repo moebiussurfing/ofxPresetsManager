@@ -1,3 +1,5 @@
+ofxGui
 ofxImGui
 ofxPresetsManager
 ofxSurfingHelpers
+ofxWindowApp

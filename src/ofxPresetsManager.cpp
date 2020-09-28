@@ -78,12 +78,6 @@ ofxPresetsManager::ofxPresetsManager()
 	//// root folder
 	//path_Root = "myAddon";
 
-	//----
-
-	// layout
-	setSizeBox_PresetClicker(80);
-	setPosition_PresetClicker(200, ofGetHeight() - getPresetClicker_Height() - 100);
-
 	//--
 
 	modeKeySave = OF_KEY_CONTROL;
@@ -123,6 +117,7 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Gui_AdvancedControl.set("SHOW ADVANCED", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", true);
 	SHOW_BrowserPanel.set("SHOW BROWSER PANEL", true);
+	SHOW_RandomizerPanel.set("SHOW RANDOMIZER PANEL", true);
 	MODE_Browser_NewPreset.set("NEW!", false);
 	ENABLE_Keys.set("ENABLE KEYS", true);
 
@@ -179,6 +174,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.add(SHOW_Gui_AdvancedControl);
 	params_Gui.add(SHOW_ClickPanel);
 	params_Gui.add(SHOW_BrowserPanel);
+	params_Gui.add(SHOW_RandomizerPanel);
 	params_Gui.add(SHOW_ImGui);
 	params_Gui.add(SHOW_ImGui_PresetsParams);
 	params_Gui.add(ENABLE_Keys);
@@ -196,11 +192,14 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//--
 
-	// gui font
+	// gui box clicker font
 	string str;
+	//sizeTTF = 8;
+	//str = "telegrama_render.otf";
+	//str = "iAWriterMonoS-Bold.ttf";
+	sizeTTF = 10;
 	str = "overpass-mono-bold.otf";
 	myTTF = "assets/fonts/" + str;
-	sizeTTF = 10;
 	bool bLoaded = myFont.load(myTTF, sizeTTF, true, true);
 	if (!bLoaded) bLoaded = myFont.load(OF_TTF_SANS, sizeTTF, true, true);
 
@@ -223,6 +222,7 @@ ofxPresetsManager::ofxPresetsManager()
 	TIME_SAMPLE_GET_INSTANCE()->setEnabled(true);
 	TIME_SAMPLE_DISABLE();
 #endif
+
 }
 
 //----
@@ -289,7 +289,25 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 		// TODO: should allow customize keys to avoid coollide with 0,1,2.. and customize amount too
 		// create the extra main selector
-		add(params_GroupMainSelector, { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+		vector<int> _keys;
+		for (int i = 0; i < groupLinkSize; i++) {
+			switch (i)
+			{
+			case 0: _keys.push_back('0'); break;
+			case 1: _keys.push_back('1'); break;
+			case 2: _keys.push_back('2'); break;
+			case 3: _keys.push_back('3'); break;
+			case 4: _keys.push_back('4'); break;
+			case 5: _keys.push_back('5'); break;
+			case 6: _keys.push_back('6'); break;
+			case 7: _keys.push_back('7'); break;
+			case 8: _keys.push_back('8'); break;
+			case 9: _keys.push_back('9'); break;
+			default: break;
+			}
+		}
+		add(params_GroupMainSelector, _keys);
+		//add(params_GroupMainSelector, { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
 
 		//--
 
@@ -301,7 +319,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		GROUP_LINK_Selected_Index.makeReferenceTo(PRESETS_Selected_Index[_last]);// TODO: link
 
 		// excludes all selectors except the main one. the other will be saved as preset
-		params_Selectors.setSerializable(false);
+		params_GroupsSelectors.setSerializable(false);
 	}
 
 	//--
@@ -316,9 +334,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	// ImGui
 
-#ifndef MODE_ImGui_EXTERNAL
 	ImGui_Setup();
-#endif
 
 	//--
 
@@ -338,6 +354,8 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Gui.add(SHOW_ImGui_Selectors);
 	params_Gui.add(SHOW_ImGui_PresetsParams);
 	params_Gui.add(SHOW_Help);
+	params_Gui.add(MODE_EditPresetClicker);
+	params_Gui.add(bg_EditPresetClicker);
 
 	params_Control.add(params_Options);
 	params_Control.add(params_Gui);
@@ -346,7 +364,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	// user-kit
 	params_UserKitSettings.setName("USER-KIT");
-	params_UserKitSettings.add(params_Selectors);//includes all selectors
+	params_UserKitSettings.add(params_GroupsSelectors);//includes all selectors
 
 	// main group link selector
 	int _last = groups.size() - 1;
@@ -394,8 +412,9 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		_g.add(PRESETS_Selected_Index[i]);// selector
 		//_g.add(groupRandomizers[i].getParamsRandomizers());// all params
 		_g.add(groupRandomizers[i].PLAY_RandomizeTimer);// play
-		_g.add(groupRandomizers[i].bRandomizeIndex);// random index
-		params_Selectors.add(_g);
+		_g.add(groupRandomizers[i].randomizeDurationBpm);// bpm
+		//_g.add(groupRandomizers[i].bRandomizeIndex);// random index
+		params_GroupsSelectors.add(_g);
 	}
 
 	//----
@@ -448,6 +467,38 @@ void ofxPresetsManager::startup()
 
 	setVisible_GUI_Internal(false);
 	windowResized(ofGetWidth(), ofGetHeight());
+
+	//----
+
+	// preset clicker
+
+	MODE_EditPresetClicker.set("EDIT CLICKER", false);
+	bg_EditPresetClicker.set("BG CLICKER", false);
+
+	// reset mini previews layout
+	float _size = 80;
+	setSizeBox_PresetClicker(_size);
+	float _xx = 200;
+	float _yy = ofGetHeight() - getPresetClicker_Height() - 20;
+
+	// layout
+	setPosition_PresetClicker(_xx, _yy);
+
+	// clicker_Pos
+	_RectClick_Pad = 10;
+	_RectClick_w = getGroupNamesWidth();
+	//_ratio = ndiReceiveTexture.getHeight() / ndiReceiveTexture.getWidth();
+
+	rectanglePresetClicker.width = getPresetClicker_Width() + 2 * _RectClick_Pad + _RectClick_w;
+	rectanglePresetClicker.height = getPresetClicker_Height() + 2 * _RectClick_Pad;
+	rectanglePresetClicker.x = getPresetClicker_Position().x - _RectClick_Pad - _RectClick_w;
+	rectanglePresetClicker.y = getPresetClicker_Position().y - _RectClick_Pad;
+	_rectRatio = rectanglePresetClicker.width / rectanglePresetClicker.height;
+
+	// load settings
+	rectanglePresetClicker.loadSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/", false);
+	clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
+	clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
 
 	//--
 
@@ -555,10 +606,11 @@ void ofxPresetsManager::update(ofEventArgs & args)
 void ofxPresetsManager::drawImGui()
 {
 	ImGui_Draw_WindowBegin();
-
-	//draw content
-	bImGui_mouseOver = ImGui_Draw_Window();
-
+	{
+		//draw content
+		//bImGui_mouseOver = ImGui_Draw_Window();
+		ImGui_Draw_Window();
+	}
 	ImGui_Draw_WindowEnd();
 }
 //---------------------------------------------------------------------
@@ -578,15 +630,11 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	//gui
 
 	//draw ImGui
-#ifndef MODE_ImGui_EXTERNAL
 	if (SHOW_ImGui)
 	{
 		drawImGui();
 	}
-#else
-	bImGui_mouseOver = false;
-#endif
-
+	//bImGui_mouseOver = false;
 }
 
 //--------------------------------------------------------------
@@ -632,7 +680,7 @@ void ofxPresetsManager::drawPresetClicker()
 	// light theme
 	else {
 		_colorText = ofColor(255, 128);
-		_colorButton = ofColor(24, 200);
+		_colorButton = ofColor(16, 200);
 		_colorBg = ofColor(0, 128);
 	}
 
@@ -643,6 +691,28 @@ void ofxPresetsManager::drawPresetClicker()
 	//----
 
 	ofPushStyle();
+
+	//----
+
+	// bg rectangle editor
+	if (bg_EditPresetClicker) {
+		ofFill();
+		ofSetColor(_colorBg);
+		rectanglePresetClicker.draw();
+		ofDrawRectRounded(rectanglePresetClicker, _round);
+	}
+
+	// get clicker position from being edited rectangle
+	if (MODE_EditPresetClicker) {
+		_RectClick_w = getGroupNamesWidth();
+		clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
+		clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
+		//rectanglePresetClicker.width = MIN(getPresetClicker_Width() + 2 * _RectClick_Pad + _RectClick_w, 1000);
+		//rectanglePresetClicker.height = rectanglePresetClicker.width / _rectRatio;
+	}
+
+	//--
+
 	ofPushMatrix();
 	ofTranslate(clicker_Pos);
 
@@ -814,7 +884,7 @@ void ofxPresetsManager::drawPresetClicker()
 			string info = groups[i].getName();
 
 			// marl selected group. useful to navigate with arrow keys
-			if (i == GuiGROUP_Selected_Index.get()) info = "* " + info;
+			if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1) info = "* " + info;
 
 			// double font to improve different background colors
 			int gap = 1;
@@ -848,7 +918,8 @@ void ofxPresetsManager::drawPresetClicker()
 			if (bShowClickerInfo && ENABLE_Keys && (i == 0))
 			{
 				string ss = helpInfo;
-				int pad = 22;
+				int _padx = 22;
+				int _pady = 30;
 				int x = 0;
 				int y = 0;
 
@@ -856,20 +927,20 @@ void ofxPresetsManager::drawPresetClicker()
 				if (!bLateralPosition)
 				{
 					float hh = ofxSurfingHelpers::getHeightBBtextBoxed(myFont, ss);
-					x += 4 + pad;
-					y -= hh + pad;
+					x += 4 + _padx;
+					y -= hh + _pady;
 				}
 
 				// B. lateral position right to the boxes
 				else
 				{
 					float _w;
-					y = ySave + pad;
+					y = ySave + _pady;
 
 					if (!bLeftPosition)// on the right
 					{
 						_w = getPresetClicker_Width();
-						x = _w + pad + 30;
+						x = _w + _padx + 30;
 					}
 					else {// on the left
 						if (myFont.isLoaded())
@@ -916,11 +987,30 @@ void ofxPresetsManager::add(ofParameterGroup _params, int _amountPresets)
 	ofParameter<int> p{ groups[_size].getName(), 0, 0,  _amountPresets - 1 };
 	//p.setSerializable(false);// exclude saving all slectors except last one, that will be enalbed at setup
 	PRESETS_Selected_Index.push_back(p);
-	//params_Selectors.add(PRESETS_Selected_Index[_size]);// add this new param (lastone)
+	//params_GroupsSelectors.add(PRESETS_Selected_Index[_size]);// add this new param (lastone)
 
 	//-
 
 	ofLogNotice(__FUNCTION__) << "group " << (_size) << " : " << groups[_size].getName();
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::add(ofParameterGroup _params, vector<int> _keysList)
+{
+	// adds a ofParameterGroup for preset management with the list of trigger keys
+
+	add(_params, _keysList.size());// re add with known size affter counted passed key triggers
+
+	keys.resize(groups.size());
+	int i = groups.size() - 1;
+	keys[i].reserve(_keysList.size());
+
+	for (const int &key : _keysList)
+	{
+		keys[i].push_back(key);
+	}
+
+	if (keysNotActivated) addKeysListeners();
 }
 
 //--------------------------------------------------------------
@@ -952,8 +1042,8 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 	if (((guiIndex >= 0) && (guiIndex < (int)groups.size())) &&
 		(presetIndex >= 0) && (presetIndex < groupsSizes[guiIndex]))
 	{
-		//MODE A. it's important if this line is before or after ofSerialize
-		DONE_save = true;
+		// MODE A. it's important if this line is before or after ofSerialize
+		//DONE_save = true;
 
 		std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
 
@@ -961,6 +1051,16 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 
 		if (b) ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex << " " << _path;
 		else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " " << _path;
+
+		//-
+
+		// callback
+		// MODE A. it's important if this line is before or after ofSerialize
+		ofLogVerbose(__FUNCTION__) << "DONE_save";
+		DONE_save = true;
+
+		//simple callback
+		bIsDoneSave = true;
 	}
 
 	//--
@@ -1038,15 +1138,26 @@ void ofxPresetsManager::save(int presetIndex, string gName)
 	if (((guiIndex >= 0) && (guiIndex < (int)groups.size())) &&
 		(presetIndex >= 0) && (presetIndex < groupsSizes[guiIndex]))
 	{
+		//-
+
+		// callback
+		// MODE A. it's important if this line is before or after ofSerialize
+		ofLogVerbose(__FUNCTION__) << "DONE_save";
 		DONE_save = true;
-		{
-			TS_START("SAVE FILE 2");//for TimeMeasurements only
-			std::string _path = getPresetPath(gName, presetIndex);
-			bool b = ofxSurfingHelpers::saveGroup(groups[guiIndex], _path);
-			if (b) ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " " << guiIndex << " " << _path;
-			else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " " << _path;
-			TS_STOP("SAVE FILE 2");//for TimeMeasurements only
-		}
+
+		//simple callback
+		bIsDoneSave = true;
+
+		//-
+
+		TS_START("SAVE FILE 2");//for TimeMeasurements only
+		std::string _path = getPresetPath(gName, presetIndex);
+		bool b = ofxSurfingHelpers::saveGroup(groups[guiIndex], _path);
+		if (b) ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " " << guiIndex << " " << _path;
+		else ofLogError(__FUNCTION__) << "Error saving: " << groups[guiIndex].getName() << " " << _path;
+		TS_STOP("SAVE FILE 2");//for TimeMeasurements only
+
+		//-
 	}
 
 	//--
@@ -1130,9 +1241,19 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 		}
 		else ofLogNotice(__FUNCTION__) << "name: " << groups[guiIndex].getName() << " group: " << guiIndex << " preset: " << presetIndex << " " << _path;
 
-		// TODO: ? already marked?
+		// TODO: already marked
 		// mark selected
 		PRESETS_Selected_Index[guiIndex] = presetIndex;
+
+		//-
+
+		// callback
+		// MODE A. it's important if this line is before or after ofSerialize
+		ofLogVerbose(__FUNCTION__) << "DONE_load";
+		DONE_load = true;
+
+		//simple callback
+		bIsDoneLoad = true;
 	}
 
 	//--
@@ -1229,12 +1350,23 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 		if (!b) {
 			ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " " << _path;
 
-			//file not found so create one file instead
+			// file not found so create one file instead
 			save(presetIndex, guiIndex);
 		}
 
+		// TODO: already marked
 		// mark selected
 		PRESETS_Selected_Index[guiIndex] = presetIndex;
+
+		//-
+
+		// callback
+		// MODE A. it's important if this line is before or after ofSerialize
+		ofLogVerbose(__FUNCTION__) << "DONE_load";
+		DONE_load = true;
+
+		//simple callback
+		bIsDoneLoad = true;
 	}
 
 	//--
@@ -1314,28 +1446,20 @@ void ofxPresetsManager::load(int presetIndex, string gName)
 //--------------------------------------------------------------
 void ofxPresetsManager::savePreset(int presetIndex, int groupIndex)
 {
-	//if (!DISABLE_CALLBACKS)
-	{
-		ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
-
-		save(presetIndex, groupIndex);
-	}
+	ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
+	save(presetIndex, groupIndex);
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::loadPreset(int presetIndex, int groupIndex)
 {
-	//if (!DISABLE_CALLBACKS)
-	{
-		ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
-
-		load(presetIndex, groupIndex);
-	}
+	ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
+	load(presetIndex, groupIndex);
 }
 
 //--
 
-//engine helpers
+// engine helpers
 //--------------------------------------------------------------
 int ofxPresetsManager::getPresetIndex(int guiIndex) const
 {
@@ -1386,7 +1510,7 @@ string ofxPresetsManager::getPresetPath(string _gName, int _presetIndex)
 
 	_pathFolder = path_UserKit_Folder + "/" + path_PresetsFavourites + "/";
 
-	//append group name to subfolder files by each parameter group
+	// append group name to subfolder files by each parameter group
 	if (bSplitGroupFolders) _pathFolder += _gName + "/";
 
 	_pathFilename = _gName + filenamesPrefix + ofToString(_presetIndex);
@@ -1405,7 +1529,7 @@ string ofxPresetsManager::getGroupPath(string _gName)
 
 	_pathFolder = path_UserKit_Folder + "/" + path_PresetsFavourites + "/";
 
-	//append group name to subfolder files by each parameter group
+	// append group name to subfolder files by each parameter group
 	if (bSplitGroupFolders) _pathFolder += _gName + "/";
 
 	ofLogVerbose(__FUNCTION__) << "group name: " << _gName << " path: " << _pathFolder;
@@ -1502,12 +1626,17 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		// randomizers
 
 		// timer to randomize and choice a random preset from the kit
-		else if (key == ' ')
+		else if (eventArgs.hasModifier(OF_KEY_CONTROL) && eventArgs.codepoint == ' ')
 		{
 			for (int i = 0; i < groups.size(); i++) {
 				setTogglePlayRandomizerPreset(GuiGROUP_Selected_Index);
 			}
 		}
+		else if (eventArgs.hasModifier(OF_KEY_ALT) && eventArgs.codepoint == 'E')
+		{
+			MODE_EditPresetClicker = !MODE_EditPresetClicker;
+		}
+		// random index
 		else if (key == 'R')
 		{
 			doRandomizePresetSelected(GuiGROUP_Selected_Index);
@@ -1910,6 +2039,7 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 		//--
 
 		// presets selectors
+
 		if (!DISABLE_CALLBACKS_SELECTORS)
 		{
 			// exclude group 0
@@ -1925,11 +2055,11 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 
 						//-
 
-						// 1. main group selected preset NOT CHANGED
+						// 1. group selected preset NOT CHANGED
 
 						if (PRESETS_Selected_Index[g] == PRESETS_Selected_Index_PRE[g])
 						{
-							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " Not Changed";
+							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " not changed";
 
 							// browser
 							//if (MODE_Browser_NewPreset)
@@ -1944,11 +2074,11 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 
 						//--
 
-						// 2. main group selected preset CHANGED
+						// 2. group selected preset CHANGED
 
 						else if (PRESETS_Selected_Index[g] != PRESETS_Selected_Index_PRE[g])
 						{
-							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " Changed";
+							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " changed";
 
 							//-
 
@@ -2006,9 +2136,21 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 
 			//--
 
-			//// TODO:
-			//// refresh in other another better place?...
-			//buildHelpInfo();
+			for (int i = 0; i < groups.size(); i++) {
+				groupRandomizers[i].setModeEditor(MODE_Editor);
+			}
+		}
+
+		if (name == MODE_EditPresetClicker.getName())
+		{
+			if (MODE_EditPresetClicker.get())
+			{
+				rectanglePresetClicker.enableEdit();
+			}
+			else
+			{
+				rectanglePresetClicker.disableEdit();
+			}
 		}
 
 		//----
@@ -2043,15 +2185,17 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 
 		//--
 
-		// workflow
-		else if (name == SHOW_ImGui_PresetsParams.getName())
-		{
-			if (SHOW_ImGui_PresetsParams) SHOW_ImGui_Selectors = false;
-		}
-		else if (name == SHOW_ImGui_Selectors.getName())
-		{
-			if (SHOW_ImGui_Selectors) SHOW_ImGui_PresetsParams = false;
-		}
+		//// workflow
+		//else if (name == SHOW_ImGui_PresetsParams.getName())
+		//{
+		//	if (SHOW_ImGui_PresetsParams) SHOW_ImGui_Selectors = false;
+		//}
+		//else if (name == SHOW_ImGui_Selectors.getName())
+		//{
+		//	if (SHOW_ImGui_Selectors) SHOW_ImGui_PresetsParams = false;
+		//}
+
+		//--
 
 		//		else if (name == "GUI ImGui POSITION")
 		//		{
@@ -2334,7 +2478,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #endif
 		}
 	}
-		}
+}
 
 ////--------------------------------------------------------------
 //void ofxPresetsManager::addGroup_TARGET(ofParameterGroup &g)
@@ -2404,6 +2548,8 @@ void ofxPresetsManager::exit()
 	// all app settings
 	save_ControlSettings();
 
+	rectanglePresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/", false);
+
 	//--
 
 	// TODO: debug crash
@@ -2414,7 +2560,6 @@ void ofxPresetsManager::exit()
 
 #pragma mark - IM_GUI
 
-#ifndef MODE_ImGui_EXTERNAL
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Setup()
 {
@@ -2423,30 +2568,30 @@ void ofxPresetsManager::ImGui_Setup()
 	//--
 
 	// font customize
-#ifndef MODE_ImGui_EXTERNAL
-#ifdef INCLUDE_IMGUI_CUSTOM_FONT
+#ifdef INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT
 	ofxSurfingHelpers::ImGui_FontCustom();
-#endif
 #endif
 
 	//--
 
 	gui_ImGui.setup();
 
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
 	//--
 
-	// theme
-#ifndef MODE_ImGui_EXTERNAL
-	//ofxSurfingHelpers::ImGui_ThemeModernDark();
+	// theme customize
+#ifdef INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT
 	ofxSurfingHelpers::ImGui_ThemeMoebiusSurfing();
+	//ofxSurfingHelpers::ImGui_ThemeModernDark();
+#endif
 
 	//--
 
-	// mouse over
-	ImGui::GetIO().MouseDrawCursor = false;
-	bImGui_mouseOver.set("mouseOverGui", false);
-	//ImGui::GetIO().ConfigWindowsResizeFromEdges = true;
-#endif
+	//// mouse over
+	//ImGui::GetIO().MouseDrawCursor = false;
+	//bImGui_mouseOver.set("mouseOverGui", false);
+	////ImGui::GetIO().ConfigWindowsResizeFromEdges = true;
 
 	//--
 }
@@ -2454,18 +2599,13 @@ void ofxPresetsManager::ImGui_Setup()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_WindowBegin()
 {
-	// mouse over gui system
-	bMouseOver_Changed = false;
-	bImGui_mouseOver = false;
+	//	// mouse over gui system
+	//	bMouseOver_Changed = false;
+	//	bImGui_mouseOver = false;
 
 	//-
 
-#ifndef USE_ofxImGuiSimple
 	gui_ImGui.begin();
-#else
-	gui_ImGui.begin();
-	ImGui::ShowDemoWindow();
-#endif
 
 	//-
 }
@@ -2473,179 +2613,88 @@ void ofxPresetsManager::ImGui_Draw_WindowBegin()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_WindowEnd()
 {
-	if (bImGui_mouseOver != bImGui_mouseOver_PRE)
-	{
-		bImGui_mouseOver_PRE = bImGui_mouseOver;
-		bMouseOver_Changed = true;
-	}
+	//if (bImGui_mouseOver != bImGui_mouseOver_PRE)
+	//{
+	//	bImGui_mouseOver_PRE = bImGui_mouseOver;
+	//	bMouseOver_Changed = true;
+	//}
 
-	if (bMouseOver_Changed)
-	{
-		ofLogVerbose(__FUNCTION__) << "bImGui_mouseOver: " << (bImGui_mouseOver ? "INSIDE" : "OUTSIDE");
-	}
+	//if (bMouseOver_Changed)
+	//{
+	//	ofLogVerbose(__FUNCTION__) << "bImGui_mouseOver: " << (bImGui_mouseOver ? "INSIDE" : "OUTSIDE");
+	//}
 
 	//--
 
-#ifndef USE_ofxImGuiSimple
 	gui_ImGui.end();
-#else
-	gui_ImGui.end();
-#endif
 }
 
 //--------------------------------------------------------------
-bool ofxPresetsManager::ImGui_Draw_Window()
+void ofxPresetsManager::ImGui_Draw_Window()
 {
-	auto mainSettings = ofxImGui::Settings();
-	ofVec2f _pos;
-	ofVec2f _size;
+	bool b = true;
 
-	_pos.set(ImGui_Position.get().x, ImGui_Position.get().y);
-	_size.set(ImGui_Size.get().x, ImGui_Size.get().y);
+	// main panel
+	ImGui_Draw_MainPanel();// main control + extra
+	
+	// group selector
+	ofxImGui::Settings settings;
 
-	mainSettings.windowPos = _pos;
-	mainSettings.windowSize = _size;
-
-	auto _mode = ImGuiCond_FirstUseEver;//ImGuiCond_Always;
-	ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
-	ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
-
-	//--
-
-	// User-Kit name
-	string _name = "ofxPresetsManager : " + displayNameUserKit;
-
-	bool _collapse = false;// TODO: don't do nothing?
-
-	//--
-
-	// set window properties
-	//bool show = true;
-	static bool no_titlebar = false;
-	static bool no_border = true;
-	static bool no_resize = true;
-	static bool no_move = true;
-	static bool no_scrollbar = false;
-	static bool no_collapse = true;
-	static bool no_close = true;
-	static bool no_menu = true;
-	static bool no_settings = true;
-	static float bg_alpha = -0.01f; // <0: default
-
-	// Demonstrate the various window flags. 
-	// Typically you would just use the default.
-	ImGuiWindowFlags window_flags = 0;
-	//window_flags |= ImGuiWindowFlags_NoBackground;//make background transparent
-	//if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
-	//if (!no_border)   window_flags |= ImGuiWindowFlags_NoDecoration;
-	//if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
-	//if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
-	//if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
-	//if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
-	//if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
-	//if (no_settings)	window_flags |= ImGuiWindowFlags_NoSavedSettings;
-
-	//----
-
-	// A window: main (1st) group
-	_collapse = true;
-	if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
+	if (ofxImGui::BeginWindow("Group select", settings, false))
 	{
-		ImGui_Draw_WindowContent(mainSettings);
+		// main group link selector
+		if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);
 
-		// get window position/size: must be inside begin/end
-		_pos = ImGui::GetWindowPos();
-		_size = ImGui::GetWindowSize();
-
-		ImGui_Position = glm::vec2(_pos.x, _pos.y);
-		ImGui_Size = glm::vec2(_size.x, _size.y);
+		// randomizers
+		if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
 	}
-	ofxImGui::EndWindow(mainSettings);
+	ofxImGui::EndWindow(settings);
 
-	//----
+	// parameters
+	ImGui_Draw_PresetParameters();
 
-	// B window
-	// window for all group parameters contained into presetsManager
-	// all parameters in all added groups
+	// selectors
+	ImGui_Draw_GroupsSelectors();
 
-	if (SHOW_ImGui_PresetsParams) {
-
-		_size = ofVec2f(400, 800);
-		_pos = _pos - ofVec2f(_size.x + 10, 0);
-
-		mainSettings.windowPos = _pos;
-		mainSettings.windowSize = _size;
-
-		_mode = ImGuiCond_FirstUseEver;
-		ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
-		ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
-
-		_name = "ofxPresetsManager";
-		if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
-		{
-			ImGui_Draw_PresetPreview(mainSettings);
-		}
-		ofxImGui::EndWindow(mainSettings);
-	}
-
-	//----
-
-	// C window
-	// each group selectors 
-	// window for each group selector
-
-	if (SHOW_ImGui_Selectors) {
-
-		_size = ofVec2f(350, 500);
-		_pos = _pos - ofVec2f(_size.x + 10, 0);
-
-		mainSettings.windowPos = _pos;
-		mainSettings.windowSize = _size;
-
-		_mode = ImGuiCond_FirstUseEver;
-		ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
-		ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
-
-		_name = "SELECTORS";
-		if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
-		{
-			ImGui_Draw_Selectors(mainSettings);
-		}
-		ofxImGui::EndWindow(mainSettings);
-	}
-
-	//----
-
-	return mainSettings.mouseOverGui;
+	// selected rendomizers
+	ImGui_Draw_WindowContent();
 }
 
-#endif
-
-// ImGui pure content
+// ImGui content
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_PresetPreview(ofxImGui::Settings &settings)
+void ofxPresetsManager::ImGui_Draw_PresetParameters()
 {
-	if (ofxImGui::BeginTree("PRESETS PARAMETERS", settings))
+	ofxImGui::Settings settings;
+
+	if (ofxImGui::BeginWindow("Parameters", settings, false))
 	{
-		for (int i = 0; i < groups.size(); i++) {
+		for (int i = 0; i < groups.size(); i++)
+		{
 			ofxImGui::AddGroup(groups[i], settings);
 		}
-
-		ofxImGui::EndTree(settings);
 	}
+	ofxImGui::EndWindow(settings);
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_Selectors(ofxImGui::Settings &settings)
+void ofxPresetsManager::ImGui_Draw_GroupsSelectors()
 {
-	// 0.1 sliders preset selectors
-	ofxImGui::AddGroup(params_Selectors, settings);
+	ofxImGui::Settings settings;
+
+	if (ofxImGui::BeginWindow("Selectors", settings, false))
+	{
+		ofxImGui::AddGroup(params_GroupsSelectors, settings);
+	}
+	ofxImGui::EndWindow(settings);
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
+void ofxPresetsManager::ImGui_Draw_MainPanel()
 {
-	if (ofxImGui::BeginTree("MAIN CONTROL", settings))
+	bool b = true;
+
+	ofxImGui::Settings settings;
+	if (ofxImGui::BeginWindow("MAIN PANEL", settings, false))
 	{
 		// mode edit
 		ofxImGui::AddParameter(MODE_Editor);
@@ -2653,29 +2702,36 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 
 		//---
 
-		//ImGui::SameLine();
-		if (ImGui::TreeNode("PANELS"))
+		// panels
+		if (MODE_Editor)
 		{
-			ofxImGui::AddParameter(SHOW_ClickPanel);
-			if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
-			ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
-			ofxImGui::AddParameter(SHOW_BrowserPanel);
+			//ImGui::SameLine();
+			if (ImGui::TreeNode("PANELS"))
+			{
+				if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
+				ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
+				ofxImGui::AddParameter(SHOW_RandomizerPanel);
+				ofxImGui::AddParameter(SHOW_BrowserPanel);
 
-			ImGui::TreePop();
+				ofxImGui::AddParameter(SHOW_ClickPanel);
+				//ImGui::SameLine(); 
+				ofxImGui::AddParameter(MODE_EditPresetClicker);
+				ImGui::SameLine(); ofxImGui::AddParameter(bg_EditPresetClicker);
+
+				ImGui::TreePop();
+			}
 		}
 
 		// extra
-		if (MODE_Editor) ImGui_Draw_Extra(settings);
+		if (MODE_Editor) ImGui_Draw_Extra();
 
 		//--
-
-		//ImGui::TreePop();
-		ofxImGui::EndTree(settings);
 	}
+	ofxImGui::EndWindow(settings);
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_Extra(ofxImGui::Settings &settings)
+void ofxPresetsManager::ImGui_Draw_Extra()
 {
 	//----
 
@@ -2688,6 +2744,9 @@ void ofxPresetsManager::ImGui_Draw_Extra(ofxImGui::Settings &settings)
 			ofxImGui::AddParameter(autoSave); ImGui::SameLine();
 			//ofxImGui::AddParameter(autoLoad);//ImGui::SameLine();
 			ofxImGui::AddParameter(MODE_MemoryLive);
+			//ImGui::SameLine();
+			//ofxImGui::AddParameter(MODE_EditPresetClicker);
+
 			ofxImGui::AddParameter(SHOW_Help); ImGui::SameLine();
 			ofxImGui::AddParameter(bThemDark);
 
@@ -2741,6 +2800,8 @@ void ofxPresetsManager::ImGui_Draw_Extra(ofxImGui::Settings &settings)
 		//	// 2. advanced
 		//	if (SHOW_Gui_AdvancedControl)
 		//	{
+		//ofxImGui::Settings settings;
+
 		//		// show ALL the addon internal params! mainly to debug all settings or to use without ImGui..
 		//		ofxImGui::AddGroup(params_Control, settings);
 		//	}
@@ -2783,14 +2844,14 @@ void ofxPresetsManager::buildHelpInfo() {
 
 	helpInfo += "\n";
 	helpInfo += "KEYS\n";
-	helpInfo += "MOUSE|KEYS             LOAD\n";
-	helpInfo += "CTRL                   SAVE/COPY\n";
-	helpInfo += "ALT                    SWAP\n";
-	helpInfo += "ARROWS                 NAVIGATE\n";
-	helpInfo += "E                      EDIT\n";
-	helpInfo += "H                      HELP\n";
-	helpInfo += "P                      CLICKER\n";
-	helpInfo += "G                      GUI";
+	helpInfo += "&MOUSE           LOAD\n";
+	helpInfo += "CTRL             SAVE/COPY\n";
+	helpInfo += "ALT              SWAP\n";
+	helpInfo += "ARROWS           NAVIGATE\n";
+	helpInfo += "E                EDIT\n";
+	helpInfo += "H                HELP\n";
+	helpInfo += "P                CLICKER\n";
+	helpInfo += "G                GUI";
 }
 
 //--------------------------------------------------------------
@@ -2816,19 +2877,18 @@ void ofxPresetsManager::buildDefaultUserKit() {
 	buildHelpInfo();
 }
 
-// TODO:
 //--------------------------------------------------------------
 void ofxPresetsManager::buildCustomUserKit() {
 
-	setPath_UserKit_Folder(pathDirCustom);//creates subfolders for each group
+	setPath_UserKit_Folder(pathDirCustom);// creates subfolders for each group
 
 	//-
 
 	// reduce to name only
 	string str = path_UserKit_Folder;
-	std::string temp = R"(\)";//use '\' as splitter...should use '/' too bc Windows/macOS compatibility..
+	std::string temp = R"(\)";// use '\' as splitter...should use '/' too bc Windows/macOS compatibility..
 	auto ss = ofSplitString(path_UserKit_Folder, temp);
-	displayNameUserKit = ss[ss.size() - 1];//get last word and use as name
+	displayNameUserKit = ss[ss.size() - 1];// get last word and use as name
 
 	//-
 
@@ -2917,9 +2977,10 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
+void ofxPresetsManager::ImGui_Draw_Browser()
 {
-	if (ofxImGui::BeginTree("FILES BROWSER", settings))
+	bool b = true;
+	ImGui::Begin("FILES BROWSER", &b);
 	{
 		int _numfiles = fileNames.size();
 
@@ -3266,34 +3327,42 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 					ImGui::PopStyleColor(1);
 				}
 			}
-			ofxImGui::EndTree(settings);
-		}
 
-		ImGui::TreePop();
+			ImGui::TreePop();
+		}
 	}
+	ImGui::End();
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_WindowContent(ofxImGui::Settings &settings)
+void ofxPresetsManager::ImGui_Draw_WindowContent()
 {
-	// tittle
-	//ImGui::Text("PRESETS MANAGER");
-	//ImGui::NewLine();
+	////// tittle
+	//////ImGui::Text("PRESETS MANAGER");
+	//////ImGui::NewLine();
 
-	// main panel
-	ImGui_Draw_MainPanel(settings);
 
-	// main group
-	if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);
 
-	// randomizers
-	if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
-	groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers(settings);// show randomizers of user selected group
+	////--
 
-	// standalone presets browser
-	if (MODE_Editor && SHOW_BrowserPanel) {
-		ImGui_Draw_Browser(settings);
-	}
+	////-
+	//bool b = true;
+	//ImGui::Begin("GROUP RANDOMIZER", &b);
+	//{
+	//	ImGui_Draw_MainPanel();
+
+	//	if (SHOW_RandomizerPanel)
+	//	{
+			groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers();// show randomizers of user selected group
+	//	}
+	//}
+	//ImGui::End();
+
+	////// standalone presets browser
+	////if (MODE_Editor && SHOW_BrowserPanel) 
+	////{
+	////	ImGui_Draw_Browser(settings);
+	////}
 }
 
 // standalone presets browser
@@ -3502,6 +3571,7 @@ void ofxPresetsManager::doCheckPresetsFolderIsEmpty()
 			CheckFolder(_path);
 
 			ofDirectory dataDirectory(ofToDataPath(_path, true));
+
 			// check if folder is empty
 			if (dataDirectory.size() == 0) {// if there's no files into folder
 				ofLogNotice(__FUNCTION__) << "Folder " << _path << " is empty. Force populate favourites files...";
