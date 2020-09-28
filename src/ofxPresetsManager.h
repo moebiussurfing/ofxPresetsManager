@@ -57,7 +57,7 @@
 //
 //#define MODE_ImGui_EXTERNAL			// this must be defined here and (but not only) in ofApp (too)!!
 //										// will handle the gui outisde the addon, here the parameters only!
-#define INCLUDE_IMGUI_CUSTOM_FONT		// customize ImGui font
+#define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT		// customize ImGui font
 //#define INCLUDE_ofxUndoSimple			// undo engine to store after randomize preset parameters (& recall)
 //#define USE_ofxImGuiSimple			// TEST with an alternative ImGui addon
 //#define USE_JSON						// file settings format
@@ -918,12 +918,18 @@ private:
 	// ImGui
 
 public:
-	void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
-	void ImGui_Draw_MainPanel(ofxImGui::Settings &settings);
-	void ImGui_Draw_Extra(ofxImGui::Settings &settings);
-	void ImGui_Draw_GroupsSelectors(ofxImGui::Settings &settings);
-	void ImGui_Draw_Browser(ofxImGui::Settings &settings);
-	void ImGui_Draw_PresetParameters(ofxImGui::Settings &settings);
+	void ImGui_Draw_WindowContent();
+	void ImGui_Draw_MainPanel();
+	void ImGui_Draw_Extra();
+	void ImGui_Draw_GroupsSelectors();
+	void ImGui_Draw_Browser();
+	void ImGui_Draw_PresetParameters();
+	//void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
+	//void ImGui_Draw_MainPanel(ofxImGui::Settings &settings);
+	//void ImGui_Draw_Extra(ofxImGui::Settings &settings);
+	//void ImGui_Draw_GroupsSelectors(ofxImGui::Settings &settings);
+	//void ImGui_Draw_Browser(ofxImGui::Settings &settings);
+	//void ImGui_Draw_PresetParameters(ofxImGui::Settings &settings);
 	//void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
 
 private:
@@ -963,7 +969,7 @@ private:
 	void ImGui_Setup();
 	void ImGui_Draw_WindowBegin();
 	void ImGui_Draw_WindowEnd();
-	bool ImGui_Draw_Window();
+	void ImGui_Draw_Window();
 #endif
 
 	ofParameter<glm::vec2> ImGui_Position;// ImGui browser panel position. 

@@ -42,7 +42,7 @@ public:
 	}
 
 public:
-	void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
+	void ImGui_Draw_GroupRandomizers();
 
 	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
 

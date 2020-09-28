@@ -903,13 +903,15 @@ void groupRandomizer::keyPressed(int key)
 }
 
 //--------------------------------------------------------------
-void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
+void groupRandomizer::ImGui_Draw_GroupRandomizers()
 {
 	// 1. randomizers
 	string str;
 	str = "GROUP " + group.getName();
 
-	if (ofxImGui::BeginTree(str, settings))
+	ofxImGui::Settings settings;
+
+	if (ofxImGui::BeginWindow(str.c_str(), settings))
 	{
 		//---
 
@@ -1016,7 +1018,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 		//--
 
 		ImGui::Dummy(ImVec2(0.0f, 10));
-		
+
 		str = "RANDOMIZER";
 		ImGui::Text(str.c_str());
 		ImGui::Dummy(ImVec2(0.0f, 5));
@@ -1100,7 +1102,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 				ofxImGui::AddGroup(params_Randomizer, settings);
 
 #ifdef DEBUG_randomTest
-				ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
+					ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
 #endif
 				//--
 
@@ -1113,11 +1115,8 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 				ImGui::TreePop();
 			}
 		}
-
-		//-
-
-		ofxImGui::EndTree(settings);
 	}
+	ofxImGui::EndWindow(settings);
 }
 
 //--------------------------------------------------------------
