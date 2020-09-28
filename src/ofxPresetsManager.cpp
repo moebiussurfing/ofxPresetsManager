@@ -334,9 +334,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	// ImGui
 
-#ifndef MODE_ImGui_EXTERNAL
 	ImGui_Setup();
-#endif
 
 	//--
 
@@ -632,15 +630,11 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	//gui
 
 	//draw ImGui
-#ifndef MODE_ImGui_EXTERNAL
 	if (SHOW_ImGui)
 	{
 		drawImGui();
 	}
-#else
-	bImGui_mouseOver = false;
-#endif
-
+	//bImGui_mouseOver = false;
 }
 
 //--------------------------------------------------------------
@@ -2566,7 +2560,6 @@ void ofxPresetsManager::exit()
 
 #pragma mark - IM_GUI
 
-#ifndef MODE_ImGui_EXTERNAL
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Setup()
 {
@@ -2666,8 +2659,6 @@ void ofxPresetsManager::ImGui_Draw_Window()
 	// selected rendomizers
 	ImGui_Draw_WindowContent();
 }
-
-#endif
 
 // ImGui content
 //--------------------------------------------------------------

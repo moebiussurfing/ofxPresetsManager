@@ -55,18 +55,15 @@
 //
 //	DEFINES
 //
-//#define MODE_ImGui_EXTERNAL			// this must be defined here and (but not only) in ofApp (too)!!
-//										// will handle the gui outisde the addon, here the parameters only!
 #define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT		// customize ImGui font
-//#define INCLUDE_ofxUndoSimple			// undo engine to store after randomize preset parameters (& recall)
-//#define USE_ofxImGuiSimple			// TEST with an alternative ImGui addon
-//#define USE_JSON						// file settings format
+//#define INCLUDE_ofxUndoSimple					// undo engine to store after randomize preset parameters (& recall)
+//#define USE_JSON								// file settings format
 //										   
 //	DEBUG									   
 //										   
-//#define INCLUDE_PERFORMANCE_MEASURES	// measure performance ofxTimeMeasurements
-//#define DEBUG_randomTest				// uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
-//#define DEBUG_BLOCK_SAVE_SETTINGS		// disable save settings//enable this bc sometimes there's crashes on exit
+//#define INCLUDE_PERFORMANCE_MEASURES			// measure performance ofxTimeMeasurements
+//#define DEBUG_randomTest						// uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
+//#define DEBUG_BLOCK_SAVE_SETTINGS				// disable save settings//enable this bc sometimes there's crashes on exit
 //
 //--------------------------------------
 
@@ -77,12 +74,9 @@
 //--
 
 // gui
-#ifdef USE_ofxImGuiSimple// alternative to official addon
-#include "ofxImGuiSimple.h"
-#include "Helpers.h"
-#else
+// uasing alternative branch: https://github.com/MacFurax/ofxImGui/tree/docking
+// this branch allows docking, layout store/recall, some extra widgets 
 #include "ofxImGui.h"
-#endif
 
 // undo engine
 #ifdef INCLUDE_ofxUndoSimple
@@ -959,18 +953,11 @@ private:
 
 	//--
 
-private:
-#ifdef USE_ofxImGuiSimple
-	ofxImGuiSimple gui_ImGui;
-#else
-
-#ifndef MODE_ImGui_EXTERNAL
 	ofxImGui::Gui gui_ImGui;
 	void ImGui_Setup();
 	void ImGui_Draw_WindowBegin();
 	void ImGui_Draw_WindowEnd();
 	void ImGui_Draw_Window();
-#endif
 
 	ofParameter<glm::vec2> ImGui_Position;// ImGui browser panel position. 
 	ofParameter<glm::vec2> ImGui_Size;// ImGui browser panel position. 
@@ -1056,8 +1043,6 @@ public:
 		// refresh files
 		doStandaloneRefreshPresets();
 	}
-
-#endif
 
 	//----
 
