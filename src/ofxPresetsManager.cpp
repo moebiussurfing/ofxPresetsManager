@@ -117,6 +117,7 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Gui_AdvancedControl.set("SHOW ADVANCED", false);
 	SHOW_ClickPanel.set("SHOW CLICK PANEL", true);
 	SHOW_BrowserPanel.set("SHOW BROWSER PANEL", true);
+	SHOW_RandomizerPanel.set("SHOW RANDOMIZER PANEL", true);
 	MODE_Browser_NewPreset.set("NEW!", false);
 	ENABLE_Keys.set("ENABLE KEYS", true);
 
@@ -173,6 +174,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.add(SHOW_Gui_AdvancedControl);
 	params_Gui.add(SHOW_ClickPanel);
 	params_Gui.add(SHOW_BrowserPanel);
+	params_Gui.add(SHOW_RandomizerPanel);
 	params_Gui.add(SHOW_ImGui);
 	params_Gui.add(SHOW_ImGui_PresetsParams);
 	params_Gui.add(ENABLE_Keys);
@@ -887,7 +889,7 @@ void ofxPresetsManager::drawPresetClicker()
 			string info = groups[i].getName();
 
 			// marl selected group. useful to navigate with arrow keys
-			if (i == GuiGROUP_Selected_Index.get()) info = "* " + info;
+			if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1) info = "* " + info;
 
 			// double font to improve different background colors
 			int gap = 1;
@@ -2188,15 +2190,17 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 
 		//--
 
-		// workflow
-		else if (name == SHOW_ImGui_PresetsParams.getName())
-		{
-			if (SHOW_ImGui_PresetsParams) SHOW_ImGui_Selectors = false;
-		}
-		else if (name == SHOW_ImGui_Selectors.getName())
-		{
-			if (SHOW_ImGui_Selectors) SHOW_ImGui_PresetsParams = false;
-		}
+		//// workflow
+		//else if (name == SHOW_ImGui_PresetsParams.getName())
+		//{
+		//	if (SHOW_ImGui_PresetsParams) SHOW_ImGui_Selectors = false;
+		//}
+		//else if (name == SHOW_ImGui_Selectors.getName())
+		//{
+		//	if (SHOW_ImGui_Selectors) SHOW_ImGui_PresetsParams = false;
+		//}
+
+		//--
 
 		//		else if (name == "GUI ImGui POSITION")
 		//		{
@@ -2445,7 +2449,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 			ofLogNotice(__FUNCTION__) << "[" << i << "]";
 			ofLogNotice(__FUNCTION__) << "File: " << pathComplete
 				<< "\n" << ofToString(settings.toString());
-	}
+		}
 
 		//-
 
@@ -2465,7 +2469,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
 		}
-}
+	}
 
 	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
@@ -2570,7 +2574,7 @@ void ofxPresetsManager::ImGui_Setup()
 	//--
 
 	// font customize
-#ifndef MODE_ImGui_EXTERNAL
+#ifndef MODE_ImGui_EXTERNAL  
 #ifdef INCLUDE_IMGUI_CUSTOM_FONT
 	ofxSurfingHelpers::ImGui_FontCustom();
 #endif
@@ -2578,7 +2582,37 @@ void ofxPresetsManager::ImGui_Setup()
 
 	//--
 
+	//ofxImGui::Gui;
 	gui_ImGui.setup();
+
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+	//// test docking
+	//ImGui::GetIO().ConfigDockingWithShift = true;
+	//ImGui::GetIO().ConfigDockingAlwaysTabBar = true;
+	//ImGui::SetNextWindowDockID(1);
+	//
+	//bool initialized = true;
+	//bool new_window = true;
+	//if (ImGui::BeginMenuBar())
+	//{
+	//	if (initialized == 0)
+	//	{
+	//		if (ImGui::Button("1. Initialize"))
+	//			initialized = 1;
+	//	}
+	//	if (initialized > 0 && new_window == 0)
+	//	{
+	//		if (ImGui::Button("2. New Window"))
+	//			new_window = 1;
+	//	}
+	//	ImGui::EndMenuBar();
+	//}
+
+	//ImGuiIO& io = ImGui::GetIO();
+	//io.ConfigDockingWithShift = true;
+	//io.ConfigDockingAlwaysTabBar = true;
+	//ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
 
 	//--
 
@@ -2644,125 +2678,124 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 bool ofxPresetsManager::ImGui_Draw_Window()
 {
 	auto mainSettings = ofxImGui::Settings();
-	ofVec2f _pos;
-	ofVec2f _size;
+	string _name;
 
-	int _pad = 2;// _padx between ImGui panels
+	////int _pad = 2;// _padx between ImGui panels
+	////ofVec2f _pos;
+	////ofVec2f _size;
+	////_pos.set(ImGui_Position.get().x, ImGui_Position.get().y);
+	////_size.set(ImGui_Size.get().x, ImGui_Size.get().y);
+	////mainSettings.windowPos = _pos;
+	////mainSettings.windowSize = _size;
+	////auto _mode = ImGuiCond_FirstUseEver;//ImGuiCond_Always;
+	////ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
+	////ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
 
-	_pos.set(ImGui_Position.get().x, ImGui_Position.get().y);
-	_size.set(ImGui_Size.get().x, ImGui_Size.get().y);
+	////--
 
-	mainSettings.windowPos = _pos;
-	mainSettings.windowSize = _size;
+	//// User-Kit name
+	//string _name = displayNameUserKit;
+	//bool _collapse = true;// TODO: don't do nothing?
 
-	auto _mode = ImGuiCond_FirstUseEver;//ImGuiCond_Always;
-	ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
-	ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
+	////--
 
-	//--
+	//// set window properties
+	////bool show = true;
+	//static bool no_titlebar = false;
+	//static bool no_border = true;
+	//static bool no_resize = true;
+	//static bool no_move = true;
+	//static bool no_scrollbar = false;
+	//static bool no_collapse = true;
+	//static bool no_close = true;
+	//static bool no_menu = true;
+	//static bool no_settings = true;
+	//static float bg_alpha = -0.01f; // <0: default
 
-	// User-Kit name
-	string _name = displayNameUserKit;
-	//string _name = "ofxPresetsManager : " + displayNameUserKit;
+	//// Demonstrate the various window flags. 
+	//// Typically you would just use the default.
+	//ImGuiWindowFlags window_flags = 0;
+	////window_flags |= ImGuiWindowFlags_NoBackground;//make background transparent
+	////if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
+	////if (!no_border)   window_flags |= ImGuiWindowFlags_NoDecoration;
+	////if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
+	////if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
+	////if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
+	////if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
+	////if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
+	////if (no_settings)	window_flags |= ImGuiWindowFlags_NoSavedSettings;
 
-	bool _collapse = false;// TODO: don't do nothing?
+	////----
 
-	//--
+	//// A window: main (1st) group
+	//_collapse = false;
+	////if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
+	//{
+		//ImGui_Draw_WindowContent(mainSettings);
 
-	// set window properties
-	//bool show = true;
-	static bool no_titlebar = false;
-	static bool no_border = true;
-	static bool no_resize = true;
-	static bool no_move = true;
-	static bool no_scrollbar = false;
-	static bool no_collapse = true;
-	static bool no_close = true;
-	static bool no_menu = true;
-	static bool no_settings = true;
-	static float bg_alpha = -0.01f; // <0: default
+	//	//// get window position/size: must be inside begin/end
+	//	//_pos = ImGui::GetWindowPos();
+	//	//_size = ImGui::GetWindowSize();
+	//	//ImGui_Position = glm::vec2(_pos.x, _pos.y);
+	//	//ImGui_Size = glm::vec2(_size.x, _size.y);
+	//}
+	////ofxImGui::EndWindow(mainSettings);
 
-	// Demonstrate the various window flags. 
-	// Typically you would just use the default.
-	ImGuiWindowFlags window_flags = 0;
-	//window_flags |= ImGuiWindowFlags_NoBackground;//make background transparent
-	//if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
-	//if (!no_border)   window_flags |= ImGuiWindowFlags_NoDecoration;
-	//if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
-	//if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
-	//if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
-	//if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
-	//if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
-	//if (no_settings)	window_flags |= ImGuiWindowFlags_NoSavedSettings;
+	////----
+	//// B window
+	//// window for all group parameters contained into presetsManager
+	//// all parameters in all added groups
 
-	//----
+	//if (SHOW_ImGui_PresetsParams && MODE_Editor)
+	//{
+	//	//_size = ofVec2f(400, 800);
+	//	//_pos = _pos - ofVec2f(_size.x + _pad, 0);
+	//	//mainSettings.windowPos = _pos;
+	//	//mainSettings.windowSize = _size;
+	//	//_mode = ImGuiCond_FirstUseEver;
+	//	//ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
+	//	//ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
 
-	// A window: main (1st) group
-	_collapse = true;
-	if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
-	{
-		ImGui_Draw_WindowContent(mainSettings);
-
-		// get window position/size: must be inside begin/end
-		_pos = ImGui::GetWindowPos();
-		_size = ImGui::GetWindowSize();
-
-		ImGui_Position = glm::vec2(_pos.x, _pos.y);
-		ImGui_Size = glm::vec2(_size.x, _size.y);
-	}
-	ofxImGui::EndWindow(mainSettings);
-
-	//----
-
-	// B window
-	// window for all group parameters contained into presetsManager
-	// all parameters in all added groups
-
-	if (SHOW_ImGui_PresetsParams && MODE_Editor) {
-
-		_size = ofVec2f(400, 800);
-		_pos = _pos - ofVec2f(_size.x + _pad, 0);
-
-		mainSettings.windowPos = _pos;
-		mainSettings.windowSize = _size;
-
-		_mode = ImGuiCond_FirstUseEver;
-		ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
-		ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
-
-		_name = "ofxPresetsManager";
-		if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
+		 _name = "ofxPresetsManager";
+		if (ofxImGui::BeginWindow(_name, mainSettings))
 		{
 			ImGui_Draw_PresetParameters(mainSettings);
 		}
 		ofxImGui::EndWindow(mainSettings);
-	}
+	//}
 
-	//----
+		bool b = true;
+		//note: ofVec2f and ImVec2f are interchangeable
+		ImGui::SetNextWindowSize(ofVec2f(200, 100), ImGuiCond_FirstUseEver);
+		ImGui::Begin("Another Window", &b);
+		ImGui::Text("Hello");
+		if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);
+		ImGui::End();
 
-	// C window
-	// each group selectors 
-	// window for each group selector
+	////----
 
-	if (SHOW_ImGui_Selectors) {
+	//// C window
+	//// each group selectors 
+	//// window for each group selector
 
-		_size = ofVec2f(350, 500);
-		_pos = _pos - ofVec2f(_size.x + _pad, 0);
-
-		mainSettings.windowPos = _pos;
-		mainSettings.windowSize = _size;
-
-		_mode = ImGuiCond_FirstUseEver;
-		ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
-		ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
+	//if (SHOW_ImGui_Selectors)
+	//{
+	//	//_size = ofVec2f(350, 500);
+	//	//_pos = _pos - ofVec2f(_size.x + _pad, 0);
+	//	//mainSettings.windowPos = _pos;
+	//	//mainSettings.windowSize = _size;
+	//	//_mode = ImGuiCond_FirstUseEver;
+	//	//ImGui::SetNextWindowPos(ofVec2f(_pos.x, _pos.y), _mode);
+	//	//ImGui::SetNextWindowSize(ofVec2f(_size.x, _size.y), _mode);
 
 		_name = "SELECTORS";
-		if (ofxImGui::BeginWindow(_name, mainSettings, window_flags, &_collapse))
+		if (ofxImGui::BeginWindow(_name, mainSettings))
 		{
 			ImGui_Draw_GroupsSelectors(mainSettings);
 		}
 		ofxImGui::EndWindow(mainSettings);
-	}
+
+	//}
 
 	//----
 
@@ -2775,14 +2808,15 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_PresetParameters(ofxImGui::Settings &settings)
 {
-	if (ofxImGui::BeginTree("PRESETS PARAMETERS", settings))
+	//if (ofxImGui::BeginTree("PRESETS PARAMETERS", settings))
+	//{
+	for (int i = 0; i < groups.size(); i++)
 	{
-		for (int i = 0; i < groups.size(); i++) {
-			ofxImGui::AddGroup(groups[i], settings);
-		}
-
-		ofxImGui::EndTree(settings);
+		ofxImGui::AddGroup(groups[i], settings);
 	}
+	//ofxImGui::EndTree(settings);
+//}
+	//ImGui_Draw_GroupsSelectors(settings);
 }
 
 //--------------------------------------------------------------
@@ -2797,7 +2831,6 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 {
 	if (ofxImGui::BeginTree("MAIN CONTROL", settings))
 	{
-
 		//ofxImGui::AddParameter(c);
 
 		// mode edit
@@ -2807,16 +2840,19 @@ void ofxPresetsManager::ImGui_Draw_MainPanel(ofxImGui::Settings &settings)
 		//---
 
 		// panels
-		if (MODE_Editor) {
+		if (MODE_Editor)
+		{
 			//ImGui::SameLine();
 			if (ImGui::TreeNode("PANELS"))
 			{
 				if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
 				ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
+				ofxImGui::AddParameter(SHOW_RandomizerPanel);
 				ofxImGui::AddParameter(SHOW_BrowserPanel);
 
 				ofxImGui::AddParameter(SHOW_ClickPanel);
-				ImGui::SameLine(); ofxImGui::AddParameter(MODE_EditPresetClicker);
+				//ImGui::SameLine(); 
+				ofxImGui::AddParameter(MODE_EditPresetClicker);
 				ImGui::SameLine(); ofxImGui::AddParameter(bg_EditPresetClicker);
 
 				ImGui::TreePop();
@@ -3426,34 +3462,54 @@ void ofxPresetsManager::ImGui_Draw_Browser(ofxImGui::Settings &settings)
 					ImGui::PopStyleColor(1);
 				}
 			}
-			ofxImGui::EndTree(settings);
+
+			ImGui::TreePop();
 		}
 
-		ImGui::TreePop();
+		ofxImGui::EndTree(settings);
 	}
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_WindowContent(ofxImGui::Settings &settings)
 {
-	// tittle
-	//ImGui::Text("PRESETS MANAGER");
-	//ImGui::NewLine();
+	//// tittle
+	////ImGui::Text("PRESETS MANAGER");
+	////ImGui::NewLine();
 
 	// main panel
-	ImGui_Draw_MainPanel(settings);
+	string _name = "MAIN PANEL";
+	if (ofxImGui::BeginWindow(_name, settings))
+	{
+		ImGui_Draw_MainPanel(settings);
+	}
+	ofxImGui::EndWindow(settings);
 
-	// main group
+	//--
+
+	// main group link selector
 	if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);
 
 	// randomizers
 	if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
-	groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers(settings);// show randomizers of user selected group
 
-	// standalone presets browser
-	if (MODE_Editor && SHOW_BrowserPanel) {
-		ImGui_Draw_Browser(settings);
+	//-
+
+	 _name = "GROUP RANDOMIZER";
+	if (ofxImGui::BeginWindow(_name, settings))
+	{
+		if (SHOW_RandomizerPanel) 
+		{
+			groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers(settings);// show randomizers of user selected group
+		}
 	}
+	ofxImGui::EndWindow(settings);
+
+	//// standalone presets browser
+	//if (MODE_Editor && SHOW_BrowserPanel) 
+	//{
+	//	ImGui_Draw_Browser(settings);
+	//}
 }
 
 // standalone presets browser

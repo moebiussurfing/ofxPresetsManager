@@ -907,8 +907,9 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 {
 	// 1. randomizers
 	string str;
+	str = "GROUP " + group.getName();
 
-	if (ofxImGui::BeginTree("SELECTED GROUP", settings))
+	if (ofxImGui::BeginTree(str, settings))
 	{
 		//---
 
@@ -916,9 +917,9 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings)
 
 		ImGui::Dummy(ImVec2(0.0f, 5));
 
-		//string str = "User-Kit: " + displayNameUserKit;
-		str = "  Group    " + group.getName();
-		ImGui::Text(str.c_str());
+		////string str = "User-Kit: " + displayNameUserKit;
+		//str = "  Group    " + group.getName();
+		//ImGui::Text(str.c_str());
 		str = "  Preset   " + ofToString(PRESET_Selected_IndexMain.get());
 		ImGui::Text(str.c_str());
 

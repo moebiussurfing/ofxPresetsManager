@@ -930,8 +930,9 @@ private:
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
 	ofParameter<bool> MODE_Browser_NewPreset;
 	ofParameter<bool> SHOW_ClickPanel;// to allow include as toggle parameter into external gui
-	ofParameter<bool> SHOW_BrowserPanel;
 	ofParameter<bool> SHOW_ImGui;
+	ofParameter<bool> SHOW_BrowserPanel;
+	ofParameter<bool> SHOW_RandomizerPanel;
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
 	ofParameter<bool> SHOW_ImGui_Selectors;
 	ofParameter<bool> SHOW_Help;
