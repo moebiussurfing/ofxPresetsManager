@@ -2565,6 +2565,7 @@ void ofxPresetsManager::exit()
 
 #pragma mark - IM_GUI
 
+#ifdef USE_IMGUI 
 #ifndef USE_IMGUI_EXTERNAL
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Setup()
@@ -2635,19 +2636,28 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 	gui_ImGui.end();
 }
 #endif
+#endif
 
 //--------------------------------------------------------------
+//#ifdef USE_IMGUI_EXTERNAL
+//inline void ofxPresetsManager::ImGui_Draw_Window()
+//#else
+//void ofxPresetsManager::ImGui_Draw_Window()
+//#endif
+
+#ifdef USE_IMGUI 
+
 void ofxPresetsManager::ImGui_Draw_Window()
 {
 	if (SHOW_ImGui)
 	{
-		bool b = true;
-
-		// main panel
-		ImGui_Draw_MainPanel();// main control + extra
+		//bool b = true;
 
 		// group selector
 		ofxImGui::Settings settings;
+
+		// main panel
+		ImGui_Draw_MainPanel();// main control + extra
 
 		if (ofxImGui::BeginWindow("Group select", settings, false))
 		{
@@ -2665,8 +2675,8 @@ void ofxPresetsManager::ImGui_Draw_Window()
 		// selectors
 		ImGui_Draw_GroupsSelectors();
 
-		// selected rendomizers
-		ImGui_Draw_WindowContent();
+		// selected randomizers
+		ImGui_Draw_Randomizers();
 	}
 }
 
@@ -2701,9 +2711,10 @@ void ofxPresetsManager::ImGui_Draw_GroupsSelectors()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_MainPanel()
 {
+	ofxImGui::Settings settings;
+
 	bool b = true;
 
-	ofxImGui::Settings settings;
 	if (ofxImGui::BeginWindow("MAIN PANEL", settings, false))
 	{
 		// mode edit
@@ -2821,6 +2832,7 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 		ImGui::TreePop();
 	}
 }
+#endif
 
 //--
 
@@ -2988,6 +3000,7 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 	}
 }
 
+#ifdef USE_IMGUI 
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Browser()
 {
@@ -3347,7 +3360,7 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_WindowContent()
+void ofxPresetsManager::ImGui_Draw_Randomizers()
 {
 	////// tittle
 	//////ImGui::Text("PRESETS MANAGER");
@@ -3376,6 +3389,7 @@ void ofxPresetsManager::ImGui_Draw_WindowContent()
 ////	ImGui_Draw_Browser(settings);
 ////}
 }
+#endif
 
 // standalone presets browser
 //--------------------------------------------------------------

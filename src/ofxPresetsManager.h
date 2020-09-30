@@ -56,7 +56,8 @@
 //	DEFINES
 //
 #define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT		// customize ImGui font
-#define USE_IMGUI_EXTERNAL						// this is to group all ImGui panels into one unique instance in ofApp
+#define USE_IMGUI								// disabler for testing 
+//#define USE_IMGUI_EXTERNAL						// this is to group all ImGui panels into one unique instance in ofApp
 //#define INCLUDE_ofxUndoSimple					// undo engine to store after randomize preset parameters (& recall)
 //#define USE_JSON								// file settings format
 //										   
@@ -77,7 +78,10 @@
 // gui
 // uasing alternative branch: https://github.com/MacFurax/ofxImGui/tree/docking
 // this branch allows docking, layout store/recall, some extra widgets 
+
+#ifdef USE_IMGUI
 #include "ofxImGui.h"
+#endif
 
 // undo engine
 #ifdef INCLUDE_ofxUndoSimple
@@ -910,23 +914,6 @@ private:
 
 	//----
 
-	// ImGui
-
-public:
-	void ImGui_Draw_WindowContent();
-	void ImGui_Draw_MainPanel();
-	void ImGui_Draw_Extra();
-	void ImGui_Draw_GroupsSelectors();
-	void ImGui_Draw_Browser();
-	void ImGui_Draw_PresetParameters();
-	//void ImGui_Draw_WindowContent(ofxImGui::Settings &settings);
-	//void ImGui_Draw_MainPanel(ofxImGui::Settings &settings);
-	//void ImGui_Draw_Extra(ofxImGui::Settings &settings);
-	//void ImGui_Draw_GroupsSelectors(ofxImGui::Settings &settings);
-	//void ImGui_Draw_Browser(ofxImGui::Settings &settings);
-	//void ImGui_Draw_PresetParameters(ofxImGui::Settings &settings);
-	//void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
-
 private:
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
 	ofParameter<bool> MODE_Browser_NewPreset;
@@ -954,6 +941,34 @@ private:
 
 	//--
 
+	// ImGui
+
+#ifdef USE_IMGUI 
+
+public:
+	void ImGui_Draw_Randomizers();
+	void ImGui_Draw_MainPanel();
+	void ImGui_Draw_Extra();
+	void ImGui_Draw_GroupsSelectors();
+	void ImGui_Draw_Browser();
+	void ImGui_Draw_PresetParameters();
+	//void ImGui_Draw_Randomizers(ofxImGui::Settings &settings);
+	//void ImGui_Draw_MainPanel(ofxImGui::Settings &settings);
+	//void ImGui_Draw_Extra(ofxImGui::Settings &settings);
+	//void ImGui_Draw_GroupsSelectors(ofxImGui::Settings &settings);
+	//void ImGui_Draw_Browser(ofxImGui::Settings &settings);
+	//void ImGui_Draw_PresetParameters(ofxImGui::Settings &settings);
+	//void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
+
+public:
+	//#ifdef USE_IMGUI_EXTERNAL
+	//	inline void ImGui_Draw_Window();
+	//#else
+	//	void ImGui_Draw_Window();
+	//#endif
+	void ImGui_Draw_Window();
+
+
 #ifndef USE_IMGUI_EXTERNAL
 	ofxImGui::Gui gui_ImGui;
 	void ImGui_Setup();
@@ -961,8 +976,7 @@ private:
 	void ImGui_Draw_WindowEnd();
 #endif
 
-public:
-	void ImGui_Draw_Window();
+#endif
 
 private:
 	ofParameter<glm::vec2> ImGui_Position;// ImGui browser panel position. 
