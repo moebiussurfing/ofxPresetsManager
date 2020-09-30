@@ -333,8 +333,9 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	//----
 
 	// ImGui
-
+#ifndef USE_IMGUI_EXTERNAL	
 	ImGui_Setup();
+#endif
 
 	//--
 
@@ -602,6 +603,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 	}
 }
 
+#ifndef USE_IMGUI_EXTERNAL	
 //---------------------------------------------------------------------
 void ofxPresetsManager::drawImGui()
 {
@@ -613,6 +615,8 @@ void ofxPresetsManager::drawImGui()
 	}
 	ImGui_Draw_WindowEnd();
 }
+#endif
+
 //---------------------------------------------------------------------
 void ofxPresetsManager::draw(ofEventArgs & args)
 {
@@ -630,10 +634,11 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	//gui
 
 	//draw ImGui
-	if (SHOW_ImGui)
-	{
-		drawImGui();
-	}
+
+#ifndef USE_IMGUI_EXTERNAL	
+	drawImGui();
+#endif
+
 	//bImGui_mouseOver = false;
 }
 
@@ -1672,7 +1677,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		{
 			ofLogNotice(__FUNCTION__) << "UNDO CLEAR";
 			undoStringParams.clear();
-		}
+	}
 #endif
 
 
@@ -1739,7 +1744,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				}
 			}
 		}
-	}
+}
 }
 
 //--------------------------------------------------------------
@@ -2382,12 +2387,12 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 			if (!b) ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets > " << _path;
 #endif
 #endif
-		}
+	}
 		else {
 			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
-	}
+}
 
 	// debug params
 	if (true)
@@ -2400,7 +2405,7 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 #ifdef USE_JSON
 #endif
 #endif
-		}
+	}
 	}
 }
 
@@ -2476,8 +2481,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
-		}
 	}
+}
 }
 
 ////--------------------------------------------------------------
@@ -2560,6 +2565,7 @@ void ofxPresetsManager::exit()
 
 #pragma mark - IM_GUI
 
+#ifndef USE_IMGUI_EXTERNAL
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Setup()
 {
@@ -2628,36 +2634,40 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 
 	gui_ImGui.end();
 }
+#endif
 
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Window()
 {
-	bool b = true;
-
-	// main panel
-	ImGui_Draw_MainPanel();// main control + extra
-	
-	// group selector
-	ofxImGui::Settings settings;
-
-	if (ofxImGui::BeginWindow("Group select", settings, false))
+	if (SHOW_ImGui)
 	{
-		// main group link selector
-		if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);
+		bool b = true;
 
-		// randomizers
-		if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
+		// main panel
+		ImGui_Draw_MainPanel();// main control + extra
+
+		// group selector
+		ofxImGui::Settings settings;
+
+		if (ofxImGui::BeginWindow("Group select", settings, false))
+		{
+			// main group link selector
+			if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);
+
+			// randomizers
+			if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
+		}
+		ofxImGui::EndWindow(settings);
+
+		// parameters
+		ImGui_Draw_PresetParameters();
+
+		// selectors
+		ImGui_Draw_GroupsSelectors();
+
+		// selected rendomizers
+		ImGui_Draw_WindowContent();
 	}
-	ofxImGui::EndWindow(settings);
-
-	// parameters
-	ImGui_Draw_PresetParameters();
-
-	// selectors
-	ImGui_Draw_GroupsSelectors();
-
-	// selected rendomizers
-	ImGui_Draw_WindowContent();
 }
 
 // ImGui content
@@ -2811,6 +2821,8 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 		ImGui::TreePop();
 	}
 }
+
+//--
 
 //--------------------------------------------------------------
 void ofxPresetsManager::buildHelpInfo() {
@@ -3353,16 +3365,16 @@ void ofxPresetsManager::ImGui_Draw_WindowContent()
 
 	//	if (SHOW_RandomizerPanel)
 	//	{
-			groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers();// show randomizers of user selected group
-	//	}
-	//}
-	//ImGui::End();
+	groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers();// show randomizers of user selected group
+//	}
+//}
+//ImGui::End();
 
-	////// standalone presets browser
-	////if (MODE_Editor && SHOW_BrowserPanel) 
-	////{
-	////	ImGui_Draw_Browser(settings);
-	////}
+////// standalone presets browser
+////if (MODE_Editor && SHOW_BrowserPanel) 
+////{
+////	ImGui_Draw_Browser(settings);
+////}
 }
 
 // standalone presets browser

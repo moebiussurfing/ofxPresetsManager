@@ -56,6 +56,7 @@
 //	DEFINES
 //
 #define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT		// customize ImGui font
+#define USE_IMGUI_EXTERNAL						// this is to group all ImGui panels into one unique instance in ofApp
 //#define INCLUDE_ofxUndoSimple					// undo engine to store after randomize preset parameters (& recall)
 //#define USE_JSON								// file settings format
 //										   
@@ -541,7 +542,7 @@ public:
 	void saveCurrentPreset(int groupIndex = -1) {
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 
-		ofLogNotice(__FUNCTION__) << "SAVE PRESET  group: " << groupIndex <<" preset: " << PRESETS_Selected_Index[groupIndex].get();
+		ofLogNotice(__FUNCTION__) << "SAVE PRESET  group: " << groupIndex << " preset: " << PRESETS_Selected_Index[groupIndex].get();
 		save(PRESETS_Selected_Index[groupIndex].get(), groupIndex);
 	}
 
@@ -953,12 +954,17 @@ private:
 
 	//--
 
+#ifndef USE_IMGUI_EXTERNAL
 	ofxImGui::Gui gui_ImGui;
 	void ImGui_Setup();
 	void ImGui_Draw_WindowBegin();
 	void ImGui_Draw_WindowEnd();
+#endif
+
+public:
 	void ImGui_Draw_Window();
 
+private:
 	ofParameter<glm::vec2> ImGui_Position;// ImGui browser panel position. 
 	ofParameter<glm::vec2> ImGui_Size;// ImGui browser panel position. 
 
