@@ -14,11 +14,17 @@
 #include "ofxWindowApp.h"
 #endif
 
+#include "ofxImGui.h"
+
 class ofApp : public ofBaseApp
 {
 
 public:
-    void setup();
+	//TEST
+	//ofxImGui::Gui gui_ImGui;// if this enabled seems to brake context. we can not load the font into presetManager
+
+public:
+	void setup();
     void update();
     void draw();
     void exit();

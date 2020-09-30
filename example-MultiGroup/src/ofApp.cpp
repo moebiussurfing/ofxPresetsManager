@@ -3,6 +3,9 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
+	//TEST
+	//gui_ImGui.setup();
+
 #ifdef USE_WindowApp
 	WindowApp.setFrameRate(60);
 	WindowApp.setVerticalSync(true);
@@ -66,7 +69,7 @@ void ofApp::setupParameters()
 	//--
 
 	// 0. ofParameterGroup's
-	
+
 	// group0
 	params0.setName("paramsGroup0");// this is our parent group
 	params0.add(show0.set("show0", true));
@@ -155,6 +158,19 @@ void ofApp::draw()
 		gui2.draw();
 		gui3.draw();
 	}
+
+	//TEST
+	//gui_ImGui.begin();
+	//{
+	//	ofxImGui::Settings settings;
+	//	if (ofxImGui::BeginWindow("MAIN PANEL", settings, false))
+	//	{
+	//		ofxImGui::AddParameter(size3);
+	//		ofxImGui::AddGroup(params0, settings);
+	//	}
+	//	ofxImGui::EndWindow(settings);
+	//}
+	//gui_ImGui.end();
 }
 
 //--------------------------------------------------------------

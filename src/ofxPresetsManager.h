@@ -55,9 +55,9 @@
 //
 //	DEFINES
 //
-#define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT		// customize ImGui font
 #define USE_IMGUI								// disabler for testing 
 //#define USE_IMGUI_EXTERNAL						// this is to group all ImGui panels into one unique instance in ofApp
+#define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT		// customize ImGui font
 //#define INCLUDE_ofxUndoSimple					// undo engine to store after randomize preset parameters (& recall)
 //#define USE_JSON								// file settings format
 //										   
