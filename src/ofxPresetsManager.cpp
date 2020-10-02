@@ -1458,6 +1458,7 @@ void ofxPresetsManager::savePreset(int presetIndex, int groupIndex)
 //--------------------------------------------------------------
 void ofxPresetsManager::loadPreset(int presetIndex, int groupIndex)
 {
+	if (groupIndex == -1) groupIndex = groups.size() - 1;// set last group that is the group link selector
 	ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
 	load(presetIndex, groupIndex);
 }

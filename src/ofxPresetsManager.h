@@ -536,8 +536,8 @@ public:
 
 public:
 	//--------------------------------------------------------------
-	void loadPreset(int p, int _indexGroup);// load preset for extra groups by code from ofApp
-	void savePreset(int p, int _indexGroup);// save preset for extra groups by code from ofApp
+	void loadPreset(int p, int _indexGroup = -1);// load preset for extra groups by code from ofApp
+	void savePreset(int p, int _indexGroup = -1);// save preset for extra groups by code from ofApp
 
 	//--
 
@@ -551,24 +551,30 @@ public:
 	}
 
 	// presets browsing
-	////--------------------------------------------------------------
-	//void load_Next()// for main group
-	//{
-	//	PRESET_Selected_IndexMain++;
-	//	if (PRESET_Selected_IndexMain >= mainGroupAmtPresetsFav - 1)
-	//	{
-	//		PRESET_Selected_IndexMain = mainGroupAmtPresetsFav - 1;
-	//	}
-	//}
-	////--------------------------------------------------------------
-	//void load_Previous()// for main group
-	//{
-	//	PRESET_Selected_IndexMain--;
-	//	if (PRESET_Selected_IndexMain < 0)
-	//	{
-	//		PRESET_Selected_IndexMain = 0;
-	//	}
-	//}
+	//--------------------------------------------------------------
+	void load_Previous(int groupIndex = -1)// default if not defined, is the last one: main group link
+	{
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+		groupIndex = (int)ofClamp(groupIndex, 0, groups.size() - 1);
+
+		int _curr = PRESETS_Selected_Index[groupIndex];
+		_curr--;
+		_curr = (int)ofClamp(_curr, 0, groupsSizes[groupIndex] - 1);
+
+		PRESETS_Selected_Index[groupIndex] = _curr;
+	}
+	//--------------------------------------------------------------
+	void load_Next(int groupIndex = -1)// default if not defined, is the last one: main group link
+	{
+		if (groupIndex == -1) groupIndex = groups.size() - 1;
+		groupIndex = (int)ofClamp(groupIndex, 0, groups.size() - 1);
+
+		int _curr = PRESETS_Selected_Index[groupIndex];
+		_curr++;
+		_curr = (int)ofClamp(_curr, 0, groupsSizes[groupIndex] - 1);
+
+		PRESETS_Selected_Index[groupIndex] = _curr;
+	}
 
 	//--
 
@@ -718,25 +724,25 @@ private:
 
 	//----
 
-public:
-	// BUG: 
-	// workflow 
-	// to solve auto load fail because the sorting of xml autoSave after preset selector tag
-	// //(optional) on startup: called at the end of your ofApp setup() 
-	//--------------------------------------------------------------
-	void refreshStartup()
-	{
-		// //browser
-		//doStandaloneRefreshPresets();
-
-		//-
-
-		ofLogNotice(__FUNCTION__);
-		PRESET_Selected_IndexMain_PRE = -1;
-
-		PRESET_Selected_IndexMain = PRESET_Selected_IndexMain;// just for refresh callback
-		ofLogNotice(__FUNCTION__) << "Preset " << PRESET_Selected_IndexMain;
-	}
+//public:
+//	// BUG: 
+//	// workflow 
+//	// to solve auto load fail because the sorting of xml autoSave after preset selector tag
+//	// //(optional) on startup: called at the end of your ofApp setup() 
+//	//--------------------------------------------------------------
+//	void refreshStartup()
+//	{
+//		// //browser
+//		//doStandaloneRefreshPresets();
+//
+//		//-
+//
+//		ofLogNotice(__FUNCTION__);
+//		PRESET_Selected_IndexMain_PRE = -1;
+//
+//		PRESET_Selected_IndexMain = PRESET_Selected_IndexMain;// just for refresh callback
+//		ofLogNotice(__FUNCTION__) << "Preset " << PRESET_Selected_IndexMain;
+//	}
 
 	//--
 
