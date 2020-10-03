@@ -369,53 +369,58 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	// main group link selector
 	int _last = groups.size() - 1;
+	
+	// This is a strange situation
+	// this is to know if no groups has been added before call setup! 
+	if (_last >= 0) {
 
-	GROUP_LINK_Selected_Index.set("GROUP_LINK", 0, 0, groupsSizes[_last] - 1);
-	params_UserKitSettings.add(GROUP_LINK_Selected_Index);
+		GROUP_LINK_Selected_Index.set("GROUP_LINK", 0, 0, groupsSizes[_last] - 1);
+		params_UserKitSettings.add(GROUP_LINK_Selected_Index);
 
-	//----
+		//----
 
-	// user gui selector
-	GuiGROUP_Selected_Index.set("GUI GROUP SELECTOR", 0, 0, groups.size() - 1);
-	GuiGROUP_Selected_Index.addListener(this, &ofxPresetsManager::Changed_GuiGROUP_Selected_Index);
+		// user gui selector
+		GuiGROUP_Selected_Index.set("GUI GROUP SELECTOR", 0, 0, groups.size() - 1);
+		GuiGROUP_Selected_Index.addListener(this, &ofxPresetsManager::Changed_GuiGROUP_Selected_Index);
 
-	groupRandomizers.resize(groups.size());
+		groupRandomizers.resize(groups.size());
 
-	for (int i = 0; i < groups.size(); i++)
-	{
-		// link selectors from class to group randomizer
-		groupRandomizers[i].PRESET_Selected_IndexMain.makeReferenceTo(PRESETS_Selected_Index[i]);// TODO: link
-
-		//-
-
-		// set the name for the randomizer settings file
-		if (bSplitGroupFolders.get())
+		for (int i = 0; i < groups.size(); i++)
 		{
-			std::string _path;
-			_path = path_UserKit_Folder + "/" + path_PresetsFavourites;// current kit-presets presets folder
-			_path += "/" + groups[i].getName();// append group name
-			_path += "/";// the folder
-			ofxSurfingHelpers::CheckFolder(_path);// check parent container folder
+			// link selectors from class to group randomizer
+			groupRandomizers[i].PRESET_Selected_IndexMain.makeReferenceTo(PRESETS_Selected_Index[i]);// TODO: link
 
-			_path += groups[i].getName();
-			_path += filename_Randomizers;// the full path with filename
+			//-
 
-			groupRandomizers[i].setPath_RandomizerSettings(_path);
+			// set the name for the randomizer settings file
+			if (bSplitGroupFolders.get())
+			{
+				std::string _path;
+				_path = path_UserKit_Folder + "/" + path_PresetsFavourites;// current kit-presets presets folder
+				_path += "/" + groups[i].getName();// append group name
+				_path += "/";// the folder
+				ofxSurfingHelpers::CheckFolder(_path);// check parent container folder
+
+				_path += groups[i].getName();
+				_path += filename_Randomizers;// the full path with filename
+
+				groupRandomizers[i].setPath_RandomizerSettings(_path);
+			}
+
+			//-
+
+			groupRandomizers[i].setup(groups[i], keys[i]);// pass the group and the associated keys
+
+			//-
+
+			ofParameterGroup _g{ groups[i].getName() };
+			_g.add(PRESETS_Selected_Index[i]);// selector
+			//_g.add(groupRandomizers[i].getParamsRandomizers());// all params
+			_g.add(groupRandomizers[i].PLAY_RandomizeTimer);// play
+			_g.add(groupRandomizers[i].randomizeDurationBpm);// bpm
+			//_g.add(groupRandomizers[i].bRandomizeIndex);// random index
+			params_GroupsSelectors.add(_g);
 		}
-
-		//-
-
-		groupRandomizers[i].setup(groups[i], keys[i]);// pass the group and the associated keys
-
-		//-
-
-		ofParameterGroup _g{ groups[i].getName() };
-		_g.add(PRESETS_Selected_Index[i]);// selector
-		//_g.add(groupRandomizers[i].getParamsRandomizers());// all params
-		_g.add(groupRandomizers[i].PLAY_RandomizeTimer);// play
-		_g.add(groupRandomizers[i].randomizeDurationBpm);// bpm
-		//_g.add(groupRandomizers[i].bRandomizeIndex);// random index
-		params_GroupsSelectors.add(_g);
 	}
 
 	//----
