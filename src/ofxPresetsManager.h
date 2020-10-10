@@ -194,6 +194,7 @@ public:
 	void setup(std::string name);// TODO: should use char array to avoid collapse with bool..?
 	void setup(std::string name, bool _buildGroupSelector);
 	void setup(bool _buildGroupSelector);
+	bool bDoneSetup = false;// to ensure all setup process is done and avoid troubles if not
 
 	void startup();// must be called after setup (who is called after all group adds) to set initial states well
 
@@ -236,7 +237,24 @@ private:
 	//--
 
 	// preset selectors to each added group
+
+public:
+	// TODO: API. expose to allow external callbacks
 	std::vector<ofParameter<int>> PRESETS_Selected_Index;
+	// TODO: API
+public:
+	//--------------------------------------------------------------
+	ofParameterGroup getSelectorsGroup() {
+		//ofParameterGroup g{ "SelectorsGroup" };
+		//for (int i = 0; i < groups.size(); i++) {
+		//	g.add(PRESETS_Selected_Index[i]);
+		//}
+		//return g;
+
+		return params_GroupsSelectors;
+	}
+
+private:
 	std::vector<int> PRESETS_Selected_Index_PRE;// remember previous selector
 	ofParameterGroup params_GroupsSelectors{ "PRESET SELECTORS" };// group all selectors
 
@@ -259,7 +277,7 @@ private:
 	bool bAllowGroupSelector = true;// to allow disable main group. not allways we need it..
 	int groupLinkSize = 10;// ammount of presets we want to the group link
 public:
-	void setGroupLinkSize(int size) {// customize group link presets
+	void setGroupLinkSize(int size) {// customize how many group link presets we want to create
 		groupLinkSize = size;
 	}
 	void setEnableMainGroupSelector(bool b) {// disable the use of main group selector. must call before setup. enabled by default
@@ -932,7 +950,7 @@ private:
 	ofParameter<bool> SHOW_Help;
 	ofParameter<bool> SHOW_Gui_AdvancedControl;
 	ofParameter<bool> ENABLE_Keys;
-	ofParameter<bool> bThemDark{ "THEME DARK", false };
+	ofParameter<bool> bThemDark{ "THEME DARK", true };
 	ofParameter<glm::vec2> Gui_Internal_Position;
 
 private:
@@ -1124,6 +1142,8 @@ public:
 private:
 	void addKeysListeners();
 	void removeKeysListeners();
+
+	void removeMouseListeners();// TODO: fix easy remover..
 
 	vector<vector<int>> keys;// queued trigger keys for each group ? (all presets) (size of)
 	bool bKeys;// enabled keys

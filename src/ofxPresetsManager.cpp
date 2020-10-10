@@ -37,7 +37,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//----
 
-	filenameMainSettings = "ofxPresetsManagerSettings" + fileExtension;// default user preset name
+	filenameMainSettings = "ofxPresetsManager_Settings" + fileExtension;// default user preset name
 
 	// top parent folder
 	// root
@@ -63,7 +63,7 @@ ofxPresetsManager::ofxPresetsManager()
 #endif
 
 	// global app session settings
-	filename_ControlSettings = "settingsControl";
+	filename_ControlSettings = "Control_Settings";
 #ifdef USE_XML
 	filename_ControlSettings += ".xml";
 #else
@@ -233,7 +233,7 @@ ofxPresetsManager::ofxPresetsManager()
 void ofxPresetsManager::setup()
 {
 	ofLogNotice(__FUNCTION__);
-	// filenameMainSettings will use default name "ofxPresetsManagerSettings.xml"
+	// filenameMainSettings will use default name "ofxPresetsManager_Settings.xml"
 	setup(bAllowGroupSelector);// split folders by group name
 }
 
@@ -369,7 +369,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	// main group link selector
 	int _last = groups.size() - 1;
-	
+
 	// This is a strange situation
 	// this is to know if no groups has been added before call setup! 
 	if (_last >= 0) {
@@ -380,7 +380,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		//----
 
 		// user gui selector
-		GuiGROUP_Selected_Index.set("GUI GROUP SELECTOR", 0, 0, groups.size() - 1);
+		GuiGROUP_Selected_Index.set("GROUP SELECT", 0, 0, groups.size() - 1);
 		GuiGROUP_Selected_Index.addListener(this, &ofxPresetsManager::Changed_GuiGROUP_Selected_Index);
 
 		groupRandomizers.resize(groups.size());
@@ -434,7 +434,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	ofAddListener(params_UserKitSettings.parameterChangedE(), this, &ofxPresetsManager::Changed_UserKit);
 
-	//-------
+	//-
 
 	startup();
 }
@@ -482,7 +482,7 @@ void ofxPresetsManager::startup()
 	bg_EditPresetClicker.set("BG CLICKER", false);
 
 	// reset mini previews layout
-	float _size = 80;
+	float _size = cellSize;
 	setSizeBox_PresetClicker(_size);
 	float _xx = 200;
 	float _yy = ofGetHeight() - getPresetClicker_Height() - 20;
@@ -502,7 +502,7 @@ void ofxPresetsManager::startup()
 	_rectRatio = rectanglePresetClicker.width / rectanglePresetClicker.height;
 
 	// load settings
-	rectanglePresetClicker.loadSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/", false);
+	rectanglePresetClicker.loadSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
 	clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
 	clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
 
@@ -548,6 +548,18 @@ void ofxPresetsManager::startup()
 	// TODO:
 	// refresh in other another better place?...
 	buildHelpInfo();
+
+	//-------
+
+	//// avoid troubles when all setup process have not finished property
+	//if (groups.size() > 0) bDoneSetup = true;
+	//else bDoneSetup = false;
+	//if (!bDoneSetup) {
+	//	removeKeysListeners();
+	//	removeMouseListeners();
+	//}
+	// TODO:
+	bDoneSetup = true;
 
 	//--
 }
@@ -680,14 +692,14 @@ void ofxPresetsManager::drawPresetClicker()
 
 	//-
 
-	// dark theme
-	if (bThemDark) {
+	// light theme
+	if (!bThemDark) {
 		_colorText = ofColor(0, 255);
 		_colorButton = ofColor(0, 64);
 		_colorBg = ofColor(255, 8);
 	}
 
-	// light theme
+	// dark theme
 	else {
 		_colorText = ofColor(255, 128);
 		_colorButton = ofColor(16, 200);
@@ -838,9 +850,13 @@ void ofxPresetsManager::drawPresetClicker()
 		// 5. gui toggle button box
 
 		int _i;
-		if (bBuildGroupSelector) _i = groups.size() - 1;
-		else if (groups.size() > 1) _i = 1;
-		else _i = 0;
+
+		//if (bBuildGroupSelector && bAllowGroupSelector) _i = groups.size() - 1;
+		//else if (groups.size() > 1) _i = 1;
+		////else if (groups.size() > 1) _i = 0;
+		//else _i = 0;
+
+		_i = groups.size() - 1;
 
 		if (i == _i)
 		{
@@ -910,7 +926,7 @@ void ofxPresetsManager::drawPresetClicker()
 			int xG = -strW - 20;
 			ySave = ySave - 2;// little up
 
-			if (bThemDark) ofSetColor(_colorBg);// shadow
+			if (!bThemDark) ofSetColor(_colorBg);// shadow
 			else ofSetColor(_colorButton);// shadow
 			if (myFont.isLoaded()) myFont.drawString(info, xG + gap, ySave + gap);
 			else ofDrawBitmapString(info, xG + gap, ySave + gap);
@@ -1580,192 +1596,198 @@ void ofxPresetsManager::setModeKeySwap(int key)
 //----------------------------------------------------------------
 void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 {
-	const int &key = eventArgs.key;
-
-	if (key == 'K' && !bImGui_mouseOver)// restore keys control
+	if (bDoneSetup)
 	{
-		ENABLE_Keys = !ENABLE_Keys;
-	}
+		const int &key = eventArgs.key;
 
-	else if (bKeys && ENABLE_Keys && !bImGui_mouseOver)// disable keys when mouse over gui
-	{
-		//-
-
-		// mode key for saving with mouse or trigger keys
-		if (key == modeKeySave)
+		if (key == 'K' && !bImGui_mouseOver)// restore keys control
 		{
-			bKeySave = true;
-			ofLogVerbose(__FUNCTION__) << "modeKeySave TRUE" << endl;
-			return;
+			ENABLE_Keys = !ENABLE_Keys;
 		}
 
-		// mode key for swap with mouse or trigger keys
-		else if (key == modKeySwap)
+		else if (bKeys && ENABLE_Keys && !bImGui_mouseOver)// disable keys when mouse over gui
 		{
-			bKeySwap = true;
-			ofLogVerbose(__FUNCTION__) << "modKeySwap TRUE" << endl;
-			return;
-		}
+			//-
 
-		//--
-
-		if (false) {}
-
-		// hide/show control gui
-		else if (key == 'G')
-		{
-			SHOW_Gui_AdvancedControl = !SHOW_Gui_AdvancedControl;
-			setVisible_GUI_Internal(SHOW_Gui_AdvancedControl);
-			setVisible_GUI_ImGui(SHOW_Gui_AdvancedControl);
-			setVisible_PresetClicker(SHOW_Gui_AdvancedControl);
-		}
-		else if (key == 'H')
-		{
-			SHOW_Help = !SHOW_Help;
-		}
-		else if (key == 'E')
-		{
-			MODE_Editor = !MODE_Editor;
-		}
-		if (key == 'P')
-		{
-			setVisible_PresetClicker(!isVisible_PresetClicker());
-		}
-
-		//----
-
-		// randomizers
-
-		// timer to randomize and choice a random preset from the kit
-		else if (eventArgs.hasModifier(OF_KEY_CONTROL) && eventArgs.codepoint == ' ')
-		{
-			for (int i = 0; i < groups.size(); i++) {
-				setTogglePlayRandomizerPreset(GuiGROUP_Selected_Index);
+			// mode key for saving with mouse or trigger keys
+			if (key == modeKeySave)
+			{
+				bKeySave = true;
+				ofLogVerbose(__FUNCTION__) << "modeKeySave TRUE" << endl;
+				return;
 			}
-		}
-		else if (eventArgs.hasModifier(OF_KEY_ALT) && eventArgs.codepoint == 'E')
-		{
-			MODE_EditPresetClicker = !MODE_EditPresetClicker;
-		}
-		// random index
-		else if (key == 'R')
-		{
-			doRandomizePresetSelected(GuiGROUP_Selected_Index);
-		}
-		//// timer to randomize and choice a random preset from the kit
-		//if (key == 'R')
-		//{
-		//	setTogglePlayRandomizerPreset();
-		//		//doRandomIndex(GuiGROUP_Selected_Index);
-		//}
-		//			else if (key == 'E')
-		//			{
-		//				doRandomPreset();
-		//			}
-		//		}
 
-		//----
+			// mode key for swap with mouse or trigger keys
+			else if (key == modKeySwap)
+			{
+				bKeySwap = true;
+				ofLogVerbose(__FUNCTION__) << "modKeySwap TRUE" << endl;
+				return;
+			}
+
+			//--
+
+			if (false) {}
+
+			// hide/show control gui
+			else if (key == 'G')
+			{
+				SHOW_Gui_AdvancedControl = !SHOW_Gui_AdvancedControl;
+				setVisible_GUI_Internal(SHOW_Gui_AdvancedControl);
+				setVisible_GUI_ImGui(SHOW_Gui_AdvancedControl);
+				setVisible_PresetClicker(SHOW_Gui_AdvancedControl);
+			}
+			else if (key == 'H')
+			{
+				SHOW_Help = !SHOW_Help;
+			}
+			else if (key == 'E')
+			{
+				MODE_Editor = !MODE_Editor;
+			}
+			if (key == 'P')
+			{
+				setVisible_PresetClicker(!isVisible_PresetClicker());
+			}
+
+			//----
+
+			// randomizers
+
+			// timer to randomize and choice a random preset from the kit
+			else if (eventArgs.hasModifier(OF_KEY_CONTROL) && eventArgs.codepoint == ' ')
+			{
+				for (int i = 0; i < groups.size(); i++) {
+					setTogglePlayRandomizerPreset(GuiGROUP_Selected_Index);
+				}
+			}
+			else if (eventArgs.hasModifier(OF_KEY_ALT) && eventArgs.codepoint == 'E')
+			{
+				MODE_EditPresetClicker = !MODE_EditPresetClicker;
+			}
+			// random index
+			else if (key == 'R')
+			{
+				doRandomizePresetSelected(GuiGROUP_Selected_Index);
+			}
+			//// timer to randomize and choice a random preset from the kit
+			//if (key == 'R')
+			//{
+			//	setTogglePlayRandomizerPreset();
+			//		//doRandomIndex(GuiGROUP_Selected_Index);
+			//}
+			//			else if (key == 'E')
+			//			{
+			//				doRandomPreset();
+			//			}
+			//		}
+
+			//----
 
 #ifdef INCLUDE_ofxUndoSimple
-		if (key == 'A')// previous
-		{
-			ofLogNotice(__FUNCTION__) << "UNDO <-";
-			undoStringParams.undo();
-			undoRefreshParams();
+			if (key == 'A')// previous
+			{
+				ofLogNotice(__FUNCTION__) << "UNDO <-";
+				undoStringParams.undo();
+				undoRefreshParams();
+			}
+			else if (key == 'D')// next
+			{
+				ofLogNotice(__FUNCTION__) << "REDO ->";
+				undoStringParams.redo();
+				undoRefreshParams();
+			}
+			else if (key == 'Q')// clear history
+			{
+				ofLogNotice(__FUNCTION__) << "UNDO CLEAR";
+				undoStringParams.clear();
 		}
-		else if (key == 'D')// next
-		{
-			ofLogNotice(__FUNCTION__) << "REDO ->";
-			undoStringParams.redo();
-			undoRefreshParams();
-		}
-		else if (key == 'Q')// clear history
-		{
-			ofLogNotice(__FUNCTION__) << "UNDO CLEAR";
-			undoStringParams.clear();
-	}
 #endif
 
 
-		//----
+			//----
 
-		// navigate kit/favorites presets
-		if (ENABLE_KeysArrowBrowse)
-		{
-			// browse groups
-			if (key == OF_KEY_UP)
+			// navigate kit/favorites presets
+			if (ENABLE_KeysArrowBrowse)
 			{
-				GuiGROUP_Selected_Index--;
-			}
-
-			else if (key == OF_KEY_DOWN)
-			{
-				GuiGROUP_Selected_Index++;
-			}
-
-			else if (key == OF_KEY_LEFT)
-			{
-				DISABLE_CALLBACKS = true;
-				int sel = GuiGROUP_Selected_Index.get();
-				int i = PRESETS_Selected_Index[sel];
-				i--;
-				DISABLE_CALLBACKS = false;
-				PRESETS_Selected_Index[sel] = (int)ofClamp(i, 0, PRESETS_Selected_Index[sel].getMax());
-			}
-			else if (key == OF_KEY_RIGHT)
-			{
-				DISABLE_CALLBACKS = true;
-				int sel = GuiGROUP_Selected_Index.get();
-				int i = PRESETS_Selected_Index[sel];
-				i++;
-				DISABLE_CALLBACKS = false;
-				PRESETS_Selected_Index[sel] = (int)ofClamp(i, 0, PRESETS_Selected_Index[sel].getMax());
-			}
-		}
-
-		//----
-
-		// presets selectors
-
-		for (int g = 0; g < keys.size(); g++)
-		{
-			for (int k = 0; k < keys[g].size(); k++)// performs all registered keys: one for each [8] preset
-			{
-				if (key == keys[g][k])
+				// browse groups
+				if (key == OF_KEY_UP)
 				{
-					ofLogNotice(__FUNCTION__) << "key: " << (char)key;
+					GuiGROUP_Selected_Index--;
+				}
 
-					if (bKeySave)
-					{
-						save(k, g);
-					}
-					else
-					{
-						ofLogNotice(__FUNCTION__) << groups[g].getName() << " group: " << g << " preset: " << k;
+				else if (key == OF_KEY_DOWN)
+				{
+					GuiGROUP_Selected_Index++;
+				}
 
-						if (g < PRESETS_Selected_Index.size()) PRESETS_Selected_Index[g] = k;
-					}
-
-					return;
+				else if (key == OF_KEY_LEFT)
+				{
+					DISABLE_CALLBACKS = true;
+					int sel = GuiGROUP_Selected_Index.get();
+					int i = PRESETS_Selected_Index[sel];
+					i--;
+					DISABLE_CALLBACKS = false;
+					PRESETS_Selected_Index[sel] = (int)ofClamp(i, 0, PRESETS_Selected_Index[sel].getMax());
+				}
+				else if (key == OF_KEY_RIGHT)
+				{
+					DISABLE_CALLBACKS = true;
+					int sel = GuiGROUP_Selected_Index.get();
+					int i = PRESETS_Selected_Index[sel];
+					i++;
+					DISABLE_CALLBACKS = false;
+					PRESETS_Selected_Index[sel] = (int)ofClamp(i, 0, PRESETS_Selected_Index[sel].getMax());
 				}
 			}
-		}
+
+			//----
+
+			// presets selectors
+
+			for (int g = 0; g < keys.size(); g++)
+			{
+				for (int k = 0; k < keys[g].size(); k++)// performs all registered keys: one for each [8] preset
+				{
+					if (key == keys[g][k])
+					{
+						ofLogNotice(__FUNCTION__) << "key: " << (char)key;
+
+						if (bKeySave)
+						{
+							save(k, g);
+						}
+						else
+						{
+							ofLogNotice(__FUNCTION__) << groups[g].getName() << " group: " << g << " preset: " << k;
+
+							if (g < PRESETS_Selected_Index.size()) PRESETS_Selected_Index[g] = k;
+						}
+
+						return;
+					}
+				}
+			}
+	}
 }
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::keyReleased(ofKeyEventArgs &eventArgs)
 {
-	// mod keys
-	if (eventArgs.key == modeKeySave && ENABLE_Keys)
+	if (bDoneSetup)
 	{
-		bKeySave = false;
-		ofLogVerbose(__FUNCTION__) << "modeKeySave FALSE" << endl;
-	}
-	else if (eventArgs.key == modKeySwap && ENABLE_Keys)
-	{
-		bKeySwap = false;
-		ofLogVerbose(__FUNCTION__) << "modKeySwap FALSE" << endl;
+		// mod keys
+		if (eventArgs.key == modeKeySave && ENABLE_Keys)
+		{
+			bKeySave = false;
+			ofLogVerbose(__FUNCTION__) << "modeKeySave FALSE" << endl;
+		}
+		else if (eventArgs.key == modKeySwap && ENABLE_Keys)
+		{
+			bKeySwap = false;
+			ofLogVerbose(__FUNCTION__) << "modKeySwap FALSE" << endl;
+		}
 	}
 }
 
@@ -1785,104 +1807,117 @@ void ofxPresetsManager::removeKeysListeners()
 	ofRemoveListener(ofEvents().keyReleased, this, &ofxPresetsManager::keyReleased);
 }
 
+//--------------------------------------------------------------
+void ofxPresetsManager::removeMouseListeners()
+{
+	//ofRemoveListener(ofEvents().mousePressed, this, &ofxPresetsManager::mousePressed);
+}
+
 //----
 
 //-----------------------------------------------------
 void ofxPresetsManager::mousePressed(int x, int y)
 {
-	// this method will get what box button is pressed: in wich group-row (y) and wich preset (x)
-
-	x = x - clicker_Pos.x;
-	y = y - clicker_Pos.y;
-
-	int xIndex = x / cellSize;
-	int yIndex = y / cellSize;
-
-	// Index -1 for out (left) of boxes
-	xIndex = (x > 0) ? xIndex : -1;
-	yIndex = (y > 0) ? yIndex : -1;
-
-	//-
-
-	// 1. presets buttons & save button
-
-	// click is iniside allowed presets/groups
-	if ((yIndex >= 0) && (yIndex < (int)groups.size()))//valid group
+	if (bDoneSetup)
 	{
-		//avoid outer panel logs. only into the group row levels
-		if ((xIndex != -1) && (yIndex != -1) &&//valid preset. to the left of panels
-			(xIndex >= 0) && (xIndex < groupsSizes[yIndex]))//valid group. to the right of panels
+		// this method will get what box button is pressed: in wich group-row (y) and wich preset (x)
 
-			ofLogNotice(__FUNCTION__) << groups[yIndex].getName() << " group: " << yIndex << " preset: " << xIndex;
+		x = x - clicker_Pos.x;
+		y = y - clicker_Pos.y;
+
+		// get what matrix button has been just clicked
+		int xIndex = x / cellSize;
+		int yIndex = y / cellSize;
+
+		// Index -1 for out (left) of boxes
+		xIndex = (x > 0) ? xIndex : -1;
+		yIndex = (y > 0) ? yIndex : -1;
 
 		//-
 
-		if ((xIndex >= 0) && (xIndex < groupsSizes[yIndex]))
+		// 1. presets buttons & save button
+
+		// click is iniside allowed presets/groups
+		if ((yIndex >= 0) && (yIndex < (int)groups.size()) && groups.size() > 0)//valid group
 		{
-			// 1. mod save controlled by modeKeySave
-			if (bKeySave)
+			//avoid outer panel logs. only into the group row levels
+			if ((xIndex != -1) && (yIndex != -1) &&//valid preset. to the left of panels
+				(xIndex >= 0) && (xIndex < groupsSizes[yIndex]))//valid group. to the right of panels
+
+				ofLogNotice(__FUNCTION__) << groups[yIndex].getName() << " group: " << yIndex << " preset: " << xIndex;
+
+			//-
+
+			if ((xIndex >= 0) && (xIndex < groupsSizes[yIndex]))
 			{
-				ofLogNotice(__FUNCTION__) << "SAVE";
+				// 1. mod save controlled by modeKeySave
+				if (bKeySave)
+				{
+					ofLogNotice(__FUNCTION__) << "SAVE";
 
-				save(xIndex, yIndex);
+					save(xIndex, yIndex);
 
-				//will auto load and set the already clicked preset button
-				if (yIndex < PRESETS_Selected_Index.size()) PRESETS_Selected_Index[yIndex] = xIndex;
+					//will auto load and set the already clicked preset button
+					if (yIndex < PRESETS_Selected_Index.size()) PRESETS_Selected_Index[yIndex] = xIndex;
+				}
+
+				//-
+
+				// 2. mod swap controlled by modKeySwap
+				else if (bKeySwap)
+				{
+					ofLogNotice(__FUNCTION__) << "SWAP";
+
+					if (yIndex < PRESETS_Selected_Index.size()) doSwap(yIndex, PRESETS_Selected_Index[yIndex], xIndex);
+				}
+
+				//-
+
+				// 3. no mod keys: normal load (not any key modifier pressed)
+				else
+				{
+					ofLogNotice(__FUNCTION__) << "LOAD";
+
+					if (yIndex < PRESETS_Selected_Index.size()) PRESETS_Selected_Index[yIndex] = xIndex;
+				}
 			}
 
 			//-
 
-			// 2. mod swap controlled by modKeySwap
-			else if (bKeySwap)
+			// 2. last button (save button)
+			else if (xIndex == groupsSizes[yIndex])
 			{
-				ofLogNotice(__FUNCTION__) << "SWAP";
+				//TODO: hide save buttons if autoSave 
+				//if (!autoSave)
+				{
+					ofLogNotice(__FUNCTION__) << "saveButton group:" << yIndex;
 
-				if (yIndex < PRESETS_Selected_Index.size()) doSwap(yIndex, PRESETS_Selected_Index[yIndex], xIndex);
-			}
-
-			//-
-
-			// 3. no mod keys: normal load (not any key modifier pressed)
-			else
-			{
-				ofLogNotice(__FUNCTION__) << "LOAD";
-
-				if (yIndex < PRESETS_Selected_Index.size()) PRESETS_Selected_Index[yIndex] = xIndex;
+					save(PRESETS_Selected_Index[yIndex], yIndex);
+				}
 			}
 		}
 
 		//-
 
-		// 2. last button (save button)
-		else if (xIndex == groupsSizes[yIndex])
+		if (groups.size() > 0) 
 		{
-			//TODO: hide save buttons if autoSave 
-			//if (!autoSave)
-			{
-				ofLogNotice(__FUNCTION__) << "saveButton group:" << yIndex;
+			// 3. toggle show gui (on main group only)
+			// TODO: hide save button on autosave mode...
+			//int _offset = (autoSave ? 0 : 1);
+			int _offset = 1;
 
-				save(PRESETS_Selected_Index[yIndex], yIndex);
+			int _i;
+			if (bBuildGroupSelector) _i = groups.size() - 1;
+			else if (groups.size() > 1) _i = 1;
+			else _i = 0;
+
+			if ((yIndex == groups.size() - 1) && (xIndex == groupsSizes[_i] + _offset))
+			{
+				SHOW_ImGui = !SHOW_ImGui;
+
+				ofLogNotice(__FUNCTION__) << "SHOW_ImGui : " << (SHOW_ImGui ? "TRUE" : "FALSE");
 			}
 		}
-	}
-
-	//-
-
-	// 3. toggle show gui (on main group only)
-	// TODO: hide save button on autosave mode...
-	//int _offset = (autoSave ? 0 : 1);
-	int _offset = 1;
-
-	int _i;
-	if (bBuildGroupSelector) _i = groups.size() - 1;
-	else if (groups.size() > 1) _i = 1;
-	else _i = 0;
-
-	if ((yIndex == groups.size() - 1) && (xIndex == groupsSizes[_i] + _offset))
-	{
-		SHOW_ImGui = !SHOW_ImGui;
-
-		ofLogNotice(__FUNCTION__) << "SHOW_ImGui : " << (SHOW_ImGui ? "TRUE" : "FALSE");
 	}
 }
 
@@ -2393,12 +2428,12 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 			if (!b) ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets > " << _path;
 #endif
 #endif
-	}
+		}
 		else {
 			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
-}
+	}
 
 	// debug params
 	if (true)
@@ -2411,8 +2446,8 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 #ifdef USE_JSON
 #endif
 #endif
-	}
-	}
+		}
+}
 }
 
 //--------------------------------------------------------------
@@ -2470,11 +2505,11 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 				mainGroupMemoryFilesPresets[i] = settings;
 #endif
-			}
+	}
 			else {
 				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
-		}
+}
 	}
 
 	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
@@ -2487,7 +2522,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
-	}
+		}
 }
 }
 
@@ -2559,7 +2594,7 @@ void ofxPresetsManager::exit()
 	// all app settings
 	save_ControlSettings();
 
-	rectanglePresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/", false);
+	rectanglePresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
 
 	//--
 
@@ -2694,6 +2729,8 @@ void ofxPresetsManager::ImGui_Draw_PresetParameters()
 
 	if (ofxImGui::BeginWindow("Parameters", settings, false))
 	{
+		//ofxImGui::AddDrag(PRESETS_Selected_Index[0]);
+
 		for (int i = 0; i < groups.size(); i++)
 		{
 			ofxImGui::AddGroup(groups[i], settings);
@@ -2726,7 +2763,6 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 		// mode edit
 		ofxImGui::AddParameter(MODE_Editor);
 		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30);// TODO: repair. collides when multiple toggles..
-
 		//---
 
 		// panels
@@ -2735,9 +2771,11 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 			//ImGui::SameLine();
 			if (ImGui::TreeNode("PANELS"))
 			{
-				if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
-				ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
-				ofxImGui::AddParameter(SHOW_RandomizerPanel);
+				// handled by docker mode
+				//if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
+				//ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
+				//ofxImGui::AddParameter(SHOW_RandomizerPanel);
+
 				ofxImGui::AddParameter(SHOW_BrowserPanel);
 
 				ofxImGui::AddParameter(SHOW_ClickPanel);
@@ -2776,6 +2814,7 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 
 			ofxImGui::AddParameter(SHOW_Help); ImGui::SameLine();
 			ofxImGui::AddParameter(bThemDark);
+			ofxImGui::AddParameter(ENABLE_Keys);
 
 			ImGui::TreePop();
 		}
