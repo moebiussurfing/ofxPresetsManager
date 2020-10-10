@@ -3052,7 +3052,7 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 	bool b = true;
 	ImGui::Begin("FILES BROWSER", &b);
 	{
-		int _numfiles = fileNames.size();
+		int _numfiles = standaloneFileNames.size();
 
 		//--
 
@@ -3116,7 +3116,7 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 			{
 				//1. arrow buttons
 
-				static int counter = currentFile;
+				static int counter = standaloneFileIndex;
 				float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
 				ImGui::PushButtonRepeat(true);
 
@@ -3129,11 +3129,11 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 					if (counter > 0)
 					{
 						counter--;
-						currentFile = counter;
-						if (currentFile < files.size())
+						standaloneFileIndex = counter;
+						if (standaloneFileIndex < standaloneFiles.size())
 						{
-							displayNamePreset = fileNames[currentFile];
-							ofLogNotice(__FUNCTION__) << "ARROW: displayNamePreset: [" + ofToString(currentFile) + "] " << displayNamePreset;
+							displayNamePreset = standaloneFileNames[standaloneFileIndex];
+							ofLogNotice(__FUNCTION__) << "ARROW: displayNamePreset: [" + ofToString(standaloneFileIndex) + "] " << displayNamePreset;
 							//if (MODE_Browser_NewPreset)
 							ofLogNotice(__FUNCTION__) << "LOAD" << endl;
 							ofLogNotice(__FUNCTION__) << "PRESET NAME: " << displayNamePreset;
@@ -3149,14 +3149,14 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 				ImGui::SameLine(0.0f, spacing);
 				if (ImGui::ArrowButton("##right", ImGuiDir_Right))
 				{
-					if (counter < files.size() - 1)
+					if (counter < standaloneFiles.size() - 1)
 					{
 						counter++;
-						currentFile = counter;
-						if (currentFile < files.size())
+						standaloneFileIndex = counter;
+						if (standaloneFileIndex < standaloneFiles.size())
 						{
-							displayNamePreset = fileNames[currentFile];
-							ofLogNotice(__FUNCTION__) << "ARROW: displayNamePreset: [" + ofToString(currentFile) + "] " << displayNamePreset;
+							displayNamePreset = standaloneFileNames[standaloneFileIndex];
+							ofLogNotice(__FUNCTION__) << "ARROW: displayNamePreset: [" + ofToString(standaloneFileIndex) + "] " << displayNamePreset;
 
 							//if (MODE_Browser_NewPreset)
 							ofLogNotice(__FUNCTION__) << "LOAD PRESET NAME: " << displayNamePreset;
@@ -3171,25 +3171,25 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 				//1.3 text preview current preset index to total amount.
 
 				ImGui::SameLine();
-				ImGui::Text("%d/%d", currentFile, _numfiles - 1);
+				ImGui::Text("%d/%d", standaloneFileIndex, _numfiles - 1);
 			}
 
 			//--
 
 			//3. scrollable filenames list
 
-			if (!fileNames.empty())
+			if (!standaloneFileNames.empty())
 			{
 				ImGui::SetNextItemWidth(140);
 
-				int currentFileIndex = currentFile;
-				if (ofxImGui::VectorCombo(" ", &currentFileIndex, fileNames))
+				int currentFileIndex = standaloneFileIndex;
+				if (ofxImGui::VectorCombo(" ", &currentFileIndex, standaloneFileNames))
 				{
 					ofLogNotice(__FUNCTION__) << "Preset Index: " << ofToString(currentFileIndex);
-					if (currentFileIndex < fileNames.size())
+					if (currentFileIndex < standaloneFileNames.size())
 					{
-						currentFile = currentFileIndex;
-						displayNamePreset = fileNames[currentFile];
+						standaloneFileIndex = currentFileIndex;
+						displayNamePreset = standaloneFileNames[standaloneFileIndex];
 
 						ofLogNotice(__FUNCTION__) << "LOAD Preset Name: " << displayNamePreset;
 						doLoadMainGroupPreset(displayNamePreset);
@@ -3203,15 +3203,15 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 
 			if (ImGui::Button("UPDATE"))
 			{
-				//displayNamePreset = textInput_temp;
+				//displayNamePreset = standaloneTextInput_temp;
 				//ofLogNotice(__FUNCTION__) << "UPDATE PRESET NAME: " << displayNamePreset << endl;
 
 				//0. get filename of selected
-				string _currName = files[currentFile].getBaseName();
+				string _currName = standaloneFiles[standaloneFileIndex].getBaseName();
 				ofLogNotice(__FUNCTION__) << "UPDATE Preset Name: " << _currName;
 
 				//1. delete old file
-				files[currentFile].remove();
+				standaloneFiles[standaloneFileIndex].remove();
 
 				//2. save "ovewrite"
 				doStandalonePresetSave(_currName);
@@ -3223,9 +3223,9 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 				//4. reselect last save preset (bc directory sorting changes)
 				ofLogNotice(__FUNCTION__) << "Reload last updated preset:";
 				int iNew = -1;//search index for filename
-				for (size_t i = 0; i < files.size(); i++)
+				for (size_t i = 0; i < standaloneFiles.size(); i++)
 				{
-					string n = files[i].getBaseName();
+					string n = standaloneFiles[i].getBaseName();
 					if (n == _currName)
 					{
 						iNew = i;
@@ -3233,9 +3233,9 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 				}
 				if (iNew != -1)
 				{
-					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << files[iNew].getBaseName();
-					currentFile = iNew;
-					displayNamePreset = fileNames[currentFile];
+					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << standaloneFiles[iNew].getBaseName();
+					standaloneFileIndex = iNew;
+					displayNamePreset = standaloneFileNames[standaloneFileIndex];
 					doLoadMainGroupPreset(displayNamePreset);
 				}
 				else
@@ -3263,18 +3263,18 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 			if (ImGui::Button("DELETE"))//current preset
 			{
 				ofLogNotice(__FUNCTION__) << "DELETE Preset Name: " << displayNamePreset;
-				ofLogNotice(__FUNCTION__) << "file: " << files[currentFile].getAbsolutePath();
+				ofLogNotice(__FUNCTION__) << "file: " << standaloneFiles[standaloneFileIndex].getAbsolutePath();
 
 				//1. delete file
-				files[currentFile].remove();
+				standaloneFiles[standaloneFileIndex].remove();
 
 				//workflow
 				//2. refresh files
 				bool b = doStandaloneRefreshPresets();
 				if (b)
 				{
-					currentFile = 0;
-					displayNamePreset = fileNames[currentFile];
+					standaloneFileIndex = 0;
+					displayNamePreset = standaloneFileNames[standaloneFileIndex];
 					doLoadMainGroupPreset(displayNamePreset);
 				}
 				else
@@ -3292,12 +3292,12 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 			{
 				ofLogNotice(__FUNCTION__) << "CLEAR Presets folder: " << path_UserKit_Folder + "/" + path_PresetsStandalone;
 
-				for (int i = 0; i < files.size(); i++) {
-					ofLogWarning(__FUNCTION__) << "DELETE file: " << files[i].getAbsolutePath();
+				for (int i = 0; i < standaloneFiles.size(); i++) {
+					ofLogWarning(__FUNCTION__) << "DELETE file: " << standaloneFiles[i].getAbsolutePath();
 
 					//1. delete file
-					bool b = files[i].remove();
-					if (!b) ofLogError(__FUNCTION__) << "Can not DELETE file: " << files[i].getAbsolutePath();
+					bool b = standaloneFiles[i].remove();
+					if (!b) ofLogError(__FUNCTION__) << "Can not DELETE file: " << standaloneFiles[i].getAbsolutePath();
 				}
 
 				//workflow
@@ -3305,8 +3305,8 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 				bool b = doStandaloneRefreshPresets();
 				if (b)
 				{
-					currentFile = 0;
-					displayNamePreset = fileNames[currentFile];
+					standaloneFileIndex = 0;
+					displayNamePreset = standaloneFileNames[standaloneFileIndex];
 					doLoadMainGroupPreset(displayNamePreset);
 				}
 				else
@@ -3333,14 +3333,14 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 
 				//loaded string into char array
 				char tab[32];
-				strncpy(tab, textInput_New.c_str(), sizeof(tab));
+				strncpy(tab, standaloneTextInput_NEW.c_str(), sizeof(tab));
 				tab[sizeof(tab) - 1] = 0;
 
 				if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
 				{
 					ofLogNotice(__FUNCTION__) << "InputText [tab]:" << ofToString(tab) << endl;
-					textInput_New = ofToString(tab);
-					ofLogNotice(__FUNCTION__) << "textInput_New:" << textInput_New << endl;
+					standaloneTextInput_NEW = ofToString(tab);
+					ofLogNotice(__FUNCTION__) << "standaloneTextInput_NEW:" << standaloneTextInput_NEW << endl;
 
 					//bBlink = true;//not workind. we like to blink when mouse_on_text_input
 				}
@@ -3364,10 +3364,10 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 
 				if (ImGui::Button("SAVE"))
 				{
-					ofLogNotice(__FUNCTION__) << "textInput_New: " << textInput_New << endl;
+					ofLogNotice(__FUNCTION__) << "standaloneTextInput_NEW: " << standaloneTextInput_NEW << endl;
 
 					//1. save
-					doStandalonePresetSave(textInput_New);
+					doStandalonePresetSave(standaloneTextInput_NEW);
 
 					//workflow
 					//2. disable new preset mode
@@ -3379,17 +3379,17 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 					//4. reselect last save preset (bc directory sorting changes)
 					ofLogNotice(__FUNCTION__) << "Reload last saved preset:";
 					int iNew = -1;
-					for (size_t i = 0; i < files.size(); i++)
+					for (size_t i = 0; i < standaloneFiles.size(); i++)
 					{
-						string n = files[i].getBaseName();
-						if (n == textInput_New)
+						string n = standaloneFiles[i].getBaseName();
+						if (n == standaloneTextInput_NEW)
 						{
 							iNew = i;
 						}
 					}
-					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << files[iNew].getBaseName();
-					currentFile = iNew;
-					doLoadMainGroupPreset(textInput_New);
+					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << standaloneFiles[iNew].getBaseName();
+					standaloneFileIndex = iNew;
+					doLoadMainGroupPreset(standaloneTextInput_NEW);
 				}
 
 				if (bBlink)
@@ -3485,10 +3485,10 @@ void ofxPresetsManager::buildStandalonePresets()// standalone presets splitted f
 	if (bLoaded)
 	{
 		// load first preset
-		if (fileNames.size() > 0)
+		if (standaloneFileNames.size() > 0)
 		{
-			currentFile = 0;
-			displayNamePreset = fileNames[currentFile];
+			standaloneFileIndex = 0;
+			displayNamePreset = standaloneFileNames[standaloneFileIndex];
 
 			//// workflow
 			//doLoadMainGroupPreset(displayNamePreset);
@@ -3505,17 +3505,17 @@ bool ofxPresetsManager::doStandaloneRefreshPresets()
 	CheckFolder(_path);
 
 	ofLogNotice(__FUNCTION__) << "Path: " << _path;
-	ofDirectory dataDirectory(ofToDataPath(_path, true));
+	ofDirectory standaloneDataDirectory(ofToDataPath(_path, true));
 
 	//-
 
 	//TODO:
 	//make above code to function
 	//create folder if do not exist!
-	if (!dataDirectory.isDirectory())
+	if (!standaloneDataDirectory.isDirectory())
 	{
 		ofLogError(__FUNCTION__) << "FOLDER DOES NOT EXIST!";
-		bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
+		bool b = standaloneDataDirectory.createDirectory(ofToDataPath(_path, true));
 		if (b) ofLogNotice(__FUNCTION__) << "CREATED FOLDER: " << _path;
 		else ofLogError(__FUNCTION__) << "UNABLE TO CREATE FOLDER: " << _path;
 	}
@@ -3523,17 +3523,17 @@ bool ofxPresetsManager::doStandaloneRefreshPresets()
 	//-
 
 	// clear files and filenames vectors
-	files.clear();
-	fileNames.clear();
+	standaloneFiles.clear();
+	standaloneFileNames.clear();
 
 	// load all folder files in one call
-	files = dataDirectory.getFiles();
+	standaloneFiles = standaloneDataDirectory.getFiles();
 
 	ofLogNotice(__FUNCTION__) << "Preset files:";
-	for (size_t i = 0; i < files.size(); i++)
+	for (size_t i = 0; i < standaloneFiles.size(); i++)
 	{
-		fileNames.push_back(files[i].getBaseName());
-		ofLogNotice(__FUNCTION__) << "[" << i << "] " << files[i].getBaseName();
+		standaloneFileNames.push_back(standaloneFiles[i].getBaseName());
+		ofLogNotice(__FUNCTION__) << "[" << i << "] " << standaloneFiles[i].getBaseName();
 	}
 
 	//-
@@ -3544,7 +3544,7 @@ bool ofxPresetsManager::doStandaloneRefreshPresets()
 	// 1. load same position preset
 	// if preset is deleted goes to nextone..
 	// should check names because sorting changes..
-	if (fileNames.size() > 0)
+	if (standaloneFileNames.size() > 0)
 	{
 		bFilesError = false;
 	}
@@ -3564,10 +3564,10 @@ bool ofxPresetsManager::doStandaloneRefreshPresets()
 	//// 2. always goes to 1st preset 0
 	//// that's because saving re sort the files
 	//// and we don't know the position of last saved preset..
-	//if (fileNames.size() > 0)
+	//if (standaloneFileNames.size() > 0)
 	//{
-	//   currentFile = 0;
-	//   displayNamePreset = fileNames[currentFile];
+	//   standaloneFileIndex = 0;
+	//   displayNamePreset = standaloneFileNames[standaloneFileIndex];
 	//   doLoadMainGroupPreset(displayNamePreset);
 	//}
 	//else

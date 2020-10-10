@@ -113,7 +113,7 @@
 class ofxPresetsManager : public ofBaseApp
 {
 
-public:
+//public:
 	//ofParameter<ofColor> c;
 
 	//-
@@ -244,7 +244,8 @@ public:
 	// TODO: API
 public:
 	//--------------------------------------------------------------
-	ofParameterGroup getSelectorsGroup() {
+	ofParameterGroup getSelectorsGroup() 
+	{
 		//ofParameterGroup g{ "SelectorsGroup" };
 		//for (int i = 0; i < groups.size(); i++) {
 		//	g.add(PRESETS_Selected_Index[i]);
@@ -289,7 +290,13 @@ private:
 
 	//----
 
-	// A. better callbacks
+	// DEPRECATED: A - B - C 
+	// Only for one group selector 
+	// TODO: must finish D mode !
+
+	//--
+
+	// B. better callbacks
 	// to get when 'saved/loaded done' happens from ofApp if desired
 public:
 	ofParameter<bool> DONE_load;// easy callback to know (in ofApp) that preset LOAD is done 
@@ -297,7 +304,8 @@ public:
 
 	//--
 
-	// B. easy callback 
+	// A. easy callbacks
+	// loaded / saved
 	// to faster ofApp integration 
 	// to check in update() as callback
 public:
@@ -314,7 +322,7 @@ public:
 private:
 	bool bIsDoneLoad = false;
 
-	//-
+	//--
 
 public:
 	//--------------------------------------------------------------
@@ -330,7 +338,67 @@ public:
 private:
 	bool bIsDoneSave = false;
 
-	//--
+	//----
+
+	// C. easy trig-callback
+	// used to get alerted when preset has not changed but we like to retrig something
+	// in some situation we would like this feature:
+	// 1. user clicked a preset box
+	// 2. but to the same current loaded preset
+	// 3. no need to reload the file settings
+	// 4. but we want to use the user box click to trig something
+	bool bMustTrig = false;
+public:
+	//--------------------------------------------------------------
+	bool isMustTrig()// trig on select preset or not. this is useful when preset selected not changed, but we want to retrig current preset settings
+	{
+		if (bMustTrig)
+		{
+			bMustTrig = false;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	//// TODO:
+	//// D. split callback listeners for each group !
+	//// template example to uso on your ofApp:
+	//// all presets selectors callback
+	////--------------------------------------------------------------
+	//void Changed_PresetsManagerSelectors(ofAbstractParameter &e);
+	//// TODO:
+	//// setup()
+	//{
+	//	// create callbacks
+	//	for (int i = 0; i < presetsManager.PRESETS_Selected_Index.size(); i++)
+	//	{
+	//		ofAddListener(presetsManager.getSelectorsGroup().parameterChangedE(), this, &ofApp::Changed_PresetsManagerSelectors);
+	//	}
+	//}
+	//// callback
+	////--------------------------------------------------------------
+	//void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
+	//{
+	//	// when a selector changes, we update the local groups too, to mantain all groups synced!
+	//	if (!bDisableCallbacks)
+	//	{
+	//		string name = e.getName();
+	//		ofLogNotice(__FUNCTION__) << name << " : " << e;
+	//		cout << (__FUNCTION__) << name << " : " << e << endl;
+	//		if (0) {}
+	//		else if (name == paragraphs[0].params_BlockLayout.getName())
+	//		}
+	//		else if (name == paragraphs[0].params_Fonts.getName())
+	//		{}
+	//		else if (name == paragraphs[0].animatorPos.getParameters().getName())
+	//		{}
+	//	}
+	//}
+
+	//----
 
 	//----
 	//
@@ -545,7 +613,6 @@ public:
 
 	//----
 
-
 	//----
 	//
 	// API
@@ -554,8 +621,8 @@ public:
 
 public:
 	//--------------------------------------------------------------
-	void loadPreset(int p, int _indexGroup = -1);// load preset for extra groups by code from ofApp
-	void savePreset(int p, int _indexGroup = -1);// save preset for extra groups by code from ofApp
+	void loadPreset(int p, int _indexGroup = -1);// load preset for each group by code from ofApp
+	void savePreset(int p, int _indexGroup = -1);// save preset for each group by code from ofApp
 
 	//--
 
@@ -568,7 +635,7 @@ public:
 		save(PRESETS_Selected_Index[groupIndex].get(), groupIndex);
 	}
 
-	// presets browsing
+	// presets browsing by code from ofApp
 	//--------------------------------------------------------------
 	void load_Previous(int groupIndex = -1)// default if not defined, is the last one: main group link
 	{
@@ -598,12 +665,6 @@ public:
 
 	// for external layout or other workflow purposes
 
-	////--------------------------------------------------------------
-	//int getCurrentPreset()// get index of selected preset
-	//{
-	//	return PRESET_Selected_IndexMain;
-	//}
-
 	//--------------------------------------------------------------
 	int getCurrentPreset(int _group)// get index of selected preset on the group
 	{
@@ -612,21 +673,15 @@ public:
 		return _presetIndex;
 	}
 
-	////--------------------------------------------------------------
-	//int getAmoutPresetsMain()// get main group amount of presets
-	//{
-	//	return mainGroupAmtPresetsFav;
-	//}
-
 	//--------------------------------------------------------------
-	int getAmountGroups()
+	int getAmountGroups()// how many groups we added on setup
 	{
 		if (groups.size() > 0) return groups.size();
 		else return 1;// workaround to set default height before groups are added
 	}
 
 	//--------------------------------------------------------------
-	int getAmountPresetsOfGroup(int g)
+	int getAmountPresetsOfGroup(int g)// how many presets on the added group
 	{
 		int _size = -1;
 		if (g < groups.size()) _size = groupsSizes[g];
@@ -654,7 +709,7 @@ public:
 	}
 
 	//--------------------------------------------------------------
-	string getGroupsPaths(bool simplified = true)
+	string getGroupsPaths(bool simplified = true)// get root paths for the preset files of the groups
 	{
 		string _names = "";
 
@@ -707,38 +762,6 @@ public:
 	void doPopulateFavsALL();// fast populate random presets around all favs
 
 	void doSwap(int groupIndex, int fromIndex, int toIndex);
-
-	//--
-
-	// easy callback
-	// used when preset has not changed but we like to retrig
-	bool bMustTrig = false;
-public:
-	//--------------------------------------------------------------
-	bool isMustTrig()// trig on select preset or not. this is useful when preset selected not changed, but we want to retrig current preset settings
-	{
-		if (bMustTrig)
-		{
-			bMustTrig = false;
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	//----
-
-	// browser for standalone presets
-
-private:
-	// load presets from preset folder, not from favorites presets folders
-	void doLoadMainGroupPreset(string name);
-	void doStandalonePresetSave(string name);
-	bool doStandaloneRefreshPresets();
-	void buildStandalonePresets();// standalone presets splitted from favourites presets
-	void doCheckPresetsFolderIsEmpty();
 
 	//----
 
@@ -1010,9 +1033,11 @@ private:
 
 private:
 	// mouse over gui handler
+	// detects mouse interaction on ImGui to block other mouse actions like: easy camera... 
 	ofParameter<bool> bImGui_mouseOver;
 	bool bImGui_mouseOver_PRE;
 	bool bMouseOver_Changed = false;
+
 	//public:
 	////--------------------------------------------------------------
 	//bool isMouseOver()
@@ -1032,19 +1057,32 @@ private:
 	//	}
 	//}
 
-	//--
+	//-----
 
-	// '/archive' folder for standalone presets browser 
+	// standalone presets browser 
+	// '/archive' folder 
 
 	//bool MODE_newPreset = false;
-	string textInput_New = "";//user input text
+	string standaloneTextInput_NEW = "";//user input text
 
 	// files
-	std::vector<std::string> fileNames;
-	std::vector<ofFile> files;
-	int currentFile = 0;
-	string textInput_temp = "";
+	std::vector<std::string> standaloneFileNames;
+	std::vector<ofFile> standaloneFiles;
+	int standaloneFileIndex = 0;
+	string standaloneTextInput_temp = "";
 	bool bFilesError = false;
+
+	//------
+
+	// browser for standalone presets
+	// this presets are not included into favourites, the ones that have cllicker boxes
+private:
+	// load presets from preset folder, not from favorites presets folders
+	void doLoadMainGroupPreset(string name);
+	void doStandalonePresetSave(string name);
+	bool doStandaloneRefreshPresets();
+	void buildStandalonePresets();// standalone presets splitted from favourites presets
+	void doCheckPresetsFolderIsEmpty();
 
 	//-------
 
@@ -1099,7 +1137,9 @@ private:
 
 	//--
 
-	// helpers to easy integrate into external gui's
+	// API
+
+	// helpers to easy integrate importane controls into external gui's
 
 private:
 	// expose basic controls to allow use on external gui
@@ -1133,7 +1173,7 @@ public:
 
 	//----
 
-	//keys
+	// keys
 
 public:
 	void keyPressed(ofKeyEventArgs &eventArgs);
@@ -1175,8 +1215,8 @@ public:
 
 	// mouse
 
-	void mousePressed(int x, int y);
 private:
+	void mousePressed(int x, int y);
 	bool lastMouseButtonState;
 
 	//----
