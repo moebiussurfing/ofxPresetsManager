@@ -527,7 +527,7 @@ private:
 	ofParameter<bool> loadToMemory;
 	ofParameter<bool> saveFromMemory;
 	void load_AllKit_ToMemory();
-	void save_AllKit_FromMemory();
+	void saveAllKitFromMemory();
 
 	//--
 

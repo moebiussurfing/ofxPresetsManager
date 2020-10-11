@@ -615,7 +615,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//	else
 		//	{
 		//		//MODE B: direct from memory
-		//		save_AllKit_FromMemory();
+		//		saveAllKitFromMemory();
 		//	}
 		//	//-
 		//	//auto save timer
@@ -1603,6 +1603,9 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 	if (bDoneSetup)
 	{
 		const int &key = eventArgs.key;
+		
+		// TODO:
+		bImGui_mouseOver = false;
 
 		if (key == 'K' && !bImGui_mouseOver)// restore keys control
 		{
@@ -2215,7 +2218,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 		{
 			ofLogNotice(__FUNCTION__) << "saveFromMemory:" << e;
 			saveFromMemory = false;
-			save_AllKit_FromMemory();
+			saveAllKitFromMemory();
 		}
 		else if (name == "MODE MEMORY")
 		{
@@ -2229,7 +2232,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 			else
 			{
 				//save all xml preset files to disk from memory
-				save_AllKit_FromMemory();
+				saveAllKitFromMemory();
 			}
 		}
 
@@ -2409,7 +2412,7 @@ void ofxPresetsManager::setPath_PresetsStandalone(std::string folder)
 // memory mode 
 // (loaded from data vector instead of hd files)
 //--------------------------------------------------------------
-void ofxPresetsManager::save_AllKit_FromMemory()
+void ofxPresetsManager::saveAllKitFromMemory()
 {
 	ofLogVerbose(__FUNCTION__);
 
@@ -2569,7 +2572,7 @@ void ofxPresetsManager::exit()
 	// MODE B: direct from memory
 	if (MODE_MemoryLive && autoSave)
 	{
-		save_AllKit_FromMemory();// update of files is required bc presets are on memmory only
+		saveAllKitFromMemory();// update of files is required bc presets are on memmory only
 	}
 
 	//--

@@ -44,7 +44,7 @@ public:
 	ofParameter<bool> fill0;
 	ofParameter<float> lineWidth0;
 	ofParameter<int> shapeType0;
-	ofParameter<int> numShapes0;
+	ofParameter<int> numObjects0;
 	ofParameter<int> separation0;
     ofParameter<int> shapeSide0;
 	
@@ -52,7 +52,7 @@ public:
 	ofParameterGroup params1;
 	ofParameter<ofColor> color1;
 	ofParameter<bool> show1;
-	ofParameter<int> numShapes1;
+	ofParameter<int> numObjects1;
 	ofParameter<int> separation1;
 	ofParameter<int> shapeSide1;
 	
@@ -60,6 +60,7 @@ public:
 	ofParameterGroup params2;
 	ofParameter<ofColor> color2;
 	ofParameter<bool> show2;
+	ofParameter<int> numObjects2;
 	ofParameter<float> size2;
 	ofParameter<bool> fill2;
 	
@@ -98,5 +99,6 @@ public:
 	ofxPanel gui2;
 	ofxPanel gui3;
 #endif
+
 	bool bGui = true;
 };
