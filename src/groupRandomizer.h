@@ -127,7 +127,7 @@ public:
 	//		////--
 	//
 	//		//// refresh files
-	//		//doStandaloneRefreshPresets();
+	//		//doStandalonePresetsRefresh();
 	//	}
 
 	//----

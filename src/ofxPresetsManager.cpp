@@ -517,7 +517,7 @@ void ofxPresetsManager::startup()
 	//// TODO:
 	// workflow
 	// check if presets folders is empty. then populate all elements if not
-	doCheckPresetsFolderIsEmpty();
+	doCheckPresetsFoldersAreEmpty();
 
 	//--
 
@@ -3137,7 +3137,7 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 							//if (MODE_Browser_NewPreset)
 							ofLogNotice(__FUNCTION__) << "LOAD" << endl;
 							ofLogNotice(__FUNCTION__) << "PRESET NAME: " << displayNamePreset;
-							doLoadMainGroupPreset(displayNamePreset);
+							doStandalonePresetLoad(displayNamePreset);
 						}
 					}
 				}
@@ -3160,7 +3160,7 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 
 							//if (MODE_Browser_NewPreset)
 							ofLogNotice(__FUNCTION__) << "LOAD PRESET NAME: " << displayNamePreset;
-							doLoadMainGroupPreset(displayNamePreset);
+							doStandalonePresetLoad(displayNamePreset);
 						}
 					}
 				}
@@ -3192,7 +3192,7 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 						displayNamePreset = standaloneFileNames[standaloneFileIndex];
 
 						ofLogNotice(__FUNCTION__) << "LOAD Preset Name: " << displayNamePreset;
-						doLoadMainGroupPreset(displayNamePreset);
+						doStandalonePresetLoad(displayNamePreset);
 					}
 				}
 			}
@@ -3218,7 +3218,7 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 
 				//workflow
 				//3. refresh files
-				doStandaloneRefreshPresets();
+				doStandalonePresetsRefresh();
 
 				//4. reselect last save preset (bc directory sorting changes)
 				ofLogNotice(__FUNCTION__) << "Reload last updated preset:";
@@ -3236,7 +3236,7 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << standaloneFiles[iNew].getBaseName();
 					standaloneFileIndex = iNew;
 					displayNamePreset = standaloneFileNames[standaloneFileIndex];
-					doLoadMainGroupPreset(displayNamePreset);
+					doStandalonePresetLoad(displayNamePreset);
 				}
 				else
 				{
@@ -3252,7 +3252,7 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 			if (ImGui::Button("RELOAD"))
 			{
 				ofLogNotice(__FUNCTION__) << "RELOAD Preset Name: " << displayNamePreset;
-				doLoadMainGroupPreset(displayNamePreset);
+				doStandalonePresetLoad(displayNamePreset);
 			}
 
 			//-
@@ -3270,12 +3270,12 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 
 				//workflow
 				//2. refresh files
-				bool b = doStandaloneRefreshPresets();
+				bool b = doStandalonePresetsRefresh();
 				if (b)
 				{
 					standaloneFileIndex = 0;
 					displayNamePreset = standaloneFileNames[standaloneFileIndex];
-					doLoadMainGroupPreset(displayNamePreset);
+					doStandalonePresetLoad(displayNamePreset);
 				}
 				else
 				{
@@ -3302,12 +3302,12 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 
 				//workflow
 				//2. refresh files
-				bool b = doStandaloneRefreshPresets();
+				bool b = doStandalonePresetsRefresh();
 				if (b)
 				{
 					standaloneFileIndex = 0;
 					displayNamePreset = standaloneFileNames[standaloneFileIndex];
-					doLoadMainGroupPreset(displayNamePreset);
+					doStandalonePresetLoad(displayNamePreset);
 				}
 				else
 				{
@@ -3374,7 +3374,7 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 					MODE_Browser_NewPreset = false;
 
 					//3. refresh files
-					doStandaloneRefreshPresets();
+					doStandalonePresetsRefresh();
 
 					//4. reselect last save preset (bc directory sorting changes)
 					ofLogNotice(__FUNCTION__) << "Reload last saved preset:";
@@ -3389,7 +3389,7 @@ void ofxPresetsManager::ImGui_Draw_Browser()
 					}
 					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << standaloneFiles[iNew].getBaseName();
 					standaloneFileIndex = iNew;
-					doLoadMainGroupPreset(standaloneTextInput_NEW);
+					doStandalonePresetLoad(standaloneTextInput_NEW);
 				}
 
 				if (bBlink)
@@ -3436,7 +3436,30 @@ void ofxPresetsManager::ImGui_Draw_Randomizers()
 }
 #endif
 
+//----
+
 // standalone presets browser
+
+//--------------------------------------------------------------
+void ofxPresetsManager::buildStandalonePresets()// standalone presets splitted from favourites presets
+{
+	// load files structure directory
+	bool bLoaded = doStandalonePresetsRefresh();
+
+	// workflow
+	if (bLoaded)
+	{
+		// load first preset
+		if (standaloneFileNames.size() > 0)
+		{
+			standaloneFileIndex = 0;
+			displayNamePreset = standaloneFileNames[standaloneFileIndex];
+
+			//// workflow
+			//doStandalonePresetLoad(displayNamePreset);
+		}
+	}
+}
 //--------------------------------------------------------------
 void ofxPresetsManager::doStandalonePresetSave(string name)// without xml extension nor path
 {
@@ -3457,7 +3480,7 @@ void ofxPresetsManager::doStandalonePresetSave(string name)// without xml extens
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::doLoadMainGroupPreset(string name)// without xml extension nor path
+void ofxPresetsManager::doStandalonePresetLoad(string name)// without xml extension nor path
 {
 	ofLogNotice(__FUNCTION__) << name << fileExtension;
 
@@ -3476,28 +3499,7 @@ void ofxPresetsManager::doLoadMainGroupPreset(string name)// without xml extensi
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::buildStandalonePresets()// standalone presets splitted from favourites presets
-{
-	// load files structure directory
-	bool bLoaded = doStandaloneRefreshPresets();
-
-	// workflow
-	if (bLoaded)
-	{
-		// load first preset
-		if (standaloneFileNames.size() > 0)
-		{
-			standaloneFileIndex = 0;
-			displayNamePreset = standaloneFileNames[standaloneFileIndex];
-
-			//// workflow
-			//doLoadMainGroupPreset(displayNamePreset);
-		}
-	}
-}
-
-//--------------------------------------------------------------
-bool ofxPresetsManager::doStandaloneRefreshPresets()
+bool ofxPresetsManager::doStandalonePresetsRefresh()
 {
 	//ofLogNotice(__FUNCTION__);
 
@@ -3568,7 +3570,7 @@ bool ofxPresetsManager::doStandaloneRefreshPresets()
 	//{
 	//   standaloneFileIndex = 0;
 	//   displayNamePreset = standaloneFileNames[standaloneFileIndex];
-	//   doLoadMainGroupPreset(displayNamePreset);
+	//   doStandalonePresetLoad(displayNamePreset);
 	//}
 	//else
 	//{
@@ -3576,6 +3578,78 @@ bool ofxPresetsManager::doStandaloneRefreshPresets()
 	//}
 
 	return !bFilesError;//true if ok
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::doCheckPresetsFoldersAreEmpty()
+{
+	for (int i = 0; i < groups.size(); i++)
+	{
+		// set the name for the randomizer settings file
+		if (bSplitGroupFolders.get())
+		{
+			std::string _path;
+			_path = path_UserKit_Folder + "/" + path_PresetsFavourites;// current kit-presets presets folder
+			_path += "/" + groups[i].getName();// append group name
+			_path += "/";// the folder
+
+			CheckFolder(_path);
+
+			ofDirectory dataDirectoryGroupPresets(ofToDataPath(_path, true));
+
+			// check if folder is empty
+			if (dataDirectoryGroupPresets.size() == 0) {// if there's no files into folder
+				ofLogWarning(__FUNCTION__) << "Folder " << _path << ", used for group " << i << " " << groups[i].getName()
+					<< " is empty! Force populate favourites files...";
+
+				// 1. populate all favourite preset files for this group
+				doPopulateFavs(i);
+
+				//// 2. create standalone files too: one file for each favourite preset
+				//doGetFavsToFilesBrowser();
+			}
+
+			// verify if files are created
+			ofLogNotice(__FUNCTION__) << ofToString(dataDirectoryGroupPresets.size()) << " file preset at folder " << _path;
+		}
+	}
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::doGetFavsToFilesBrowser()// save all favorites presets to the browser (archive) folder
+{
+	ofLogNotice(__FUNCTION__);
+
+	// browser path
+	string browser_path;
+	browser_path = path_UserKit_Folder + "/" + path_PresetsStandalone;
+
+	// browser number of files
+	// iterate all presets
+	for (int i = 0; i < mainGroupAmtPresetsFav; i++)
+	{
+		std::string pathSrc;
+		std::string pathDst;
+
+		pathSrc = getPresetPath(groups[0].getName(), i);
+		boost::filesystem::path bPath(pathSrc);
+
+		//string pathFolder = ofToString(bPath.parent_path());
+		string fileName = ofToString(bPath.filename().generic_string());
+		pathDst = browser_path + "/" + fileName;
+
+		ofLogNotice(__FUNCTION__) << "pathSrc: " << pathSrc;
+		ofLogNotice(__FUNCTION__) << "pathDst: " << pathDst;
+
+		ofFile file;
+		file.copyFromTo(pathSrc, pathDst, true, true);// relative, overwrite
+
+	}
+
+	//--
+
+	// refresh files
+	doStandalonePresetsRefresh();
 }
 
 //----
@@ -3624,39 +3698,4 @@ void ofxPresetsManager::Changed_GuiGROUP_Selected_Index(int & index)
 {
 	GuiGROUP_Selected_Index = (int)ofClamp(GuiGROUP_Selected_Index.get(), 0, GuiGROUP_Selected_Index.getMax());
 	ofLogWarning(__FUNCTION__) << " : " << GuiGROUP_Selected_Index;
-}
-
-//--------------------------------------------------------------
-void ofxPresetsManager::doCheckPresetsFolderIsEmpty()
-{
-	for (int i = 0; i < groups.size(); i++)
-	{
-		// set the name for the randomizer settings file
-		if (bSplitGroupFolders.get())
-		{
-			std::string _path;
-			_path = path_UserKit_Folder + "/" + path_PresetsFavourites;// current kit-presets presets folder
-			_path += "/" + groups[i].getName();// append group name
-			_path += "/";// the folder
-
-			CheckFolder(_path);
-
-			ofDirectory dataDirectory(ofToDataPath(_path, true));
-
-			// check if folder is empty
-			if (dataDirectory.size() == 0) {// if there's no files into folder
-				ofLogNotice(__FUNCTION__) << "Folder " << _path << " is empty. Force populate favourites files...";
-
-				// populate all favs
-				doPopulateFavs(i);
-
-				//// create browser files too
-				//doGetFavsToFilesBrowser();
-			}
-
-			// verify if files are created
-			ofLogNotice(__FUNCTION__) << ofToString(dataDirectory.size()) << " file preset at folder " << _path;
-		}
-	}
-
 }

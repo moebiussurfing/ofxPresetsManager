@@ -1323,7 +1323,7 @@ void groupRandomizer::loadPreset(int p)
 }
 
 ////--------------------------------------------------------------
-//void groupRandomizer::doCheckPresetsFolderIsEmpty()
+//void groupRandomizer::doCheckPresetsFoldersAreEmpty()
 //{
 //	//string _path = path_UserKit_Folder + "/" + path_PresetsFavourites;
 //	//ofLogNotice(__FUNCTION__) << "Check that not empty folder at path: " << _path;
