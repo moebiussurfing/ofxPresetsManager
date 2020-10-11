@@ -36,7 +36,7 @@ private:
 public:
 	void setPath_RandomizerSettings(string folder)
 	{
-		ofLogNotice(__FUNCTION__) << "path: " << folder;
+		ofLogNotice(__FUNCTION__) << "Path: " << folder;
 
 		path_RandomizerSettings = folder;
 	}
@@ -94,7 +94,7 @@ public:
 
 	//public:
 	//	//--------------------------------------------------------------
-	//	void doGetFavsToFilesBrowser()// save all favorites presets to the browser (archive) folder
+	//	void doGetFavsToStandalonePresets()// save all favorites presets to the browser (archive) folder
 	//	{
 	//		ofLogNotice(__FUNCTION__);
 	//

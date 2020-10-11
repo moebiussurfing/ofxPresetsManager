@@ -14,7 +14,6 @@ void ofApp::setup()
 	ofSetVerticalSync(true);
 #endif
 	ofSetCircleResolution(200);
-	ofxSurfingHelpers::setThemeDark_ofxGui();
 
 	//--
 
@@ -22,6 +21,9 @@ void ofApp::setup()
 	setupParameters();
 
 	//--
+
+	presetsManager.setEnableKeysArrowBrowse(true);
+	presetsManager.setSizeBox_PresetClicker(50);
 
 	// add our ofParameterGroup to the preset manager 
 	// also define wich key triggers are associated to each preset. 
@@ -108,10 +110,11 @@ void ofApp::setupParameters()
 
 	//--
 
+#ifdef USE_GUI_LOCAL 
 	// 1. local guis
-
 	// a local ofApp gui to show/edit our settings/parameters
 	// we will see here show how our params/settings changes when using the presets manager
+	ofxSurfingHelpers::setThemeDark_ofxGui();
 
 	int x = 5;
 	int y = 10;
@@ -132,6 +135,7 @@ void ofApp::setupParameters()
 	gui3.setup("ofApp3");
 	gui3.add(params3);
 	gui3.setPosition(x + 3 * w, y);
+#endif
 }
 
 //--------------------------------------------------------------
@@ -151,6 +155,7 @@ void ofApp::draw()
 	if (show2) drawScene2();
 	if (show3) drawScene3();
 
+#ifdef USE_GUI_LOCAL 
 	// local gui parameters: to show or to edit presets params
 	if (bGui) {
 		gui0.draw();
@@ -158,6 +163,7 @@ void ofApp::draw()
 		gui2.draw();
 		gui3.draw();
 	}
+#endif
 
 	//TEST
 	//gui_ImGui.begin();

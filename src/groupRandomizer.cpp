@@ -1005,7 +1005,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 			//	//// populate all favs
 			//	//doPopulateFavs();
 			//	//// create browser files too
-			//	//doGetFavsToFilesBrowser();
+			//	//doGetFavsToStandalonePresets();
 			//}
 		}
 
@@ -1342,7 +1342,7 @@ void groupRandomizer::loadPreset(int p)
 //		//populate all favs
 //		doPopulateFavs();
 //		//create browser files too
-//		doGetFavsToFilesBrowser();
+//		doGetFavsToStandalonePresets();
 //	}
 //
 //	//verify if files are created

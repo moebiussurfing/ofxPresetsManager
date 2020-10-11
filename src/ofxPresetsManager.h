@@ -113,10 +113,10 @@
 class ofxPresetsManager : public ofBaseApp
 {
 
-//public:
-	//ofParameter<ofColor> c;
+	//public:
+		//ofParameter<ofColor> c;
 
-	//-
+		//-
 
 public:
 	// mini preview rectangles positions and sizes
@@ -221,12 +221,12 @@ private:
 
 public:
 	// exposed to allow external callbacks
-	std::vector<ofParameter<int>> PRESETS_Selected_Index;
+	std::vector<ofParameter<int>> PRESETS_Selected_Index;// one selector for each group
 
 public:
 	// API
 	//--------------------------------------------------------------
-	ofParameterGroup getSelectorsGroup() 
+	ofParameterGroup getSelectorsGroup()
 	{
 		// TODO:
 		// could use a customized control group with importante parameters...
@@ -502,7 +502,6 @@ private:
 	std::string fileExtension;// xml or json
 
 	std::string displayNameUserKit;
-	std::string displayNamePreset;
 
 	//--
 
@@ -520,7 +519,7 @@ private:
 private:
 	ofParameter<bool> MODE_MemoryLive;// when enabled all presets are handled from a memory vector to avoid lag of loading xml files from hd
 public:
-	void setModeMemoryPerformance(bool b) 
+	void setModeMemoryPerformance(bool b)
 	{
 		MODE_MemoryLive = b;
 	}
@@ -938,7 +937,7 @@ public:
 
 	//----
 
-	int mainGroupAmtPresetsFav;// amount of box-clickable handled presets on current favorites/kit group
+	//int mainGroupAmtPresetsFav;// amount of box-clickable handled presets on current favorites/kit group
 
 public:
 	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
@@ -985,14 +984,14 @@ public:
 	void ImGui_Draw_MainPanel();
 	void ImGui_Draw_Extra();
 	void ImGui_Draw_GroupsSelectors();
-	void ImGui_Draw_Browser();
+	void ImGui_Draw_StandalonePresets();
 	void ImGui_Draw_PresetParameters();
-	
+
 	//void ImGui_Draw_Randomizers(ofxImGui::Settings &settings);
 	//void ImGui_Draw_MainPanel(ofxImGui::Settings &settings);
 	//void ImGui_Draw_Extra(ofxImGui::Settings &settings);
 	//void ImGui_Draw_GroupsSelectors(ofxImGui::Settings &settings);
-	//void ImGui_Draw_Browser(ofxImGui::Settings &settings);
+	//void ImGui_Draw_StandalonePresets(ofxImGui::Settings &settings);
 	//void ImGui_Draw_PresetParameters(ofxImGui::Settings &settings);
 	//void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
 
@@ -1001,7 +1000,7 @@ public:
 	//#else
 	//	void ImGui_Draw_Window();
 	//#endif
-	
+
 public:
 	void ImGui_Draw_Window();
 
@@ -1061,31 +1060,56 @@ private:
 
 	// browser for standalone presets
 
-	// this presets are not included into favourites, the ones that have cllicker boxes
-	// this allows user to save a preset file with a custom name in a seprated path folder
-	// then can be used, cloned or anything in another momment
-	// typical path will be /archive
-	// \bin\data\ofxPresetsManager\archive
+	// what are standalone-presets vs favourite-presets?
+	// you can archive several named presets into a separated folder:
+	//		\bin\data\ofxPresetsManager\archive
+	// then can be loaded, cloned-to or modified in another momment.
+	// this preset files are different that favourite-presets: 
+	// the main ones that have clicker boxes and key triggers. located at:
+	//		\bin\data\ofxPresetsManager\presets
 
+	//// one-group files
+	//std::vector<std::string> standaloneFileNames;
+	//std::vector<ofFile> standaloneFiles;
+	//int standaloneFileIndex = 0;
+	//ofParameter<bool> MODE_Browser_NewPreset;
+	//string standaloneTextInput_NEW = "";//user input text
+	//string standaloneTextInput_temp = "";
+	//bool bFilesError = false;
 
-	// files
-	std::vector<std::string> standaloneFileNames;
-	std::vector<ofFile> standaloneFiles;
-	int standaloneFileIndex = 0;
+	//-
+
+	// multi-group files
+	vector < std::vector<std::string> > standaloneFileNames;// all the group standalone preset names
+	vector < std::vector<ofFile> > standaloneFiles;// all the group standalone preset files
+	vector < int> standaloneFileIndex;// selected standalone preset file of the group
+
+	// engine handler
 	ofParameter<bool> MODE_Browser_NewPreset;
 	string standaloneTextInput_NEW = "";//user input text
 	string standaloneTextInput_temp = "";
 	bool bFilesError = false;
 
+	vector < std::string > standaloneNamePresetDisplay;
+
 	//------
 
 private:
-	// load presets from preset folder, not from favorites presets folders
-	void buildStandalonePresets();// standalone presets splitted from favourites presets
-	void doStandalonePresetLoad(string name);
-	void doStandalonePresetSave(string name);
-	bool doStandalonePresetsRefresh();
-	void doGetFavsToFilesBrowser();// save all favorites presets to the browser (archive) folder
+	//// to handle standalone presets
+	//// from 'archive/' folder, not from favourites presets folders
+
+	//void doStandalonePresetsBuild();// standalone presets splitted from favourites presets
+	//void doStandalonePresetLoad(string name);
+	//void doStandalonePresetSave(string name);
+	//bool doStandalonePresetsRefresh();
+	//void doStandalonePresetsBuildFromFavs();// save all favourites-presets to the standalone-presets (archive) folder
+
+	// multi-group files
+	void doStandalonePresetsBuild(int groupIndex = -1);// standalone presets splitted from favourites presets
+	void doStandalonePresetLoad(string name, int groupIndex = -1);
+	void doStandalonePresetSave(string name, int groupIndex = -1);
+	bool doStandalonePresetsRefresh(int groupIndex = -1);
+	void doStandalonePresetsBuildFromFavs(int groupIndex = -1);// save all favourites-presets to the standalone-presets (archive) folder
 
 	//----
 
@@ -1094,28 +1118,31 @@ private:
 	// helpers to easy integrate importane controls into external gui's
 
 private:
-	// expose basic controls to allow use on external gui
+	// to expose basic controls to allow use on external gui
 	ofParameterGroup params_Controls{ "PRESETS MANAGER" };
 
 public:
+	// this are usefull parameters to use in our ofAPp/projects/addons gui's
 	//--------------------------------------------------------------
-	ofParameterGroup getParamsControls() {// this are usefull parameters to use in our projects/addons gui's
-		params_Controls.clear();
+	ofParameterGroup getParamsControls() {
 		//cout << "displayNameUserKit: " << displayNameUserKit << endl;// TODO: not refreshing well on startup..
+
+		params_Controls.clear();
 		//params_Controls.setName(displayNameUserKit);
 		//params_Controls.setName("OVERLAY");
 		params_Controls.add(getParamsPresetSelectors());
 		params_Controls.add(getParamsRandomizers());
 		params_Controls.add(SHOW_ClickPanel);
 		params_Controls.add(MODE_Editor);
+
 		return params_Controls;
 	}
 	//--------------------------------------------------------------
-	ofParameterGroup getParamsPresetSelectors() {
+	ofParameterGroup getParamsPresetSelectors() {// selectors index to all the added groups
 		return params_GroupsSelectors;
 	}
 	//--------------------------------------------------------------
-	ofParameterGroup getParamsRandomizers() {
+	ofParameterGroup getParamsRandomizers() {// important settings to handle randomizers
 		ofParameterGroup _g{ "RANDOMIZERS" };
 		for (int i = 0; i < groups.size(); i++) {
 			_g.add(groupRandomizers[i].getParamsRandomizers());
@@ -1163,7 +1190,7 @@ public:
 		ENABLE_KeysArrowBrowse = b;
 	}
 
-	//--
+	//----
 
 	// mouse
 
@@ -1179,7 +1206,7 @@ private:
 	string myTTF;// gui font for all gui theme
 	int sizeTTF;
 
-	//-
+	//----
 
 	// callbacks
 
@@ -1226,6 +1253,7 @@ public:
 
 	//--
 
+	// TODO:
 	// timer autosave
 private:
 	ofParameter<bool> bAutosaveTimer;

@@ -128,7 +128,7 @@ ofxPresetsManager::ofxPresetsManager()
 	saveFromMemory.set("SAVE FROM MEMORY", false);
 	bAutosaveTimer.set("TIMER AUTO SAVE", false);
 
-	displayNamePreset = "NO_NAME_PRESET";//browser loaded preset name
+	//displayNamePreset = "NO_NAME_PRESET";//browser loaded preset name
 
 	//-
 
@@ -193,7 +193,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//--
 
 	// gui box clicker font
-	string str;
+	std::string str;
 	//sizeTTF = 8;
 	//str = "telegrama_render.otf";
 	//str = "iAWriterMonoS-Bold.ttf";
@@ -479,7 +479,7 @@ void ofxPresetsManager::startup()
 	// preset clicker
 
 	MODE_EditPresetClicker.set("EDIT CLICKER", false);
-	bg_EditPresetClicker.set("BG CLICKER", false);
+	bg_EditPresetClicker.set("BACKGROUND CLICKER", false);
 
 	// reset mini previews layout
 	float _size = cellSize;
@@ -505,6 +505,10 @@ void ofxPresetsManager::startup()
 	rectanglePresetClicker.loadSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
 	clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
 	clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
+
+	//clamp inside window
+	clicker_Pos.x = ofClamp(clicker_Pos.x, 0, ofGetWidth());
+	clicker_Pos.y = ofClamp(clicker_Pos.y, 0, ofGetHeight());
 
 	//--
 
@@ -676,7 +680,7 @@ void ofxPresetsManager::drawPresetClicker()
 
 	float _round = 3.0f;
 	float _pad = 3.0f;
-	string _label;
+	std::string _label;
 
 	ofColor _colorText;// lines and text color
 	ofColor _colorButton;// bg selected button
@@ -907,7 +911,7 @@ void ofxPresetsManager::drawPresetClicker()
 
 		if (SHOW_GroupName)
 		{
-			string info = groups[i].getName();
+			std::string info = groups[i].getName();
 
 			// marl selected group. useful to navigate with arrow keys
 			if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1) info = "* " + info;
@@ -943,7 +947,7 @@ void ofxPresetsManager::drawPresetClicker()
 			bShowClickerInfo = SHOW_Help.get();
 			if (bShowClickerInfo && ENABLE_Keys && (i == 0))
 			{
-				string ss = helpInfo;
+				std::string ss = helpInfo;
 				int _padx = 22;
 				int _pady = 30;
 				int x = 0;
@@ -1155,7 +1159,7 @@ void ofxPresetsManager::save(int presetIndex, int guiIndex)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::save(int presetIndex, string gName)
+void ofxPresetsManager::save(int presetIndex, std::string gName)
 {
 	int guiIndex = getGuiIndex(gName);
 
@@ -1360,7 +1364,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::load(int presetIndex, string gName)
+void ofxPresetsManager::load(int presetIndex, std::string gName)
 {
 	ofLogNotice(__FUNCTION__) << "name: " << gName << " preset: " << presetIndex;
 
@@ -1501,7 +1505,7 @@ int ofxPresetsManager::getPresetIndex(int guiIndex) const
 }
 
 //--------------------------------------------------------------
-int ofxPresetsManager::getPresetIndex(string gName) const
+int ofxPresetsManager::getPresetIndex(std::string gName) const
 {
 	int guiIndex = getGuiIndex(gName);
 
@@ -1516,7 +1520,7 @@ int ofxPresetsManager::getPresetIndex(string gName) const
 }
 
 //--------------------------------------------------------------
-int ofxPresetsManager::getGuiIndex(string name) const
+int ofxPresetsManager::getGuiIndex(std::string name) const
 {
 	for (size_t i = 0; i < (int)groups.size(); ++i)
 	{
@@ -1529,11 +1533,11 @@ int ofxPresetsManager::getGuiIndex(string name) const
 }
 
 //--------------------------------------------------------------
-string ofxPresetsManager::getPresetPath(string _gName, int _presetIndex)
+std::string ofxPresetsManager::getPresetPath(std::string _gName, int _presetIndex)
 {
-	string _pathFolder;
-	string _pathFilename;
-	string _path;
+	std::string _pathFolder;
+	std::string _pathFilename;
+	std::string _path;
 
 	_pathFolder = path_UserKit_Folder + "/" + path_PresetsFavourites + "/";
 
@@ -1550,9 +1554,9 @@ string ofxPresetsManager::getPresetPath(string _gName, int _presetIndex)
 }
 
 //--------------------------------------------------------------
-string ofxPresetsManager::getGroupPath(string _gName)
+std::string ofxPresetsManager::getGroupPath(std::string _gName)
 {
-	string _pathFolder;
+	std::string _pathFolder;
 
 	_pathFolder = path_UserKit_Folder + "/" + path_PresetsFavourites + "/";
 
@@ -1565,10 +1569,10 @@ string ofxPresetsManager::getGroupPath(string _gName)
 }
 
 //--------------------------------------------------------------
-string ofxPresetsManager::getGroupPath(int _index)
+std::string ofxPresetsManager::getGroupPath(int _index)
 {
-	string _pathFolder;
-	string _gName;
+	std::string _pathFolder;
+	std::string _gName;
 	_gName = getGroupPath(groups[_index].getName());
 	if (_index < groups.size()) _pathFolder = _gName;
 	else return "UNKNOWN";
@@ -1701,7 +1705,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				ofLogNotice(__FUNCTION__) << "UNDO CLEAR";
 				undoStringParams.clear();
-		}
+			}
 #endif
 
 
@@ -1768,8 +1772,8 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 					}
 				}
 			}
+		}
 	}
-}
 }
 
 //--------------------------------------------------------------
@@ -1899,7 +1903,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 		//-
 
-		if (groups.size() > 0) 
+		if (groups.size() > 0)
 		{
 			// 3. toggle show gui (on main group only)
 			// TODO: hide save button on autosave mode...
@@ -2003,8 +2007,8 @@ void ofxPresetsManager::doSwap(int groupIndex, int fromIndex, int toIndex)
 {
 	ofLogNotice(__FUNCTION__) << "group:" << groupIndex << " : " << fromIndex << "->" << toIndex;
 
-	string srcName = getPresetPath(groups[groupIndex].getName(), fromIndex);
-	string dstName = getPresetPath(groups[groupIndex].getName(), toIndex);
+	std::string srcName = getPresetPath(groups[groupIndex].getName(), fromIndex);
+	std::string dstName = getPresetPath(groups[groupIndex].getName(), toIndex);
 
 	ofLogNotice(__FUNCTION__) << "Source: " << fromIndex;
 	ofLogNotice(__FUNCTION__) << "Dest  : " << toIndex;
@@ -2012,7 +2016,7 @@ void ofxPresetsManager::doSwap(int groupIndex, int fromIndex, int toIndex)
 	ofLogNotice(__FUNCTION__) << "Dest  : " << dstName;
 
 	// 1. save source preset (from memory) to temp file
-	string _pathSrc = "tempSrc.xml";
+	std::string _pathSrc = "tempSrc.xml";
 	ofXml _settingsSrc;
 	ofSerialize(_settingsSrc, groups[groupIndex]);
 	_settingsSrc.save(_pathSrc);
@@ -2052,7 +2056,7 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 {
 	if (!DISABLE_CALLBACKS)
 	{
-		string name = e.getName();
+		std::string name = e.getName();
 
 		if ((name != "exclude") && (name != "%"))
 		{
@@ -2157,7 +2161,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 {
 	if (!DISABLE_CALLBACKS)
 	{
-		string name = e.getName();
+		std::string name = e.getName();
 
 		if ((name != "exclude") &&
 			(name != ImGui_Position.getName()) &&
@@ -2273,7 +2277,7 @@ void ofxPresetsManager::load_ControlSettings()
 
 	//control settings
 
-	string path = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_ControlSettings;
+	std::string path = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_ControlSettings;
 
 	bool b = ofxSurfingHelpers::loadGroup(params_Control, path);
 
@@ -2291,7 +2295,7 @@ void ofxPresetsManager::load_ControlSettings()
 	//testing to enable here to avoid create empty xml settings on global root?
 	DISABLE_CALLBACKS = false;
 
-	string path3 = filenameMainSettings;
+	std::string path3 = filenameMainSettings;
 
 	b = ofxSurfingHelpers::loadGroup(params_UserKitSettings, path3);
 
@@ -2325,7 +2329,7 @@ void ofxPresetsManager::save_ControlSettings()
 		// save randomizers settings
 		ofLogVerbose(__FUNCTION__) << endl << params_Control.toString() << endl;
 
-		string path;
+		std::string path;
 		bool b;
 
 		path = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_ControlSettings;
@@ -2362,7 +2366,7 @@ void ofxPresetsManager::save_ControlSettings()
 //--
 
 //--------------------------------------------------------------
-void ofxPresetsManager::setPath_UserKit_Folder(string folder)
+void ofxPresetsManager::setPath_UserKit_Folder(std::string folder)
 {
 	ofLogNotice(__FUNCTION__) << folder;
 
@@ -2371,7 +2375,7 @@ void ofxPresetsManager::setPath_UserKit_Folder(string folder)
 	CheckFolder(folder);
 
 	// create the folders of each group into main presets folder 
-	string _path;
+	std::string _path;
 	if (bSplitGroupFolders.get())
 	{
 		for (int i = 0; i < groups.size(); i++)
@@ -2385,7 +2389,7 @@ void ofxPresetsManager::setPath_UserKit_Folder(string folder)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::setPath_PresetsFavourites(string folder)
+void ofxPresetsManager::setPath_PresetsFavourites(std::string folder)
 {
 	ofLogNotice(__FUNCTION__) << folder;
 	path_PresetsFavourites = folder;
@@ -2393,7 +2397,7 @@ void ofxPresetsManager::setPath_PresetsFavourites(string folder)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::setPath_PresetsStandalone(string folder)
+void ofxPresetsManager::setPath_PresetsStandalone(std::string folder)
 {
 	ofLogNotice(__FUNCTION__) << folder;
 	path_PresetsStandalone = folder;
@@ -2411,7 +2415,7 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 
 	for (int i = 0; i < mainGroupMemoryFilesPresets.size(); i++)
 	{
-		string _folder, _file, _path;
+		std::string _folder, _file, _path;
 
 		_folder = path_UserKit_Folder + "/" + path_PresetsFavourites + "/";
 		_file = groups[0].getName() + filenamesPrefix + ofToString(i);
@@ -2447,7 +2451,7 @@ void ofxPresetsManager::save_AllKit_FromMemory()
 #endif
 #endif
 		}
-}
+	}
 }
 
 //--------------------------------------------------------------
@@ -2472,7 +2476,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 
 		//-
 
-		string pathFolder, pathFilename, pathComplete;
+		std::string pathFolder, pathFilename, pathComplete;
 		pathFolder = path_UserKit_Folder + "/" + path_PresetsFavourites + "/";
 		pathFilename = groups[0].getName() + filenamesPrefix + ofToString(i);
 		pathFilename += fileExtension;
@@ -2505,11 +2509,11 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 				mainGroupMemoryFilesPresets[i] = settings;
 #endif
-	}
+			}
 			else {
 				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
-}
+		}
 	}
 
 	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
@@ -2523,7 +2527,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
 		}
-}
+	}
 }
 
 ////--------------------------------------------------------------
@@ -2606,7 +2610,6 @@ void ofxPresetsManager::exit()
 
 #pragma mark - IM_GUI
 
-#ifdef USE_IMGUI 
 #ifndef USE_IMGUI_EXTERNAL
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Setup()
@@ -2677,7 +2680,6 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 	gui_ImGui.end();
 }
 #endif
-#endif
 
 //--------------------------------------------------------------
 //#ifdef USE_IMGUI_EXTERNAL
@@ -2685,8 +2687,6 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 //#else
 //void ofxPresetsManager::ImGui_Draw_Window()
 //#endif
-
-#ifdef USE_IMGUI 
 
 void ofxPresetsManager::ImGui_Draw_Window()
 {
@@ -2718,6 +2718,9 @@ void ofxPresetsManager::ImGui_Draw_Window()
 
 		// selected randomizers
 		ImGui_Draw_Randomizers();
+
+		// standalone presets browser
+		ImGui_Draw_StandalonePresets();
 	}
 }
 
@@ -2727,7 +2730,7 @@ void ofxPresetsManager::ImGui_Draw_PresetParameters()
 {
 	ofxImGui::Settings settings;
 
-	if (ofxImGui::BeginWindow("Parameters", settings, false))
+	if (ofxImGui::BeginWindow("All Parameters", settings, false))
 	{
 		//ofxImGui::AddDrag(PRESETS_Selected_Index[0]);
 
@@ -2744,7 +2747,7 @@ void ofxPresetsManager::ImGui_Draw_GroupsSelectors()
 {
 	ofxImGui::Settings settings;
 
-	if (ofxImGui::BeginWindow("Selectors", settings, false))
+	if (ofxImGui::BeginWindow("Group Selectors", settings, false))
 	{
 		ofxImGui::AddGroup(params_GroupsSelectors, settings);
 	}
@@ -2775,8 +2778,7 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 				//if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
 				//ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
 				//ofxImGui::AddParameter(SHOW_RandomizerPanel);
-
-				ofxImGui::AddParameter(SHOW_BrowserPanel);
+				//ofxImGui::AddParameter(SHOW_BrowserPanel);
 
 				ofxImGui::AddParameter(SHOW_ClickPanel);
 				//ImGui::SameLine(); 
@@ -2826,7 +2828,7 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 			if (ImGui::TreeNode("USER-KIT"))
 			{
 				// User-Kit name
-				string str;
+				std::string str;
 				str = "Name: ";
 				str += displayNameUserKit;
 				ImGui::Text(str.c_str());
@@ -2877,13 +2879,14 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 		ImGui::TreePop();
 	}
 }
-#endif
 
 //--
 
 //--------------------------------------------------------------
 void ofxPresetsManager::buildHelpInfo() {
+
 	// build help info
+
 	helpInfo = "";
 	helpInfo += "USER-KIT\n";
 	//helpInfo += "  ";
@@ -2929,14 +2932,33 @@ void ofxPresetsManager::buildDefaultUserKit() {
 
 	//--
 
-	// browser for standalone presets
-	buildStandalonePresets();
+	// standalone presets
+
+	int _size = groups.size();
+
+	standaloneFileNames.clear();
+	standaloneFileNames.resize(_size);
+	standaloneFiles.clear();
+	standaloneFiles.resize(_size);
+	standaloneFileIndex.clear();
+	standaloneFileIndex.resize(_size);
+	standaloneNamePresetDisplay.clear();
+	standaloneNamePresetDisplay.resize(_size);
+
+	for (int i = 0; i < _size; i++) {
+		standaloneNamePresetDisplay[i] = "NO_NAME_PRESET";
+
+		doStandalonePresetsBuild(i);
+	}
 
 	//--
 
+	// user kit name is a bigger session preset
+	// will handle all the groups
+
 	// reduce path to name only (to display purposes only)
-	string str = path_UserKit_Folder;
-	string temp = R"(\)";//use '\' as splitter...should use '/' too bc Windows/macOS compatibility..
+	std::string str = path_UserKit_Folder;
+	std::string temp = R"(\)";//use '\' as splitter...should use '/' too bc Windows/macOS compatibility..
 	auto ss = ofSplitString(path_UserKit_Folder, temp);
 	displayNameUserKit = ss[ss.size() - 1];
 
@@ -2954,7 +2976,7 @@ void ofxPresetsManager::buildCustomUserKit() {
 	//-
 
 	// reduce to name only
-	string str = path_UserKit_Folder;
+	std::string str = path_UserKit_Folder;
 	std::string temp = R"(\)";// use '\' as splitter...should use '/' too bc Windows/macOS compatibility..
 	auto ss = ofSplitString(path_UserKit_Folder, temp);
 	displayNameUserKit = ss[ss.size() - 1];// get last word and use as name
@@ -2963,12 +2985,12 @@ void ofxPresetsManager::buildCustomUserKit() {
 
 	// TODO:
 	// load standalone presets for browser gui
-	buildStandalonePresets();
+	doStandalonePresetsBuild();
 
 	//-
 
 	//// load randomizers settings
-	//string path2;
+	//std::string path2;
 	//bool b2;
 	//path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
 	//b2 = ofxSurfingHelpers::loadGroup(params_RandomizerSettings, path2);
@@ -3004,7 +3026,7 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 	//--
 
 	//// save randomizers settings
-	//string path2;
+	//std::string path2;
 	//bool b2;
 	//path2 = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_Randomizers;
 	//b2 = ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path2);
@@ -3045,497 +3067,442 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 	}
 }
 
-#ifdef USE_IMGUI 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_Browser()
+void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 {
-	bool b = true;
-	ImGui::Begin("FILES BROWSER", &b);
+	//if (SHOW_BrowserPanel) 
 	{
-		int _numfiles = standaloneFileNames.size();
+		bool b = true;
 
-		//--
+		ofxImGui::Settings settings;
 
-		if (ImGui::TreeNode("STANDALONE PRESETS"))
+		if (ofxImGui::BeginWindow("Standalone Presets", settings, false))
+			//ImGui::Begin("FILES BROWSER", &b);
 		{
-			//new button
-			ofxImGui::AddParameter(MODE_Browser_NewPreset);
-
-			//-
-
-			//0. send/save current browsed (from "/archive/") preset to current presets on favorites
-
-			//get/copy all favs presets from favs and send/save to browser folder ("archive")
-
-			if (ImGui::Button("FROM FAVS"))
-			{
-				ofLogNotice(__FUNCTION__) << "FROM FAVS";
-				doGetFavsToFilesBrowser();
-			}
-
-			//-
-
-			ImGui::SameLine();
-			if (ImGui::Button("TO FAVS"))
-			{
-				ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE BROWSED PRESET: " << displayNamePreset;
-				//ofLogNotice(__FUNCTION__) << "TO FAVORITES PRESET: [" << PRESET_Selected_IndexMain << "]";
-
-				if (MODE_Browser_NewPreset)
-				{
-					//save(PRESET_Selected_IndexMain, 0);
-				}
-			}
-
-			//---
-
-			//label for User-Kit folder
-			string str = "";
-			str += path_UserKit_Folder;
-			ImGui::Text(str.c_str());
-
-			//-
-
-			//blink error when no files detected on folder
-
-			if (_numfiles == 0)
-			{
-				int n = 30;
-				float a = ofMap(ofGetFrameNum() % n, 0, n, 0.f, 1.f);
-				ImGui::PushID(1);
-				ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
-				ImGui::Text("DIR OR FILES NOT FOUND!");
-				string browser_path = path_UserKit_Folder + "/" + path_PresetsStandalone;
-				const char *array = browser_path.c_str();
-				ImGui::Text(array);
-				ImGui::PopStyleColor(1);
-				ImGui::PopID();
-			}
-
-			else if (_numfiles > 0)
-			{
-				//1. arrow buttons
-
-				static int counter = standaloneFileIndex;
-				float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
-				ImGui::PushButtonRepeat(true);
-
-				//--
-
-				//1.1 prev file
-
-				if (ImGui::ArrowButton("##left", ImGuiDir_Left))
-				{
-					if (counter > 0)
-					{
-						counter--;
-						standaloneFileIndex = counter;
-						if (standaloneFileIndex < standaloneFiles.size())
-						{
-							displayNamePreset = standaloneFileNames[standaloneFileIndex];
-							ofLogNotice(__FUNCTION__) << "ARROW: displayNamePreset: [" + ofToString(standaloneFileIndex) + "] " << displayNamePreset;
-							//if (MODE_Browser_NewPreset)
-							ofLogNotice(__FUNCTION__) << "LOAD" << endl;
-							ofLogNotice(__FUNCTION__) << "PRESET NAME: " << displayNamePreset;
-							doStandalonePresetLoad(displayNamePreset);
-						}
-					}
-				}
-
-				//--
-
-				//1.2 next file
-
-				ImGui::SameLine(0.0f, spacing);
-				if (ImGui::ArrowButton("##right", ImGuiDir_Right))
-				{
-					if (counter < standaloneFiles.size() - 1)
-					{
-						counter++;
-						standaloneFileIndex = counter;
-						if (standaloneFileIndex < standaloneFiles.size())
-						{
-							displayNamePreset = standaloneFileNames[standaloneFileIndex];
-							ofLogNotice(__FUNCTION__) << "ARROW: displayNamePreset: [" + ofToString(standaloneFileIndex) + "] " << displayNamePreset;
-
-							//if (MODE_Browser_NewPreset)
-							ofLogNotice(__FUNCTION__) << "LOAD PRESET NAME: " << displayNamePreset;
-							doStandalonePresetLoad(displayNamePreset);
-						}
-					}
-				}
-				ImGui::PopButtonRepeat();
-
-				//--
-
-				//1.3 text preview current preset index to total amount.
-
-				ImGui::SameLine();
-				ImGui::Text("%d/%d", standaloneFileIndex, _numfiles - 1);
-			}
+			int _groupIndex = GuiGROUP_Selected_Index.get();
+			int _numfiles = standaloneFileNames[_groupIndex].size();//int _numfiles = standaloneFileNames.size();
+			int _index = standaloneFileIndex[_groupIndex];
+			std::string _name;//displayNamePreset
 
 			//--
 
-			//3. scrollable filenames list
-
-			if (!standaloneFileNames.empty())
+			if (ImGui::TreeNode("STANDALONE PRESETS"))
 			{
-				ImGui::SetNextItemWidth(140);
-
-				int currentFileIndex = standaloneFileIndex;
-				if (ofxImGui::VectorCombo(" ", &currentFileIndex, standaloneFileNames))
-				{
-					ofLogNotice(__FUNCTION__) << "Preset Index: " << ofToString(currentFileIndex);
-					if (currentFileIndex < standaloneFileNames.size())
-					{
-						standaloneFileIndex = currentFileIndex;
-						displayNamePreset = standaloneFileNames[standaloneFileIndex];
-
-						ofLogNotice(__FUNCTION__) << "LOAD Preset Name: " << displayNamePreset;
-						doStandalonePresetLoad(displayNamePreset);
-					}
-				}
-			}
-
-			//--
-
-			//4.2 update
-
-			if (ImGui::Button("UPDATE"))
-			{
-				//displayNamePreset = standaloneTextInput_temp;
-				//ofLogNotice(__FUNCTION__) << "UPDATE PRESET NAME: " << displayNamePreset << endl;
-
-				//0. get filename of selected
-				string _currName = standaloneFiles[standaloneFileIndex].getBaseName();
-				ofLogNotice(__FUNCTION__) << "UPDATE Preset Name: " << _currName;
-
-				//1. delete old file
-				standaloneFiles[standaloneFileIndex].remove();
-
-				//2. save "ovewrite"
-				doStandalonePresetSave(_currName);
-
-				//workflow
-				//3. refresh files
-				doStandalonePresetsRefresh();
-
-				//4. reselect last save preset (bc directory sorting changes)
-				ofLogNotice(__FUNCTION__) << "Reload last updated preset:";
-				int iNew = -1;//search index for filename
-				for (size_t i = 0; i < standaloneFiles.size(); i++)
-				{
-					string n = standaloneFiles[i].getBaseName();
-					if (n == _currName)
-					{
-						iNew = i;
-					}
-				}
-				if (iNew != -1)
-				{
-					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << standaloneFiles[iNew].getBaseName();
-					standaloneFileIndex = iNew;
-					displayNamePreset = standaloneFileNames[standaloneFileIndex];
-					doStandalonePresetLoad(displayNamePreset);
-				}
-				else
-				{
-					ofLogError(__FUNCTION__) << "Not found! Bad Index [" << iNew << "]";
-				}
-			}
-
-			//-
-
-			//4.3 reload
-
-			ImGui::SameLine();
-			if (ImGui::Button("RELOAD"))
-			{
-				ofLogNotice(__FUNCTION__) << "RELOAD Preset Name: " << displayNamePreset;
-				doStandalonePresetLoad(displayNamePreset);
-			}
-
-			//-
-
-			//4.4 delete
-
-			ImGui::SameLine();
-			if (ImGui::Button("DELETE"))//current preset
-			{
-				ofLogNotice(__FUNCTION__) << "DELETE Preset Name: " << displayNamePreset;
-				ofLogNotice(__FUNCTION__) << "file: " << standaloneFiles[standaloneFileIndex].getAbsolutePath();
-
-				//1. delete file
-				standaloneFiles[standaloneFileIndex].remove();
-
-				//workflow
-				//2. refresh files
-				bool b = doStandalonePresetsRefresh();
-				if (b)
-				{
-					standaloneFileIndex = 0;
-					displayNamePreset = standaloneFileNames[standaloneFileIndex];
-					doStandalonePresetLoad(displayNamePreset);
-				}
-				else
-				{
-					ofLogError(__FUNCTION__) << "Error listing directory!";
-				}
-			}
-
-			//-
-
-			//4.5 clear. delete all!
-
-			ImGui::SameLine();
-			if (ImGui::Button("CLEAR"))//delete all files
-			{
-				ofLogNotice(__FUNCTION__) << "CLEAR Presets folder: " << path_UserKit_Folder + "/" + path_PresetsStandalone;
-
-				for (int i = 0; i < standaloneFiles.size(); i++) {
-					ofLogWarning(__FUNCTION__) << "DELETE file: " << standaloneFiles[i].getAbsolutePath();
-
-					//1. delete file
-					bool b = standaloneFiles[i].remove();
-					if (!b) ofLogError(__FUNCTION__) << "Can not DELETE file: " << standaloneFiles[i].getAbsolutePath();
-				}
-
-				//workflow
-				//2. refresh files
-				bool b = doStandalonePresetsRefresh();
-				if (b)
-				{
-					standaloneFileIndex = 0;
-					displayNamePreset = standaloneFileNames[standaloneFileIndex];
-					doStandalonePresetLoad(displayNamePreset);
-				}
-				else
-				{
-					ofLogError(__FUNCTION__) << "Error listing directory!";
-				}
-			}
-
-			//----
-
-			//mode new preset enabled
-
-			//5. second panel
-
-			if (MODE_Browser_NewPreset)
-			{
-				//5.1 new preset name
-
-				//ImGui::Text("NEW PRESET:");
+				// new button
+				ofxImGui::AddParameter(MODE_Browser_NewPreset);
 
 				//-
 
-				//5.2 user input text
+				// 0. send/save current browsed (from "/archive/") preset to current presets on favorites
 
-				//loaded string into char array
-				char tab[32];
-				strncpy(tab, standaloneTextInput_NEW.c_str(), sizeof(tab));
-				tab[sizeof(tab) - 1] = 0;
+				// get/copy all favs presets from favs and send/save to browser folder ("archive")
 
-				if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
+				if (ImGui::Button("FROM FAVS"))
 				{
-					ofLogNotice(__FUNCTION__) << "InputText [tab]:" << ofToString(tab) << endl;
-					standaloneTextInput_NEW = ofToString(tab);
-					ofLogNotice(__FUNCTION__) << "standaloneTextInput_NEW:" << standaloneTextInput_NEW << endl;
+					ofLogNotice(__FUNCTION__) << "FROM FAVS";
 
-					//bBlink = true;//not workind. we like to blink when mouse_on_text_input
+					doStandalonePresetsBuildFromFavs(_groupIndex);
+				}
+
+				//-
+
+				ImGui::SameLine();
+				if (ImGui::Button("TO FAVS"))
+				{
+					ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE STANDALONE PRESET: " << standaloneNamePresetDisplay[_groupIndex];
+
+					if (MODE_Browser_NewPreset)
+					{
+						save(PRESETS_Selected_Index[_groupIndex], _groupIndex);
+					}
+				}
+
+				//---
+
+				// TODO:
+				// label for User-Kit folder
+				std::string str = "";
+				str += path_UserKit_Folder;
+				ImGui::Text(str.c_str());
+
+				//-
+
+				// blink error when no files detected on folder
+
+				if (_numfiles == 0)
+				{
+					int n = 30;
+					float a = ofMap(ofGetFrameNum() % n, 0, n, 0.f, 1.f);
+					ImGui::PushID(1);
+					ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+					ImGui::Text("DIR OR FILES NOT FOUND!");
+
+					std::string _path = path_UserKit_Folder + "/" + path_PresetsStandalone;
+
+					const char *array = _path.c_str();
+					ImGui::Text(array);
+					ImGui::PopStyleColor(1);
+					ImGui::PopID();
+				}
+
+				else if (_numfiles > 0)
+				{
+					// 1. arrow buttons
+
+					static int counter = _index;
+					float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+					ImGui::PushButtonRepeat(true);
+
+					//--
+
+					// 1.1 prev file
+
+					if (ImGui::ArrowButton("##left", ImGuiDir_Left))
+					{
+						if (counter > 0)
+						{
+							counter--;
+							_index = counter;
+							if (_index < standaloneFiles[_groupIndex].size())
+							{
+								_name = standaloneFileNames[_groupIndex][_index];
+								ofLogNotice(__FUNCTION__) << "ARROW: displayNamePreset: [" + ofToString(_index) + "] " << _name;
+
+								//if (MODE_Browser_NewPreset)
+								ofLogNotice(__FUNCTION__) << "LOAD" << endl;
+								ofLogNotice(__FUNCTION__) << "PRESET NAME: " << _name;
+								doStandalonePresetLoad(_name);
+							}
+						}
+					}
+
+					//--
+
+					// 1.2 next file
+
+					ImGui::SameLine(0.0f, spacing);
+					if (ImGui::ArrowButton("##right", ImGuiDir_Right))
+					{
+						if (counter < standaloneFiles[_groupIndex].size() - 1)
+						{
+							counter++;
+							_index = counter;
+							if (_index < standaloneFiles[_groupIndex].size())
+							{
+								_name = standaloneFileNames[_groupIndex][_index];
+								ofLogNotice(__FUNCTION__) << "ARROW: displayNamePreset: [" + ofToString(_index) + "] " << _name;
+
+								//if (MODE_Browser_NewPreset)
+								ofLogNotice(__FUNCTION__) << "LOAD PRESET NAME: " << _name;
+								doStandalonePresetLoad(_name);
+							}
+						}
+					}
+					ImGui::PopButtonRepeat();
+
+					//--
+
+					// 1.3 text preview current preset index to total amount.
+
+					ImGui::SameLine();
+					ImGui::Text("%d/%d", _index, _numfiles - 1);
 				}
 
 				//--
 
-				//5.3 save new
+				// 3. scrollable filenames list
 
-				//workflow
-				//TODO:
-				//blink when it's editing a new preset..
-				bool bBlink;
-				bBlink = true;
-				if (bBlink)
+				if (!standaloneFileNames[_groupIndex].empty())
 				{
-					//ImGui::PushID(1);
-					int n = 30;
-					float a = ofMap(ofGetFrameNum() % n, 0, n, 0.2f, 0.5f);
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+					ImGui::SetNextItemWidth(140);
+
+					int currentFileIndex = _index;
+					if (ofxImGui::VectorCombo(" ", &currentFileIndex, standaloneFileNames[_groupIndex]))
+					{
+						ofLogNotice(__FUNCTION__) << "Preset Index: " << ofToString(currentFileIndex);
+						if (currentFileIndex < standaloneFileNames[_groupIndex].size())
+						{
+							_index = currentFileIndex;
+							_name = standaloneFileNames[_groupIndex][_index];
+
+							ofLogNotice(__FUNCTION__) << "LOAD Preset Name: " << _name;
+							doStandalonePresetLoad(_name);
+						}
+					}
 				}
 
-				if (ImGui::Button("SAVE"))
+				//--
+
+				// 4.2 update
+
+				if (ImGui::Button("UPDATE"))
 				{
-					ofLogNotice(__FUNCTION__) << "standaloneTextInput_NEW: " << standaloneTextInput_NEW << endl;
+					//_name = standaloneTextInput_temp;
+					//ofLogNotice(__FUNCTION__) << "UPDATE PRESET NAME: " << _name << endl;
 
-					//1. save
-					doStandalonePresetSave(standaloneTextInput_NEW);
+					// 0. get filename of selected
+					std::string _currName = standaloneFiles[_groupIndex][_index].getBaseName();
+					ofLogNotice(__FUNCTION__) << "UPDATE Preset Name: " << _currName;
 
-					//workflow
-					//2. disable new preset mode
-					MODE_Browser_NewPreset = false;
+					// 1. delete old file
+					standaloneFiles[_groupIndex][_index].remove();
 
-					//3. refresh files
+					// 2. save "ovewrite"
+					doStandalonePresetSave(_currName);
+
+					// workflow
+					// 3. refresh files
 					doStandalonePresetsRefresh();
 
-					//4. reselect last save preset (bc directory sorting changes)
-					ofLogNotice(__FUNCTION__) << "Reload last saved preset:";
-					int iNew = -1;
-					for (size_t i = 0; i < standaloneFiles.size(); i++)
+					// 4. reselect last save preset (bc directory sorting changes)
+					ofLogNotice(__FUNCTION__) << "Reload last updated preset:";
+					int iNew = -1;//search index for filename
+					for (size_t i = 0; i < standaloneFiles[_groupIndex].size(); i++)
 					{
-						string n = standaloneFiles[i].getBaseName();
-						if (n == standaloneTextInput_NEW)
+						std::string n = standaloneFiles[_groupIndex][i].getBaseName();
+						if (n == _currName)
 						{
 							iNew = i;
 						}
 					}
-					ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << standaloneFiles[iNew].getBaseName();
-					standaloneFileIndex = iNew;
-					doStandalonePresetLoad(standaloneTextInput_NEW);
+					if (iNew != -1)
+					{
+						ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << standaloneFiles[_groupIndex][iNew].getBaseName();
+						_index = iNew;
+						_name = standaloneFileNames[_groupIndex][_index];
+						doStandalonePresetLoad(_name);
+					}
+					else
+					{
+						ofLogError(__FUNCTION__) << "Not found! Bad Index [" << iNew << "]";
+					}
 				}
 
-				if (bBlink)
+				//-
+
+				// 4.3 reload
+
+				ImGui::SameLine();
+				if (ImGui::Button("RELOAD"))
 				{
-					ImGui::PopStyleColor(1);
+					ofLogNotice(__FUNCTION__) << "RELOAD Preset Name: " << _name;
+					doStandalonePresetLoad(_name);
 				}
-			}
 
-			ImGui::TreePop();
+				//-
+
+				// 4.4 delete
+
+				ImGui::SameLine();
+				if (ImGui::Button("DELETE"))// current preset
+				{
+					ofLogNotice(__FUNCTION__) << "DELETE Preset Name: " << _name;
+					ofLogNotice(__FUNCTION__) << "file: " << standaloneFiles[_groupIndex][_index].getAbsolutePath();
+
+					// 1. delete file
+					standaloneFiles[_groupIndex][_index].remove();
+
+					// workflow
+					// 2. refresh files
+					bool b = doStandalonePresetsRefresh();
+					if (b)
+					{
+						_index = 0;
+						_name = standaloneFileNames[_groupIndex][_index];
+						doStandalonePresetLoad(_name);
+					}
+					else
+					{
+						ofLogError(__FUNCTION__) << "Error listing directory!";
+					}
+				}
+
+				//-
+
+				// 4.5 clear. delete all!
+
+				ImGui::SameLine();
+				if (ImGui::Button("CLEAR"))// delete all files
+				{
+					ofLogNotice(__FUNCTION__) << "CLEAR Presets folder: " << path_UserKit_Folder + "/" + path_PresetsStandalone;
+
+					for (int i = 0; i < standaloneFiles[_groupIndex].size(); i++) {
+						ofLogWarning(__FUNCTION__) << "DELETE file: " << standaloneFiles[_groupIndex][i].getAbsolutePath();
+
+						// 1. delete file
+						bool b = standaloneFiles[_groupIndex][i].remove();
+						if (!b) ofLogError(__FUNCTION__) << "Can not DELETE file: " << standaloneFiles[_groupIndex][i].getAbsolutePath();
+					}
+
+					// workflow
+					// 2. refresh files
+					bool b = doStandalonePresetsRefresh();
+					if (b)
+					{
+						_index = 0;
+						_name = standaloneFileNames[_groupIndex][_index];
+						doStandalonePresetLoad(_name);
+					}
+					else
+					{
+						ofLogError(__FUNCTION__) << "Error listing directory!";
+					}
+				}
+
+				//----
+
+				// mode new preset enabled
+
+				// 5. second panel
+
+				if (MODE_Browser_NewPreset)
+				{
+					//5.1 new preset name
+
+					//ImGui::Text("NEW PRESET:");
+
+					//-
+
+					//5.2 user input text
+
+					//loaded string into char array
+					char tab[32];
+					strncpy(tab, standaloneTextInput_NEW.c_str(), sizeof(tab));
+					tab[sizeof(tab) - 1] = 0;
+
+					if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
+					{
+						ofLogNotice(__FUNCTION__) << "InputText [tab]:" << ofToString(tab) << endl;
+						standaloneTextInput_NEW = ofToString(tab);
+						ofLogNotice(__FUNCTION__) << "standaloneTextInput_NEW:" << standaloneTextInput_NEW << endl;
+
+						//bBlink = true;//not workind. we like to blink when mouse_on_text_input
+					}
+
+					//--
+
+					// 5.3 save new
+
+					// workflow
+					// TODO:
+					// blink when it's editing a new preset..
+					bool bBlink;
+					bBlink = true;
+					if (bBlink)
+					{
+						//ImGui::PushID(1);
+						int n = 30;
+						float a = ofMap(ofGetFrameNum() % n, 0, n, 0.2f, 0.5f);
+						ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
+					}
+
+					if (ImGui::Button("SAVE"))
+					{
+						ofLogNotice(__FUNCTION__) << "standaloneTextInput_NEW: " << standaloneTextInput_NEW << endl;
+
+						// 1. save
+						doStandalonePresetSave(standaloneTextInput_NEW);
+
+						// workflow
+						// 2. disable new preset mode
+						MODE_Browser_NewPreset = false;
+
+						// 3. refresh files
+						doStandalonePresetsRefresh();
+
+						// 4. reselect last save preset (bc directory sorting changes)
+						ofLogNotice(__FUNCTION__) << "Reload last saved preset:";
+						int iNew = -1;
+						for (size_t i = 0; i < standaloneFiles[_groupIndex].size(); i++)
+						{
+							std::string n = standaloneFiles[_groupIndex][i].getBaseName();
+							if (n == standaloneTextInput_NEW)
+							{
+								iNew = i;
+							}
+						}
+						ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << standaloneFiles[_groupIndex][iNew].getBaseName();
+						_index = iNew;
+						doStandalonePresetLoad(standaloneTextInput_NEW);
+					}
+
+					if (bBlink)
+					{
+						ImGui::PopStyleColor(1);
+					}
+				}
+
+				ImGui::TreePop();
+			}
 		}
+		//ImGui::End();
+		ofxImGui::EndWindow(settings);
 	}
-	ImGui::End();
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Randomizers()
 {
-	////// tittle
-	//////ImGui::Text("PRESETS MANAGER");
-	//////ImGui::NewLine();
+	// this panel will show the settings for the selected by user group (GuiGROUP_Selected_Index)
 
-
-
-	////--
-
-	////-
-	//bool b = true;
-	//ImGui::Begin("GROUP RANDOMIZER", &b);
-	//{
-	//	ImGui_Draw_MainPanel();
-
-	//	if (SHOW_RandomizerPanel)
-	//	{
-	groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers();// show randomizers of user selected group
-//	}
-//}
-//ImGui::End();
-
-////// standalone presets browser
-////if (MODE_Editor && SHOW_BrowserPanel) 
-////{
-////	ImGui_Draw_Browser(settings);
-////}
+	//if (SHOW_RandomizerPanel)
+	{
+		groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers();// show randomizers of user selected group
+	}
 }
-#endif
 
 //----
 
-// standalone presets browser
+// standalone presets browser engine
 
 //--------------------------------------------------------------
-void ofxPresetsManager::buildStandalonePresets()// standalone presets splitted from favourites presets
+bool ofxPresetsManager::doStandalonePresetsRefresh(int groupIndex)
 {
-	// load files structure directory
-	bool bLoaded = doStandalonePresetsRefresh();
+	ofLogNotice(__FUNCTION__) << groupIndex;
 
-	// workflow
-	if (bLoaded)
-	{
-		// load first preset
-		if (standaloneFileNames.size() > 0)
-		{
-			standaloneFileIndex = 0;
-			displayNamePreset = standaloneFileNames[standaloneFileIndex];
+	if (groupIndex >= groups.size()) {
+		ofLogError(__FUNCTION__) << "groupIndex Out of groups range: " << groupIndex;
+		groupIndex = groups.size() - 1;
 
-			//// workflow
-			//doStandalonePresetLoad(displayNamePreset);
-		}
+		bFilesError = true;
+		return !bFilesError;
 	}
-}
-//--------------------------------------------------------------
-void ofxPresetsManager::doStandalonePresetSave(string name)// without xml extension nor path
-{
-	ofLogNotice(__FUNCTION__) << name << fileExtension;
 
-	string _path;
-	_path = path_UserKit_Folder + "/" + path_PresetsStandalone + "/" + name;
-	_path += fileExtension;
+	//-
 
-	bool b = ofxSurfingHelpers::saveGroup(groups[0], _path);
-	if (!b)
-	{
-		ofLogError(__FUNCTION__) << "CAN'T SAVE FILE " << _path << "!";
-	}
-	else {
-		ofLogNotice(__FUNCTION__) << "DONE SAVE " << _path;
-	}
-}
+	std::string _path;
+	_path = path_UserKit_Folder + "/" + path_PresetsStandalone;// '/archive'
+	_path += "/" + groups[groupIndex].getName();// append group name
+	_path += "/";// the folder
 
-//--------------------------------------------------------------
-void ofxPresetsManager::doStandalonePresetLoad(string name)// without xml extension nor path
-{
-	ofLogNotice(__FUNCTION__) << name << fileExtension;
-
-	string _path;
-	_path = path_UserKit_Folder + "/" + path_PresetsStandalone + "/" + name;
-	_path += fileExtension;
-
-	bool b = ofxSurfingHelpers::loadGroup(groups[0], _path);
-	if (!b)
-	{
-		ofLogError(__FUNCTION__) << "CAN'T LOAD FILE " << _path << "!";
-	}
-	else {
-		ofLogNotice(__FUNCTION__) << "DONE LOAD " << _path;
-	}
-}
-
-//--------------------------------------------------------------
-bool ofxPresetsManager::doStandalonePresetsRefresh()
-{
-	//ofLogNotice(__FUNCTION__);
-
-	string _path = path_UserKit_Folder + "/" + path_PresetsStandalone;
 	CheckFolder(_path);
 
 	ofLogNotice(__FUNCTION__) << "Path: " << _path;
-	ofDirectory standaloneDataDirectory(ofToDataPath(_path, true));
+	ofDirectory _dataDir(ofToDataPath(_path, true));
 
 	//-
 
-	//TODO:
-	//make above code to function
-	//create folder if do not exist!
-	if (!standaloneDataDirectory.isDirectory())
+	if (groupIndex < groups.size())
 	{
-		ofLogError(__FUNCTION__) << "FOLDER DOES NOT EXIST!";
-		bool b = standaloneDataDirectory.createDirectory(ofToDataPath(_path, true));
-		if (b) ofLogNotice(__FUNCTION__) << "CREATED FOLDER: " << _path;
-		else ofLogError(__FUNCTION__) << "UNABLE TO CREATE FOLDER: " << _path;
-	}
+		// clear files and filenames vectors
+		standaloneFiles[groupIndex].clear();
+		standaloneFileNames[groupIndex].clear();
 
-	//-
+		// load all folder files in one call
+		int _size = _dataDir.getFiles().size();// amount of (standalone presets) files for this group
 
-	// clear files and filenames vectors
-	standaloneFiles.clear();
-	standaloneFileNames.clear();
+		standaloneFiles[groupIndex].resize(_size);
+		standaloneFileNames[groupIndex].resize(_size);
 
-	// load all folder files in one call
-	standaloneFiles = standaloneDataDirectory.getFiles();
+		ofLogNotice(__FUNCTION__) << "Preset files " << groups[groupIndex].getName() << " #" << groupIndex;
 
-	ofLogNotice(__FUNCTION__) << "Preset files:";
-	for (size_t i = 0; i < standaloneFiles.size(); i++)
-	{
-		standaloneFileNames.push_back(standaloneFiles[i].getBaseName());
-		ofLogNotice(__FUNCTION__) << "[" << i << "] " << standaloneFiles[i].getBaseName();
+		for (size_t i = 0; i < _size; i++)
+		{
+			ofFile f = _dataDir.getFiles()[i];
+			standaloneFiles[groupIndex].push_back(f);
+			standaloneFileNames[groupIndex].push_back(f.getBaseName());
+			ofLogNotice(__FUNCTION__) << "[" << i << "] " << f.getBaseName();
+		}
 	}
 
 	//-
@@ -3546,7 +3513,7 @@ bool ofxPresetsManager::doStandalonePresetsRefresh()
 	// 1. load same position preset
 	// if preset is deleted goes to nextone..
 	// should check names because sorting changes..
-	if (standaloneFileNames.size() > 0)
+	if (standaloneFileNames[groupIndex].size() > 0)
 	{
 		bFilesError = false;
 	}
@@ -3581,6 +3548,107 @@ bool ofxPresetsManager::doStandalonePresetsRefresh()
 }
 
 //--------------------------------------------------------------
+void ofxPresetsManager::doStandalonePresetsBuild(int groupIndex)// standalone presets splitted from favourites presets
+{
+	// load files structure directory
+	bool bLoaded = doStandalonePresetsRefresh(groupIndex);
+
+	// workflow
+	if (bLoaded)
+	{
+		// load first preset
+		if (standaloneFileNames[groupIndex].size() > 0)
+		{
+			standaloneFileIndex[groupIndex] = 0;// select first file
+			standaloneNamePresetDisplay[groupIndex] = standaloneFileNames[groupIndex][0];
+
+			//// workflow
+			//doStandalonePresetLoad(displayNamePreset, groupIndex);
+		}
+	}
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::doStandalonePresetSave(std::string name, int groupIndex)// without xml extension nor path
+{
+	ofLogNotice(__FUNCTION__) << "name: " << name << fileExtension << " group: " << groupIndex;
+
+	std::string _path;
+	_path = path_UserKit_Folder + "/" + path_PresetsStandalone;
+	_path += "/" + groups[groupIndex].getName();// append group name
+	_path += "/" + name;// append preset name
+	_path += fileExtension;
+	ofLogNotice(__FUNCTION__) << _path;
+
+	if (groupIndex < groups.size()) {
+		bool b = ofxSurfingHelpers::saveGroup(groups[groupIndex], _path);
+		if (!b) ofLogError(__FUNCTION__) << "CAN'T SAVE FILE " << _path << "!";
+		else ofLogNotice(__FUNCTION__) << "DONE SAVED " << _path;
+	}
+	else ofLogError(__FUNCTION__) << "groupIndex Out of groups range: " << groupIndex;
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::doStandalonePresetLoad(std::string name, int groupIndex)// without xml extension nor path
+{
+	ofLogNotice(__FUNCTION__) << "name: " << name << fileExtension << " group: " << groupIndex;
+
+	std::string _path;
+	_path = path_UserKit_Folder + "/" + path_PresetsStandalone;
+	_path += "/" + groups[groupIndex].getName();// append group name
+	_path += "/" + name;// append preset name
+	_path += fileExtension;
+	ofLogNotice(__FUNCTION__) << _path;
+
+	if (groupIndex < groups.size()) {
+		bool b = ofxSurfingHelpers::loadGroup(groups[groupIndex], _path);
+		if (!b) ofLogError(__FUNCTION__) << "CAN'T LOAD FILE " << _path << "!";
+		else ofLogNotice(__FUNCTION__) << "DONE LOADED " << _path;
+	}
+	else ofLogError(__FUNCTION__) << "groupIndex Out of groups range: " << groupIndex;
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::doStandalonePresetsBuildFromFavs(int groupIndex)// save all favorites presets to the browser (archive) folder
+{
+	ofLogNotice(__FUNCTION__) << " group: " << groupIndex;
+
+	std::string _path;
+	_path = path_UserKit_Folder + "/" + path_PresetsStandalone;
+	_path += "/" + groups[groupIndex].getName();// append group name
+	_path += "/";// the folder
+	ofLogNotice(__FUNCTION__) << _path;
+
+	// amount of files
+	// iterate all presets
+	for (int i = 0; i < groupsSizes[groupIndex]; i++)
+	{
+		std::string pathSrc;
+		std::string pathDst;
+
+		pathSrc = getPresetPath(groups[groupIndex].getName(), i);
+		boost::filesystem::path bPath(pathSrc);
+
+		//string pathFolder = ofToString(bPath.parent_path());
+		std::string _fileName = ofToString(bPath.filename().generic_string());
+		pathDst = _path + "/" + _fileName;
+
+		ofLogNotice(__FUNCTION__) << "pathSrc: " << pathSrc;
+		ofLogNotice(__FUNCTION__) << "pathDst: " << pathDst;
+
+		ofFile _file;
+		_file.copyFromTo(pathSrc, pathDst, true, true);// relative, overwrite
+	}
+
+	//--
+
+	// refresh files
+	doStandalonePresetsRefresh();
+}
+
+//--
+
+//--------------------------------------------------------------
 void ofxPresetsManager::doCheckPresetsFoldersAreEmpty()
 {
 	for (int i = 0; i < groups.size(); i++)
@@ -3597,59 +3665,23 @@ void ofxPresetsManager::doCheckPresetsFoldersAreEmpty()
 
 			ofDirectory dataDirectoryGroupPresets(ofToDataPath(_path, true));
 
-			// check if folder is empty
-			if (dataDirectoryGroupPresets.size() == 0) {// if there's no files into folder
-				ofLogWarning(__FUNCTION__) << "Folder " << _path << ", used for group " << i << " " << groups[i].getName()
-					<< " is empty! Force populate favourites files...";
+			// check if folder is empty: no files into folder
+			if (dataDirectoryGroupPresets.size() == 0)
+			{
+				ofLogWarning(__FUNCTION__) << "Folder " << _path << ", used for group " << i << " "
+					<< groups[i].getName() << " is empty! Force populate favourites files...";
 
-				// 1. populate all favourite preset files for this group
+				// 1. populate all favourites preset files for this group
 				doPopulateFavs(i);
 
 				//// 2. create standalone files too: one file for each favourite preset
-				//doGetFavsToFilesBrowser();
+				//doStandalonePresetsBuildFromFavs();
 			}
 
 			// verify if files are created
 			ofLogNotice(__FUNCTION__) << ofToString(dataDirectoryGroupPresets.size()) << " file preset at folder " << _path;
 		}
 	}
-}
-
-//--------------------------------------------------------------
-void ofxPresetsManager::doGetFavsToFilesBrowser()// save all favorites presets to the browser (archive) folder
-{
-	ofLogNotice(__FUNCTION__);
-
-	// browser path
-	string browser_path;
-	browser_path = path_UserKit_Folder + "/" + path_PresetsStandalone;
-
-	// browser number of files
-	// iterate all presets
-	for (int i = 0; i < mainGroupAmtPresetsFav; i++)
-	{
-		std::string pathSrc;
-		std::string pathDst;
-
-		pathSrc = getPresetPath(groups[0].getName(), i);
-		boost::filesystem::path bPath(pathSrc);
-
-		//string pathFolder = ofToString(bPath.parent_path());
-		string fileName = ofToString(bPath.filename().generic_string());
-		pathDst = browser_path + "/" + fileName;
-
-		ofLogNotice(__FUNCTION__) << "pathSrc: " << pathSrc;
-		ofLogNotice(__FUNCTION__) << "pathDst: " << pathDst;
-
-		ofFile file;
-		file.copyFromTo(pathSrc, pathDst, true, true);// relative, overwrite
-
-	}
-
-	//--
-
-	// refresh files
-	doStandalonePresetsRefresh();
 }
 
 //----
@@ -3663,7 +3695,7 @@ void ofxPresetsManager::undoStoreParams() {
 	undoStringParams = (undoXmlParams.toString());// fill the ofxUndoSimple with the xml as string
 	undoStringParams.store();
 
-	string str = "";
+	std::string str = "";
 	str += "UNDO HISTORY: " + ofToString(undoStringParams.getUndoLength()) + "/";
 	str += ofToString(undoStringParams.getRedoLength());
 	//str += "\n";
@@ -3680,7 +3712,7 @@ void ofxPresetsManager::undoRefreshParams() {
 	ofParameterGroup _group = groups[0];
 	ofDeserialize(undoXmlParams, _group);// load the ofParameterGroup
 
-	string str = "";
+	std::string str = "";
 	str += "UNDO HISTORY: " + ofToString(undoStringParams.getUndoLength()) + "/";
 	str += ofToString(undoStringParams.getRedoLength());
 	//str += "\n";

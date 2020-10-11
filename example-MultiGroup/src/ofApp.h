@@ -4,7 +4,10 @@
 
 #include "ofxPresetsManager.h"
 
+//#define USE_GUI_LOCAL 
+#ifdef USE_GUI_LOCAL 
 #include "ofxGui.h"
+#endif
 
 #include "ofxSurfingConstants.h"
 #include "ofxSurfingHelpers.h"	// optional: to use setThemeDark_ofxGui only
@@ -30,6 +33,8 @@ public:
     void exit();
     void keyPressed(int key);
 	void windowResized(int w, int h);
+
+	void setupParameters();
 
 	// group0
     ofParameterGroup params0;
@@ -66,27 +71,32 @@ public:
 	ofParameter<float> size3;
 	ofParameter<int> separation3;
 
-    void setupParameters();
-
     // presetsManager
     ofxPresetsManager presetsManager;
+
+	//-
 
 	// scene
 	void drawScene0();
     void drawScene1();
     void drawScene2();
     void drawScene3();
-	
-	// gui panels
-	ofxPanel gui0;
-	ofxPanel gui1;
-	ofxPanel gui2;
-	ofxPanel gui3;
-	bool bGui = true;
+	float _alpha = 255/0.4f;
+
+	//-
 
 #ifdef USE_WindowApp
 	ofxWindowApp WindowApp;
 #endif
 
-	float _alpha = 255/0.4f;
+	//-
+
+	// gui panels
+#ifdef USE_GUI_LOCAL 
+	ofxPanel gui0;
+	ofxPanel gui1;
+	ofxPanel gui2;
+	ofxPanel gui3;
+#endif
+	bool bGui = true;
 };
