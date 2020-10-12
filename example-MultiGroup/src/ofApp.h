@@ -4,7 +4,10 @@
 
 #include "ofxPresetsManager.h"
 
+//#define USE_GUI_LOCAL 
+#ifdef USE_GUI_LOCAL 
 #include "ofxGui.h"
+#endif
 
 #include "ofxSurfingConstants.h"
 #include "ofxSurfingHelpers.h"	// optional: to use setThemeDark_ofxGui only
@@ -14,16 +17,24 @@
 #include "ofxWindowApp.h"
 #endif
 
+#include "ofxImGui.h"
+
 class ofApp : public ofBaseApp
 {
 
 public:
-    void setup();
+	//TEST
+	//ofxImGui::Gui gui_ImGui;// if this enabled seems to brake context. we can not load the font into presetManager
+
+public:
+	void setup();
     void update();
     void draw();
     void exit();
     void keyPressed(int key);
 	void windowResized(int w, int h);
+
+	void setupParameters();
 
 	// group0
     ofParameterGroup params0;
@@ -33,7 +44,7 @@ public:
 	ofParameter<bool> fill0;
 	ofParameter<float> lineWidth0;
 	ofParameter<int> shapeType0;
-	ofParameter<int> numShapes0;
+	ofParameter<int> numObjects0;
 	ofParameter<int> separation0;
     ofParameter<int> shapeSide0;
 	
@@ -41,7 +52,7 @@ public:
 	ofParameterGroup params1;
 	ofParameter<ofColor> color1;
 	ofParameter<bool> show1;
-	ofParameter<int> numShapes1;
+	ofParameter<int> numObjects1;
 	ofParameter<int> separation1;
 	ofParameter<int> shapeSide1;
 	
@@ -49,6 +60,7 @@ public:
 	ofParameterGroup params2;
 	ofParameter<ofColor> color2;
 	ofParameter<bool> show2;
+	ofParameter<int> numObjects2;
 	ofParameter<float> size2;
 	ofParameter<bool> fill2;
 	
@@ -60,27 +72,33 @@ public:
 	ofParameter<float> size3;
 	ofParameter<int> separation3;
 
-    void setupParameters();
-
     // presetsManager
     ofxPresetsManager presetsManager;
+
+	//-
 
 	// scene
 	void drawScene0();
     void drawScene1();
     void drawScene2();
     void drawScene3();
-	
-	// gui panels
-	ofxPanel gui0;
-	ofxPanel gui1;
-	ofxPanel gui2;
-	ofxPanel gui3;
-	bool bGui = true;
+	float _alpha = 255/0.4f;
+
+	//-
 
 #ifdef USE_WindowApp
 	ofxWindowApp WindowApp;
 #endif
 
-	float _alpha = 255/0.4f;
+	//-
+
+	// gui panels
+#ifdef USE_GUI_LOCAL 
+	ofxPanel gui0;
+	ofxPanel gui1;
+	ofxPanel gui2;
+	ofxPanel gui3;
+#endif
+
+	bool bGui = true;
 };

@@ -345,7 +345,7 @@ void groupRandomizer::doResetDices()
 	}
 	randomizedDice.setMax(dicesTotalAmount - 1);
 	randomizeDuration = 1000;
-	randomizeDurationShort = randomizeDuration * 0.5;
+	randomizeDurationShort = randomizeDuration * randomizeDurationShortRatio;
 }
 
 //--------------------------------------------------------------
@@ -821,12 +821,14 @@ void groupRandomizer::setupRandomizerIndex()
 	MODE_LatchTrig.set("MODE LATCH", false);
 	MODE_AvoidRandomRepeat.set("MODE AVOID REPEAT", false);
 	randomizeDuration.set("t DURATION", 1000, 10, randomize_MAX_DURATION);
-	randomizeDurationShort.set("t SHORT", 250, 10, randomize_MAX_DURATION_SHORT);
+	randomizeDurationShortRatio.set("t RATIO", 0.25, 0.005, 1);
+	randomizeDurationShort.set("t SHORT", 250, 10, randomize_MAX_DURATION);// locked
 	randomizeDurationBpm.set("t BPM", 120, 10, 400);
 	randomizedDice.set("DICE", 0, 0, amountPresets - 1);
 	bResetDices.set("RESET PROBS", false);
 
 	// exclude
+	randomizeDurationShort.setSerializable(false);// lock
 	bRandomizeIndex.setSerializable(false);
 	bResetDices.setSerializable(false);
 
@@ -868,7 +870,8 @@ void groupRandomizer::setupRandomizerIndex()
 	params_Randomizer.add(bRandomizeIndex);
 	params_Randomizer.add(randomizeDurationBpm);
 	params_Randomizer.add(randomizeDuration);
-	params_Randomizer.add(randomizeDurationShort);
+	params_Randomizer.add(randomizeDurationShortRatio);
+	params_Randomizer.add(randomizeDurationShort);// locked
 	params_Randomizer.add(MODE_DicesProbs);
 	params_Randomizer.add(MODE_LatchTrig);
 	params_Randomizer.add(MODE_AvoidRandomRepeat);
@@ -922,12 +925,14 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		////string str = "User-Kit: " + displayNameUserKit;
 		//str = "  Group    " + group.getName();
 		//ImGui::Text(str.c_str());
+
 		str = "  Preset   " + ofToString(PRESET_Selected_IndexMain.get());
 		ImGui::Text(str.c_str());
 
 		ImGui::Dummy(ImVec2(0.0f, 5));
 
 		ofxImGui::AddParameter(PRESET_Selected_IndexMain);
+
 		//ImGui::SameLine();
 		//ImGui::Dummy(ImVec2(0.0f, 5));
 
@@ -1005,7 +1010,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 			//	//// populate all favs
 			//	//doPopulateFavs();
 			//	//// create browser files too
-			//	//doGetFavsToFilesBrowser();
+			//	//doGetFavsToStandalonePresets();
 			//}
 		}
 
@@ -1251,13 +1256,8 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 				PLAY_RandomizeTimer = false;
 			}
 		}
-		//else if (name == "SPEED FACTOR")
-		//{
-		//	ofLogNotice(__FUNCTION__) << "SPEED FACTOR: " << e;
-		//	//randomizeDuration = randomize_MAX_DURATION * (1.f - randomizeSpeedF);
-		//	randomizeDuration.setMax(randomizeSpeedF * randomize_MAX_DURATION);
-		//	randomizeDurationShort.setMax(randomizeSpeedF * randomize_MAX_DURATION_SHORT);
-		//}
+
+		// durations
 		else if (name == randomizeDuration.getName())
 		{
 			ofLogNotice(__FUNCTION__) << "DURATION: " << e;
@@ -1273,8 +1273,20 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 
 			// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
 			randomizeDuration = (MAX_DURATION_RATIO * 60000.f) / randomizeDurationBpm;
-			randomizeDurationShort = randomizeDuration / 4.f;
+			randomizeDurationShort = randomizeDuration * randomizeDurationShortRatio;
+			//randomizeDurationShort = randomizeDuration / 4.f;
 		}
+		else if (name == randomizeDurationShortRatio.getName())
+		{
+			ofLogNotice(__FUNCTION__) << "Short ratio: " << e;
+			randomizeDurationShort = randomizeDuration * randomizeDurationShortRatio;
+		}
+		else if (name == randomizeDurationShort.getName())
+		{
+			ofLogNotice(__FUNCTION__) << "Lock Short ratio: " << e;
+			randomizeDurationShort = randomizeDuration * randomizeDurationShortRatio;
+		}
+
 #ifdef DEBUG_randomTest
 		else if (name == "DICE")// when debug enabled: set dice by user to test
 		{
@@ -1282,6 +1294,7 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 			doRandomIndex();
 		}
 #endif
+
 		else if (name == bResetDices.getName() && bResetDices)
 		{
 			ofLogNotice(__FUNCTION__) << "RESET DICES: " << e;
@@ -1323,7 +1336,7 @@ void groupRandomizer::loadPreset(int p)
 }
 
 ////--------------------------------------------------------------
-//void groupRandomizer::doCheckPresetsFolderIsEmpty()
+//void groupRandomizer::doCheckPresetsFoldersAreEmpty()
 //{
 //	//string _path = path_UserKit_Folder + "/" + path_PresetsFavourites;
 //	//ofLogNotice(__FUNCTION__) << "Check that not empty folder at path: " << _path;
@@ -1342,7 +1355,7 @@ void groupRandomizer::loadPreset(int p)
 //		//populate all favs
 //		doPopulateFavs();
 //		//create browser files too
-//		doGetFavsToFilesBrowser();
+//		doGetFavsToStandalonePresets();
 //	}
 //
 //	//verify if files are created

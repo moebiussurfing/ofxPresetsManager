@@ -36,7 +36,7 @@ private:
 public:
 	void setPath_RandomizerSettings(string folder)
 	{
-		ofLogNotice(__FUNCTION__) << "path: " << folder;
+		ofLogNotice(__FUNCTION__) << "Path: " << folder;
 
 		path_RandomizerSettings = folder;
 	}
@@ -94,7 +94,7 @@ public:
 
 	//public:
 	//	//--------------------------------------------------------------
-	//	void doGetFavsToFilesBrowser()// save all favorites presets to the browser (archive) folder
+	//	void doGetFavsToStandalonePresets()// save all favorites presets to the browser (archive) folder
 	//	{
 	//		ofLogNotice(__FUNCTION__);
 	//
@@ -127,7 +127,7 @@ public:
 	//		////--
 	//
 	//		//// refresh files
-	//		//doStandaloneRefreshPresets();
+	//		//doStandalonePresetsRefresh();
 	//	}
 
 	//----
@@ -144,6 +144,7 @@ public:
 	ofParameter<float> randomizeDurationBpm; // bpm
 	ofParameter<int> randomizeDuration;
 	ofParameter<int> randomizeDurationShort;
+	ofParameter<float> randomizeDurationShortRatio;
 
 private:
 	ofParameter<bool> MODE_DicesProbs;
@@ -158,7 +159,7 @@ private:
 	uint32_t randomizerTimer;
 	float MAX_DURATION_RATIO = 2.0f;
 	int randomize_MAX_DURATION = MAX_DURATION_RATIO * 6000;
-	int randomize_MAX_DURATION_SHORT = 6000 / 2.f;
+	//int randomize_MAX_DURATION_SHORT = 6000 / 2.f;
 	vector<ofParameter<int>> presetsRandomFactor;// probability of every preset
 	vector<ofParameter<bool>> presetsRandomModeShort;// mode short for ebvery preset
 	vector<int> randomFactorsDices;
@@ -244,7 +245,8 @@ public:
 		randomizeDurationBpm = bpm;
 		// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
 		randomizeDuration = 60000.f / bpm;
-		randomizeDurationShort = randomizeDuration / 2.f;
+		randomizeDurationShort = randomizeDuration * randomizeDurationShortRatio;
+		//randomizeDurationShort = randomizeDuration / 2.f;
 	}
 	//--------------------------------------------------------------
 	void doRandomizePresetFromFavs()// trig randomize and select one of the favs presets
@@ -264,6 +266,7 @@ public:
 		_g.add(randomizeDurationBpm);
 		_g.add(randomizeDuration);
 		_g.add(randomizeDurationShort);
+		_g.add(randomizeDurationShortRatio);
 		_g.add(randomizerProgress);
 		return _g;
 	}
