@@ -18,24 +18,6 @@ void groupRandomizer::setup(ofParameterGroup &g, vector<int> _keysList)
 	setup(g, keys.size());
 }
 
-// TODO: alternative pointer target
-////--------------------------------------------------------------
-//void groupRandomizer::setSelectorTARGET(ofParameter<int> &index) {
-//	ofLogNotice(__FUNCTION__) << "target registered: " << index.getName();
-//
-//	// TODO:
-//	//PRESET_Selected_IndexMain.makeReferenceTo(index);// TODO: it brokes saveing well..
-//	//PRESET_Selected_IndexMain.makeReferenceTo(selectorTARGET);
-//
-//	// TODO:
-//	//selectorTARGET = index;
-//}
-////--------------------------------------------------------------
-//void groupRandomizer::setup(ofParameterGroup &g, int _numPresets, ofParameter<int> &index) {
-//	setup(g, _numPresets);
-//	setSelectorTARGET(index);
-//}
-
 //--------------------------------------------------------------
 void groupRandomizer::setup(ofParameterGroup &_group, int _numPresets) {
 	ofLogNotice(__FUNCTION__) << "add randomizer: " << _group.getName() << " amount presets: " << _numPresets;
@@ -275,7 +257,6 @@ int groupRandomizer::doRandomIndexChanged()
 void groupRandomizer::doRandomIndex()
 {
 #ifdef DEBUG_randomTest
-	//ofLogNotice(__FUNCTION__);
 	ofLogNotice(__FUNCTION__) << "---------------------------------------------------";
 #endif
 
@@ -350,7 +331,7 @@ void groupRandomizer::doResetDices()
 
 //--------------------------------------------------------------
 void groupRandomizer::addGroupToEditor(ofParameterGroup& group) {
-	//editorPresets.clear();//?
+	//editorPresets.clear();// ?
 
 	// TODO:
 	// if we want to make nested folders (not all toggles into same and only one level, we need to create subgroups too...)
@@ -648,7 +629,7 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 				continue;
 			}
 
-			ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
+			ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter: " << parameter->getName();
 		}
 	}
 }
@@ -662,7 +643,7 @@ void groupRandomizer::setupRandomizerParams()
 	addGroupToEditor(group);// enqueue all content params and create a toggle for each one
 
 	// add to group
-	bRandomizeEditor.set("RANDOMIZE PRESET", false);
+	bRandomizeEditor.set("RANDOMIZE PRESET PARAMETERS", false);
 	bRandomizeEditorPopulateFavs.set("POPULATE FAVS!", false);
 	bRandomizeEditorAll.set("ALL", false);
 	bRandomizeEditorNone.set("NONE", false);
@@ -721,14 +702,14 @@ void groupRandomizer::update()
 	//----
 
 	// randomizer timer mode latch
-
-	// callback
-
+	
 	// TODO:
+	// on this mode: when we click to some presets, we load the preset, but after duration, 
+	// we jump back to preset index 0
+	
+	// easy callback
 	// latch mode
-	if (bIsDoneLoad &&
-		MODE_LatchTrig &&
-		!PLAY_RandomizeTimer)
+	if (bIsDoneLoad && MODE_LatchTrig && !PLAY_RandomizeTimer)
 	{
 		bIsDoneLoad = false;
 		randomizerTimer = ofGetElapsedTimeMillis();
@@ -794,18 +775,23 @@ void groupRandomizer::update()
 	//else _prog = timerRandomizer / (float)randomizeDurationShort;
 	// bar relative only to long
 
-	if (PLAY_RandomizeTimer) {
+	if (PLAY_RandomizeTimer) 
+	{
 		randomizerProgress = 100 * timerRandomizer / (float)randomizeDuration;
 	}
-	else if (MODE_LatchTrig) {
-		if (bLatchRun) {
+	else if (MODE_LatchTrig)
+	{
+		if (bLatchRun) 
+		{
 			randomizerProgress = 100 * timerRandomizer / (float)randomizeDuration;
 		}
-		else {
+		else 
+		{
 			randomizerProgress = 0;
 		}
 	}
-	else {
+	else 
+	{
 		randomizerProgress = 0;
 	}
 	_prog = MIN(100, randomizerProgress / 100.f);
@@ -819,7 +805,7 @@ void groupRandomizer::setupRandomizerIndex()
 	PLAY_RandomizeTimer.setSerializable(false);
 	MODE_DicesProbs.set("MODE USE PROBS", true);
 	MODE_LatchTrig.set("MODE LATCH", false);
-	MODE_AvoidRandomRepeat.set("MODE AVOID REPEAT", false);
+	MODE_AvoidRandomRepeat.set("MODE AVOID REPEAT", true);
 	randomizeDuration.set("t DURATION", 1000, 10, randomize_MAX_DURATION);
 	randomizeDurationShortRatio.set("t RATIO", 0.25, 0.005, 1);
 	randomizeDurationShort.set("t SHORT", 250, 10, randomize_MAX_DURATION);// locked
@@ -865,7 +851,7 @@ void groupRandomizer::setupRandomizerIndex()
 	}
 
 	params_Randomizer.clear();
-	params_Randomizer.setName("RANDOM SELECTED");
+	params_Randomizer.setName("RANDOM SELECTED INDEX");
 	params_Randomizer.add(PLAY_RandomizeTimer);
 	params_Randomizer.add(bRandomizeIndex);
 	params_Randomizer.add(randomizeDurationBpm);
@@ -886,23 +872,23 @@ void groupRandomizer::setupRandomizerIndex()
 //----------------------------------------------------------------
 void groupRandomizer::keyPressed(int key)
 {
-	//bool bEnableKeyRandomizers = false;
-	//if (bEnableKeyRandomizers) 
-	{
-		//timer to randomize and choice a random preset from the kit
-		if (key == 'R')
-		{
-			setTogglePlayRandomizerPreset();
-		}
-		else if (key == 'r')
-		{
-			doRandomIndex();
-		}
-		else if (key == 'E')
-		{
-			doRandomPreset();
-		}
-	}
+	////bool bEnableKeyRandomizers = false;
+	////if (bEnableKeyRandomizers) 
+	//{
+	//	//timer to randomize and choice a random preset from the kit
+	//	if (key == 'R')
+	//	{
+	//		setTogglePlayRandomizerPreset();
+	//	}
+	//	else if (key == 'r')
+	//	{
+	//		doRandomIndex();
+	//	}
+	//	else if (key == 'E')
+	//	{
+	//		doRandomPreset();
+	//	}
+	//}
 }
 
 //--------------------------------------------------------------
@@ -937,6 +923,8 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		//ImGui::Dummy(ImVec2(0.0f, 5));
 
 		//--
+
+		// TODO: copy this code to my ImGui hewlpers..
 
 		// preset clicker matrix buttons
 		{
@@ -1030,8 +1018,9 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 		// 1.0.1 play randomizer index
 
-		ofxImGui::AddParameter(PLAY_RandomizeTimer);
+		//ofxImGui::AddParameter(PLAY_RandomizeTimer);
 		//ofxSurfingHelpers::AddBigToggle(PLAY_RandomizeTimer, 30);
+		ofxSurfingHelpers::AddBigToggle(PLAY_RandomizeTimer, 30, "STOP RANDOMIZER", "PLAY RANDOMIZER");
 
 		//-
 
@@ -1065,8 +1054,8 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 			ImGui::Dummy(ImVec2(0.0f, 5));
 
-			//ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 30);//preset
-			ofxImGui::AddParameter(bRandomizeEditor);// trig random current preset: will randomize all enabled toggle parameters
+			ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 30);
+			//ofxImGui::AddParameter(bRandomizeEditor);// trig random current preset: will randomize all enabled toggle parameters
 		}
 
 		//--
@@ -1263,9 +1252,6 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 			ofLogNotice(__FUNCTION__) << "DURATION: " << e;
 
 			randomizeDurationBpm = (MAX_DURATION_RATIO * 60000.f) / randomizeDuration;
-
-			//randomizeSpeedF = -((float)randomizeDuration / (float)randomize_MAX_DURATION) + 1.f;
-			////randomizeSpeedF = 1 + (randomizeDuration / (float)randomize_MAX_DURATION);
 		}
 		else if (name == randomizeDurationBpm.getName())
 		{
@@ -1274,7 +1260,6 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 			// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
 			randomizeDuration = (MAX_DURATION_RATIO * 60000.f) / randomizeDurationBpm;
 			randomizeDurationShort = randomizeDuration * randomizeDurationShortRatio;
-			//randomizeDurationShort = randomizeDuration / 4.f;
 		}
 		else if (name == randomizeDurationShortRatio.getName())
 		{
@@ -1294,7 +1279,6 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 			doRandomIndex();
 		}
 #endif
-
 		else if (name == bResetDices.getName() && bResetDices)
 		{
 			ofLogNotice(__FUNCTION__) << "RESET DICES: " << e;
@@ -1360,4 +1344,23 @@ void groupRandomizer::loadPreset(int p)
 //
 //	//verify if files are created
 //	ofLogNotice(__FUNCTION__) << ofToString(dataDirectory.size()) << " file preset at folder " << _path;
+//}
+
+
+// TODO: alternative pointer target
+////--------------------------------------------------------------
+//void groupRandomizer::setSelectorTARGET(ofParameter<int> &index) {
+//	ofLogNotice(__FUNCTION__) << "target registered: " << index.getName();
+//
+//	// TODO:
+//	//PRESET_Selected_IndexMain.makeReferenceTo(index);// TODO: it brokes saveing well..
+//	//PRESET_Selected_IndexMain.makeReferenceTo(selectorTARGET);
+//
+//	// TODO:
+//	//selectorTARGET = index;
+//}
+////--------------------------------------------------------------
+//void groupRandomizer::setup(ofParameterGroup &g, int _numPresets, ofParameter<int> &index) {
+//	setup(g, _numPresets);
+//	setSelectorTARGET(index);
 //}

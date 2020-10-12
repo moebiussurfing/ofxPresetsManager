@@ -11,16 +11,44 @@
 /// my idea is to allow use ofParameterGroup's as managed content instead of ofxPanel
 
 
-///---
-///
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//	DOCUMENTATION
+//
+//	this is a very simple example to use ofxPresetsManager.
+//	we will add only ONE ofParameterGroup, but the addon can handle more groups!
+//
+//	* usage:
+//	0. init your scene and the related parameters / settings.
+//	1. add our parameters to the ofParameterGroup as container.
+//	2.1 add the container to the addon object. 
+//	2.2 you can define how many preset you want, and what keys to associate as triggers.
+//	3. done! just play with the addon gui. 
+//
+//	the file settings (one for each preset) will be placed into /bin/data.
+//	there are lot of implemented features:
+//		- 
+//
+//	there are two types of presets: 
+//		- favourites: clickable presets
+//		- standalone: archived named presets
+//
+//
+
+
+///------
+
+///	BUGS:
+///			! broken swap key
+///			! broken key command to randomize
+
+///-
+
 ///	TODO:
-///
-///	+++ 	fix helpers: clone
-///	+++		fix backward target pointer from group to addon class
-///	+++		fix ImGui helper big toggle to useful edit/live modes: enables undo, autosave, memory mode..etc
+
 ///	+++		open/save dialog to project User-Kit session in a single file.
 ///				or allowed to all the groups?
-///
+
 ///	++		randomize editor preset
 ///				preset mini engine. ABC dropdown list for randomizers
 ///				could add also several randomizer settings presets. selectable by dropdown list..
@@ -28,23 +56,28 @@
 ///				do nesting toggles to improve view. create a group for related toggles..	
 ///				clone using editor toggles to avoid clone disabled toggle params
 ///				mode state to allow overwrite only enabled toggle params
+
 ///	++		add populator engine to create all preset files if it's a new empty project
 ///				add setter to enable some params to randomize
 ///				call populate. disable debug_display red info
-///
+
 ///	+		add undo to all the groups
-///	++		add ofColor to ImGui helpers vs ofFloatColor
+
 ///	++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
+
 ///	++		performance: 
-///				check memory_mode. memory mode to extra groups too
+///				restore back memory_mode. to extra groups too
 ///	+		repair autosave timer. exclude log
-///	+		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
+
+///	++		make a lite minimal version compatible !
+///	++		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
 ///				or add simpler class but compatible with preset files kits
+
 ///	+		could make tween when changing params using ofLerp or ofxKeyTween...
-///	+		add draggable rectangle to move/resize clicker
 ///
-///---
+
+///------
 
 
 #pragma once
@@ -55,7 +88,6 @@
 //
 //	DEFINES
 //
-#define USE_IMGUI								// disabler for testing 
 //#define USE_IMGUI_EXTERNAL						// this is to group all ImGui panels into one unique instance in ofApp
 #define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT		// customize ImGui font
 //#define INCLUDE_ofxUndoSimple					// undo engine to store after randomize preset parameters (& recall)
@@ -79,9 +111,7 @@
 // uasing alternative branch: https://github.com/MacFurax/ofxImGui/tree/docking
 // this branch allows docking, layout store/recall, some extra widgets 
 
-#ifdef USE_IMGUI
 #include "ofxImGui.h"
-#endif
 
 // undo engine
 #ifdef INCLUDE_ofxUndoSimple
@@ -109,14 +139,9 @@
 
 //---
 
-//TODO: removable ofBaseApp? or it's mandatory for auto update()?
+// TODO: removable ofBaseApp? or it's mandatory for auto update() ??
 class ofxPresetsManager : public ofBaseApp
 {
-
-	//public:
-		//ofParameter<ofColor> c;
-
-		//-
 
 public:
 	// mini preview rectangles positions and sizes
@@ -274,7 +299,7 @@ private:
 	ofParameter<bool> bSplitGroupFolders{ "MODE SPLIT FOLDERS", true };//on this mode we split every group on his own sub folder
 	// finally, we will use all this mode allways, allways enabled
 	// TODO: should remove this variable and use always splitted
-	
+
 	//----
 
 	// callbacks engine
@@ -661,7 +686,7 @@ public:
 
 	//--
 
-	// for external layout or other workflow purposes
+	// helpers for external layout or other workflow purposes
 
 	//--------------------------------------------------------------
 	int getCurrentPreset(int _group)// get index of selected preset on the group
@@ -711,7 +736,7 @@ public:
 	{
 		string _names = "";
 
-		if (!simplified)
+		if (!simplified)// full paths info
 		{
 			for (int i = 0; i < groups.size(); i++)
 			{
@@ -719,18 +744,18 @@ public:
 				_names += "\n";
 			}
 		}
-		else// simplified
+		else// simplified path info
 		{
-			if (!bPathDirCustom) _names += "/data/";
-			_names += path_UserKit_Folder + "/" + path_PresetsFavourites;
+			if (!bPathDirCustom) _names += "/data/" + path_UserKit_Folder + "/\n";
+			_names += path_PresetsFavourites + "/           > favourites\n";
+			_names += path_PresetsStandalone + "/           > standalones\n";
 			_names += "\n";
 
 			for (int i = 0; i < groups.size(); i++)
 			{
-				_names += ofToString(i) + " /";
+				_names += "#" + ofToString(i) + " ";
 				_names += groups[i].getName();
-				_names += "/";
-				_names += "\n";
+				_names += "/\n";
 			}
 		}
 		return _names;
@@ -762,15 +787,6 @@ public:
 	void doSwap(int groupIndex, int fromIndex, int toIndex);
 
 	//----
-
-//public:
-//	// to solve auto load fail because the sorting of xml autoSave after preset selector tag
-//	// //(optional) on startup: called at the end of your ofApp setup() 
-//	//--------------------------------------------------------------
-//	void refreshStartup()
-//	{ }
-
-	//--
 
 	//----
 	//
@@ -888,7 +904,7 @@ public:
 
 	//----
 
-	// file paths
+	// customize file paths
 
 	//--------------------------------------------------------------
 	void setPath_UserKit_Folder(string folder);// path for root container folder. must be called before setup()!
@@ -901,7 +917,7 @@ public:
 		path_ControlSettings = str;
 	}
 
-	// TODO: customize root path
+	// TODO: customize root path. this could be the user-kit path ??
 	////--------------------------------------------------------------
 	//void setPath_Root(string str)
 	//{
@@ -938,12 +954,8 @@ public:
 
 	//----
 
-	//int mainGroupAmtPresetsFav;// amount of box-clickable handled presets on current favorites/kit group
-
 public:
 	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
-
-//vector<ofParameter<int>> PRESETS_Selected_Index;// extra groups preset selector (current)
 
 private:
 	int PRESET_Selected_IndexMain_PRE = -1;// used as callback
@@ -978,8 +990,6 @@ private:
 
 	// ImGui
 
-#ifdef USE_IMGUI 
-
 public:
 	void ImGui_Draw_Randomizers();
 	void ImGui_Draw_MainPanel();
@@ -987,20 +997,6 @@ public:
 	void ImGui_Draw_GroupsSelectors();
 	void ImGui_Draw_StandalonePresets();
 	void ImGui_Draw_PresetParameters();
-
-	//void ImGui_Draw_Randomizers(ofxImGui::Settings &settings);
-	//void ImGui_Draw_MainPanel(ofxImGui::Settings &settings);
-	//void ImGui_Draw_Extra(ofxImGui::Settings &settings);
-	//void ImGui_Draw_GroupsSelectors(ofxImGui::Settings &settings);
-	//void ImGui_Draw_StandalonePresets(ofxImGui::Settings &settings);
-	//void ImGui_Draw_PresetParameters(ofxImGui::Settings &settings);
-	//void ImGui_Draw_GroupRandomizers(ofxImGui::Settings &settings);
-
-	//#ifdef USE_IMGUI_EXTERNAL
-	//	inline void ImGui_Draw_Window();
-	//#else
-	//	void ImGui_Draw_Window();
-	//#endif
 
 public:
 	//void ImGui_Draw_Window();
@@ -1013,8 +1009,6 @@ public:
 	void ImGui_Setup();
 	void ImGui_Draw_WindowBegin();
 	void ImGui_Draw_WindowEnd();
-#endif
-
 #endif
 
 	//-
@@ -1060,53 +1054,21 @@ private:
 
 	//-----
 
-	// browser for standalone presets
-
-	// what are standalone-presets vs favourite-presets?
-	// you can archive several named presets into a separated folder:
-	//		\bin\data\ofxPresetsManager\archive
-	// then can be loaded, cloned-to or modified in another momment.
-	// this preset files are different that favourite-presets: 
-	// the main ones that have clicker boxes and key triggers. located at:
-	//		\bin\data\ofxPresetsManager\presets
-
-	//// one-group files
-	//std::vector<std::string> standaloneFileNames;
-	//std::vector<ofFile> standaloneFiles;
-	//int standaloneFileIndex = 0;
-	//ofParameter<bool> MODE_StandalonePresets_NEW;
-	//string inputText_NEW = "";//user input text
-	//string standaloneTextInput_temp = "";
-	//bool bFilesError = false;
-
-	//-
-
+	// standalone presets browser
+	// located into 'archive/' folder, not from favourites presets folders
+private:
 	// multi-group files
-	vector < std::vector<std::string> > standaloneFileNames;// all the group standalone preset names
-	vector < std::vector<ofFile> > standaloneFiles;// all the group standalone preset files
-	vector < int> standaloneFileIndex;// selected standalone preset file of the group
-
+	vector <std::vector<std::string>> standaloneFileNames;// all the group standalone preset names
+	vector <std::vector<ofFile>> standaloneFiles;// all the group standalone preset files
+	vector <int> standaloneFileIndex;// selected standalone preset file of the group
+	vector <std::string> standaloneNamePresetDisplay;
 	// engine handler
+	bool bFilesError = false;
 	ofParameter<bool> MODE_StandalonePresets_NEW;
 	string inputText_NEW = "";//user input text
-	string standaloneTextInput_temp = "";
-	bool bFilesError = false;
-
-	vector < std::string > standaloneNamePresetDisplay;
-
-	//------
+	//string inputText_TEMP = "";
 
 private:
-	//// to handle standalone presets
-	//// from 'archive/' folder, not from favourites presets folders
-
-	//void doStandalonePresetsBuild();// standalone presets splitted from favourites presets
-	//void doStandalonePresetLoad(string name);
-	//void doStandalonePresetSave(string name);
-	//bool doStandalonePresetsRefresh();
-	//void doStandalonePresetsBuildFromFavs();// save all favourites-presets to the standalone-presets (archive) folder
-
-	// multi-group files
 	void doStandalonePresetsBuild(int groupIndex = -1);// standalone presets splitted from favourites presets
 	void doStandalonePresetLoad(string name, int groupIndex = -1);
 	void doStandalonePresetSave(string name, int groupIndex = -1);
@@ -1170,7 +1132,7 @@ private:
 	bool bKeys;// enabled keys
 	bool keysNotActivated;
 
-	//save keys
+	// save keys
 	int modeKeySave;// save mod key
 	bool bKeySave;// save mod key state
 
@@ -1184,6 +1146,7 @@ public:
 
 	//--
 
+private:
 	bool ENABLE_KeysArrowBrowse = true;// allow browse presets by arrows keys by default
 public:
 	//--------------------------------------------------------------
@@ -1230,8 +1193,8 @@ public:
 	ofParameterGroup params_Control;// to use on external gui
 
 private:
-	ofParameter<bool> autoSave;
-	ofParameter<bool> autoLoad;
+	ofParameter<bool> autoSave;// auto save current preset when user clicks to another preset. almost enabled on edit mode
+	ofParameter<bool> autoLoad;// auto load the user clicked preset. almost always true
 
 	// internal groups
 	ofParameterGroup params_UserKitSettings;
@@ -1239,7 +1202,6 @@ private:
 	ofParameterGroup params_Options;
 	ofParameterGroup params_Randomizer;
 	ofParameterGroup params_Custom;
-	//ofParameterGroup params_HelperTools;
 
 	//----
 

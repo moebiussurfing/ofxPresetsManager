@@ -60,7 +60,7 @@ void ofApp::drawScene()
 	ofPopStyle();
 
 	// show help and debug preset
-	string str = "HELP\n";
+	std::string str = "HELP\n";
 	str += "G            : Show Gui\n";
 	str += "a,b,0,1,2,4  : Load Preset\n";
 	str += "Ctrl+Click   : Save to Preset\n";
@@ -73,7 +73,12 @@ void ofApp::drawScene()
 	str += "separation   : " + ofToString(separation) + "\n";
 	str += "size         : " + ofToString(size) + "\n";
 	str += "fill         : " + ofToString(fill) + "\n";
-	str += "color        : " + ofToString(color) + "\n";
+	std::string sc = 
+		ofToString(color.get().r, 1) + ", " +
+		ofToString(color.get().g, 1) + ", " +
+		ofToString(color.get().b, 1) + ", " +
+		ofToString(color.get().a, 1);
+	str += "color        : " + sc + "\n";
 	str += "lineWidth    : " + ofToString(lineWidth);
 	ofDrawBitmapStringHighlight(str, 35, 50);
 }

@@ -156,7 +156,6 @@ ofxPresetsManager::ofxPresetsManager()
 	// exclude from settings
 	loadToMemory.setSerializable(false);
 	saveFromMemory.setSerializable(false);
-	//params_HelperTools.setSerializable(false);// only reset toggles inside
 	//SHOW_Gui_AdvancedControl.setSerializable(false);
 
 	//--
@@ -965,7 +964,8 @@ void ofxPresetsManager::drawPresetClicker()
 		// 8. help info text: 
 		{
 			bShowClickerInfo = SHOW_Help.get();
-			if (bShowClickerInfo && ENABLE_Keys && (i == 0))
+
+			if (bShowClickerInfo && (i == 0))//&& ENABLE_Keys . only on first (0) for groups iterate pass..
 			{
 				std::string ss = helpInfo;
 				int _padx = 22;
@@ -1622,7 +1622,14 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 {
 	if (bDoneSetup)
 	{
-		const int &key = eventArgs.key;
+		const int key = eventArgs.key;
+
+		// modifiers
+		bool mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);
+		bool mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);
+		bool mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
+		bool mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
+		//(!mod_CONTROL && !mod_ALT)
 
 		// TODO: force disable engine
 		//bImGui_mouseOver = false;
@@ -1640,7 +1647,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			if (key == modeKeySave)
 			{
 				bKeySave = true;
-				ofLogVerbose(__FUNCTION__) << "modeKeySave TRUE" << endl;
+				ofLogNotice(__FUNCTION__) << "\t\t modeKey Save TRUE";
 				return;
 			}
 
@@ -1648,7 +1655,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			else if (key == modKeySwap)
 			{
 				bKeySwap = true;
-				ofLogVerbose(__FUNCTION__) << "modKeySwap TRUE" << endl;
+				ofLogNotice(__FUNCTION__) << "\t\t modKey Swap TRUE";
 				return;
 			}
 
@@ -1681,22 +1688,30 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 
 			// randomizers
 
-			// timer to randomize and choice a random preset from the kit
-			else if (eventArgs.hasModifier(OF_KEY_CONTROL) && eventArgs.codepoint == ' ')
+			// play
+			// timer to randomize and choice a random preset from all the available kit
+			// using a probability and a shorter mode for some presets.
+			else if ((mod_CONTROL && !mod_ALT) && key == ' ')
 			{
-				for (int i = 0; i < groups.size(); i++) {
+				//for (int i = 0; i < groups.size(); i++) 
+				{// ??
 					setTogglePlayRandomizerPreset(GuiGROUP_Selected_Index);
 				}
 			}
-			else if (eventArgs.hasModifier(OF_KEY_ALT) && eventArgs.codepoint == 'E')
-			{
-				MODE_EditPresetClicker = !MODE_EditPresetClicker;
-			}
+
 			// random index
-			else if (key == 'R')
+			else if ((mod_CONTROL && !mod_ALT) && key == 'r')
 			{
-				doRandomizePresetSelected(GuiGROUP_Selected_Index);
+				//for (int i = 0; i < groups.size(); i++) 
+				{// ??
+					doRandomizePresetSelected(GuiGROUP_Selected_Index);
+				}
 			}
+
+			//else if ((mod_CONTROL && !mod_ALT)  && key == 'e')
+			//{
+			//	MODE_EditPresetClicker = !MODE_EditPresetClicker;
+			//}
 			//// timer to randomize and choice a random preset from the kit
 			//if (key == 'R')
 			//{
@@ -1735,10 +1750,10 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			//----
 
 			// navigate kit/favorites presets
-			if (ENABLE_KeysArrowBrowse)
+			if (ENABLE_KeysArrowBrowse && (!mod_CONTROL && !mod_ALT))
 			{
 				// browse groups
-				if (key == OF_KEY_UP)
+				if (key == OF_KEY_UP )
 				{
 					GuiGROUP_Selected_Index--;
 				}
@@ -1771,27 +1786,29 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			//----
 
 			// presets selectors
-
-			for (int g = 0; g < keys.size(); g++)
+			//if ((!mod_CONTROL && !mod_ALT))
 			{
-				for (int k = 0; k < keys[g].size(); k++)// performs all registered keys: one for each [8] preset
+				for (int g = 0; g < keys.size(); g++)
 				{
-					if (key == keys[g][k])
+					for (int k = 0; k < keys[g].size(); k++)// performs all registered keys: one for each [8] preset
 					{
-						ofLogNotice(__FUNCTION__) << "key: " << (char)key;
-
-						if (bKeySave)
+						if (key == keys[g][k])
 						{
-							save(k, g);
-						}
-						else
-						{
-							ofLogNotice(__FUNCTION__) << groups[g].getName() << " group: " << g << " preset: " << k;
+							ofLogNotice(__FUNCTION__) << "key: " << (char)key;
 
-							if (g < PRESETS_Selected_Index.size()) PRESETS_Selected_Index[g] = k;
-						}
+							if (bKeySave)
+							{
+								save(k, g);
+							}
+							else
+							{
+								ofLogNotice(__FUNCTION__) << groups[g].getName() << " group: " << g << " preset: " << k;
 
-						return;
+								if (g < PRESETS_Selected_Index.size()) PRESETS_Selected_Index[g] = k;
+							}
+
+							return;
+						}
 					}
 				}
 			}
@@ -1808,12 +1825,12 @@ void ofxPresetsManager::keyReleased(ofKeyEventArgs &eventArgs)
 		if (eventArgs.key == modeKeySave && ENABLE_Keys)
 		{
 			bKeySave = false;
-			ofLogVerbose(__FUNCTION__) << "modeKeySave FALSE" << endl;
+			ofLogVerbose(__FUNCTION__) << "\t\t modeKey Save FALSE" << endl;
 		}
 		else if (eventArgs.key == modKeySwap && ENABLE_Keys)
 		{
 			bKeySwap = false;
-			ofLogVerbose(__FUNCTION__) << "modKeySwap FALSE" << endl;
+			ofLogVerbose(__FUNCTION__) << "\t\t modKey Swap FALSE" << endl;
 		}
 	}
 }
@@ -1884,7 +1901,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 					save(xIndex, yIndex);
 
-					//will auto load and set the already clicked preset button
+					// will auto load and set the already clicked preset button
 					if (yIndex < PRESETS_Selected_Index.size()) PRESETS_Selected_Index[yIndex] = xIndex;
 				}
 
@@ -2042,19 +2059,24 @@ void ofxPresetsManager::doSwap(int groupIndex, int fromIndex, int toIndex)
 	std::string srcName = getPresetPath(groups[groupIndex].getName(), fromIndex);
 	std::string dstName = getPresetPath(groups[groupIndex].getName(), toIndex);
 
-	ofLogNotice(__FUNCTION__) << "From: " << fromIndex;
-	ofLogNotice(__FUNCTION__) << "\t To: " << toIndex;
+	//ofLogNotice(__FUNCTION__) << "From: " << fromIndex;
+	//ofLogNotice(__FUNCTION__) << "\t To: " << toIndex;
 	ofLogNotice(__FUNCTION__) << "From: " << srcName;
-	ofLogNotice(__FUNCTION__) << "\t To: " << dstName;
+	ofLogNotice(__FUNCTION__) << "\t\t To: " << dstName;
 
 	// 1. save source preset (from memory) to temp file
 	std::string _pathSrc = "tempSrc.xml";
 	ofXml _settingsSrc;
 	ofSerialize(_settingsSrc, groups[groupIndex]);
-	_settingsSrc.save(_pathSrc);
 
+	bool b = _settingsSrc.save(_pathSrc);
+	if (!b) ofLogError(__FUNCTION__) << "Error saving TEMP: " << _pathSrc;
+	else ofLogNotice(__FUNCTION__) << "Saved TEMP: " << _pathSrc;
+	
 	// 2. load destination "from kit" to memory
 	std::string _pathDest = getPresetPath(groups[groupIndex].getName(), toIndex);
+	ofLogNotice(__FUNCTION__) << "Destination: " << _pathDest;
+	
 	ofXml _settingsDest;
 	_settingsDest.load(_pathDest);
 	ofDeserialize(_settingsDest, groups[groupIndex]);
@@ -2074,7 +2096,8 @@ void ofxPresetsManager::doSwap(int groupIndex, int fromIndex, int toIndex)
 
 	// workflow
 	// 6. auto load source (the same preset was selected befor swap clicked!)
-	PRESETS_Selected_Index[groupIndex] = toIndex;
+	//PRESETS_Selected_Index[groupIndex] = toIndex;
+	loadPreset(toIndex, groupIndex);
 }
 
 //--------------------------------------------------------------
@@ -2209,7 +2232,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 
 		//--
 
-		// mode edit: when false, we disabled autosave to allow performance do faster
+		// mode edit: when false, we disabled autosave to allow faster performance ! 
 		else if (name == MODE_Editor.getName())
 		{
 			ofLogNotice(__FUNCTION__) << "MODE EDITOR: " << (MODE_Editor.get() ? "TRUE" : "FALSE");
@@ -2221,6 +2244,8 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 			for (int i = 0; i < groups.size(); i++) {
 				groupRandomizers[i].setModeEditor(MODE_Editor);
 			}
+
+			if (!MODE_Editor) MODE_EditPresetClicker = false;
 		}
 
 		if (name == MODE_EditPresetClicker.getName())
@@ -2713,43 +2738,48 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		// main panel
 		ImGui_Draw_MainPanel();// main control + extra
 
+		//-
+
 		// group selector
-		if (ofxImGui::BeginWindow("Group select", settings, &b))
-		{
-			ImGui::Dummy(ImVec2(0.0f, 5));
+		if (groups.size() > 1) {// hide this panels when no more than one group! it's for multi groups
+			if (ofxImGui::BeginWindow("Group select", settings, &b))
+			{
+				ImGui::Dummy(ImVec2(0.0f, 5));
 
-			// main group link selector
-			if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);// last group is the main link group
+				// main group link selector
+				if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);// last group is the main link group
 
-			//-
+				//-
 
-			ImGui::Dummy(ImVec2(0.0f, 5));
+				ImGui::Dummy(ImVec2(0.0f, 5));
 
-			// selector to show their randomizers
-			if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
+				// selector to show their randomizers
+				if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
 
-			//-
+				//-
 
-			//ImGui::Dummy(ImVec2(0.0f, 5));
+				//ImGui::Dummy(ImVec2(0.0f, 5));
 
-			// name of selected group
-			std::string str;
-			str = "Group Name";
-			ImGui::Text(str.c_str());
-			str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
-			ImGui::Text(str.c_str());
+				// name of selected group
+				std::string str;
+				str = "Group Name";
+				ImGui::Text(str.c_str());
+				str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
+				ImGui::Text(str.c_str());
+			}
+			ofxImGui::EndWindow(settings);
 		}
-		ofxImGui::EndWindow(settings);
 
 		//--
 
 		// all parameters
 		ImGui_Draw_PresetParameters();
 
-		// all group selectors
+		// all group selectors to set current preset
 		ImGui_Draw_GroupsSelectors();
 
-		// selected randomizers
+		// selected randomizers for selected group
+		// handles matrix button selector too
 		ImGui_Draw_Randomizers();
 
 		// standalone presets browser
@@ -2979,11 +3009,12 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo += "H                HELP\n";
 	helpInfo += "G                GUI\n";
 	helpInfo += "P                CLICKER\n";
-	helpInfo += "KEYS&MOUSE       LOAD\n";
-	helpInfo += "CTRL             SAVE/COPY\n";
-	helpInfo += "ALT              SWAP\n";
-	helpInfo += "ARROWS           NAVIGATE\n";
-	helpInfo += "E                EDIT\n";
+	helpInfo += "Keys&Mouse       LOAD\n";
+	helpInfo += "Ctrl+            SAVE/COPY\n";
+	helpInfo += "Alt+             SWAP\n";
+	helpInfo += "Arrows           NAVIGATE\n";
+	helpInfo += "Ctrl+Space       PLAY RANDOMIZER\n";
+	helpInfo += "E                EDIT/LIVE\n";
 }
 
 //--------------------------------------------------------------
@@ -3014,9 +3045,10 @@ void ofxPresetsManager::buildDefaultUserKit() {
 
 	//--
 
-	// user kit name is a bigger session preset
-	// will handle all the groups
-
+	// user-kit
+	// is a bigger session preset
+	// will contain all the groups, all the settings
+	// then we can load different user-kits on same project.
 	// reduce path to name only (to display purposes only)
 	std::string str = path_UserKit_Folder;
 	std::string temp = R"(\)";//use '\' as splitter...should use '/' too bc Windows/macOS compatibility..
@@ -3166,19 +3198,18 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 			//--
 
-			if (ImGui::TreeNode("Presets Browser"))
+			// helpers and browser
 			{
 				//---
 
 				ImGui::Dummy(ImVec2(0.0f, 5));
 
-				// label for standalone presets folder
-				//str = "User-Kit";
+				//// label presets folder
+				////str = "User-Kit";
+				////ImGui::Text(str.c_str());
+				//str = "/" + path_PresetsStandalone + "/" + groups[groupIndex].getName();// append group name
 				//ImGui::Text(str.c_str());
-				str = "/" + path_PresetsStandalone + "/" + groups[groupIndex].getName();// append group name
-				ImGui::Text(str.c_str());
-
-				ImGui::Dummy(ImVec2(0.0f, 5));
+				//ImGui::Dummy(ImVec2(0.0f, 5));
 
 				//-
 
@@ -3194,14 +3225,19 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 				}
 
 				//-
+	
+				// TODO:
+				// should iterate all files and overwrite all favourites
 
-				ImGui::SameLine();
-				if (ImGui::Button("TO FAVS"))
-				{
-					ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE STANDALONE PRESET: " << standaloneNamePresetDisplay[groupIndex];
-
-					if (MODE_StandalonePresets_NEW) save(PRESETS_Selected_Index[groupIndex], groupIndex);
-				}
+				//ImGui::SameLine();
+				//if (ImGui::Button("TO FAVS"))
+				//{
+				//	ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE STANDALONE PRESET: " << standaloneNamePresetDisplay[groupIndex];
+				//	//if (MODE_StandalonePresets_NEW) save(PRESETS_Selected_Index[groupIndex], groupIndex);
+				//	
+				//	// save current to favourites
+				//	save(PRESETS_Selected_Index[groupIndex], groupIndex);
+				//}
 
 				ImGui::Dummy(ImVec2(0.0f, 5));
 
@@ -3219,7 +3255,6 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 					std::string _path = path_UserKit_Folder + "/" + path_PresetsStandalone + "/";
 					_path += PRESETS_Selected_Index[groupIndex].getName();// group name
-					//_path += standaloneNamePresetDisplay[groupIndex];// name is empty here..
 
 					const char *array = _path.c_str();
 
@@ -3319,6 +3354,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 				//--
 
+				// update, reload, delete, clear
 				{
 					// 4.2 update
 
@@ -3326,7 +3362,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 					if (ImGui::Button("UPDATE"))
 					{
-						//_name = standaloneTextInput_temp;
+						//_name = inputText_TEMP;
 						//ofLogNotice(__FUNCTION__) << "UPDATE PRESET NAME: " << _name << endl;
 
 						// 0. get filename of selected
@@ -3440,7 +3476,8 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 				//----
 
-				// new button
+				// new preset button
+
 				ofxImGui::AddParameter(MODE_StandalonePresets_NEW);
 
 				//-
@@ -3538,8 +3575,6 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 					// to disable global keys to not collide with ImGui textInput
 					ofxImGui::AddParameter(ENABLE_Keys);
 				}
-
-				ImGui::TreePop();
 			}
 		}
 		ofxImGui::EndWindow(settings);
