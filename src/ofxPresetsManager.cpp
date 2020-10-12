@@ -2921,8 +2921,8 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo += "\n";
 	helpInfo += "KEYS\n";
 	helpInfo += "H                HELP\n";
-	helpInfo += "P                CLICKER\n";
 	helpInfo += "G                GUI\n";
+	helpInfo += "P                CLICKER\n";
 	helpInfo += "KEYS&MOUSE       LOAD\n";
 	helpInfo += "CTRL             SAVE/COPY\n";
 	helpInfo += "ALT              SWAP\n";
