@@ -1003,7 +1003,8 @@ public:
 	//#endif
 
 public:
-	void ImGui_Draw_Window();
+	//void ImGui_Draw_Window();
+	bool ImGui_Draw_Window();
 
 	//-
 
@@ -1073,8 +1074,8 @@ private:
 	//std::vector<std::string> standaloneFileNames;
 	//std::vector<ofFile> standaloneFiles;
 	//int standaloneFileIndex = 0;
-	//ofParameter<bool> MODE_StandalonePresets_NewPreset;
-	//string standaloneTextInput_NEW = "";//user input text
+	//ofParameter<bool> MODE_StandalonePresets_NEW;
+	//string inputText_NEW = "";//user input text
 	//string standaloneTextInput_temp = "";
 	//bool bFilesError = false;
 
@@ -1086,8 +1087,8 @@ private:
 	vector < int> standaloneFileIndex;// selected standalone preset file of the group
 
 	// engine handler
-	ofParameter<bool> MODE_StandalonePresets_NewPreset;
-	string standaloneTextInput_NEW = "";//user input text
+	ofParameter<bool> MODE_StandalonePresets_NEW;
+	string inputText_NEW = "";//user input text
 	string standaloneTextInput_temp = "";
 	bool bFilesError = false;
 

@@ -117,7 +117,7 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Gui_AdvancedControl.set("SHOW ADVANCED", false);
 	SHOW_Panel_Click.set("SHOW CLICKER", true);
 	SHOW_Panel_StandalonePresets.set("SHOW STANDALONE PRESETS", true);
-	MODE_StandalonePresets_NewPreset.set("NEW!", false);
+	MODE_StandalonePresets_NEW.set("NEW!", false);
 	SHOW_Panel_Randomizer.set("SHOW RANDOMIZER PANEL", true);
 	ENABLE_Keys.set("ENABLE KEYS", true);
 
@@ -349,7 +349,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	//--
 
 	MODE_EditPresetClicker.set("EDIT CLICKER", false);
-	SHOW_BackGround_EditPresetClicker.set("BACKGROUND CLICKER", false);
+	SHOW_BackGround_EditPresetClicker.set("BOX CLICKER", false);
 
 	//----
 
@@ -605,7 +605,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		// TODO:
 		////autosave
 		////&& autoLoad? 
-		//if (!MODE_StandalonePresets_NewPreset && autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
+		//if (!MODE_StandalonePresets_NEW && autoSave && bAutosaveTimer && ofGetElapsedTimeMillis() - timerLast_Autosave > timeToAutosave)
 		//{
 		//	ofLogNotice(__FUNCTION__) << "[AUTOSAVE]";
 		//	//app settings
@@ -633,9 +633,26 @@ void ofxPresetsManager::drawImGui()
 {
 	ImGui_Draw_WindowBegin();
 	{
-		//draw content
-		//bImGui_mouseOver = ImGui_Draw_Window();
-		ImGui_Draw_Window();
+		// mouse over ImGui engine
+		bMouseOver_Changed = false;
+
+		//-
+
+		//ImGui_Draw_Window();
+		bImGui_mouseOver = ImGui_Draw_Window();// handling mouse over gui to disable keys callbacks
+
+		//-
+
+		// mouse over ImGui engine
+		if (bImGui_mouseOver != bImGui_mouseOver_PRE)
+		{
+			bImGui_mouseOver_PRE = bImGui_mouseOver;
+			bMouseOver_Changed = true;
+		}
+		if (bMouseOver_Changed)
+		{
+			ofLogNotice(__FUNCTION__) << "bImGui_mouseOver: " << (bImGui_mouseOver ? "\t\t\t\t > INSIDE" : "< OUTSIDE");
+		}
 	}
 	ImGui_Draw_WindowEnd();
 }
@@ -655,15 +672,13 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 
 	//----
 
-	//gui
-
-	//draw ImGui
+	// ImGui
 
 #ifndef USE_IMGUI_EXTERNAL	
 	drawImGui();
 #endif
 
-	//bImGui_mouseOver = false;
+	//----
 }
 
 //--------------------------------------------------------------
@@ -699,17 +714,19 @@ void ofxPresetsManager::drawPresetClicker()
 
 	//-
 
-	// light theme
-	if (!bThemDark) {
+	// light theme (black lines)
+	if (!bThemDark) 
+	{
 		_colorText = ofColor(0, 255);
 		_colorButton = ofColor(0, 64);
 		_colorBg = ofColor(255, 8);
 	}
 
-	// dark theme
-	else {
+	// dark theme (white lines)
+	else
+	{
 		_colorText = ofColor(255, 128);
-		_colorButton = ofColor(16, 200);
+		_colorButton = ofColor(32, 200);
 		_colorBg = ofColor(0, 128);
 	}
 
@@ -1607,15 +1624,15 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 	{
 		const int &key = eventArgs.key;
 
-		// TODO:
-		bImGui_mouseOver = false;
+		// TODO: force disable engine
+		//bImGui_mouseOver = false;
 
-		if (key == 'K' && !bImGui_mouseOver)// restore keys control
+		if (key == 'K' && !bImGui_mouseOver_PRE)// restore keys control
 		{
 			ENABLE_Keys = !ENABLE_Keys;
 		}
 
-		else if (bKeys && ENABLE_Keys && !bImGui_mouseOver)// disable keys when mouse over gui
+		else if (bKeys && ENABLE_Keys && !bImGui_mouseOver_PRE)// disable keys when mouse over gui
 		{
 			//-
 
@@ -2127,7 +2144,7 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " not changed";
 
 							// browser
-							//if (MODE_StandalonePresets_NewPreset)
+							//if (MODE_StandalonePresets_NEW)
 							//{
 							//	if (autoLoad)
 							//	{
@@ -2149,7 +2166,7 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 
 							// workflow
 							// browser mode bypasses autosave
-							//if (autoSave && !MODE_StandalonePresets_NewPreset)
+							//if (autoSave && !MODE_StandalonePresets_NEW)
 							if (autoSave)
 							{
 								save(PRESETS_Selected_Index_PRE[g], g);
@@ -2448,7 +2465,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
-	}
+		}
 
 	// debug params
 	if (true)
@@ -2539,7 +2556,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #endif
 		}
 	}
-}
+		}
 
 ////--------------------------------------------------------------
 //void ofxPresetsManager::addGroup_TARGET(ofParameterGroup &g)
@@ -2650,10 +2667,8 @@ void ofxPresetsManager::ImGui_Setup()
 
 	//--
 
-	//// mouse over
-	//ImGui::GetIO().MouseDrawCursor = false;
-	//bImGui_mouseOver.set("mouseOverGui", false);
-	////ImGui::GetIO().ConfigWindowsResizeFromEdges = true;
+	// mouse over
+	bImGui_mouseOver.set("mouseOverGui", false);
 
 	//--
 }
@@ -2661,10 +2676,6 @@ void ofxPresetsManager::ImGui_Setup()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_WindowBegin()
 {
-	//	// mouse over gui system
-	//	bMouseOver_Changed = false;
-	//	bImGui_mouseOver = false;
-
 	//-
 
 	gui_ImGui.begin();
@@ -2675,20 +2686,11 @@ void ofxPresetsManager::ImGui_Draw_WindowBegin()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_WindowEnd()
 {
-	//if (bImGui_mouseOver != bImGui_mouseOver_PRE)
-	//{
-	//	bImGui_mouseOver_PRE = bImGui_mouseOver;
-	//	bMouseOver_Changed = true;
-	//}
-
-	//if (bMouseOver_Changed)
-	//{
-	//	ofLogVerbose(__FUNCTION__) << "bImGui_mouseOver: " << (bImGui_mouseOver ? "INSIDE" : "OUTSIDE");
-	//}
-
 	//--
 
 	gui_ImGui.end();
+
+	//--
 }
 #endif
 
@@ -2699,19 +2701,20 @@ void ofxPresetsManager::ImGui_Draw_WindowEnd()
 //#endif
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_Window()
+//void ofxPresetsManager::ImGui_Draw_Window()
+bool ofxPresetsManager::ImGui_Draw_Window()
 {
+	ofxImGui::Settings settings;
+
 	if (SHOW_ImGui)
 	{
-		//bool b = true;
-
-		// group selector
-		ofxImGui::Settings settings;
+		bool b = false;
 
 		// main panel
 		ImGui_Draw_MainPanel();// main control + extra
 
-		if (ofxImGui::BeginWindow("Group select", settings, false))
+		// group selector
+		if (ofxImGui::BeginWindow("Group select", settings, &b))
 		{
 			ImGui::Dummy(ImVec2(0.0f, 5));
 
@@ -2725,6 +2728,8 @@ void ofxPresetsManager::ImGui_Draw_Window()
 			// selector to show their randomizers
 			if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
 
+			//-
+
 			//ImGui::Dummy(ImVec2(0.0f, 5));
 
 			// name of selected group
@@ -2736,18 +2741,22 @@ void ofxPresetsManager::ImGui_Draw_Window()
 		}
 		ofxImGui::EndWindow(settings);
 
-		// parameters
+		//--
+
+		// all parameters
 		ImGui_Draw_PresetParameters();
 
-		// selectors
+		// all group selectors
 		ImGui_Draw_GroupsSelectors();
 
 		// selected randomizers
 		ImGui_Draw_Randomizers();
 
 		// standalone presets browser
-		ImGui_Draw_StandalonePresets();
+		if (MODE_Editor) ImGui_Draw_StandalonePresets();
 	}
+
+	return settings.mouseOverGui;
 }
 
 // ImGui content
@@ -2789,37 +2798,6 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 
 	if (ofxImGui::BeginWindow("Main Panel", settings, false))
 	{
-		// mode edit
-		//ofxImGui::AddParameter(MODE_Editor);
-		ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30);// TODO: repair. collides when multiple toggles..
-
-		//---
-
-		// panels
-		if (MODE_Editor)
-		{
-			if (ImGui::TreeNode("PANELS"))
-			{
-				// handled by docker mode
-				//if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
-				//ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
-
-				ofxImGui::AddParameter(SHOW_Panel_Click);//ImGui::SameLine(); 
-				ofxImGui::AddParameter(MODE_EditPresetClicker);
-				ImGui::SameLine(); ofxImGui::AddParameter(SHOW_BackGround_EditPresetClicker);
-
-				//ofxImGui::AddParameter(SHOW_Panel_Randomizer);
-
-				ofxImGui::AddParameter(SHOW_Panel_StandalonePresets); ImGui::SameLine();
-				ofxImGui::AddParameter(MODE_StandalonePresets_NewPreset);
-
-				ImGui::TreePop();
-			}
-		}
-
-		// extra
-		if (MODE_Editor) ImGui_Draw_Extra();
-
 		//---
 
 		ImGui::Dummy(ImVec2(0.0f, 5));
@@ -2832,6 +2810,46 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 		ImGui::Text(str.c_str());
 
 		ImGui::Dummy(ImVec2(0.0f, 5));
+		
+		//--
+
+		// mode edit
+		//ofxImGui::AddParameter(MODE_Editor);
+		ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30, "EDIT MODE", "LIVE MODE");
+		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30); // TODO: repair method. collides when multiple toggles..
+
+		ImGui::Dummy(ImVec2(0.0f, 5));
+
+		//---
+
+		// panels
+		//if (MODE_Editor)
+		{
+			if (ImGui::TreeNode("PANELS"))
+			{
+				// handled by docker mode
+				//if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
+				//ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
+
+				ofxImGui::AddParameter(SHOW_Panel_Click); ImGui::SameLine(); 
+				ofxImGui::AddParameter(ENABLE_Keys);//ImGui::SameLine(); 
+				if (MODE_Editor) {
+					ofxImGui::AddParameter(MODE_EditPresetClicker); ImGui::SameLine();
+					ofxImGui::AddParameter(SHOW_BackGround_EditPresetClicker);
+				}
+
+				//ofxImGui::AddParameter(SHOW_Panel_Randomizer);
+
+				if (MODE_Editor) ofxImGui::AddParameter(SHOW_Panel_StandalonePresets); //ImGui::SameLine();
+				//ofxImGui::AddParameter(MODE_StandalonePresets_NEW);
+				//ofxImGui::AddParameter(MODE_StandalonePresets_NEW);
+
+				ImGui::TreePop();
+			}
+		}
+
+		// extra
+		if (MODE_Editor) ImGui_Draw_Extra();
 
 		//--
 	}
@@ -3105,11 +3123,11 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 {
 	if (SHOW_Panel_StandalonePresets)
 	{
-		//bool b = true;
+		bool b = true;
 
 		ofxImGui::Settings settings;
 
-		if (ofxImGui::BeginWindow("Standalone Presets", settings, true))
+		if (ofxImGui::BeginWindow("Standalone Presets", settings, &b))
 		{
 			int groupIndex = GuiGROUP_Selected_Index.get();
 			int _numfiles = standaloneFileNames[groupIndex].size();
@@ -3164,11 +3182,6 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 				//-
 
-				// new button
-				ofxImGui::AddParameter(MODE_StandalonePresets_NewPreset);
-
-				//-
-
 				// 0. send/save current browsed (from "/archive/") preset to current presets on favorites
 
 				// get/copy all favs presets from favs and send/save to browser folder ("archive")
@@ -3187,7 +3200,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 				{
 					ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE STANDALONE PRESET: " << standaloneNamePresetDisplay[groupIndex];
 
-					if (MODE_StandalonePresets_NewPreset) save(PRESETS_Selected_Index[groupIndex], groupIndex);
+					if (MODE_StandalonePresets_NEW) save(PRESETS_Selected_Index[groupIndex], groupIndex);
 				}
 
 				ImGui::Dummy(ImVec2(0.0f, 5));
@@ -3237,7 +3250,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 								_name = standaloneFileNames[groupIndex][standaloneFileIndex[groupIndex]];
 								ofLogNotice(__FUNCTION__) << "ARROW: displayNamePreset: [" + ofToString(standaloneFileIndex[groupIndex]) + "] " << _name;
 
-								//if (MODE_StandalonePresets_NewPreset)
+								//if (MODE_StandalonePresets_NEW)
 								ofLogNotice(__FUNCTION__) << "LOAD. filename: " << _name;
 
 								doStandalonePresetLoad(_name, groupIndex);
@@ -3261,7 +3274,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 								_name = standaloneFileNames[groupIndex][standaloneFileIndex[groupIndex]];
 								ofLogNotice(__FUNCTION__) << "ARROW: displayNamePreset: [" + ofToString(standaloneFileIndex[groupIndex]) + "] " << _name;
 
-								//if (MODE_StandalonePresets_NewPreset)
+								//if (MODE_StandalonePresets_NEW)
 								ofLogNotice(__FUNCTION__) << "LOAD. filename: " << _name;
 
 								doStandalonePresetLoad(_name, groupIndex);
@@ -3306,7 +3319,6 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 				//--
 
-				//
 				{
 					// 4.2 update
 
@@ -3334,26 +3346,21 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 						// 4. reselect last save preset (bc directory sorting changes)
 						ofLogNotice(__FUNCTION__) << "Reload last updated preset:";
-						int iNew = -1;//search index for filename
+						int _newIndex = -1;// search index for filename
 						for (size_t i = 0; i < standaloneFiles[groupIndex].size(); i++)
 						{
 							std::string n = standaloneFiles[groupIndex][i].getBaseName();
-							if (n == _currName)
-							{
-								iNew = i;
-							}
+							if (n == _currName) _newIndex = i;
 						}
-						if (iNew != -1)
+						if (_newIndex != -1)
 						{
-							ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << standaloneFiles[groupIndex][iNew].getBaseName();
-							standaloneFileIndex[groupIndex] = iNew;
+							ofLogNotice(__FUNCTION__) << "Index [" << _newIndex << "] " << standaloneFiles[groupIndex][_newIndex].getBaseName();
+							standaloneFileIndex[groupIndex] = _newIndex;
 							_name = standaloneFileNames[groupIndex][standaloneFileIndex[groupIndex]];
+
 							doStandalonePresetLoad(_name, groupIndex);
 						}
-						else
-						{
-							ofLogError(__FUNCTION__) << "Not found! Bad Index [" << iNew << "]";
-						}
+						else ofLogError(__FUNCTION__) << "Not found! Bad Index [" << _newIndex << "]";
 					}
 
 					//-
@@ -3427,20 +3434,22 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 							doStandalonePresetLoad(_name, groupIndex);
 						}
-						else
-						{
-							ofLogError(__FUNCTION__) << "Error listing directory!";
-						}
+						else ofLogError(__FUNCTION__) << "Error listing directory!";
 					}
 				}
 
 				//----
 
+				// new button
+				ofxImGui::AddParameter(MODE_StandalonePresets_NEW);
+
+				//-
+
 				// mode new preset enabled
 
 				// 5. second panel
 
-				if (MODE_StandalonePresets_NewPreset)
+				if (MODE_StandalonePresets_NEW)
 				{
 					// 5.1 new preset name
 
@@ -3452,16 +3461,18 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 					// loaded string into char array
 					char tab[32];
-					strncpy(tab, standaloneTextInput_NEW.c_str(), sizeof(tab));
+					strncpy(tab, inputText_NEW.c_str(), sizeof(tab));
 					tab[sizeof(tab) - 1] = 0;
 
 					if (ImGui::InputText("", tab, IM_ARRAYSIZE(tab)))
 					{
-						ofLogNotice(__FUNCTION__) << "InputText [tab]:" << ofToString(tab) << endl;
-						standaloneTextInput_NEW = ofToString(tab);
-						ofLogNotice(__FUNCTION__) << "standaloneTextInput_NEW:" << standaloneTextInput_NEW << endl;
+						ofLogNotice(__FUNCTION__) << "InputText [tab]: \t\t" << ofToString(tab);
 
-						//bBlink = true;//not workind. we like to blink when mouse_on_text_input
+						inputText_NEW = ofToString(tab);
+
+						ofLogNotice(__FUNCTION__) << "inputText_NEW: \t\t" << inputText_NEW;
+
+						//bBlink = true; // not workind. we like to blink when mouse_on_text_input
 					}
 
 					//--
@@ -3469,10 +3480,11 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 					// 5.3 save new
 
 					// workflow
+
 					// TODO:
 					// blink when it's editing a new preset..
-					bool bBlink;
-					bBlink = true;
+					bool bBlink = true;
+
 					if (bBlink)
 					{
 						//ImGui::PushID(1);
@@ -3483,39 +3495,48 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 					if (ImGui::Button("SAVE"))
 					{
-						ofLogNotice(__FUNCTION__) << "standaloneTextInput_NEW: " << standaloneTextInput_NEW << endl;
+						ofLogNotice(__FUNCTION__) << "inputText_NEW: " << inputText_NEW << endl;
 
 						// 1. save
-						doStandalonePresetSave(standaloneTextInput_NEW, groupIndex);
+						doStandalonePresetSave(inputText_NEW, groupIndex);
 
 						// workflow
+
 						// 2. disable new preset mode
-						MODE_StandalonePresets_NewPreset = false;
+						MODE_StandalonePresets_NEW = false;
 
 						// 3. refresh files
-						doStandalonePresetsRefresh(groupIndex);;
+						doStandalonePresetsRefresh(groupIndex);
 
 						// 4. reselect last save preset (bc directory sorting changes)
 						ofLogNotice(__FUNCTION__) << "Reload last saved preset:";
-						int iNew = -1;
+						int _newIndex = -1;
 						for (size_t i = 0; i < standaloneFiles[groupIndex].size(); i++)
 						{
 							std::string n = standaloneFiles[groupIndex][i].getBaseName();
-							if (n == standaloneTextInput_NEW)
-							{
-								iNew = i;
-							}
+							if (n == inputText_NEW) _newIndex = i;
 						}
-						ofLogNotice(__FUNCTION__) << "Index [" << iNew << "] " << standaloneFiles[groupIndex][iNew].getBaseName();
-						standaloneFileIndex[groupIndex] = iNew;
+						ofLogNotice(__FUNCTION__) << "Index [" << _newIndex << "] " << standaloneFiles[groupIndex][_newIndex].getBaseName();
+						standaloneFileIndex[groupIndex] = _newIndex;
 
-						doStandalonePresetLoad(standaloneTextInput_NEW);
+						doStandalonePresetLoad(inputText_NEW);
 					}
 
-					if (bBlink)
+					if (bBlink) ImGui::PopStyleColor(1);
+					
+					ImGui::SameLine();
+					if (ImGui::Button("CANCEL"))
 					{
-						ImGui::PopStyleColor(1);
+						ofLogNotice(__FUNCTION__) << "Cancel";
+						inputText_NEW = "";
+						MODE_StandalonePresets_NEW = false;
 					}
+
+					//--
+
+					// workaround
+					// to disable global keys to not collide with ImGui textInput
+					ofxImGui::AddParameter(ENABLE_Keys);
 				}
 
 				ImGui::TreePop();
@@ -3816,7 +3837,7 @@ void ofxPresetsManager::undoStoreParams() {
 	//str += undoStringParams.getUndoStateDescriptor() + "\n";
 
 	ofLogNotice(__FUNCTION__) << str;
-		}
+}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::undoRefreshParams() {
