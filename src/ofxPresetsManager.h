@@ -124,7 +124,7 @@ public:
 	string path_RectanglePresetClicker = "_RectanglePresetClicker";
 	ofParameter<bool> MODE_EditPresetClicker;
 	ofParameter<float> _rectRatio;
-	ofParameter<bool> bg_EditPresetClicker;
+	ofParameter<bool> SHOW_BackGround_EditPresetClicker;
 	//ofParameter<bool> bResetRects;
 	float _RectClick_w;
 	float _RectClick_Pad;
@@ -273,7 +273,8 @@ public:
 private:
 	ofParameter<bool> bSplitGroupFolders{ "MODE SPLIT FOLDERS", true };//on this mode we split every group on his own sub folder
 	// finally, we will use all this mode allways, allways enabled
-
+	// TODO: should remove this variable and use always splitted
+	
 	//----
 
 	// callbacks engine
@@ -753,9 +754,9 @@ public:
 
 	// helper tools
 
-	void doCloneRight(int gIndex);// clone from selected preset of index group to all others to the right
-	void doCloneAll(int gIndex);// clone all presets from the current index group
-	void doPopulateFavs(int gIndex);// fast populate random presets of index group
+	void doCloneRight(int groupIndex);// clone from selected preset of index group to all others to the right
+	void doCloneAll(int groupIndex);// clone all presets from the current index group
+	void doPopulateFavs(int groupIndex);// fast populate random presets of index group
 	void doPopulateFavsALL();// fast populate random presets around all favs of index group
 
 	void doSwap(int groupIndex, int fromIndex, int toIndex);
@@ -799,13 +800,13 @@ public:
 	void setVisible_GUI(bool b)
 	{
 		SHOW_ImGui = b;
-		SHOW_ClickPanel = b;
+		SHOW_Panel_Click = b;
 	}
 	//--------------------------------------------------------------
 	void toggleVisible_GUI()
 	{
 		SHOW_ImGui = !SHOW_ImGui;
-		SHOW_ClickPanel = SHOW_ImGui;
+		SHOW_Panel_Click = SHOW_ImGui;
 	}
 	//--------------------------------------------------------------
 	void setVisible_GUI_ImGui(bool b)
@@ -853,22 +854,22 @@ public:
 	//--------------------------------------------------------------
 	void setVisible_PresetClicker(bool visible)
 	{
-		SHOW_ClickPanel = visible;
+		SHOW_Panel_Click = visible;
 	}
 	//--------------------------------------------------------------
 	void toggleVisible_PresetClicker()
 	{
-		SHOW_ClickPanel = !SHOW_ClickPanel;
+		SHOW_Panel_Click = !SHOW_Panel_Click;
 	}
 	//--------------------------------------------------------------
 	bool getVisible_PresetClicker()
 	{
-		return SHOW_ClickPanel;
+		return SHOW_Panel_Click;
 	}
 	//--------------------------------------------------------------
 	bool isVisible_PresetClicker()
 	{
-		return SHOW_ClickPanel;
+		return SHOW_Panel_Click;
 	}
 	//--------------------------------------------------------------
 	float getGroupNamesWidth() {
@@ -951,10 +952,10 @@ private:
 
 private:
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
-	ofParameter<bool> SHOW_ClickPanel;// to allow include as toggle parameter into external gui
+	ofParameter<bool> SHOW_Panel_Click;// to allow include as toggle parameter into external gui
 	ofParameter<bool> SHOW_ImGui;
-	ofParameter<bool> SHOW_BrowserPanel;
-	ofParameter<bool> SHOW_RandomizerPanel;
+	ofParameter<bool> SHOW_Panel_StandalonePresets;
+	ofParameter<bool> SHOW_Panel_Randomizer;
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
 	ofParameter<bool> SHOW_ImGui_Selectors;
 	ofParameter<bool> SHOW_Help;
@@ -1072,7 +1073,7 @@ private:
 	//std::vector<std::string> standaloneFileNames;
 	//std::vector<ofFile> standaloneFiles;
 	//int standaloneFileIndex = 0;
-	//ofParameter<bool> MODE_Browser_NewPreset;
+	//ofParameter<bool> MODE_StandalonePresets_NewPreset;
 	//string standaloneTextInput_NEW = "";//user input text
 	//string standaloneTextInput_temp = "";
 	//bool bFilesError = false;
@@ -1085,7 +1086,7 @@ private:
 	vector < int> standaloneFileIndex;// selected standalone preset file of the group
 
 	// engine handler
-	ofParameter<bool> MODE_Browser_NewPreset;
+	ofParameter<bool> MODE_StandalonePresets_NewPreset;
 	string standaloneTextInput_NEW = "";//user input text
 	string standaloneTextInput_temp = "";
 	bool bFilesError = false;
@@ -1132,7 +1133,7 @@ public:
 		//params_Controls.setName("OVERLAY");
 		params_Controls.add(getParamsPresetSelectors());
 		params_Controls.add(getParamsRandomizers());
-		params_Controls.add(SHOW_ClickPanel);
+		params_Controls.add(SHOW_Panel_Click);
 		params_Controls.add(MODE_Editor);
 
 		return params_Controls;

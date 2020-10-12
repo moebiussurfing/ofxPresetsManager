@@ -925,12 +925,14 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		////string str = "User-Kit: " + displayNameUserKit;
 		//str = "  Group    " + group.getName();
 		//ImGui::Text(str.c_str());
+
 		str = "  Preset   " + ofToString(PRESET_Selected_IndexMain.get());
 		ImGui::Text(str.c_str());
 
 		ImGui::Dummy(ImVec2(0.0f, 5));
 
 		ofxImGui::AddParameter(PRESET_Selected_IndexMain);
+
 		//ImGui::SameLine();
 		//ImGui::Dummy(ImVec2(0.0f, 5));
 
