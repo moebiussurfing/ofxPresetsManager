@@ -217,7 +217,7 @@ void ofApp::drawScene0()
 	ofSetLineWidth(lineWidth0);
 	if (fill0) ofFill();
 	else ofNoFill();
-	for (int i = 0; i < numObjects0; ++i)
+	for (int i = 0; i < numObjects0+1; ++i)
 	{
 		if (shapeType0 == 1) ofDrawRectangle(0, 0, shapeSide0 * i / 2, shapeSide0 * i / 2);
 		else if (shapeType0 == 2) ofDrawCircle(0, 0, shapeSide0 * i / 2);
@@ -253,7 +253,7 @@ void ofApp::drawScene2()
 	ofSetColor(color2.get());
 	if (fill2) ofFill();
 	else ofNoFill();
-	for (int i = 0; i < numObjects2; ++i)
+	for (int i = 0; i < numObjects2+1; ++i)
 	{
 		ofDrawCircle(0, 0, (size2 + size2 / i) / 4);
 		ofTranslate(size2 * i * 1.5, -size2 / 10 - i * 25);
@@ -270,7 +270,7 @@ void ofApp::drawScene3()
 	ofTranslate(500, 800);
 	ofFill();
 	ofSetColor(color3.get());
-	for (int i = 0; i < numObjects3; ++i)
+	for (int i = 0; i < numObjects3+1; ++i)
 	{
 		ofDrawRectangle(0, 0, size3 * i / 2, size3 * i / 2);
 		float _tr = i * (separation3 + 20);
