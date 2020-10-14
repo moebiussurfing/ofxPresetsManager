@@ -45,7 +45,7 @@ ofxPresetsManager::ofxPresetsManager()
 	// default User-Kit folder (main root container!)
 	path_UserKit_Folder = "ofxPresetsManager";
 
-	// favourites (live) presets
+	// favourites presets (live clickeable and key triggeable) 
 	path_PresetsFavourites = "presets";
 	// standalone presets
 	path_PresetsStandalone = "archive";
@@ -116,6 +116,7 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Help.set("SHOW HELP", false);
 	SHOW_Gui_AdvancedControl.set("SHOW ADVANCED", false);
 	SHOW_Panel_Click.set("SHOW CLICKER", true);
+	SHOW_Panel_AllParameter.set("SHOW ALL PARAMETERS", true);
 	SHOW_Panel_StandalonePresets.set("SHOW STANDALONE PRESETS", true);
 	MODE_StandalonePresets_NEW.set("NEW!", false);
 	SHOW_Panel_Randomizer.set("SHOW RANDOMIZER PANEL", true);
@@ -172,6 +173,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	params_Gui.setName("GUI");
 	params_Gui.add(SHOW_Gui_AdvancedControl);
+	params_Gui.add(SHOW_Panel_AllParameter);
 	params_Gui.add(SHOW_Panel_Click);
 	params_Gui.add(SHOW_Panel_StandalonePresets);
 	params_Gui.add(SHOW_Panel_Randomizer);
@@ -2772,8 +2774,8 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 		//--
 
-		// all parameters
-		ImGui_Draw_PresetParameters();
+		// all parameters from all groups
+		if (SHOW_Panel_AllParameter) ImGui_Draw_PresetParameters();
 
 		// all group selectors to set current preset
 		ImGui_Draw_GroupsSelectors();
@@ -2789,7 +2791,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	return settings.mouseOverGui;
 }
 
-// ImGui content
+// ImGui
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_PresetParameters()
 {
@@ -2861,6 +2863,7 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 				//if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
 				//ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
 
+				ofxImGui::AddParameter(SHOW_Panel_AllParameter);//ImGui::SameLine();
 				ofxImGui::AddParameter(SHOW_Panel_Click); ImGui::SameLine(); 
 				ofxImGui::AddParameter(ENABLE_Keys);//ImGui::SameLine(); 
 				if (MODE_Editor) {
