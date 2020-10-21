@@ -934,8 +934,8 @@ void ofxPresetsManager::drawPresetClicker()
 		{
 			std::string info = groups[i].getName();
 
-			// marl selected group. useful to navigate with arrow keys
-			if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1) info = "* " + info;
+			// mark selected group. useful to navigate with arrow keys
+			if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1 && ENABLE_Keys.get()) info = "* " + info;
 
 			// double font to improve different background colors
 			int gap = 1;
@@ -1631,12 +1631,13 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		bool mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);
 		bool mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
 		bool mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
-		//(!mod_CONTROL && !mod_ALT)
 
-		// TODO: force disable engine
+		// TODO: TEST: to force disable engine
 		//bImGui_mouseOver = false;
 
-		if (key == 'K' && !bImGui_mouseOver_PRE)// restore keys control
+		// always listening to K to avoid can be blocked
+		// restore keys control
+		if (key == 'K' && !bImGui_mouseOver_PRE)
 		{
 			ENABLE_Keys = !ENABLE_Keys;
 		}
@@ -1748,7 +1749,6 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			}
 #endif
 
-
 			//----
 
 			// navigate kit/favorites presets
@@ -1788,7 +1788,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			//----
 
 			// presets selectors
-			//if ((!mod_CONTROL && !mod_ALT))
+			//if (!mod_CONTROL && !mod_SHIFT && !mod_ALT)// exclude controls do notr works bc blocks the mod keys to copy/swap presets...
 			{
 				for (int g = 0; g < keys.size(); g++)
 				{

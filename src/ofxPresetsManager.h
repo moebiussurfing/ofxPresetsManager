@@ -658,6 +658,22 @@ public:
 		save(PRESETS_Selected_Index[groupIndex].get(), groupIndex);
 	}
 
+public:
+	//--------------------------------------------------------------
+	void saveCurrentPreset(string groupName) {
+		int _groupIndex = -1;
+		for (int i = 0; i < groups.size(); i++) {
+			if (groups[i].getName() == groupName) _groupIndex = i;
+		}
+		if (_groupIndex != -1) {
+			ofLogNotice(__FUNCTION__) << "SAVE PRESET from group: "<< groupName << " #" << _groupIndex << " preset: " << PRESETS_Selected_Index[_groupIndex].get();
+			save(PRESETS_Selected_Index[_groupIndex].get(), _groupIndex);
+		}
+		else {
+			ofLogError(__FUNCTION__) << "Can't found any group named: " << groupName << ". Save command failed!";
+		}
+	}
+
 	// presets browsing by code from ofApp
 	//--------------------------------------------------------------
 	void load_Previous(int groupIndex = -1)// default if not defined, is the last one: main group link

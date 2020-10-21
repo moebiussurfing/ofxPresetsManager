@@ -702,11 +702,11 @@ void groupRandomizer::update()
 	//----
 
 	// randomizer timer mode latch
-	
+
 	// TODO:
 	// on this mode: when we click to some presets, we load the preset, but after duration, 
 	// we jump back to preset index 0
-	
+
 	// easy callback
 	// latch mode
 	if (bIsDoneLoad && MODE_LatchTrig && !PLAY_RandomizeTimer)
@@ -775,22 +775,22 @@ void groupRandomizer::update()
 	//else _prog = timerRandomizer / (float)randomizeDurationShort;
 	// bar relative only to long
 
-	if (PLAY_RandomizeTimer) 
+	if (PLAY_RandomizeTimer)
 	{
 		randomizerProgress = 100 * timerRandomizer / (float)randomizeDuration;
 	}
 	else if (MODE_LatchTrig)
 	{
-		if (bLatchRun) 
+		if (bLatchRun)
 		{
 			randomizerProgress = 100 * timerRandomizer / (float)randomizeDuration;
 		}
-		else 
+		else
 		{
 			randomizerProgress = 0;
 		}
 	}
-	else 
+	else
 	{
 		randomizerProgress = 0;
 	}
@@ -1093,10 +1093,11 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 			{
 				// 1.1 randomizers presets
 				//if (MODE_DicesProbs) 
+				//ImGui::SetNextWindowCollapsed(true);// ?? not working
 				ofxImGui::AddGroup(params_Randomizer, settings);
 
 #ifdef DEBUG_randomTest
-					ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
+				ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
 #endif
 				//--
 
@@ -1104,6 +1105,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 				if (MODE_Editor)
 				{
+					//ImGui::SetNextWindowCollapsed(false);// ?? not working
 					ofxImGui::AddGroup(params_Editor, settings);
 				}
 				ImGui::TreePop();
