@@ -1095,9 +1095,22 @@ public:
 		params_Controls.clear();
 		//params_Controls.setName(displayNameUserKit);
 		//params_Controls.setName("OVERLAY");
-		params_Controls.add(getParamsPresetSelectors());
-		params_Controls.add(getParamsRandomizers());
-		params_Controls.add(SHOW_Panel_Click);
+
+        // Windows
+        //params_Controls.add(getParamsPresetSelectors());
+        // macOS casting...
+        ofParameterGroup g1;
+        g1 = getParamsPresetSelectors();
+        params_Controls.add(g1);
+
+        // Windows
+		//params_Controls.add(getParamsRandomizers());
+        // macOS casting...
+        ofParameterGroup g2;
+        g2 = getParamsRandomizers();
+        params_Controls.add(g2);
+
+        params_Controls.add(SHOW_Panel_Click);
 		params_Controls.add(MODE_Editor);
 
 		return params_Controls;
@@ -1109,9 +1122,16 @@ public:
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsRandomizers() {// important settings to handle randomizers
 		ofParameterGroup _g{ "RANDOMIZERS" };
-		for (int i = 0; i < groups.size(); i++) {
-			_g.add(groupRandomizers[i].getParamsRandomizers());
-		}
+		for (int i = 0; i < groups.size(); i++)
+		{
+            // Windows
+            //_g.add(groupRandomizers[i].getParamsRandomizers());
+            // macOS casting...
+            ofParameterGroup g;
+            g = groupRandomizers[i].getParamsRandomizers();
+            _g.add(g);
+
+			}
 		return _g;
 	}
 
