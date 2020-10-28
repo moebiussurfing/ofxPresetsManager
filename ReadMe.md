@@ -12,21 +12,25 @@ ofxPresetsManager
 - Lot of `customizations` and `helpers`:  
 clone presets, change gui layout, dark/light themes, presets re-arrenge/sorting, play timed randomizer, randomize settings, browse multigroups by arrows...etc.  
 
-- `Two types` of `presets`: 
+**Two Types of Presets**:  
 1. `Favourite presets`:  
 fast clickable-boxes/key-trigged presets.  
 ![image](/readme_images/Capture_favourites.PNG?raw=true "image")  
-2. `Standalone presets`:  
-archived and named presets.  
+2. `Standalone Presets`:  
+archived and named presets that we can load into and from favourites.  
 ![image](/readme_images/Capture_standalone.PNG?raw=true "image")  
 
-- *Two modes*: 
+**Two modes**: 
 1. **Edit Mode**: autosaves changes when switching between presets.  
 2. **Live Mode**: disables autosave and hidde some GUI sections to simplify and improve performance.   
-- **Multigroup**: when adding several `ofParameterGroup` we can handle them individually. Also we have an extra selector called `GROUP_LINK` wich groups the other group selectors states:  
+
+**Multigroup**:  
+When adding several `ofParameterGroup` we can handle them individually.  
+We can use arrow keys to browse the groups and their selectors.  
+Also we have an extra selector called `GROUP_LINK` wich groups the other group selectors states:  
 ![image](/readme_images/Capture_multigroup.PNG?raw=true "image")  
 
-- *Two randomizer engines*: 
+**Two randomizer engines**: 
 1. To select a preset index by random and probabilities, customizable tempo and two types of preset/states durations: normal and short.  
 ![image](/readme_images/Capture_randomizer1.PNG?raw=true "image")  
 2. To randomize some enabled parameters from current preset.  
@@ -44,11 +48,11 @@ archived and named presets.
 
 ## Examples Screenshots
 `example-Basic`:  
-illustrates how to handle one `ofParameterGroup`.  
+Illustrates how to handle one `ofParameterGroup`.  
 ![image](/readme_images/Capture-example-Basic.PNG?raw=true "image")  
 
 `example-MultiGroup`:  
-learn how to handle multiple `ofParameterGroup`'s.  
+Learn how to handle multiple `ofParameterGroup`'s.  
 ![image](/readme_images/Capture-example-MultiGroup.PNG?raw=true "image")  
 
 ### ofApp.h
