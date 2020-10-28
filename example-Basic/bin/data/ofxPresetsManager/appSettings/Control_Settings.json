@@ -16,7 +16,7 @@
             "SHOW_RANDOMIZER_PANEL": "1",
             "SHOW_SELECTORS": "0",
             "SHOW_STANDALONE_PRESETS": "1",
-            "THEME_DARK": "0"
+            "THEME_DARK": "1"
         },
         "OPTIONS": {
             "AUTO_LOAD": "1",
