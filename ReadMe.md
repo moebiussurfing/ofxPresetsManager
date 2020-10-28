@@ -86,11 +86,11 @@ ofApp::setup(){
 ```
 
 ## Dependencies
-All are bundled. Already included in `OF_ADDON/libs`.  
-Do not require to manually include into `Project Generator`.  
+All are bundled. Already included in `OF_ADDON/libs`. Do not require to manually include into `Project Generator`.  
 - **ofxImGui** fork from https://github.com/MacFurax/ofxImGui
 - **ofxScaleDragRect** from https://github.com/roymacdonald/ofxScaleDragRect
 - **ofxUndo** from https://github.com/nariakiiwatani/ofxUndo  
+
 *Thanks to the above coders!*  
 *Special thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector that inspired this addon.*
 
@@ -98,7 +98,7 @@ Do not require to manually include into `Project Generator`.
 - **Windows10** / **VS2017** / **OF ~0.11**
 - **macOS. High Sierra** / **Xcode9** & **Xcode10** / **OF ~0.11**
 
-### TODO/IDEAS/NOTES
+## NOTES
 * Should improve **ofxImGui** because we can't use more than one instance yet.  
 * Other ideas into `ofxPresetsManager.h`.   
 * Undo workflow not operative now.
