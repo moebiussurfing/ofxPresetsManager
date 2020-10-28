@@ -4,7 +4,7 @@
 
 #include "ofxSurfingHelpers.h"
 #include "ofxSurfing_ImGui.h"
-#include "ofxImGui.h"
+//#include "ofxImGui.h"
 
 class groupRandomizer
 {

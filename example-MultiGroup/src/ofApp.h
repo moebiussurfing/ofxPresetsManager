@@ -4,17 +4,12 @@
 
 #include "ofxPresetsManager.h"
 
-//#define USE_GUI_LOCAL 
+//#define USE_GUI_LOCAL //-> we can even use our personal local gui
 #ifdef USE_GUI_LOCAL 
 #include "ofxGui.h"
-#endif
-
+#include "ofxSurfingHelpers.h"
 #include "ofxSurfingConstants.h"
-#include "ofxSurfingHelpers.h"	// optional: to use setThemeDark_ofxGui only
-
-#define USE_WindowApp			// optional: to handle app window only
-#ifdef USE_WindowApp
-#include "ofxWindowApp.h"
+#include "ofxSurfing_ofxGui.h"
 #endif
 
 #include "ofxImGui.h"
@@ -23,16 +18,10 @@ class ofApp : public ofBaseApp
 {
 
 public:
-	//TEST
-	//ofxImGui::Gui gui_ImGui;// if this enabled seems to brake context. we can not load the font into presetManager
-
-public:
 	void setup();
-    void update();
     void draw();
     void exit();
     void keyPressed(int key);
-	void windowResized(int w, int h);
 
 	void setupParameters();
 

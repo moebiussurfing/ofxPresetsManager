@@ -1,8 +1,8 @@
 {
     "paramsGroup1": {
         "numObjects1": "2",
-        "separation1": "100",
-        "shapeSide1": "43",
-        "show1": "0"
+        "separation1": "99",
+        "shapeSide1": "200",
+        "show1": "1"
     }
 }

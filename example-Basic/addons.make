@@ -1,4 +1,1 @@
-ofxGui
-ofxImGui
 ofxPresetsManager
-ofxSurfingHelpers

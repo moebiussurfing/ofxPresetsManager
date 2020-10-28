@@ -86,5 +86,5 @@ void ofApp::drawScene()
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-	presetsManager.exit();// call required to store current selected preset settings on exit. 
+	presetsManager.exit();// call is required only to auto-store current selected preset settings on exit. 
 }

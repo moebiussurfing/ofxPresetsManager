@@ -4,17 +4,9 @@
 void ofApp::setup()
 {
 	ofSetCircleResolution(200);
-	
-	//TEST
-	//gui_ImGui.setup();
 
-#ifdef USE_WindowApp
-	WindowApp.setFrameRate(60);
-	WindowApp.setVerticalSync(true);
-#else
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
-#endif
 
 	//--
 
@@ -142,15 +134,9 @@ void ofApp::setupParameters()
 }
 
 //--------------------------------------------------------------
-void ofApp::update()
-{
-}
-
-//--------------------------------------------------------------
 void ofApp::draw()
 {
 	ofBackground(8);
-	//ofBackground(ofColor::darkBlue);
 
 	// scene draw object linked to grouped parameters
 	if (show0) drawScene0();
@@ -167,19 +153,6 @@ void ofApp::draw()
 		gui3.draw();
 	}
 #endif
-
-	//TEST
-	//gui_ImGui.begin();
-	//{
-	//	ofxImGui::Settings settings;
-	//	if (ofxImGui::BeginWindow("MAIN PANEL", settings, false))
-	//	{
-	//		ofxImGui::AddParameter(size3);
-	//		ofxImGui::AddGroup(params0, settings);
-	//	}
-	//	ofxImGui::EndWindow(settings);
-	//}
-	//gui_ImGui.end();
 }
 
 //--------------------------------------------------------------
@@ -195,15 +168,12 @@ void ofApp::keyPressed(int key)
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h)
-{
-}
-
-//--------------------------------------------------------------
 void ofApp::exit()
 {
 	presetsManager.exit();// required to store settings. (maybe required before destruct our class params..)
 }
+
+//--
 
 // scene
 

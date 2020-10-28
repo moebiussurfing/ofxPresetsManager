@@ -7,16 +7,16 @@
                 "fill": "0",
                 "lineWidth": "0",
                 "separation": "1",
-                "shapeType": "0",
+                "shapeType": "1",
                 "size": "1"
             }
         },
         "RANDOM_SELECTED_INDEX": {
             "MODE_AVOID_REPEAT": "1",
             "MODE_DURATION_SHORT": {
-                "SHORT_0": "1",
-                "SHORT_1": "1",
-                "SHORT_2": "1",
+                "SHORT_0": "0",
+                "SHORT_1": "0",
+                "SHORT_2": "0",
                 "SHORT_3": "0",
                 "SHORT_4": "0",
                 "SHORT_5": "0"
@@ -25,15 +25,15 @@
             "MODE_USE_PROBS": "1",
             "PRESETS_PROBS": {
                 "PROB_0": "5",
-                "PROB_1": "2",
-                "PROB_2": "1",
-                "PROB_3": "2",
+                "PROB_1": "5",
+                "PROB_2": "5",
+                "PROB_3": "5",
                 "PROB_4": "5",
-                "PROB_5": "2"
+                "PROB_5": "5"
             },
-            "t_BPM": "133.779",
-            "t_DURATION": "897",
-            "t_RATIO": "0.207"
+            "t_BPM": "120",
+            "t_DURATION": "1000",
+            "t_RATIO": "0.25"
         }
     }
 }

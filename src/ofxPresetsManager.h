@@ -68,10 +68,10 @@
 ///				can be done enabling/disabling serializable for each param with a group of toggles
 
 ///	++		performance: 
-///				restore-back memory_mode. (use xml objects into memoryvs hd files) to extra groups too
+///				restore-back memory_mode. (use xml objects into memory vs hd files) to extra groups too
 
 ///	+		repair autosave timer. exclude log
-///	++		make a lite minimal version compatible !
+///	++		make a lite minimal version compatible ! without ImGui, maybe with ofxGui or even without any GUI.
 ///	++		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
 ///				or add simpler class but compatible with preset files kits
 ///	+		could make tween when changing params using ofLerp or ofxKeyTween...

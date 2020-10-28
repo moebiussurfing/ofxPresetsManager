@@ -1,7 +1,7 @@
 {
     "ofxPresetsManager": {
         "GUI": {
-            "BOX_CLICKER": "1",
+            "BOX_CLICKER": "0",
             "EDIT_CLICKER": "0",
             "ENABLE_KEYS": "1",
             "GUI_INTERNAL_POSITION": "960, 530.5",
@@ -20,8 +20,8 @@
         },
         "OPTIONS": {
             "AUTO_LOAD": "1",
-            "AUTO_SAVE": "0",
-            "MODE_EDIT": "0",
+            "AUTO_SAVE": "1",
+            "MODE_EDIT": "1",
             "MODE_MEMORY": "0",
             "TIMER_AUTO_SAVE": "0"
         }

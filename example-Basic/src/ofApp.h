@@ -1,12 +1,8 @@
-
-//	ofxSphereCam2-exampleBasic
-
 #pragma once
 
 #include "ofMain.h"
 
 #include "ofxPresetsManager.h"
-#include "ofxSurfingConstants.h" // -> defines (modes) are here "to share between addons" in one place
 
 class ofApp : public ofBaseApp
 {
