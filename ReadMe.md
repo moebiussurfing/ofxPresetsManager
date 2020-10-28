@@ -10,30 +10,28 @@ ofxPresetsManager
 - You don't need to add extra Gui to control your parameters.
 - `Cute Gui` based on `docked ImGui` windows using ofxImGui.
 - Lot of `customizations` and `helpers`:  
-clone presets, change gui layout, dark/light themes, presets re-arrenge/sorting, play timed randomizer, randomize settings, browse multigroups by arrows...etc.  
+clone presets, change GUI layout, dark/light themes, presets re-arrange/sorting, play timed randomizer, randomize settings, browse multigroups by arrows...etc.  
 
 **Two Types of Presets**:  
-1. `Favourite presets`:  
-fast clickable-boxes/key-trigged presets.  
+1. **Favourite Presets**: Fast clickable-boxes/key-trigged presets.  
 ![image](/readme_images/Capture_favourites.PNG?raw=true "image")  
-2. `Standalone Presets`:  
-archived and named presets that we can load into and from favourites.  
+2. **Standalone Presets**: Archived and named presets that we can load into and from favourites.  
 ![image](/readme_images/Capture_standalone.PNG?raw=true "image")  
 
-**Two modes**: 
-1. **Edit Mode**: autosaves changes when switching between presets.  
-2. **Live Mode**: disables autosave and hidde some GUI sections to simplify and improve performance.   
+**Two Modes**: 
+1. **Edit Mode**: Autosaves changes when switching between presets.  
+2. **Live Mode**: Disables autosave and hide some GUI sections to simplify and improve performance.   
 
-**Multigroup**:  
-When adding several `ofParameterGroup` we can handle them individually.  
+**Multigroups**:  
+When adding individually several `ofParameterGroup` we can handle them independtly.  
 We can use arrow keys to browse the groups and their selectors.  
 Also we have an extra selector called `GROUP_LINK` wich groups the other group selectors states:  
 ![image](/readme_images/Capture_multigroup.PNG?raw=true "image")  
 
-**Two randomizer engines**: 
-1. To select a preset index by random and probabilities, customizable tempo and two types of preset/states durations: normal and short.  
+**Two Randomizer Engines**: 
+1. **RANDOM SELECTED INDEX**: To select a preset index by random and probabilities, customizable tempo, and two types of preset/states durations: normal and short.  
 ![image](/readme_images/Capture_randomizer1.PNG?raw=true "image")  
-2. To randomize some enabled parameters from current preset.  
+2. **RANDOM EDIT**: To randomize some enabled parameters from current preset.  
 ![image](/readme_images/Capture_randomizer2.PNG?raw=true "image")  
 
 ## Basic Usage
@@ -43,7 +41,7 @@ Also we have an extra selector called `GROUP_LINK` wich groups the other group s
 4. `Add` the container `to the addon` object. 
 5. You can define how many presets you want for each group, and what keys to associate as triggers.
 6. `Done! just play` with the addon Gui or the control API methods.  
-- Look the examples and `ofxPresetsManager.h` for more learning.  
+- Look at the examples and `ofxPresetsManager.h` for more learning.  
 - The file settings (one for each preset) will be placed by default into `/bin/data`.
 
 ## Examples Screenshots
@@ -88,22 +86,23 @@ ofApp::setup(){
 ```
 
 ## Dependencies
-Already included in `OF_ADDON/libs`.  
+All are bundled. Already included in `OF_ADDON/libs`.  
 Do not require to manually include into `Project Generator`.  
 - **ofxImGui** fork from https://github.com/MacFurax/ofxImGui
 - **ofxScaleDragRect** from https://github.com/roymacdonald/ofxScaleDragRect
 - **ofxUndo** from https://github.com/nariakiiwatani/ofxUndo  
-Thanks to the above coders!  
-Special thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector that inspired this addon.
+*Thanks to the above coders!*  
+*Special thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector that inspired this addon.*
 
-## Tested systems
+## Tested Systems
 - **Windows10** / **VS2017** / **OF ~0.11**
-- **macOS High Sierra** / **Xcode9** & **Xcode10** / **OF ~0.11**
+- **macOS. High Sierra** / **Xcode9** & **Xcode10** / **OF ~0.11**
 
 ### TODO/IDEAS/NOTES
 * Should improve **ofxImGui** because we can't use more than one instance yet.  
 * Other ideas into `ofxPresetsManager.h`.   
-* Feedback, issues and PR's are welcome!
+* Undo workflow not operative now.
+* **Feedback**, issues, and PR's are very welcome!
 
 ## Author
 Addon by **@moebiusSurfing**  
