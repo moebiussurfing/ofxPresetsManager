@@ -13,9 +13,11 @@ ofxPresetsManager
 clone presets, change gui layout, dark/light themes, presets re-arrenge/sorting, play timed randomizer, randomize settings, browse multigroups by arrows...etc.  
 
 - `Two types` of `presets`: 
-1. `Favourite presets`: the clickable-boxes/key-trigged presets:  
+1. `Favourite presets`:  
+fast clickable-boxes/key-trigged presets.  
 ![image](/readme_images/Capture_favourites.PNG?raw=true "image")  
-2. `Standalone presets`: the archived and named presets:  
+2. `Standalone presets`:  
+archived and named presets.  
 ![image](/readme_images/Capture_standalone.PNG?raw=true "image")  
 
 - *Two modes*: 
@@ -30,23 +32,23 @@ clone presets, change gui layout, dark/light themes, presets re-arrenge/sorting,
 2. To randomize some enabled parameters from current preset.  
 ![image](/readme_images/Capture_randomizer2.PNG?raw=true "image")  
 
-## Usage
-**DOCUMENTATION**  
-This is a very simple guide to use `ofxPresetsManager`.  
-Simpler use will be to add a single `ofParameterGroup`, but the addon can handle more groups!  
+## Basic Usage
 1. Set up your scene and `initialize` the related `parameters`.
 2. Add the parameters to the `ofParameterGroup` as `container`.
 3. `Customize` some settings if desired.
 4. `Add` the container `to the addon` object. 
-5. You can define how many preset you want, and what keys to associate as triggers.
+5. You can define how many presets you want for each group, and what keys to associate as triggers.
 6. `Done! just play` with the addon Gui or the control API methods.  
 - Look the examples and `ofxPresetsManager.h` for more learning.  
 - The file settings (one for each preset) will be placed by default into `/bin/data`.
 
 ## Examples Screenshots
-`example-Basic`: illustrates how to handle one `ofParameterGroup`.  
+`example-Basic`:  
+illustrates how to handle one `ofParameterGroup`.  
 ![image](/readme_images/Capture-example-Basic.PNG?raw=true "image")  
-`example-MultiGroup`: learn how to handle multiple `ofParameterGroup`'s.  
+
+`example-MultiGroup`:  
+learn how to handle multiple `ofParameterGroup`'s.  
 ![image](/readme_images/Capture-example-MultiGroup.PNG?raw=true "image")  
 
 ### ofApp.h
@@ -54,7 +56,8 @@ Simpler use will be to add a single `ofParameterGroup`, but the addon can handle
 #include "ofxPresetsManager.h"
 
 ofxPresetsManager presetsManager;
-ofParameterGroup params;
+
+ofParameterGroup params;// main container
 ofParameter<int> shapeType;
 ofParameter<int> amount;
 //...more parameters
@@ -63,8 +66,9 @@ ofParameter<int> amount;
 ### ofApp.cpp
 ```.cpp
 ofApp::setup(){
-	// define our parameters for the scene. and add them to our ofParameterGroup container. 
-	params.setName("sceneParamsGroup");// preset settings main container	
+	// define our parameters for the scene. 
+	// and add them to our ofParameterGroup container. 
+	params.setName("sceneParamsGroup");	
 	params.add(shapeType.set("shapeType", 1, 1, 2));
 	params.add(amount.set("amount", 10, 1, 24));
 
@@ -74,6 +78,9 @@ ofApp::setup(){
 	presetsManager.add(params, { 'a', 'b', '0', '1', '2', '3' });
 	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
 }
+
+// nothing more!
+// but some optional customization is allowed.
 ```
 
 ## Dependencies
@@ -81,12 +88,13 @@ Already included in `OF_ADDON/libs`.
 Do not require to manually include into `Project Generator`.  
 - **ofxImGui** fork from https://github.com/MacFurax/ofxImGui
 - **ofxScaleDragRect** from https://github.com/roymacdonald/ofxScaleDragRect
-- **ofxUndo** from https://github.com/nariakiiwatani/ofxUndo
-Thanks to the above coders! Special thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector that inspired this addon.
+- **ofxUndo** from https://github.com/nariakiiwatani/ofxUndo  
+Thanks to the above coders!  
+Special thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector that inspired this addon.
 
 ## Tested systems
 - **Windows10** / **VS2017** / **OF ~0.11**
-- **macOS High Sierra** / **Xcode 9/10** / **OF ~0.11**
+- **macOS High Sierra** / **Xcode9** & **Xcode10** / **OF ~0.11**
 
 ### TODO/IDEAS/NOTES
 * Should improve **ofxImGui** because we can't use more than one instance yet.  

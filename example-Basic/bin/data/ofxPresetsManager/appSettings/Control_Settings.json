@@ -10,7 +10,7 @@
             "SHOW_ADVANCED": "0",
             "SHOW_ALL_PARAMETERS": "1",
             "SHOW_CLICKER": "1",
-            "SHOW_HELP": "0",
+            "SHOW_HELP": "1",
             "SHOW_ImGui": "1",
             "SHOW_PARAMETERS": "0",
             "SHOW_RANDOMIZER_PANEL": "1",
