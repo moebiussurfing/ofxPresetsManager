@@ -1,0 +1,34 @@
+{
+    "Randomizers": {
+        "RANDOM_EDIT": {
+            "PRESET_PARAMETERS": {
+                "numObjects3": "1",
+                "separation3": "1",
+                "show3": "0",
+                "size3": "1"
+            }
+        },
+        "RANDOM_SELECTED_INDEX": {
+            "MODE_AVOID_REPEAT": "1",
+            "MODE_DURATION_SHORT": {
+                "SHORT_0": "0",
+                "SHORT_1": "0",
+                "SHORT_2": "0",
+                "SHORT_3": "0",
+                "SHORT_4": "0"
+            },
+            "MODE_LATCH": "0",
+            "MODE_USE_PROBS": "1",
+            "PRESETS_PROBS": {
+                "PROB_0": "5",
+                "PROB_1": "5",
+                "PROB_2": "5",
+                "PROB_3": "5",
+                "PROB_4": "5"
+            },
+            "t_BPM": "103.986",
+            "t_DURATION": "1154",
+            "t_RATIO": "0.25"
+        }
+    }
+}

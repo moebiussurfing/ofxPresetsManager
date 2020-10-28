@@ -12,10 +12,10 @@ docs/tagfile.xml
 /bin/*
 !/bin/data/
 
-*.XML
-*.xml
-*.JSON
-*.json
+#*.XML
+#*.xml
+#*.JSON
+#*.json
 
 [Bb]uild/
 [Oo]bj/

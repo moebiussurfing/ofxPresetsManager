@@ -15,12 +15,13 @@
 //
 //	DOCUMENTATION
 //
-//	this is a very simple example to use ofxPresetsManager.
+//	this is a very simple guide to use ofxPresetsManager.
 //	we will add only ONE ofParameterGroup, but the addon can handle more groups!
 //
 //	* usage:
 //	0. init your scene and the related parameters / settings.
 //	1. add our parameters to the ofParameterGroup as container.
+//  2.0 customize some settings if desired
 //	2.1 add the container to the addon object. 
 //	2.2 you can define how many preset you want, and what keys to associate as triggers.
 //	3. done! just play with the addon gui. 
@@ -30,8 +31,8 @@
 //		- 
 //
 //	there are two types of presets: 
-//		- favourites: clickable presets
-//		- standalone: archived named presets
+//		- favourites: the clickable-boxes/key-trigged presets
+//		- standalone: the archived and named presets
 //
 //
 
@@ -61,19 +62,18 @@
 ///				add setter to enable some params to randomize
 ///				call populate. disable debug_display red info
 
-///	+		add undo to all the groups
+///	+		add/restore-back undo to all the groups
 
 ///	++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
 
 ///	++		performance: 
-///				restore back memory_mode. to extra groups too
-///	+		repair autosave timer. exclude log
+///				restore-back memory_mode. (use xml objects into memoryvs hd files) to extra groups too
 
+///	+		repair autosave timer. exclude log
 ///	++		make a lite minimal version compatible !
 ///	++		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
 ///				or add simpler class but compatible with preset files kits
-
 ///	+		could make tween when changing params using ofLerp or ofxKeyTween...
 ///
 
