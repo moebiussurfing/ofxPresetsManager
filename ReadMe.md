@@ -2,11 +2,7 @@ ofxPresetsManager
 =============================
 
 # Overview
-**ofxPresetsManager** is an **openFrameworks** addon to handle presets of several ofParameter's nested into an ofParameterGroup container. Also empowered with a cute GUI and many helpers and customizations.
-
-## Screenshot
-![image](/readme_images/Capture1.PNG?raw=true "image")  
-![image](/readme_images/Capture2.PNG?raw=true "image")  
+**ofxPresetsManager** is an **openFrameworks** addon to handle presets of several ´ofParameter´'s nested into an ´ofParameterGroup´ container. Also empowered with a cute GUI and many helpers and customizations.
 
 ## Features
 - ´Powerful´ handling of several nested ´ofParameters´ into ´ofParameterGroup´'s as containers.
@@ -22,27 +18,27 @@ ofxPresetsManager
 - Two randomizer engines: 
 1. To select a preset index by random and probabilities, customizable tempo and two types of preset/states durations: normal and short.  
 ![image](/readme_images/Capture_randomizer1.PNG?raw=true "image")  
-2. To randomize some enabled parameters from current preset.
+2. To randomize some enabled parameters from current preset.  
 ![image](/readme_images/Capture_randomizer2.PNG?raw=true "image")  
 
 ## Usage
 **DOCUMENTATION**  
 This is a very simple guide to use `ofxPresetsManager`.  
-Simpler use will be to add only ONE `ofParameterGroup`, but the addon can handle more groups!  
+Simpler use will be to add a single `ofParameterGroup`, but the addon can handle more groups!  
 0. Set up your scene and `initialize` the related `parameters`.
-1. add the parameters to the `ofParameterGroup` as `container`.
-2.0. `customize` some settings if desired.
-2.1. `add` the container `to the addon` object. 
-2.2. you can define how many preset you want, and what keys to associate as triggers.
-3. ´done! just play´ with the addon Gui or the control API methods.  
-
+1. Add the parameters to the `ofParameterGroup` as `container`.
+2. `Customize` some settings if desired.
+3. `Add` the container `to the addon` object. 
+4. You can define how many preset you want, and what keys to associate as triggers.
+5. ´Done! just play´ with the addon Gui or the control API methods.  
+- Look the examples.
 The file settings (one for each preset) will be placed by default into ´/bin/data´.
 
-- Look the examples.
+## Examples Screenshots
 ´example-Basic´: handles one ´ofParameterGroup´.  
 ![image](/readme_images/Capture-example-Basic.PNG?raw=true "image")  
 ´example-MultiGroup´: handles multiple ´ofParameterGroup´'s.  
-![image](/readme_images/Capture-example-MultiGroup?raw=true "image")  
+![image](/readme_images/Capture-example-MultiGroup.PNG?raw=true "image")  
 
 ### ofApp.h
 ```.cpp
