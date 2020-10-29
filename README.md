@@ -60,7 +60,9 @@ Illustrates how to handle one `ofParameterGroup`.
 * `example-MultiGroup`:  
 Learn how to handle multiple `ofParameterGroup`'s.  
 
-![image](/readme_images/Capture-example-MultiGroup.PNG?raw=true "image")  
+![image](/readme_images/Capture_multigroupParams.PNG?raw=true "image")  
+
+![image](/readme_images/Capture_multigroupSelectors.PNG?raw=true "image")  
 
 ### ofApp.h
 ```.cpp
