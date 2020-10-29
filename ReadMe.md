@@ -6,51 +6,60 @@ ofxPresetsManager
 
 ## Features
 - `Powerful` handling of several nested `ofParameters` into `ofParameterGroup`'s as containers.
-- `Easy to integrate` into all your projects.
-- You don't need to add extra Gui to control your parameters.
+- `Easy to integrate` into your projects.
+- `Autogenerates a GUI` to tweak all the parameters.
 - `Cute Gui` based on `docked ImGui` windows using ofxImGui.
 - Lot of `customizations` and `helpers`:  
-clone presets, change GUI layout, dark/light themes, presets re-arrange/sorting, play timed randomizer, randomize settings, browse multigroups by arrows...etc.  
+clone presets, change GUI layout and button sizes, dark/light themes, re-arrange/sorting presets, play timed randomizer to switching between presets, randomize parameters, browse multigroups by arrow keys...etc.  
 
 **Two Types of Presets**:  
 1. **Favourite Presets**: Fast clickable-boxes/key-trigged presets.  
+
 ![image](/readme_images/Capture_favourites.PNG?raw=true "image")  
 2. **Standalone Presets**: Archived and named presets that we can load into and from favourites.  
+
 ![image](/readme_images/Capture_standalone.PNG?raw=true "image")  
+
 
 **Two Modes**: 
 1. **Edit Mode**: Autosaves changes when switching between presets.  
 2. **Live Mode**: Disables autosave and hide some GUI sections to simplify and improve performance.   
 
 **Multigroups**:  
+
 When adding individually several `ofParameterGroup` we can handle them independtly.  
 We can use arrow keys to browse the groups and their selectors.  
 Also we have an extra selector called `GROUP_LINK` wich groups the other group selectors states:  
+
 ![image](/readme_images/Capture_multigroup.PNG?raw=true "image")  
 
 **Two Randomizer Engines**: 
 1. **RANDOM SELECTED INDEX**: To select a preset index by random and probabilities, customizable tempo, and two types of preset/states durations: normal and short.  
+
 ![image](/readme_images/Capture_randomizer1.PNG?raw=true "image")  
 2. **RANDOM EDIT**: To randomize some enabled parameters from current preset.  
+
 ![image](/readme_images/Capture_randomizer2.PNG?raw=true "image")  
 
 ## Basic Usage
-1. Set up your scene and `initialize` the related `parameters`.
-2. Add the parameters to the `ofParameterGroup` as `container`.
+1. Set up your scene and `initialize` the related `ofParameter`'s.
+2. Add the parameters to the `ofParameterGroup` `container`.
 3. `Customize` some settings if desired.
 4. `Add` the container `to the addon` object. 
 5. You can define how many presets you want for each group, and what keys to associate as triggers.
-6. `Done! just play` with the addon Gui or the control API methods.  
+6. `Done! Just play` with the addon GUI or the API control methods.  
 - Look at the examples and `ofxPresetsManager.h` for more learning.  
 - The file settings (one for each preset) will be placed by default into `/bin/data`.
 
 ## Examples Screenshots
-`example-Basic`:  
+* `example-Basic`:  
 Illustrates how to handle one `ofParameterGroup`.  
+
 ![image](/readme_images/Capture-example-Basic.PNG?raw=true "image")  
 
-`example-MultiGroup`:  
+* `example-MultiGroup`:  
 Learn how to handle multiple `ofParameterGroup`'s.  
+
 ![image](/readme_images/Capture-example-MultiGroup.PNG?raw=true "image")  
 
 ### ofApp.h
@@ -59,7 +68,7 @@ Learn how to handle multiple `ofParameterGroup`'s.
 
 ofxPresetsManager presetsManager;
 
-ofParameterGroup params;// main container
+ofParameterGroup params;// main params container
 ofParameter<int> shapeType;
 ofParameter<int> amount;
 //...more parameters
@@ -68,13 +77,13 @@ ofParameter<int> amount;
 ### ofApp.cpp
 ```.cpp
 ofApp::setup(){
-	// define our parameters for the scene. 
-	// and add them to our ofParameterGroup container. 
+	// define the scene parameters. 
+	// add them to our ofParameterGroup container. 
 	params.setName("sceneParamsGroup");	
 	params.add(shapeType.set("shapeType", 1, 1, 2));
 	params.add(amount.set("amount", 10, 1, 24));
 
-	// add our ofParameterGroup to the presetManager 
+	// add the ofParameterGroup to the presetManager 
 	// and define key triggers for each preset. 
 	// the amount of keys will be the amount of favourites presets
 	presetsManager.add(params, { 'a', 'b', '0', '1', '2', '3' });
@@ -92,7 +101,7 @@ All are bundled. Already included in `OF_ADDON/libs`. Do not require to manually
 - **ofxUndo** from https://github.com/nariakiiwatani/ofxUndo  
 
 *Thanks to the above coders!*  
-*Special thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector that inspired this addon.*
+*Special thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector that inspired this addon a lot.*
 
 ## Tested Systems
 - **Windows10** / **VS2017** / **OF ~0.11**
@@ -100,9 +109,9 @@ All are bundled. Already included in `OF_ADDON/libs`. Do not require to manually
 
 ## NOTES
 * Should improve **ofxImGui** because we can't use more than one instance yet.  
-* Other ideas into `ofxPresetsManager.h`.   
+* Other ideas noted into `ofxPresetsManager.h`.   
 * Undo workflow not operative now.
-* **Feedback**, issues, and PR's are very welcome!
+* **Feedback**, **issues**, and **PR**'s are very welcome!
 
 ## Author
 Addon by **@moebiusSurfing**  
