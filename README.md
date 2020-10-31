@@ -84,6 +84,48 @@ ofApp::setup(){
 // but some optional customization is allowed.
 ```
 
+### Other API useful methods
+```.cpp
+	presetsManager.setSizeBox_PresetClicker(45);
+	presetsManager.setVisible_PresetClicker(false);
+	presetsManager.toggleVisible_PresetClicker();
+
+	presetsManager.setToggleEnableKeys();
+	presetsManager.setEnableKeys(false);
+	
+	// disable the Group_Link auto creation by default
+	presetsManager.setEnableGroupLinkSelector(false);
+	
+	//presetsManager.setEnableGroupLinkSelector(true);
+	//presetsManager.setGroupLinkSize(2);// define how many presets we want for Group_Link selector
+
+	// save current preset from an added group
+	presetsManager.saveCurrentPreset(params.getName());// by name
+	presetsManager.saveCurrentPreset(0);// by index
+
+	// B. callback
+	// callbacks for all selectors to know when a group selector changed
+	for (int i = 0; i < presetsManager.PRESETS_Selected_Index.size(); i++)
+	{
+		ofAddListener(presetsManager.getSelectorsGroup().parameterChangedE(), this, &ofApp::Changed_PresetsManagerSelectors);
+	}
+	//--------------------------------------------------------------
+	void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
+	{
+		string name = e.getName();
+		ofLogNotice(__FUNCTION__) << "THE SELECTOR FOR GROUP WITH NAME " << name << " CHANGED TO PRESET INDEX: " << e;
+		if (name == params.getName()) {}
+	}
+
+	// A. an easier callback that can not know wich group selector changed
+	if (presetsManager.isDoneLoad())
+	{
+		ofLogNotice(__FUNCTION__) << "DONE LOAD PRESET. SOME GROUP HAVE CURRENTLY LOADED/CHANGED TO A PRESET INDEX";
+	}
+
+	// customize path to allow using more session presets
+	presetsManager.setPath_UserKit_Folder(path);
+```
 
 ## Examples Screenshots
 * `example-Basic`:  
