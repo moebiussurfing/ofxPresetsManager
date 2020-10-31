@@ -86,12 +86,12 @@ ofApp::setup(){
 
 ## Examples Screenshots
 * `example-Basic`:  
-Illustrates how to handle one `ofParameterGroup`.  
+Illustrates how to handle some ofParameters bundled into one `ofParameterGroup` used as container.  
 
 ![image](/readme_images/Capture-example-Basic.PNG?raw=true "image")  
 
 * `example-MultiGroup`:  
-Learn how to handle multiple `ofParameterGroup`'s.  
+Helps to learn how to handle multiple `ofParameterGroup`'s.  
 ```.cpp
 // group 0
 presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' });
