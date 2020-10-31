@@ -1667,7 +1667,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			if (false) {}
 
 			// hide/show control gui
-			else if (key == 'G')
+			else if (key == 'g' && (mod_CONTROL && !mod_ALT && !mod_SHIFT))
 			{
 				SHOW_Gui_AdvancedControl = !SHOW_Gui_AdvancedControl;
 				setVisible_GUI_Internal(SHOW_Gui_AdvancedControl);
@@ -3010,11 +3010,11 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo += "\n";
 	helpInfo += "KEYS\n";
 	helpInfo += "H                HELP\n";
-	helpInfo += "G                GUI\n";
+	helpInfo += "Ctrl+g           GUI\n";
 	helpInfo += "P                CLICKER\n";
 	helpInfo += "Keys&Mouse       LOAD\n";
-	helpInfo += "Ctrl+            SAVE/COPY\n";
-	helpInfo += "Alt+             SWAP\n";
+	helpInfo += "+Ctrl            SAVE/COPY\n";
+	helpInfo += "+Alt             SWAP\n";
 	helpInfo += "Arrows           NAVIGATE\n";
 	helpInfo += "Ctrl+Space       PLAY RANDOMIZER\n";
 	helpInfo += "E                EDIT/LIVE\n";

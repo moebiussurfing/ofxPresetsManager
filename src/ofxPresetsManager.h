@@ -291,7 +291,7 @@ public:
 	void setGroupLinkSize(int size) {// customize how many group link presets we want to create
 		groupLinkSize = size;
 	}
-	void setEnableMainGroupSelector(bool b) {// disable the use of main group selector. must call before setup. enabled by default
+	void setEnableGroupLinkSelector(bool b) {// disable the use of main group selector. must call before setup. enabled by default
 		bAllowGroupSelector = b;
 	}
 
