@@ -36,15 +36,8 @@ GUI selectors for each added group:
 **Two Randomizer Engines**: 
 1. **RANDOM SELECTED INDEX**: To select a preset index by random and probabilities, customizable tempo, and two types of preset/states durations: normal and short. 
 
-[Imgur](https://i.imgur.com/ozXBgUe.gifv)
-![Imgur](https://i.imgur.com/ozXBgUe.gifv)
-![Imgur](https://i.imgur.com/ozXBgUe.gif)
-![An open source player](https://i.imgur.com/ozXBgUe.gif)
+![image](/readme_images/Capture_randomizer1.gif?raw=true "image")  
 
-![An open source player](https://i.imgur.com/ozXBgUe.gif?raw=true "image")
-
-//////////////////
-![image](/readme_images/Capture_randomizer1.PNG?raw=true "image")  
 2. **RANDOM EDIT**: To randomize some enabled parameters from current preset.  
 
 ![image](/readme_images/Capture_randomizer2.PNG?raw=true "image")  
