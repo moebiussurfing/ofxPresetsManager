@@ -38,7 +38,8 @@ GUI selectors for each added group:
 
 [Imgur](https://i.imgur.com/ozXBgUe.gifv)
 ![Imgur](https://i.imgur.com/ozXBgUe.gifv)
-
+![Imgur](https://i.imgur.com/ozXBgUe.gif)
+//////////////////
 ![image](/readme_images/Capture_randomizer1.PNG?raw=true "image")  
 2. **RANDOM EDIT**: To randomize some enabled parameters from current preset.  
 
