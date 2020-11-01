@@ -7,8 +7,8 @@
         "GROUP_LINK": "0",
         "PRESET_SELECTORS": {
             "sceneParamsGroup": {
-                "sceneParamsGroup": "0",
-                "t_BPM": "120"
+                "sceneParamsGroup": "5",
+                "t_BPM": "111.008"
             }
         }
     }
