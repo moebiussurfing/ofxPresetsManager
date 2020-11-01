@@ -12,8 +12,6 @@
 #include "ofxSurfing_ofxGui.h"
 #endif
 
-#include "ofxImGui.h"
-
 class ofApp : public ofBaseApp
 {
 
@@ -72,12 +70,6 @@ public:
     void drawScene2();
     void drawScene3();
 	float _alpha = 255/0.4f;
-
-	//-
-
-#ifdef USE_WindowApp
-	ofxWindowApp WindowApp;
-#endif
 
 	//-
 
