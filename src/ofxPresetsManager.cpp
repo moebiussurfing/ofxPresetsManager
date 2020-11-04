@@ -1730,7 +1730,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			//----
 
 #ifdef INCLUDE_ofxUndoSimple
-			if (key == 'A')// previous
+			else if (key == 'A')// previous
 			{
 				ofLogNotice(__FUNCTION__) << "UNDO <-";
 				undoStringParams.undo();
