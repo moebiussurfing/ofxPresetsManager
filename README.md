@@ -4,6 +4,8 @@ ofxPresetsManager
 # Overview
 **ofxPresetsManager** is an **openFrameworks** addon to handle presets of several `ofParameter`'s nested into an `ofParameterGroup` container. Also *empowered* with a *nice GUI* and many *helpers* and customizations.
 
+![gif](/readme_images/Capture_ofxPresetsManager.gif?raw=true "gif")  
+
 ## Features
 - `Powerful` handling of several nested `ofParameters` into `ofParameterGroup`'s as containers.
 - `Easy to integrate` into your projects.
@@ -36,7 +38,7 @@ GUI selectors for each added group:
 **Two Randomizer Engines**: 
 1. **RANDOM SELECTED INDEX**: To select a preset index by random and probabilities, customizable tempo, and two types of preset/states durations: normal and short. 
 
-![image](/readme_images/Capture_randomizer1.gif?raw=true "image")  
+![gif](/readme_images/Capture_randomizer1.gif?raw=true "gif")  
 
 2. **RANDOM EDIT**: To randomize some enabled parameters from current preset.  
 
