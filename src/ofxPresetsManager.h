@@ -835,7 +835,7 @@ public:
 		SHOW_Panel_Click = b;
 	}
 	//--------------------------------------------------------------
-	void toggleVisible_GUI()
+	void setToggleVisible_GUI()
 	{
 		SHOW_ImGui = !SHOW_ImGui;
 		SHOW_Panel_Click = SHOW_ImGui;
@@ -846,7 +846,7 @@ public:
 		SHOW_ImGui = b;
 	}
 	//--------------------------------------------------------------
-	void toggleVisible_GUI_ImGui()
+	void setToggleVisible_GUI_ImGui()
 	{
 		SHOW_ImGui = !SHOW_ImGui;
 	}
@@ -889,7 +889,7 @@ public:
 		SHOW_Panel_Click = visible;
 	}
 	//--------------------------------------------------------------
-	void toggleVisible_PresetClicker()
+	void setToggleVisible_PresetClicker()
 	{
 		SHOW_Panel_Click = !SHOW_Panel_Click;
 	}

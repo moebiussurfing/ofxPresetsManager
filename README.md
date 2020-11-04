@@ -2,7 +2,7 @@ ofxPresetsManager
 =============================
 
 # Overview
-**ofxPresetsManager** is an **openFrameworks** addon to handle presets of several `ofParameter`'s nested into an `ofParameterGroup` container. Also *empowered* with a *nice GUI* and many *helpers* and customizations.
+**ofxPresetsManager** is an **openFrameworks** addon to handle presets of several `ofParameter`'s nested into single or multiple `ofParameterGroup` containers. Also *empowered* with a *nice GUI* and many *helpers* and customizations.
 
 ![gif](/readme_images/Capture_ofxPresetsManager.gif?raw=true "gif")  
 
