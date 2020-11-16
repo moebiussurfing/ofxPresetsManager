@@ -1,4 +1,4 @@
-#include "Helpers.h"
+#include "ImHelpers.h"
 
 //--------------------------------------------------------------
 ofxImGui::Settings::Settings()
@@ -7,7 +7,7 @@ ofxImGui::Settings::Settings()
 	, lockPosition(false)
 	, windowBlock(false)
 	, mouseOverGui(false)
-	, treeLevel(0)
+    , treeLevel(0)
 {}
 
 bool ofxImGui::IsMouseOverGui()
@@ -72,11 +72,10 @@ bool ofxImGui::BeginWindow(const std::string& name, Settings& settings, bool col
 	// Push a new list of names onto the stack.
 	windowOpen.usedNames.push(std::vector<std::string>());
 
-	/*ImGui::SetNextWindowPos(settings.windowPos, settings.lockPosition? ImGuiCond_Always : ImGuiCond_Appearing);
+	ImGui::SetNextWindowPos(settings.windowPos, settings.lockPosition? ImGuiCond_Always : ImGuiCond_Appearing);
 	ImGui::SetNextWindowSize(settings.windowSize, ImGuiCond_Appearing);
-	ImGui::SetNextWindowCollapsed(collapse, ImGuiCond_Appearing);*/
-	//return ImGui::Begin(name.c_str(), open, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize | (collapse ? 0 : ImGuiWindowFlags_NoCollapse));
-	return ImGui::Begin(name.c_str(), open);
+	//ImGui::SetNextWindowCollapsed(collapse, ImGuiCond_Appearing);
+	return ImGui::Begin(name.c_str(), open, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize | (collapse ? 0 : ImGuiWindowFlags_NoCollapse));
 }
 
 //--------------------------------------------------------------
@@ -93,9 +92,9 @@ bool ofxImGui::BeginWindow(const std::string& name, Settings& settings, ImGuiWin
 	// Push a new list of names onto the stack.
 	windowOpen.usedNames.push(std::vector<std::string>());
 
-	/*ImGui::SetNextWindowPos(settings.windowPos, settings.lockPosition? ImGuiCond_Always : ImGuiCond_Appearing);
+	ImGui::SetNextWindowPos(settings.windowPos, settings.lockPosition? ImGuiCond_Always : ImGuiCond_Appearing);
 	ImGui::SetNextWindowSize(settings.windowSize, ImGuiCond_Appearing);
-	ImGui::SetNextWindowCollapsed(!(flags & ImGuiWindowFlags_NoCollapse), ImGuiCond_Appearing);*/
+	ImGui::SetNextWindowCollapsed(!(flags & ImGuiWindowFlags_NoCollapse), ImGuiCond_Appearing);
 	return ImGui::Begin(name.c_str(), open, flags);
 }
 
@@ -143,7 +142,7 @@ bool ofxImGui::BeginTree(ofAbstractParameter& parameter, Settings& settings)
 bool ofxImGui::BeginTree(const std::string& name, Settings& settings)
 {
 	bool result;
-	ImGui::SetNextTreeNodeOpen(true, ImGuiCond_Appearing);
+    ImGui::SetNextTreeNodeOpen(true, ImGuiCond_Appearing);
 	if (settings.treeLevel == 0)
 	{
 		result = ImGui::TreeNodeEx(GetUniqueName(name), ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog);
@@ -166,7 +165,7 @@ bool ofxImGui::BeginTree(const std::string& name, Settings& settings)
 void ofxImGui::EndTree(Settings& settings)
 {
 	ImGui::TreePop();
-
+	
 	settings.treeLevel = std::max(0, settings.treeLevel - 1);
 
 	// Clear the list of names from the stack.
@@ -249,12 +248,6 @@ void ofxImGui::AddGroup(ofParameterGroup& group, Settings& settings)
 			ofxImGui::AddParameter(*parameterFloatColor);
 			continue;
 		}
-		auto parameterColor = std::dynamic_pointer_cast<ofParameter<ofColor>>(parameter);
-		if (parameterColor)
-		{
-			ofxImGui::AddParameter(*parameterColor);
-			continue;
-		}
 		auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
 		if (parameterFloat)
 		{
@@ -274,8 +267,7 @@ void ofxImGui::AddGroup(ofParameterGroup& group, Settings& settings)
 			continue;
 		}
 
-		if (parameter->isSerializable() && (parameter->getName() != ""))// reduce log overflow
-			ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter '" << parameter->getName() << "'";
+		ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
 	}
 
 	if (settings.windowBlock && !prevWindowBlock)
@@ -423,36 +415,6 @@ bool ofxImGui::AddParameter(ofParameter<ofFloatColor>& parameter, bool alpha)
 }
 
 //--------------------------------------------------------------
-bool ofxImGui::AddParameter(ofParameter<ofColor>& parameter, bool alpha)
-{
-	//auto tmpRef = parameter.get();
-
-	ofParameter<ofFloatColor> c;
-	c.set(parameter.getName(),
-		ofFloatColor(parameter.get().r / 255.f, parameter.get().g / 255.f, parameter.get().b / 255.f, parameter.get().a / 255.f),
-		ofFloatColor(0, 0, 0, 0),
-		ofFloatColor(1.f, 1.f, 1.f, 1.f)
-	);
-
-	auto tmpRef = c.get();
-
-	if (alpha)
-	{
-		if (ImGui::ColorEdit4(GetUniqueName(parameter), &tmpRef.r))
-		{
-			parameter.set(tmpRef);
-			return true;
-		}
-	}
-	else if (ImGui::ColorEdit3(GetUniqueName(parameter), &tmpRef.r))
-	{
-		parameter.set(tmpRef);
-		return true;
-	}
-	return false;
-}
-
-//--------------------------------------------------------------
 bool ofxImGui::AddParameter(ofParameter<std::string>& parameter, size_t maxChars, bool multiline)
 {
 	auto tmpRef = parameter.get();
@@ -477,9 +439,9 @@ bool ofxImGui::AddParameter(ofParameter<std::string>& parameter, size_t maxChars
 }
 
 //--------------------------------------------------------------
-bool ofxImGui::AddParameter(ofParameter<void>& parameter)
+bool ofxImGui::AddParameter(ofParameter<void>& parameter, float width)
 {
-	if (ImGui::Button(GetUniqueName(parameter)))
+	if (ImGui::Button(GetUniqueName(parameter), glm::vec2(width, 0.0f)))
 	{
 		parameter.trigger();
 		return true;
@@ -491,13 +453,13 @@ bool ofxImGui::AddParameter(ofParameter<void>& parameter)
 bool ofxImGui::AddRadio(ofParameter<int>& parameter, std::vector<std::string> labels, int columns)
 {
 	auto uniqueName = GetUniqueName(parameter);
-	ImGui::Text(uniqueName);
+    ImGui::Text("%s", uniqueName);
 	auto result = false;
 	auto tmpRef = parameter.get();
 	ImGui::PushID(uniqueName);
 	{
 		ImGui::Columns(columns);
-		for (int i = 0; i < labels.size(); ++i)
+		for (size_t i = 0; i < labels.size(); ++i)
 		{
 			result |= ImGui::RadioButton(GetUniqueName(labels[i]), &tmpRef, i);
 			ImGui::NextColumn();
@@ -519,7 +481,7 @@ bool ofxImGui::AddCombo(ofParameter<int>& parameter, std::vector<std::string> la
 	auto tmpRef = parameter.get();
 	if (ImGui::BeginCombo(GetUniqueName(parameter), labels.at(parameter.get()).c_str()))
 	{
-		for (int i = 0; i < labels.size(); ++i)
+		for (size_t i = 0; i < labels.size(); ++i)
 		{
 			bool selected = (i == tmpRef);
 			if (ImGui::Selectable(labels[i].c_str(), selected))
@@ -537,37 +499,6 @@ bool ofxImGui::AddCombo(ofParameter<int>& parameter, std::vector<std::string> la
 	}
 	if (result)
 	{
-		//ofLogNotice() << "Set combo to " << tmpRef << "\n";
-		parameter.set(tmpRef);
-	}
-	return result;
-}
-
-bool ofxImGui::AddCombo(std::string overrideLabel, ofParameter<int>& parameter, std::vector<std::string> labels)
-{
-	auto result = false;
-	auto tmpRef = parameter.get();
-	if (ImGui::BeginCombo(GetUniqueName(overrideLabel), labels.at(parameter.get()).c_str()))
-	{
-		for (int i = 0; i < labels.size(); ++i)
-		{
-			bool selected = (i == tmpRef);
-			if (ImGui::Selectable(labels[i].c_str(), selected))
-			{
-				tmpRef = i;
-				result = true;
-			}
-			if (selected)
-			{
-				ImGui::SetItemDefaultFocus();
-			}
-		}
-
-		ImGui::EndCombo();
-	}
-	if (result)
-	{
-		//ofLogNotice() << "Set combo to " << tmpRef << "\n";
 		parameter.set(tmpRef);
 	}
 	return result;
@@ -585,65 +516,11 @@ bool ofxImGui::AddStepper(ofParameter<int>& parameter, int step, int stepFast)
 	return false;
 }
 
-bool ofxImGui::AddKnob(ofParameter<float>& parameter)
+//--------------------------------------------------------------
+bool ofxImGui::AddSlider(ofParameter<float>& parameter, const char* format, float power)
 {
 	auto tmpRef = parameter.get();
-	if (ImGui::KnobNeedleTrail(GetUniqueName(parameter), &tmpRef, parameter.getMin(), parameter.getMax(), parameter.getMin()))
-	{
-		parameter.set(tmpRef);
-		return true;
-	}
-	return false;
-}
-
-bool ofxImGui::AddKnob(ofParameter<float>& parameter, float zeroRef)
-{
-	auto tmpRef = parameter.get();
-	if (ImGui::KnobNeedleTrail(GetUniqueName(parameter), &tmpRef, parameter.getMin(), parameter.getMax(), zeroRef))
-	{
-		parameter.set(tmpRef);
-		return true;
-	}
-	return false;
-}
-
-bool ofxImGui::AddKnob(std::string label, ofParameter<float>& parameter)
-{
-	auto tmpRef = parameter.get();
-	if (ImGui::KnobNeedleTrail(GetUniqueName(label), &tmpRef, parameter.getMin(), parameter.getMax(), parameter.getMin()))
-	{
-		parameter.set(tmpRef);
-		return true;
-	}
-	return false;
-}
-
-bool ofxImGui::AddKnob(std::string label, ofParameter<float>& parameter, float zeroRef)
-{
-	auto tmpRef = parameter.get();
-	if (ImGui::KnobNeedleTrail(GetUniqueName(label), &tmpRef, parameter.getMin(), parameter.getMax(), zeroRef))
-	{
-		parameter.set(tmpRef);
-		return true;
-	}
-	return false;
-}
-
-bool ofxImGui::AddVSlider(ofParameter<float>& parameter, ImVec2& size)
-{
-	auto tmpRef = parameter.get();
-	if (ImGui::VSliderFloat(GetUniqueName(parameter), size, &tmpRef, parameter.getMin(), parameter.getMax()))
-	{
-		parameter.set(tmpRef);
-		return true;
-	}
-	return false;
-}
-
-bool ofxImGui::AddVSlider(std::string label, ofParameter<float>& parameter, ImVec2& size)
-{
-	auto tmpRef = parameter.get();
-	if (ImGui::VSliderFloat(GetUniqueName(label), size, &tmpRef, parameter.getMin(), parameter.getMax()))
+	if (ImGui::SliderFloat(GetUniqueName(parameter), (float*)&tmpRef, parameter.getMin(), parameter.getMax(), format, power))
 	{
 		parameter.set(tmpRef);
 		return true;
@@ -770,10 +647,17 @@ bool ofxImGui::AddRange(const std::string& name, ofParameter<glm::vec4>& paramet
 bool ofxImGui::AddValues(const std::string& name, std::vector<glm::tvec2<int>>& values, int minValue, int maxValue)
 {
 	auto result = false;
-	for (int i = 0; i < values.size(); ++i)
+	for (size_t i = 0; i < values.size(); ++i)
 	{
 		const auto iname = name + " " + ofToString(i);
-		result |= ImGui::SliderInt2(GetUniqueName(iname), glm::value_ptr(values[i]), minValue, maxValue);
+		if (minValue == 0 && maxValue == 0)
+		{
+			result |= ImGui::DragInt2(GetUniqueName(iname), glm::value_ptr(values[i]));
+		}
+		else
+		{
+			result |= ImGui::SliderInt2(GetUniqueName(iname), glm::value_ptr(values[i]), minValue, maxValue);
+		}
 	}
 	return result;
 }
@@ -782,10 +666,17 @@ bool ofxImGui::AddValues(const std::string& name, std::vector<glm::tvec2<int>>& 
 bool ofxImGui::AddValues(const std::string& name, std::vector<glm::tvec3<int>>& values, int minValue, int maxValue)
 {
 	auto result = false;
-	for (int i = 0; i < values.size(); ++i)
+	for (size_t i = 0; i < values.size(); ++i)
 	{
 		const auto iname = name + " " + ofToString(i);
-		result |= ImGui::SliderInt3(GetUniqueName(iname), glm::value_ptr(values[i]), minValue, maxValue);
+		if (minValue == 0 && maxValue == 0)
+		{
+			result |= ImGui::DragInt3(GetUniqueName(iname), glm::value_ptr(values[i]));
+		}
+		else
+		{
+			result |= ImGui::SliderInt3(GetUniqueName(iname), glm::value_ptr(values[i]), minValue, maxValue);
+		}
 	}
 	return result;
 }
@@ -794,10 +685,17 @@ bool ofxImGui::AddValues(const std::string& name, std::vector<glm::tvec3<int>>& 
 bool ofxImGui::AddValues(const std::string& name, std::vector<glm::tvec4<int>>& values, int minValue, int maxValue)
 {
 	auto result = false;
-	for (int i = 0; i < values.size(); ++i)
+	for (size_t i = 0; i < values.size(); ++i)
 	{
 		const auto iname = name + " " + ofToString(i);
-		result |= ImGui::SliderInt4(GetUniqueName(iname), glm::value_ptr(values[i]), minValue, maxValue);
+		if (minValue == 0 && maxValue == 0)
+		{
+			result |= ImGui::DragInt4(GetUniqueName(iname), glm::value_ptr(values[i]));
+		}
+		else
+		{
+			result |= ImGui::SliderInt4(GetUniqueName(iname), glm::value_ptr(values[i]), minValue, maxValue);
+		}
 	}
 	return result;
 }
@@ -806,10 +704,17 @@ bool ofxImGui::AddValues(const std::string& name, std::vector<glm::tvec4<int>>& 
 bool ofxImGui::AddValues(const std::string& name, std::vector<glm::vec2>& values, float minValue, float maxValue)
 {
 	auto result = false;
-	for (int i = 0; i < values.size(); ++i)
+	for (size_t i = 0; i < values.size(); ++i)
 	{
 		const auto iname = name + " " + ofToString(i);
-		result |= ImGui::SliderFloat2(GetUniqueName(iname), glm::value_ptr(values[i]), minValue, maxValue);
+		if (minValue == 0 && maxValue == 0)
+		{
+			result |= ImGui::DragFloat2(GetUniqueName(iname), glm::value_ptr(values[i]));
+		}
+		else
+		{
+			result |= ImGui::SliderFloat2(GetUniqueName(iname), glm::value_ptr(values[i]), minValue, maxValue);
+		}
 	}
 	return result;
 }
@@ -818,10 +723,17 @@ bool ofxImGui::AddValues(const std::string& name, std::vector<glm::vec2>& values
 bool ofxImGui::AddValues(const std::string& name, std::vector<glm::vec3>& values, float minValue, float maxValue)
 {
 	auto result = false;
-	for (int i = 0; i < values.size(); ++i)
+	for (size_t i = 0; i < values.size(); ++i)
 	{
 		const auto iname = name + " " + ofToString(i);
-		result |= ImGui::SliderFloat3(GetUniqueName(iname), glm::value_ptr(values[i]), minValue, maxValue);
+		if (minValue == 0 && maxValue == 0)
+		{
+			result |= ImGui::DragFloat3(GetUniqueName(iname), glm::value_ptr(values[i]));
+		}
+		else
+		{
+			result |= ImGui::SliderFloat3(GetUniqueName(iname), glm::value_ptr(values[i]), minValue, maxValue);
+		}
 	}
 	return result;
 }
@@ -830,10 +742,17 @@ bool ofxImGui::AddValues(const std::string& name, std::vector<glm::vec3>& values
 bool ofxImGui::AddValues(const std::string& name, std::vector<glm::vec4>& values, float minValue, float maxValue)
 {
 	auto result = false;
-	for (int i = 0; i < values.size(); ++i)
+	for (size_t i = 0; i < values.size(); ++i)
 	{
 		const auto iname = name + " " + ofToString(i);
-		result |= ImGui::SliderFloat4(GetUniqueName(iname), glm::value_ptr(values[i]), minValue, maxValue);
+		if (minValue == 0 && maxValue == 0)
+		{
+			result |= ImGui::DragFloat4(GetUniqueName(iname), glm::value_ptr(values[i]));
+		}
+		else
+		{
+			result |= ImGui::SliderFloat4(GetUniqueName(iname), glm::value_ptr(values[i]), minValue, maxValue);
+		}
 	}
 	return result;
 }
@@ -844,10 +763,17 @@ bool ofxImGui::AddValues(const std::string& name, std::vector<glm::vec4>& values
 bool ofxImGui::AddValues(const std::string& name, std::vector<ofVec2f>& values, float minValue, float maxValue)
 {
 	auto result = false;
-	for (int i = 0; i < values.size(); ++i)
+	for (size_t i = 0; i < values.size(); ++i)
 	{
 		const auto iname = name + " " + ofToString(i);
-		result |= ImGui::SliderFloat2(GetUniqueName(iname), values[i].getPtr(), minValue, maxValue);
+		if (minValue == 0 && maxValue == 0)
+		{
+			result |= ImGui::DragFloat2(GetUniqueName(iname), values[i].getPtr());
+		}
+		else
+		{
+			result |= ImGui::SliderFloat2(GetUniqueName(iname), values[i].getPtr(), minValue, maxValue);
+		}
 	}
 	return result;
 }
@@ -856,10 +782,17 @@ bool ofxImGui::AddValues(const std::string& name, std::vector<ofVec2f>& values, 
 bool ofxImGui::AddValues(const std::string& name, std::vector<ofVec3f>& values, float minValue, float maxValue)
 {
 	auto result = false;
-	for (int i = 0; i < values.size(); ++i)
+	for (size_t i = 0; i < values.size(); ++i)
 	{
 		const auto iname = name + " " + ofToString(i);
-		result |= ImGui::SliderFloat3(GetUniqueName(iname), values[i].getPtr(), minValue, maxValue);
+		if (minValue == 0 && maxValue == 0)
+		{
+			result |= ImGui::DragFloat3(GetUniqueName(iname), values[i].getPtr());
+		}
+		else
+		{
+			result |= ImGui::SliderFloat3(GetUniqueName(iname), values[i].getPtr(), minValue, maxValue);
+		}
 	}
 	return result;
 }
@@ -868,68 +801,70 @@ bool ofxImGui::AddValues(const std::string& name, std::vector<ofVec3f>& values, 
 bool ofxImGui::AddValues(const std::string& name, std::vector<ofVec4f>& values, float minValue, float maxValue)
 {
 	auto result = false;
-	for (int i = 0; i < values.size(); ++i)
+	for (size_t i = 0; i < values.size(); ++i)
 	{
 		const auto iname = name + " " + ofToString(i);
-		result |= ImGui::SliderFloat4(GetUniqueName(iname), values[i].getPtr(), minValue, maxValue);
+		if (minValue == 0 && maxValue == 0)
+		{
+			result |= ImGui::DragFloat4(GetUniqueName(iname), values[i].getPtr());
+		}
+		else
+		{
+			result |= ImGui::SliderFloat4(GetUniqueName(iname), values[i].getPtr(), minValue, maxValue);
+		}
 	}
 	return result;
 }
 
 //--------------------------------------------------------------
-void ofxImGui::AddImage(ofBaseHasTexture& hasTexture, const ofVec2f& size)
+void ofxImGui::AddImage(const ofBaseHasTexture& hasTexture, const ofVec2f& size)
 {
 	ofxImGui::AddImage(hasTexture.getTexture(), size);
 }
 
 //--------------------------------------------------------------
-void ofxImGui::AddImage(ofTexture& texture, const ofVec2f& size)
+void ofxImGui::AddImage(const ofTexture& texture, const ofVec2f& size)
 {
 	ImTextureID textureID = GetImTextureID(texture);
 	ImGui::Image(textureID, size);
 }
 
+#if OF_VERSION_MINOR >= 10
+
 //--------------------------------------------------------------
-bool ofxImGui::AddDrag(ofParameter<float>& parameter, float speed)
+void ofxImGui::AddImage(const ofBaseHasTexture& hasTexture, const glm::vec2& size)
 {
-	auto tmpRef = parameter.get();
-	if (ImGui::DragFloat(ofxImGui::GetUniqueName(parameter.getName()), &tmpRef, speed, parameter.getMin(), parameter.getMax())) {
-		parameter.set(tmpRef);
-		return true;
-	}
-	return false;
+    ofxImGui::AddImage(hasTexture.getTexture(), size);
 }
 
 //--------------------------------------------------------------
-bool ofxImGui::AddDrag(ofParameter<int>& parameter, float speed)
+void ofxImGui::AddImage(const ofTexture& texture, const glm::vec2& size)
 {
-	auto tmpRef = parameter.get();
-	if (ImGui::DragInt(ofxImGui::GetUniqueName(parameter.getName()), &tmpRef, speed, parameter.getMin(), parameter.getMax())) {
-		parameter.set(tmpRef);
-		return true;
-	}
-	return false;
+    ImTextureID textureID = GetImTextureID(texture);
+    ImGui::Image(textureID, size);
 }
+
+#endif
 
 static auto vector_getter = [](void* vec, int idx, const char** out_text)
 {
-	auto& vector = *static_cast<std::vector<std::string>*>(vec);
-	if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
-	*out_text = vector.at(idx).c_str();
-	return true;
+    auto& vector = *static_cast<std::vector<std::string>*>(vec);
+    if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
+    *out_text = vector.at(idx).c_str();
+    return true;
 };
 
 bool ofxImGui::VectorCombo(const char* label, int* currIndex, std::vector<std::string>& values)
 {
-	if (values.empty()) { return false; }
-	return ImGui::Combo(label, currIndex, vector_getter,
-		static_cast<void*>(&values), values.size());
+    if (values.empty()) { return false; }
+    return ImGui::Combo(label, currIndex, vector_getter,
+                        static_cast<void*>(&values), values.size());
 }
 
 bool ofxImGui::VectorListBox(const char* label, int* currIndex, std::vector<std::string>& values)
 {
-	if (values.empty()) { return false; }
-	return ImGui::ListBox(label, currIndex, vector_getter,
-		static_cast<void*>(&values), values.size());
+    if (values.empty()) { return false; }
+    return ImGui::ListBox(label, currIndex, vector_getter,
+                   static_cast<void*>(&values), values.size());
 }
 

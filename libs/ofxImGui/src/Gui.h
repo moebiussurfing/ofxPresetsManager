@@ -22,18 +22,14 @@ namespace ofxImGui
 		Gui();
 		~Gui();
 
-    void enableDocking(); // must be called before setup
-
-		void setup(BaseTheme* theme = nullptr, bool autoDraw = true);
-    
+        void setup(BaseTheme* theme = nullptr, bool autoDraw = true, ImGuiConfigFlags customFlags_=ImGuiConfigFlags_None);
 		void exit();
 
 		void begin();
 		void end();
-    
+
 		void draw();
 
-    // must be called before setup
     void SetDefaultFont(int indexAtlasFont);
     int addFont(const std::string & fontPath, float fontSize = 13.0f);
 
@@ -56,18 +52,14 @@ namespace ofxImGui
 #else
         EngineGLFW engine;
 #endif
-
-    void beginDocking();
-    void endDocking();
         
 		float lastTime;
 		bool autoDraw;
-    bool dockingEnabled = false;
+        bool isRenderingManualFrame = false;
 
 		BaseTheme* theme;
 
 		std::vector<ofTexture*> loadedTextures;
-
 		ImGuiContext* context;
 	};
 }
