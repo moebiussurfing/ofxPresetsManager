@@ -166,6 +166,8 @@ public:
 	void exit();
 	void windowResized(int w, int h);
 
+	void clear();
+	
 	//--
 
 	//----

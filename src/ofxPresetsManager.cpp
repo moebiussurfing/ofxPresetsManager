@@ -1029,6 +1029,25 @@ ofxPresetsManager::~ofxPresetsManager()
 //--
 
 //--------------------------------------------------------------
+void ofxPresetsManager::clear() {
+	groups.clear();
+	keys.clear();
+	groupsSizes.clear();
+	PRESETS_Selected_Index.clear();
+	params_GroupMainSelector.clear();
+	params_GroupsSelectors.clear();
+	PRESETS_Selected_Index_PRE.clear();
+
+	//params_Options.clear();
+	//params_Gui.clear();
+	//params_Control.clear();
+
+	params_UserKitSettings.clear();
+	groupRandomizers.clear();
+	params_Custom.clear();
+}
+
+//--------------------------------------------------------------
 void ofxPresetsManager::add(ofParameterGroup _params, int _amountPresets)
 {
 	// main adder of a ofParameterGroup's but kind of internal yet. TODO: fix to work as public..
