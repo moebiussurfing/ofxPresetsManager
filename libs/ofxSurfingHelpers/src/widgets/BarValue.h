@@ -4,8 +4,23 @@
 
 class BarValue
 {
+private:
+	ofTrueTypeFont fontCycle;
+	float fontCycleSize;
+	std::string label;
+	std::string tittle;
+	bool bLabel = false;
+	bool bTitle = false;
 public:
+	void setLabel(std::string _label) {
+		label = _label;
+	}
+	void setTitle(std::string _label) {
+		tittle = _label;
+		bTitle = true;
+	}
 
+public:
 	void setColor(ofColor _color)
 	{
 		color.set(_color);
@@ -49,6 +64,14 @@ public:
 	glm::vec2 getPosition()
 	{
 		return position;
+	}
+	float getX()
+	{
+		return position.x;
+	}
+	float getY()
+	{
+		return position.y;
 	}
 
 private:
@@ -94,6 +117,11 @@ public:
 
 		valueMin = 0;
 		valueMax = 1;
+
+		label = "";
+		fontCycleSize = 10;
+		if (!fontCycle.loadFont("assets/fonts/Pragmata Pro Mono Bold.otf", fontCycleSize))
+			fontCycle.loadFont(OF_TTF_MONO, fontCycleSize);
 	};
 
 	~BarValue() {};
@@ -138,6 +166,23 @@ public:
 		else {//TODO:
 			width = _val * widthMax;
 			ofDrawRectangle(position.x, position.y, width, heightMax);
+		}
+
+		// labels
+		if (bLabel || bTitle)
+		{
+			ofPushStyle();
+			if (bLabel) fontCycle.drawString(label, getX() - fontCycleSize, getY() + 0.5*fontCycleSize);
+			//if (bTitle) fontCycle.drawString(tittle,
+			//	getX() - widthMax - fontCycle.getStringBoundingBox(tittle, 0, 0).getWidth()*0.5,
+			//	getY() - heightMax - 0.5*fontCycleSize - 5);
+
+			if (bTitle) fontCycle.drawString(tittle,
+				getX() + widthMax * 0.5 - fontCycle.getStringBoundingBox(tittle, 0, 0).getWidth()*0.5,
+				getY() - heightMax - 0.5*fontCycleSize - 5);
+
+			//if (bTitle) fontCycle.drawString(tittle, getX() - radiusMax, getY() - radiusMax - 0.5*fontCycleSize);// left upper corner
+			ofPopStyle();
 		}
 
 		ofPopStyle();

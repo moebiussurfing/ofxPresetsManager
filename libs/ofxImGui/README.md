@@ -1,3 +1,23 @@
+# I have added
+## Docking (in docking branch)
+
+Allow to use docking with ofxImGui.
+
+To activate docking in ofApp::Setup() : 
+
+```C++
+  // Init ImGui with docking
+  gui.enableDocking();
+  gui.setup();
+```
+
+![Docking](images/docking.png)
+
+## A Knob Widget 
+Also in docking branch I think, need to cleen a bit :-)
+
+![Docking](images/knob.png)
+
 # ofxImGui
 
 ofxAddon that allows you to use [ImGui](https://github.com/ocornut/imgui) in [openFrameworks](https://github.com/openframeworks/openFrameworks).
@@ -26,6 +46,3 @@ ofxImGui helper functions for interfacing with `ofParameter`.
 
 #### example-ios  
 iOS specific with keyboard input helper.
-
-
-[![Build status](https://travis-ci.org/jvcleave/ofxImGui.svg?branch=master)](https://travis-ci.org/jvcleave/ofxImGui)

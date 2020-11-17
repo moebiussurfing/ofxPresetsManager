@@ -51,8 +51,6 @@ namespace ofxImGui
 		static unsigned int g_VaoHandle;
 		static unsigned int g_ElementsHandle;
 
-		static std::string g_ClipboardText;
-
 		bool mousePressed[5] = { false };
 
 	protected:

@@ -984,6 +984,7 @@ private:
 	ofParameter<bool> SHOW_ImGui;
 	ofParameter<bool> SHOW_Panel_StandalonePresets;
 	ofParameter<bool> SHOW_Panel_AllParameter;
+	ofParameter<bool> SHOW_Panel_AllSelectors;
 	ofParameter<bool> SHOW_Panel_Randomizer;
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
 	ofParameter<bool> SHOW_ImGui_Selectors;

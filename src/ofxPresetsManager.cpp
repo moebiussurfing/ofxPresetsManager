@@ -116,7 +116,8 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Help.set("SHOW HELP", false);
 	SHOW_Gui_AdvancedControl.set("SHOW ADVANCED", false);
 	SHOW_Panel_Click.set("SHOW CLICKER", true);
-	SHOW_Panel_AllParameter.set("SHOW ALL PARAMETERS", true);
+	SHOW_Panel_AllParameter.set("SHOW PARAMETERS", true);
+	SHOW_Panel_AllSelectors.set("SHOW SELECTORS", true);
 	SHOW_Panel_StandalonePresets.set("SHOW STANDALONE PRESETS", true);
 	MODE_StandalonePresets_NEW.set("NEW!", false);
 	SHOW_Panel_Randomizer.set("SHOW RANDOMIZER PANEL", true);
@@ -174,6 +175,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.setName("GUI");
 	params_Gui.add(SHOW_Gui_AdvancedControl);
 	params_Gui.add(SHOW_Panel_AllParameter);
+	params_Gui.add(SHOW_Panel_AllSelectors);
 	params_Gui.add(SHOW_Panel_Click);
 	params_Gui.add(SHOW_Panel_StandalonePresets);
 	params_Gui.add(SHOW_Panel_Randomizer);
@@ -677,6 +679,8 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 
 #ifndef USE_IMGUI_EXTERNAL	
 	drawImGui();
+	//gui_ImGui.draw(); //    <-- Also calls gui.end()
+
 #endif
 
 	//----
@@ -2680,7 +2684,10 @@ void ofxPresetsManager::ImGui_Setup()
 
 	//--
 
+	//gui_ImGui.enableDocking();
+
 	gui_ImGui.setup();
+	//gui_ImGui.setup(false, true); // No autodraw, Allow chaining
 
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
@@ -2743,42 +2750,47 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		//-
 
 		// group selector
-		if (groups.size() > 1) {// hide this panels when no more than one group! it's for multi groups
-			if (ofxImGui::BeginWindow("Group select", settings, &b))
+		if (SHOW_Panel_AllSelectors)
+		{
+			// hide this panels when no more than one group! it's for multi groups
+			if (groups.size() > 1) 
 			{
-				ImGui::Dummy(ImVec2(0.0f, 5));
+				if (ofxImGui::BeginWindow("Group select", settings, &b))
+				{
+					ImGui::Dummy(ImVec2(0.0f, 5));
 
-				// main group link selector
-				if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);// last group is the main link group
+					// main group link selector
+					if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);// last group is the main link group
 
-				//-
+					//-
 
-				ImGui::Dummy(ImVec2(0.0f, 5));
+					ImGui::Dummy(ImVec2(0.0f, 5));
 
-				// selector to show their randomizers
-				if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
+					// selector to show their randomizers
+					if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
 
-				//-
+					//-
 
-				//ImGui::Dummy(ImVec2(0.0f, 5));
+					//ImGui::Dummy(ImVec2(0.0f, 5));
 
-				// name of selected group
-				std::string str;
-				str = "Group Name";
-				ImGui::Text(str.c_str());
-				str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
-				ImGui::Text(str.c_str());
+					// name of selected group
+					std::string str;
+					str = "Group Name";
+					ImGui::Text(str.c_str());
+					str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
+					ImGui::Text(str.c_str());
+				}
+				ofxImGui::EndWindow(settings);
 			}
-			ofxImGui::EndWindow(settings);
 		}
+
+		// all group selectors to set current preset
+		if (SHOW_Panel_AllSelectors) ImGui_Draw_GroupsSelectors();
 
 		//--
 
 		// all parameters from all groups
 		if (SHOW_Panel_AllParameter) ImGui_Draw_PresetParameters();
-
-		// all group selectors to set current preset
-		ImGui_Draw_GroupsSelectors();
 
 		// selected randomizers for selected group
 		// handles matrix button selector too
@@ -2863,7 +2875,9 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 				//if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
 				//ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
 
-				ofxImGui::AddParameter(SHOW_Panel_AllParameter);//ImGui::SameLine();
+				ofxImGui::AddParameter(SHOW_Panel_AllParameter);ImGui::SameLine();
+				ofxImGui::AddParameter(SHOW_Panel_AllSelectors);//ImGui::SameLine();
+
 				ofxImGui::AddParameter(SHOW_Panel_Click); ImGui::SameLine(); 
 				ofxImGui::AddParameter(ENABLE_Keys);//ImGui::SameLine(); 
 				if (MODE_Editor) {
