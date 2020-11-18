@@ -497,6 +497,11 @@ public:
 	void setModeKeySave(int key);// setup the key you have to hold for saving, default is OF_KEY_CONTROL
 	void setModeKeySwap(int key);// setup the key you have to hold for swap, default is OF_KEY_ALT
 
+	//--------------------------------------------------------------
+	void setModeEditorOrLive(bool b) {
+		MODE_Editor = b;
+	}
+	
 	//----
 
 	// undo engine
@@ -534,9 +539,10 @@ private:
 	//--
 
 	// app settings for many params
-private:
-	void load_ControlSettings();
-	void save_ControlSettings();
+//private:
+	public:
+	void load_ControlSettings();// handle group selectors and some settings states
+	void save_ControlSettings();// handle group selectors and some settings states
 
 	//----
 
