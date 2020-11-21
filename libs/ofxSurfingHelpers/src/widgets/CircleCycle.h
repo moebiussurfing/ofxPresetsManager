@@ -63,7 +63,7 @@ public:
 	}
 	void setSpeed(float _speed)
 	{
-		ofClamp(_speed, 0.01f, 1.0f);
+		ofClamp(_speed, 0.0f, 1.0f);
 		animSpeed = _speed;
 	}
 	void setRadius(float _size)
@@ -168,7 +168,7 @@ public:
 		setFps(60);
 		alpha = 0.0f;
 		position = glm::vec2(200, 200);
-		animSpeed.set("animSpeed", .5f, 0.01f, 1.f);
+		animSpeed.set("animSpeed", .5f, 0.0f, 1.f);
 
 		radiusMax = 100;
 		radiusMin = radiusMax * 0.8;
@@ -204,17 +204,25 @@ public:
 		ofPopMatrix();
 
 		animRunning = animCounter <= 1.0f;
-		if (animRunning) animCounter += speedRatio * animSpeed * dt;
+		
+		if (animSpeed.get() > 0.0f) {
+			if (animRunning) animCounter += speedRatio * animSpeed * dt;
 
-		ofFill();
-		if (animRunning)
-		{
-			alpha = ofMap(animCounter, 0, 1, alphaMax, alphaMin, true);
+			if (animRunning)
+			{
+				alpha = ofMap(animCounter, 0, 1, alphaMax, alphaMin, true);
+			}
+			else
+			{
+				alpha = alphaMin;
+			}
 		}
 		else
 		{
-			alpha = alphaMin;
+			alpha = alphaMax;
 		}
+
+		ofFill();
 		ofPushMatrix();
 		ofTranslate(position);
 		ofSetColor(color.r, color.g, color.b, alpha);//faded alpha
