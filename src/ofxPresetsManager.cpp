@@ -1673,7 +1673,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			if (key == modeKeySave)
 			{
 				bKeySave = true;
-				ofLogNotice(__FUNCTION__) << "\t\t modeKey Save TRUE";
+				ofLogNotice(__FUNCTION__) << "\t\t modKey Save TRUE";
 				return;
 			}
 
@@ -2278,6 +2278,8 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 			if (MODE_EditPresetClicker.get())
 			{
 				rectanglePresetClicker.enableEdit();
+				// workflow
+				SHOW_BackGround_EditPresetClicker = true;
 			}
 			else
 			{
