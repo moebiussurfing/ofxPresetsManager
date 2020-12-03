@@ -162,6 +162,7 @@ public:
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
 	void drawImGui();
+	void drawHelp(int x, int y);
 	void exit();
 	void windowResized(int w, int h);
 
@@ -778,8 +779,8 @@ public:
 		else// simplified path info
 		{
 			if (!bPathDirCustom) _names += "/data/" + path_UserKit_Folder + "/\n";
-			_names += path_PresetsFavourites + "/           > favourites\n";
-			_names += path_PresetsStandalone + "/           > standalones\n";
+			_names += path_PresetsFavourites + "/         favourites\n";
+			_names += path_PresetsStandalone + "/         standalones\n";
 			_names += "\n";
 
 			for (int i = 0; i < groups.size(); i++)
@@ -1187,11 +1188,11 @@ private:
 
 	// save keys
 	int modeKeySave;// save mod key
-	bool bKeySave;// save mod key state
+	bool bModKeySave;// save mod key state
 
 	// swap selected preset with the currently clicked (i.e: 4 -> 7  &  4 <- 7)
 	int modKeySwap;// swap mod key 
-	bool bKeySwap;// swap mod key state
+	bool bModKeySwap;// swap mod key state
 
 public:
 	// switch on or off the control with the keys

@@ -83,8 +83,8 @@ ofxPresetsManager::ofxPresetsManager()
 	modeKeySave = OF_KEY_CONTROL;
 	modKeySwap = OF_KEY_ALT;
 	bKeys = false;
-	bKeySave = false;
-	bKeySwap = false;
+	bModKeySave = false;
+	bModKeySwap = false;
 	keysNotActivated = true;
 	lastMouseButtonState = false;
 
@@ -979,50 +979,7 @@ void ofxPresetsManager::drawPresetClicker()
 		//--
 
 		// 8. help info text: 
-		{
-			bShowClickerInfo = SHOW_Help.get();
-
-			if (bShowClickerInfo && (i == 0))//&& ENABLE_Keys . only on first (0) for groups iterate pass..
-			{
-				std::string ss = helpInfo;
-				int _padx = 22;
-				int _pady = 30;
-				int x = 0;
-				int y = 0;
-
-				// A. vertical position below boxes
-				if (!bLateralPosition)
-				{
-					float hh = ofxSurfingHelpers::getHeightBBtextBoxed(myFont, ss);
-					x += 4 + _padx;
-					y -= hh + _pady;
-				}
-
-				// B. lateral position right to the boxes
-				else
-				{
-					float _w;
-					y = ySave + _pady;
-
-					if (!bLeftPosition)// on the right
-					{
-						_w = getPresetClicker_Width();
-						x = _w + _padx + 30;
-					}
-					else {// on the left
-						if (myFont.isLoaded())
-						{
-							_w = ofxSurfingHelpers::getWidthBBtextBoxed(myFont, ss);
-							_w += myFont.getStringBoundingBox(groups[0].getName(), 0, 0).getWidth();
-							_w += 70;
-						}
-						x = -_w;
-					}
-				}
-
-				ofxSurfingHelpers::drawTextBoxed(myFont, ss, x, y, _colorText, _colorBg, true, _colorButton);
-			}
-		}
+		drawHelp(0, ySave);
 	}
 
 	ofPopMatrix();
@@ -1717,7 +1674,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			// mode key for saving with mouse or trigger keys
 			if (key == modeKeySave)
 			{
-				bKeySave = true;
+				bModKeySave = true;
 				ofLogNotice(__FUNCTION__) << "\t modKey Save TRUE";
 				//return;
 			}
@@ -1725,7 +1682,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			// mode key for swap with mouse or trigger keys
 			else if (key == modKeySwap)
 			{
-				bKeySwap = true;
+				bModKeySwap = true;
 				ofLogNotice(__FUNCTION__) << "\t modKey Swap TRUE";
 				//return;
 			}
@@ -1845,6 +1802,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 					DISABLE_CALLBACKS = false;
 					PRESETS_Selected_Index[sel] = (int)ofClamp(i, 0, PRESETS_Selected_Index[sel].getMax());
 				}
+
 				else if (key == OF_KEY_RIGHT)
 				{
 					DISABLE_CALLBACKS = true;
@@ -1869,7 +1827,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 						{
 							ofLogNotice(__FUNCTION__) << "key: " << (char)key;
 
-							if (bKeySave)
+							if (bModKeySave)
 							{
 								save(k, g);
 							}
@@ -1885,16 +1843,17 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 					}
 				}
 			}
+		}
 
-			//--
+		//--
 
-			// randomizers
-			//for (int i = 0; i < groups.size(); i++)
-			//{
-			//	groupRandomizers[i].keyPressed(key);
-			//}
-
+		// randomizers
+		if (MODE_Editor.get())
+		{
 			groupRandomizers[GuiGROUP_Selected_Index].keyPressed(key);
+
+			// workflow
+			doStoreUndo();
 		}
 	}
 }
@@ -1907,13 +1866,13 @@ void ofxPresetsManager::keyReleased(ofKeyEventArgs &eventArgs)
 		// mod keys
 		if (eventArgs.key == modeKeySave && ENABLE_Keys)
 		{
-			bKeySave = false;
-			ofLogNotice(__FUNCTION__) << "\t modKey Save FALSE" << endl;
+			bModKeySave = false;
+			ofLogNotice(__FUNCTION__) << "\t modKey Save FALSE";
 		}
 		else if (eventArgs.key == modKeySwap && ENABLE_Keys)
 		{
-			bKeySwap = false;
-			ofLogNotice(__FUNCTION__) << "\t modKey Swap FALSE" << endl;
+			bModKeySwap = false;
+			ofLogNotice(__FUNCTION__) << "\t modKey Swap FALSE";
 		}
 	}
 }
@@ -1979,7 +1938,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 			{
 				// 1. mod save controlled by modeKeySave
 
-				if (bKeySave)
+				if (bModKeySave)
 				{
 					ofLogNotice(__FUNCTION__) << "SAVE";
 
@@ -1996,7 +1955,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 				// 2. mod swap controlled by modKeySwap
 
-				else if (bKeySwap)
+				else if (bModKeySwap)
 				{
 					ofLogNotice(__FUNCTION__) << "SWAP";
 
@@ -2628,12 +2587,12 @@ void ofxPresetsManager::saveAllKitFromMemory()
 			if (!b) ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets > " << _path;
 #endif
 #endif
-	}
+		}
 		else {
 			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
-}
+	}
 
 	// debug params
 	if (true)
@@ -2646,7 +2605,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 #ifdef USE_JSON
 #endif
 #endif
-	}
+		}
 	}
 }
 
@@ -2722,8 +2681,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
+		}
 	}
-}
 }
 
 ////--------------------------------------------------------------
@@ -3206,6 +3165,7 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo += "+Alt             SWAP\n";
 	helpInfo += "Arrows           NAVIGATE\n";
 	helpInfo += "Ctrl+Space       PLAY RANDOMIZER\n";
+	helpInfo += "R                RANDOMIZE PRESET\n";
 	helpInfo += "E                EDIT/LIVE\n";
 }
 
@@ -4128,4 +4088,79 @@ void ofxPresetsManager::Changed_GuiGROUP_Selected_Index(int & index)
 {
 	GuiGROUP_Selected_Index = (int)ofClamp(GuiGROUP_Selected_Index.get(), 0, GuiGROUP_Selected_Index.getMax());
 	ofLogWarning(__FUNCTION__) << " : " << GuiGROUP_Selected_Index;
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::drawHelp(int _x, int ySave)
+{
+	ofColor _colorText;// lines and text color
+	ofColor _colorButton;// bg selected button
+	ofColor _colorBg;// background color
+	bool bLeftPosition = true;// left or right. only if lateral pos true
+	bool bLateralPosition = false;// false = on top of clicker
+
+	//-
+
+	// light theme (black lines)
+	if (!bThemDark)
+	{
+		_colorText = ofColor(0, 255);
+		_colorButton = ofColor(0, 64);
+		_colorBg = ofColor(255, 8);
+	}
+
+	// dark theme (white lines)
+	else
+	{
+		_colorText = ofColor(255, 128);
+		_colorButton = ofColor(32, 200);
+		_colorBg = ofColor(0, 128);
+	}
+
+	//--
+
+	{
+		bShowClickerInfo = SHOW_Help.get();
+
+		if (bShowClickerInfo)// && (i == 0))//&& ENABLE_Keys . only on first (0) for groups iterate pass..
+		{
+			std::string ss = helpInfo;
+			int _padx = 22;
+			int _pady = 30;
+			int x = 0;
+			int y = 0;
+
+			// A. vertical position below boxes
+			if (!bLateralPosition)
+			{
+				float hh = ofxSurfingHelpers::getHeightBBtextBoxed(myFont, ss);
+				x += 4 + _padx;
+				y -= hh + _pady;
+			}
+
+			// B. lateral position right to the boxes
+			else
+			{
+				float _w;
+				y = ySave + _pady;
+
+				if (!bLeftPosition)// on the right
+				{
+					_w = getPresetClicker_Width();
+					x = _w + _padx + 30;
+				}
+				else {// on the left
+					if (myFont.isLoaded())
+					{
+						_w = ofxSurfingHelpers::getWidthBBtextBoxed(myFont, ss);
+						_w += myFont.getStringBoundingBox(groups[0].getName(), 0, 0).getWidth();
+						_w += 70;
+					}
+					x = -_w;
+				}
+			}
+
+			ofxSurfingHelpers::drawTextBoxed(myFont, ss, x, y, _colorText, _colorBg, true, _colorButton);
+		}
+	}
 }

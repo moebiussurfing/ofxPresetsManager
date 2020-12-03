@@ -62,7 +62,7 @@ void ofApp::drawScene()
 	// show help and debug preset
 	std::string str = "HELP\n";
 	str += "G            : Show Gui\n";
-	str += "a,b,0,1,2,4  : Load Preset\n";
+	str += "0,1,2,3,4,5  : Load Preset\n";
 	str += "Ctrl+Click   : Save to Preset\n";
 	str += "Alt+Click    : Swap Presets\n";
 	str += "H            : Show file paths info\n";
