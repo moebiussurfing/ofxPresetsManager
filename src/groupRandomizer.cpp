@@ -452,10 +452,10 @@ void groupRandomizer::doRandomPreset() {
 	ofParameterGroup _group = group;
 	doRandomGroup(_group);
 
-#ifdef INCLUDE_ofxUndoSimple
-	if (MODE_Editor.get())
-		undoStoreParams();// store scene
-#endif
+//#ifdef INCLUDE_ofxUndoSimple
+//	if (MODE_Editor.get())
+//		doStoreUndo();// store scene
+//#endif
 }
 
 //--------------------------------------------------------------
@@ -872,6 +872,11 @@ void groupRandomizer::setupRandomizerIndex()
 //----------------------------------------------------------------
 void groupRandomizer::keyPressed(int key)
 {
+	if (key == 'R')
+	{
+		doRandomPreset();
+	}
+
 	////bool bEnableKeyRandomizers = false;
 	////if (bEnableKeyRandomizers) 
 	//{

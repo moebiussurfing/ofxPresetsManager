@@ -11,7 +11,7 @@ void ofApp::setup()
 
 	// add our ofParameterGroup to the presetManager 
 	// and define key triggers for each preset. the amount of keys will be the amount of favourites presets
-	presetsManager.add(params, { 'a', 'b', '0', '1', '2', '3' });
+	presetsManager.add(params, { '0', '1', '2', '3', '4', '5' });
 	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
 }
 

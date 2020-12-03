@@ -2,7 +2,7 @@
 /// ofxPresetsManager.h 
 ///
 /// ofxPresetsManager 
-/// by moebiussurfing, 2020.
+/// by moebiusSurfing, 2020.
 ///
 /// this addon is based in the original ofxGuiPresetSelector addon 
 /// by Nicola Pisanti, MIT License, 2016
@@ -16,9 +16,9 @@
 //	DOCUMENTATION
 //
 //	this is a very simple guide to use ofxPresetsManager.
-//	we will add only ONE ofParameterGroup, but the addon can handle more groups!
+//	here we will add only ONE ofParameterGroup, but the addon can handle more groups too!
 //
-//	* usage:
+//	* basic usage:
 //	0. init your scene and the related parameters / settings.
 //	1. add our parameters to the ofParameterGroup as container.
 //  2.0 customize some settings if desired
@@ -28,13 +28,13 @@
 //
 //	the file settings (one for each preset) will be placed into /bin/data.
 //	there are lot of implemented features:
-//		- 
+//		- look into README.md
 //
 //	there are two types of presets: 
 //		- favourites: the clickable-boxes/key-trigged presets
-//		- standalone: the archived and named presets
+//		- standalones: the archived and named presets files that you can load from/to favoutires
 //
-//
+/////////////////////////////////////////////////////////////////////////////////////////
 
 
 ///------
@@ -46,10 +46,10 @@
 ///-
 
 ///	TODO:
-
+///	
 ///	+++		open/save dialog to project User-Kit session in a single file.
 ///				or allowed to all the groups?
-
+///	
 ///	++		randomize editor preset
 ///				preset mini engine. ABC dropdown list for randomizers
 ///				could add also several randomizer settings presets. selectable by dropdown list..
@@ -57,19 +57,19 @@
 ///				do nesting toggles to improve view. create a group for related toggles..	
 ///				clone using editor toggles to avoid clone disabled toggle params
 ///				mode state to allow overwrite only enabled toggle params
-
+///	
 ///	++		add populator engine to create all preset files if it's a new empty project
 ///				add setter to enable some params to randomize
 ///				call populate. disable debug_display red info
-
+///	
 ///	+		add/restore-back undo to all the groups
-
+///	
 ///	++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
-
+///	
 ///	++		performance: 
 ///				restore-back memory_mode. (use xml objects into memory vs hd files) to extra groups too
-
+///	
 ///	+		repair autosave timer. exclude log
 ///	++		make a lite minimal version compatible ! without ImGui, maybe with ofxGui or even without any GUI.
 ///	++		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
@@ -139,7 +139,6 @@
 
 //---
 
-// TODO: removable ofBaseApp? or it's mandatory for auto update() ??
 class ofxPresetsManager : public ofBaseApp
 {
 
@@ -517,7 +516,7 @@ private:
 	vector <ofXml> undoXmlsParams;
 	
 	void undoRefreshParams();
-	void undoStoreParams();
+	void doStoreUndo();
 
 	void doUndo();
 	void doRedo();

@@ -11,7 +11,7 @@ ofxPresetsManager
 - `Easy to integrate` into your projects.
 - `Autogenerates a GUI` to tweak all the parameters.
 - `Cute Gui` based on `docked ImGui` windows using ofxImGui.
-- Lot of `customizations` and `helpers`: clone presets, change GUI layout and button sizes, dark/light themes, re-arrange/sorting presets, play timed randomizer to switch between presets, randomize some parameters, browse multi groups by arrow keys...etc.  
+- Lot of `customizations` and `helpers`: clone presets, change GUI layout and button sizes, dark/light themes, re-arrange/sorting presets, play timed randomizer to switch between presets, randomize some parameters, browse multi groups by arrow keys, UNDO history engine...etc.  
 
 **Two Types of Presets**:  
 1. **Favourite Presets**: Fast clickable-boxes/key-trigged presets.  
@@ -200,9 +200,8 @@ which inspired this addon a lot. Some of his code is also used here.*
 ## NOTES
 * Should improve **ofxImGui** contexts because we can't use more than one instance yet.  
 * Other ideas noted into `ofxPresetsManager.h`.   
-* Undo workflow not operative now.
 * Add minimal/lite class compatible but without any GUI or using a tiny `ofxGui` version.
-* Better performant version without using hard disk files. Memory vector of XML/JSON instead.
+* Better performant version without using hard disk files. Memory Mode, using vector of XML/JSON instead of files.
 * **Feedback**, **issues**, and **PR**'s are very welcome!
 
 ## Author
