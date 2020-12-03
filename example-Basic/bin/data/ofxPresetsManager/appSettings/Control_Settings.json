@@ -8,6 +8,7 @@
             "GUI_ImGui_POSITION": "1610, 10",
             "GUI_ImGui_SIZE": "300, 800",
             "SHOW_ADVANCED": "0",
+            "SHOW_ALL_PARAMETERS": "1",
             "SHOW_CLICKER": "1",
             "SHOW_HELP": "0",
             "SHOW_ImGui": "1",

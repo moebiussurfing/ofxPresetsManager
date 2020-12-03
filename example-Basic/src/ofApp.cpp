@@ -3,9 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setupScene()
 {
-	// preset parameters
-	params.setName("sceneParamsGroup");// main container
-
+	params.setName("sceneParamsGroup");
 	params.add(shapeType.set("shapeType", 1, 1, 2));
 	params.add(amount.set("amount", 10, 1, 24));
 	params.add(separation.set("separation", 10, 1, 100));
@@ -14,9 +12,8 @@ void ofApp::setupScene()
 	paramsNested.add(fill.set("fill", true));
 	paramsNested.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
 	paramsNested.add(lineWidth.set("lineWidth", 1, 0.1, 10));
-
-	// container ready to add to presetsManager
 	params.add(paramsNested);
+	// the container is ready to be added into presetsManager!
 }
 
 //--------------------------------------------------------------
@@ -84,10 +81,12 @@ void ofApp::drawScene()
 void ofApp::draw()
 {
 	drawScene();
+
+	// nothing more!
 }
 
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-	presetsManager.exit();// call is required only to auto-store current selected preset settings on exit. 
+	//presetsManager.exit();// this call is required only to auto-store current selected preset settings on exit. 
 }

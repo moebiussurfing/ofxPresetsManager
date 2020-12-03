@@ -16,8 +16,10 @@ public:
 	void setupScene();
 	void drawScene();
 
-	// parameters for scene presets
+	// the main container
 	ofParameterGroup params;
+	
+	// all the parameters for the scene 
 	ofParameterGroup paramsNested;
 	ofParameter<bool> fill;
 	ofParameter<float> lineWidth;

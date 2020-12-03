@@ -15,24 +15,45 @@
 //
 //	DOCUMENTATION
 //
-//	this is a very simple guide to use ofxPresetsManager.
-//	here we will add only ONE ofParameterGroup, but the addon can handle more groups too!
+//	This is a very simple guide to use ofxPresetsManager.
 //
-//	* basic usage:
+//	* EXAMPLES
+//	example-Basic: simpler example using one group only
+//	example-MultiGroup: more complex example using several and independent groups.
+//
+//	* BASIC USAGE
+//	Here we will control ONE ofParameterGroup only, but the addon can handle more groups too!
+//
 //	0. init your scene and the related parameters / settings.
-//	1. add our parameters to the ofParameterGroup as container.
-//  2.0 customize some settings if desired
-//	2.1 add the container to the addon object. 
-//	2.2 you can define how many preset you want, and what keys to associate as triggers.
+//	1. add your parameters to the ofParameterGroup acting as the main container.
+//  2.0 optionally customize some settings if desired.
+//	2.1 add the container to the addon instantiatied class object. 
+//	2.2 you can define how many presets you want for the group, 
+//	and what keys to associate as triggers.
 //	3. done! just play with the addon gui. 
 //
-//	the file settings (one for each preset) will be placed into /bin/data.
-//	there are lot of implemented features:
-//		- look into README.md
+//	* Preset Files
+//		- There's one file for each preset (includes all settings/parameters). 
+//		files will be placed into /bin/data by default. but path can be customized, 
+//		mainly to share the same settings folder between apps.
+//		- When using multiple groups, each group has his own folder.
 //
-//	there are two types of presets: 
-//		- favourites: the clickable-boxes/key-trigged presets
-//		- standalones: the archived and named presets files that you can load from/to favoutires
+//	* Two Types of Presets
+//		- Favourites: the clickable-boxes/key-trigged presets
+//		- Standalones: the archived and named presets files that you can load from/to favoutires
+//
+//	* Two Modes
+//		- Edit mode: autosave when browsing bank presets, undo engine allowed, all gui panels visible or enabled.
+//		- Live mode: simpler gui and maybe better performance intended when no need to edit or see parameters.
+//
+//	* Several Features
+//		- Store standalone name presets to make variations and help your favourite banks organizations.
+//		- Keys interaction can be disabled to avoid colliding with other addons/ofApp key commands.
+//		- Layout customization and 2 colors themes.
+//		- Randomization engine to allow more complex scenes, jumping between presets using different timers.
+//		- You don't need to use another gui like ofxGui: just ofParameters! Sometimes ImGui is enough.
+//		- Clone presets, move placing/sorting into your favourites.
+//		- More info into README.md
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -57,19 +78,18 @@
 ///				add setter to enable some params to randomize
 ///				call populate. disable debug_display red info
 ///	
-///	+		add/restore-back undo to all the groups
-///	
 ///	++		lock (by toggle) params that we want to ignore on changing presets
 ///				can be done enabling/disabling serializable for each param with a group of toggles
 ///	
 ///	++		performance: 
 ///				restore-back memory_mode. (use xml objects into memory vs hd files) to extra groups too
 ///	
-///	+		repair autosave timer. exclude log
-///	++		make a lite minimal version compatible ! without ImGui, maybe with ofxGui or even without any GUI.
-///	++		add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
+///	+		fix autosave timer. exclude log
+///	++		make a lite-minimal version compatible ! without ImGui, maybe with ofxGui or even without any GUI.
+///				add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
 ///				or add simpler class but compatible with preset files kits
-///	+		could make tween when changing params using ofLerp or ofxKeyTween...
+///
+///	+		could make curved-tweens when changing params using ofLerp or ofxKeyTween/ofxAnimatable/ofxEasing...
 ///
 
 ///------
@@ -84,26 +104,24 @@
 //	DEFINES
 //
 #define INCLUDE_ofxUndoSimple	// undo engine to store after randomize a preset or manually (to browse history states)
+//
+#define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT	// customize ImGui font
 //#define USE_IMGUI_EXTERNAL	// this is to group all ImGui panels into one unique instance in ofApp
 // currently there's a bug when using more than one single ofxImGui instance!
 // this line is proposed as debugging when adding this feature (multi instance).
-#define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT	// customize ImGui font
+//
 //#define USE_JSON	// set the file settings format (xml or json). already defined into ofxSurfingHelpers
+#define NUM_MAX_GROUPS 10
 //										   
-//										   
+//-------
+//
 //	DEBUG									   
 //										   
-//#define INCLUDE_PERFORMANCE_MEASURES			// measure performance ofxTimeMeasurements. not using now. must restore!
+//#define DEBUG_PERFORMANCE_MEASURES			// measure performance ofxTimeMeasurements. not using now. must restore!
 //#define DEBUG_randomTest						// uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
 //#define DEBUG_BLOCK_SAVE_SETTINGS				// disable save settings//enable this bc sometimes there's crashes on exit...
 //
 //--------------------------------------
-
-
-#include "ofxSurfingConstants.h" // -> defines (modes) are here "to share between addons" in one place
-#include "ofxInteractiveRect.h" // engine to move the user clicker buttons panel. TODO: add resize by mouse too.
-
-//--
 
 // this ImGui included (/lib) branch it's based on: https://github.com/MacFurax/ofxImGui/tree/docking
 // this branch allows docking, layout store/recall, some extra widgets.
@@ -112,16 +130,20 @@
 // this feature will allow that you use multiple ImGui instances running into different classes of your app.
 #include "ofxImGui.h"
 
+//--
+
+#include "ofxSurfingConstants.h" // defines (modes) are here "to share between addons" in one place
+#include "ofxInteractiveRect.h" // engine to move the user clicker buttons panel. TODO: add resize by mouse too.
+#include "ofxSurfingHelpers.h"
+#include "groupRandomizer.h"
+
 // undo engine
 #ifdef INCLUDE_ofxUndoSimple
 #include "ofxUndoSimple.h"
 #endif
 
-#include "ofxSurfingHelpers.h"
-#include "groupRandomizer.h"
-
 // optional to debug performance or delay when loading files or presets on hd or memory modes
-#ifdef INCLUDE_PERFORMANCE_MEASURES
+#ifdef DEBUG_PERFORMANCE_MEASURES
 #include "ofxTimeMeasurements.h"
 #else
 #define TS_START
@@ -131,12 +153,6 @@
 #endif
 
 //-------------------------------
-
-#pragma mark - DEFINE_DATA_TYPES
-
-#define NUM_MAX_GROUPS 10
-
-//---
 
 class ofxPresetsManager : public ofBaseApp
 {
@@ -148,13 +164,13 @@ public:
 
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
-	void exit();
 	void windowResized(int w, int h);
+	void exit();
 
 	void drawImGui();
 	void drawHelp(int x, int y);
 	void clear();
-	
+
 	//--
 
 	//----
@@ -162,8 +178,6 @@ public:
 	// API
 	//
 	//----
-
-	//--
 
 public:
 	// TODO: should use &reference? it's better?
@@ -189,23 +203,7 @@ public:
 	void startup();// must be called after setup (who is called after all group adds) to set initial states well
 
 	void doCheckPresetsFoldersAreEmpty();// used on startup. check if all favorites preset are present, and creates folders and content if not
-
-	//--
-
-private:
-	void drawPresetClicker();// user clickeable box panel preset selector
-
-//public:
-	// mini preview rectangles positions and sizes
-	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
-	string path_RectanglePresetClicker = "_RectanglePresetClicker";
-	ofParameter<bool> MODE_EditPresetClicker;
-	ofParameter<float> _rectRatio;
-	ofParameter<bool> SHOW_BackGround_EditPresetClicker;
-	//ofParameter<bool> bResetRects;
-	float _RectClick_w;
-	float _RectClick_Pad;
-
+	
 	//--
 
 	// core engine
@@ -421,6 +419,22 @@ public:
 
 	//--
 
+private:
+	void drawPresetClicker();// user clickeable box panel preset selector
+
+private:
+	// mini preview rectangles positions and sizes
+	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
+	string path_RectanglePresetClicker = "_RectanglePresetClicker";
+	ofParameter<bool> MODE_EditPresetClicker;
+	ofParameter<float> _rectRatio;
+	ofParameter<bool> SHOW_BackGround_EditPresetClicker;
+	//ofParameter<bool> bResetRects;
+	float _RectClick_w;
+	float _RectClick_Pad;
+
+	//--
+
 	//----
 	//
 	// API
@@ -499,20 +513,22 @@ public:
 	void setModeEditorOrLive(bool b) {
 		MODE_Editor = b;
 	}
-	
+
 	//----
 
-#ifdef INCLUDE_ofxUndoSimple
 	// undo engine
+#ifdef INCLUDE_ofxUndoSimple
 	// you can manually store all the parameters states to store points
+	// only works on edit mode
 	// then you can browse doing undo/redo to decide what states you like more.
 	// when doing a random, the engine auto stores the states.
+	// currently working automatic only when called by key command (ctrl+R) not when clicking gui "randomize parameters"
+	// when called using gui button, you must store states manually (ctrl+s)
 private:
 	vector <ofxUndoSimple<std::string>> undoStringsParams;
 	vector <ofXml> undoXmlsParams;
-	
 	void doRefreshUndoParams();
-	void doStoreUndo();
+	void doStoreUndo();// store current point to undo history
 	void doUndo();
 	void doRedo();
 	void doClearUndoHistory();
@@ -542,7 +558,7 @@ private:
 
 	// app settings for many params
 //private:
-	public:
+public:
 	void load_ControlSettings();// handle group selectors and some settings states
 	void save_ControlSettings();// handle group selectors and some settings states
 
@@ -678,7 +694,7 @@ public:
 			if (groups[i].getName() == groupName) _groupIndex = i;
 		}
 		if (_groupIndex != -1) {
-			ofLogNotice(__FUNCTION__) << "SAVE PRESET from group: "<< groupName << " #" << _groupIndex << " preset: " << PRESETS_Selected_Index[_groupIndex].get();
+			ofLogNotice(__FUNCTION__) << "SAVE PRESET from group: " << groupName << " #" << _groupIndex << " preset: " << PRESETS_Selected_Index[_groupIndex].get();
 			save(PRESETS_Selected_Index[_groupIndex].get(), _groupIndex);
 		}
 		else {
@@ -1125,21 +1141,21 @@ public:
 		//params_Controls.setName(displayNameUserKit);
 		//params_Controls.setName("OVERLAY");
 
-        // Windows
-        //params_Controls.add(getParamsPresetSelectors());
-        // macOS casting...
-        ofParameterGroup g1;
-        g1 = getParamsPresetSelectors();
-        params_Controls.add(g1);
+		// Windows
+		//params_Controls.add(getParamsPresetSelectors());
+		// macOS casting...
+		ofParameterGroup g1;
+		g1 = getParamsPresetSelectors();
+		params_Controls.add(g1);
 
-        // Windows
+		// Windows
 		//params_Controls.add(getParamsRandomizers());
-        // macOS casting...
-        ofParameterGroup g2;
-        g2 = getParamsRandomizers();
-        params_Controls.add(g2);
+		// macOS casting...
+		ofParameterGroup g2;
+		g2 = getParamsRandomizers();
+		params_Controls.add(g2);
 
-        params_Controls.add(SHOW_Panel_Click);
+		params_Controls.add(SHOW_Panel_Click);
 		params_Controls.add(MODE_Editor);
 
 		return params_Controls;
@@ -1153,14 +1169,14 @@ public:
 		ofParameterGroup _g{ "RANDOMIZERS" };
 		for (int i = 0; i < groups.size(); i++)
 		{
-            // Windows
-            //_g.add(groupRandomizers[i].getParamsRandomizers());
-            // macOS casting...
-            ofParameterGroup g;
-            g = groupRandomizers[i].getParamsRandomizers();
-            _g.add(g);
+			// Windows
+			//_g.add(groupRandomizers[i].getParamsRandomizers());
+			// macOS casting...
+			ofParameterGroup g;
+			g = groupRandomizers[i].getParamsRandomizers();
+			_g.add(g);
 
-			}
+		}
 		return _g;
 	}
 

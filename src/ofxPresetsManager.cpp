@@ -116,7 +116,7 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Help.set("SHOW HELP", false);
 	SHOW_Gui_AdvancedControl.set("SHOW ADVANCED", false);
 	SHOW_Panel_Click.set("SHOW CLICKER", true);
-	SHOW_Panel_AllParameter.set("SHOW PARAMETERS", true);
+	SHOW_Panel_AllParameter.set("SHOW ALL PARAMETERS", true);
 	SHOW_Panel_AllSelectors.set("SHOW SELECTORS", true);
 	SHOW_Panel_StandalonePresets.set("SHOW STANDALONES", true);
 	MODE_StandalonePresets_NEW.set("NEW!", false);
@@ -218,7 +218,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//-
 
 	// mainly to measure performance when using hd files vs faster memory vectors
-#ifdef INCLUDE_PERFORMANCE_MEASURES
+#ifdef DEBUG_PERFORMANCE_MEASURES
 	// specify a target framerate
 	//TIME_SAMPLE_SET_FRAMERATE(fps);
 	//TIME_SAMPLE_ENABLE();
@@ -605,7 +605,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//-
 
 		//plotters
-#ifdef INCLUDE_PERFORMANCE_MEASURES 
+#ifdef DEBUG_PERFORMANCE_MEASURES 
 		TS_START("LOAD 1");
 		TS_STOP("LOAD 1");
 		TS_START("LOAD 2");
@@ -1733,22 +1733,17 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			// using a probability and a shorter mode for some presets.
 			else if ((mod_CONTROL && !mod_ALT) && key == ' ')
 			{
-				//for (int i = 0; i < groups.size(); i++) 
-				{// ??
-					setTogglePlayRandomizerPreset(GuiGROUP_Selected_Index);
-				}
+				setTogglePlayRandomizerPreset(GuiGROUP_Selected_Index);
 			}
 
-			// random index
+			// randomize enable parameters (look into randomizers panel) to the current selected preset
 			else if ((mod_CONTROL && !mod_ALT) && (key == 'R' || key == 18))
 			{
-				//for (int i = 0; i < groups.size(); i++) 
-				{
-					doRandomizePresetSelected(GuiGROUP_Selected_Index);
+				doRandomizePresetSelected(GuiGROUP_Selected_Index);
 
-					// worfklow
-					doStoreUndo();
-				}
+				// worfklow
+				// store current point to undo history
+				doStoreUndo();
 			}
 
 			//else if ((mod_CONTROL && !mod_ALT)  && key == 'e')
@@ -2646,7 +2641,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #endif
 		}
 	}
-}
+		}
 
 ////--------------------------------------------------------------
 //void ofxPresetsManager::addGroup_TARGET(ofParameterGroup &g)
@@ -2856,7 +2851,10 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		ImGui_Draw_Randomizers();
 
 		// standalone presets browser
-		if (MODE_Editor) ImGui_Draw_StandalonePresets();
+		//if (MODE_Editor)
+		{
+			ImGui_Draw_StandalonePresets();
+		}
 	}
 
 	return settings.mouseOverGui;
@@ -2980,7 +2978,7 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 
 				ofxImGui::AddParameter(SHOW_Panel_Click); ImGui::SameLine();
 				ofxImGui::AddParameter(ENABLE_Keys);//ImGui::SameLine(); 
-				
+
 				if (MODE_Editor)
 				{
 					ofxImGui::AddParameter(MODE_EditPresetClicker); ImGui::SameLine();
@@ -3978,7 +3976,7 @@ void ofxPresetsManager::doCheckPresetsFoldersAreEmpty()
 #ifdef INCLUDE_ofxUndoSimple
 
 //--------------------------------------------------------------
-void ofxPresetsManager::doStoreUndo() {// TODO: not used..
+void ofxPresetsManager::doStoreUndo() {
 	// the current selected only
 	int i = GuiGROUP_Selected_Index.get();
 	//for (int i = 0; i < groups.size(); i++)// all together
