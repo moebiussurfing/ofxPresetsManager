@@ -120,7 +120,7 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Panel_AllSelectors.set("SHOW SELECTORS", true);
 	SHOW_Panel_StandalonePresets.set("SHOW STANDALONE PRESETS", true);
 	MODE_StandalonePresets_NEW.set("NEW!", false);
-	SHOW_Panel_Randomizer.set("SHOW RANDOMIZER PANEL", true);
+	SHOW_Panel_Randomizer.set("SHOW RANDOMIZERS", true);
 	ENABLE_Keys.set("ENABLE KEYS", true);
 
 	autoLoad.set("AUTO LOAD", true);
@@ -346,7 +346,18 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	// TODO: main group only
 #ifdef INCLUDE_ofxUndoSimple
-	undoStringParams = groups[0].toString();
+	//undoStringParams = groups[0].toString();
+
+	undoStringsParams.clear();
+	undoStringsParams.resize(groups.size());
+
+	undoXmlsParams.clear();
+	undoXmlsParams.resize(groups.size());
+
+	for (int i = 0; i < groups.size(); i++)
+	{
+		undoStringsParams[i] = groups[i].toString();
+	}
 #endif
 
 	//--
@@ -720,7 +731,7 @@ void ofxPresetsManager::drawPresetClicker()
 	//-
 
 	// light theme (black lines)
-	if (!bThemDark) 
+	if (!bThemDark)
 	{
 		_colorText = ofColor(0, 255);
 		_colorButton = ofColor(0, 64);
@@ -1674,7 +1685,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				bKeySave = true;
 				ofLogNotice(__FUNCTION__) << "\t\t modKey Save TRUE";
-				return;
+				//return;
 			}
 
 			// mode key for swap with mouse or trigger keys
@@ -1682,7 +1693,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				bKeySwap = true;
 				ofLogNotice(__FUNCTION__) << "\t\t modKey Swap TRUE";
-				return;
+				//return;
 			}
 
 			//--
@@ -1753,22 +1764,24 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			//----
 
 #ifdef INCLUDE_ofxUndoSimple
-			else if (key == 'A')// previous
+			if (MODE_Editor.get())
 			{
-				ofLogNotice(__FUNCTION__) << "UNDO <-";
-				undoStringParams.undo();
-				undoRefreshParams();
-			}
-			else if (key == 'D')// next
-			{
-				ofLogNotice(__FUNCTION__) << "REDO ->";
-				undoStringParams.redo();
-				undoRefreshParams();
-			}
-			else if (key == 'Q')// clear history
-			{
-				ofLogNotice(__FUNCTION__) << "UNDO CLEAR";
-				undoStringParams.clear();
+				if (!mod_SHIFT && mod_CONTROL && key == 'z')// previous
+				{
+					doUndo();
+				}
+				else if (mod_SHIFT && mod_CONTROL && key == 'z')// next
+				{
+					doRedo();
+				}
+				else if (mod_SHIFT && mod_CONTROL && key == 'c')// clear
+				{
+					doClearHistory();
+				}
+				else if (!mod_SHIFT && mod_CONTROL && key == 's')// store
+				{
+					undoStoreParams();
+				}
 			}
 #endif
 
@@ -1778,7 +1791,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			if (ENABLE_KeysArrowBrowse && (!mod_CONTROL && !mod_ALT))
 			{
 				// browse groups
-				if (key == OF_KEY_UP )
+				if (key == OF_KEY_UP)
 				{
 					GuiGROUP_Selected_Index--;
 				}
@@ -2097,11 +2110,11 @@ void ofxPresetsManager::doSwap(int groupIndex, int fromIndex, int toIndex)
 	bool b = _settingsSrc.save(_pathSrc);
 	if (!b) ofLogError(__FUNCTION__) << "Error saving TEMP: " << _pathSrc;
 	else ofLogNotice(__FUNCTION__) << "Saved TEMP: " << _pathSrc;
-	
+
 	// 2. load destination "from kit" to memory
 	std::string _pathDest = getPresetPath(groups[groupIndex].getName(), toIndex);
 	ofLogNotice(__FUNCTION__) << "Destination: " << _pathDest;
-	
+
 	ofXml _settingsDest;
 	_settingsDest.load(_pathDest);
 	ofDeserialize(_settingsDest, groups[groupIndex]);
@@ -2404,7 +2417,7 @@ void ofxPresetsManager::save_ControlSettings()
 	//---
 
 	// TODO: test to avoid crashes..?
-	try
+	//try
 	{
 		// save randomizers settings
 		ofLogVerbose(__FUNCTION__) << endl << params_Control.toString() << endl;
@@ -2429,11 +2442,11 @@ void ofxPresetsManager::save_ControlSettings()
 
 		//--
 	}
-	catch (int n)
-	{
-		ofLogError(__FUNCTION__) << "CATCH ERROR " << n << endl;
-		throw;
-	}
+	//catch (int n)
+	//{
+	//	ofLogError(__FUNCTION__) << "CATCH ERROR " << n << endl;
+	//	throw;
+	//}
 
 	//----
 
@@ -2517,7 +2530,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
-		}
+	}
 
 	// debug params
 	if (true)
@@ -2608,7 +2621,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #endif
 		}
 	}
-		}
+}
 
 ////--------------------------------------------------------------
 //void ofxPresetsManager::addGroup_TARGET(ofParameterGroup &g)
@@ -2774,7 +2787,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		if (SHOW_Panel_AllSelectors)
 		{
 			// hide this panels when no more than one group! it's for multi groups
-			if (groups.size() > 1) 
+			if (groups.size() > 1)
 			{
 				if (ofxImGui::BeginWindow("Group select", settings, &b))
 				{
@@ -2875,13 +2888,43 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 		ImGui::Text(str.c_str());
 
 		ImGui::Dummy(ImVec2(0.0f, 5));
-		
+
 		//--
 
 		// mode edit
 		//ofxImGui::AddParameter(MODE_Editor);
 		ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30, "EDIT MODE", "LIVE MODE");
 		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30); // TODO: repair method. collides when multiple toggles..
+
+		//--
+
+		// undo engine
+		ImGui::Dummy(ImVec2(0.0f, 5));
+		str = "UNDO ENGINE";
+		ImGui::Text(str.c_str());
+		str = "History: " + ofToString(undoStringsParams[GuiGROUP_Selected_Index].getUndoLength()) + "/";
+		str += ofToString(undoStringsParams[GuiGROUP_Selected_Index].getRedoLength());
+		ImGui::Text(str.c_str());
+
+		if (ImGui::Button("Store"))
+		{
+			undoStoreParams();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Undo"))
+		{
+			doUndo();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Redo"))
+		{
+			doRedo();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Clear History"))
+		{
+			doClearHistory();
+		}
 
 		ImGui::Dummy(ImVec2(0.0f, 5));
 
@@ -2896,19 +2939,23 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 				//if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
 				//ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
 
-				ofxImGui::AddParameter(SHOW_Panel_AllParameter);ImGui::SameLine();
+				ofxImGui::AddParameter(SHOW_Panel_AllParameter); ImGui::SameLine();
 				ofxImGui::AddParameter(SHOW_Panel_AllSelectors);//ImGui::SameLine();
 
-				ofxImGui::AddParameter(SHOW_Panel_Click); ImGui::SameLine(); 
+				if (MODE_Editor) 
+				{
+					ofxImGui::AddParameter(SHOW_Panel_Randomizer); ImGui::SameLine();
+					ofxImGui::AddParameter(SHOW_Panel_StandalonePresets); //ImGui::SameLine();
+				}
+
+				ofxImGui::AddParameter(SHOW_Panel_Click); ImGui::SameLine();
 				ofxImGui::AddParameter(ENABLE_Keys);//ImGui::SameLine(); 
-				if (MODE_Editor) {
+				if (MODE_Editor)
+				{
 					ofxImGui::AddParameter(MODE_EditPresetClicker); ImGui::SameLine();
 					ofxImGui::AddParameter(SHOW_BackGround_EditPresetClicker);
 				}
 
-				//ofxImGui::AddParameter(SHOW_Panel_Randomizer);
-
-				if (MODE_Editor) ofxImGui::AddParameter(SHOW_Panel_StandalonePresets); //ImGui::SameLine();
 				//ofxImGui::AddParameter(MODE_StandalonePresets_NEW);
 				//ofxImGui::AddParameter(MODE_StandalonePresets_NEW);
 
@@ -3263,7 +3310,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 				}
 
 				//-
-	
+
 				// TODO:
 				// should iterate all files and overwrite all favourites
 
@@ -3598,7 +3645,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 					}
 
 					if (bBlink) ImGui::PopStyleColor(1);
-					
+
 					ImGui::SameLine();
 					if (ImGui::Button("CANCEL"))
 					{
@@ -3624,7 +3671,7 @@ void ofxPresetsManager::ImGui_Draw_Randomizers()
 {
 	// this panel will show the settings for the selected by user group (GuiGROUP_Selected_Index)
 
-	//if (SHOW_Panel_Randomizer)
+	if (SHOW_Panel_Randomizer)
 	{
 		groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers();// show randomizers of user selected group
 	}
@@ -3894,40 +3941,109 @@ void ofxPresetsManager::doCheckPresetsFoldersAreEmpty()
 //----
 
 #ifdef INCLUDE_ofxUndoSimple
+
 //--------------------------------------------------------------
-void ofxPresetsManager::undoStoreParams() {
-	undoXmlParams.clear();
-	ofParameterGroup _group = groups[0];
-	ofSerialize(undoXmlParams, _group);// fill the xml with the ofParameterGroup
-	undoStringParams = (undoXmlParams.toString());// fill the ofxUndoSimple with the xml as string
-	undoStringParams.store();
+void ofxPresetsManager::undoStoreParams() {// TODO: not used..
+	for (int i = 0; i < groups.size(); i++)
+	{
+		undoXmlsParams[i].clear();
 
-	std::string str = "";
-	str += "UNDO HISTORY: " + ofToString(undoStringParams.getUndoLength()) + "/";
-	str += ofToString(undoStringParams.getRedoLength());
-	//str += "\n";
-	//str += "DESCRIPTOR\n";
-	//str += undoStringParams.getUndoStateDescriptor() + "\n";
+		ofParameterGroup _group = groups[i];
+		ofSerialize(undoXmlsParams[i], _group);// fill the xml with the ofParameterGroup
 
-	ofLogNotice(__FUNCTION__) << str;
+		undoStringsParams[i] = (undoXmlsParams[i].toString());// fill the ofxUndoSimple with the xml as string
+		undoStringsParams[i].store();
+
+		std::string str = "";
+		str += "UNDO HISTORY: " + ofToString(undoStringsParams[i].getUndoLength()) + "/";
+		str += ofToString(undoStringsParams[i].getRedoLength());
+		//str += "\n";
+		//str += "DESCRIPTOR\n";
+		//str += undoStringParams.getUndoStateDescriptor() + "\n";
+
+		ofLogNotice(__FUNCTION__) << str;
+	}
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::doClearHistory() {
+	ofLogNotice(__FUNCTION__) << "UNDO CLEAR : " << GuiGROUP_Selected_Index;
+	undoStringsParams[GuiGROUP_Selected_Index].clear();
+	//undoStringParams.clear();
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::doUndo() {
+	ofLogNotice(__FUNCTION__) << "UNDO < Group #" << GuiGROUP_Selected_Index << " " << groups[GuiGROUP_Selected_Index].getName();
+	undoStringsParams[GuiGROUP_Selected_Index].undo();
+	//undoStringParams.undo();
+	undoRefreshParams();
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::doRedo() {
+	ofLogNotice(__FUNCTION__) << "REDO < Group #" << GuiGROUP_Selected_Index << " " << groups[GuiGROUP_Selected_Index].getName();
+	undoStringsParams[GuiGROUP_Selected_Index].redo();
+	//undoStringParams.redo();
+	undoRefreshParams();
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::undoRefreshParams() {
-	undoXmlParams.clear();
-	undoXmlParams.parse(undoStringParams);// fill the xml with the string 
-	ofParameterGroup _group = groups[0];
-	ofDeserialize(undoXmlParams, _group);// load the ofParameterGroup
+	for (int i = 0; i < groups.size(); i++)
+	{
+		undoXmlsParams[i].clear();
+		undoXmlsParams[i].parse(undoStringsParams[i]);// fill the xml with the string 
 
-	std::string str = "";
-	str += "UNDO HISTORY: " + ofToString(undoStringParams.getUndoLength()) + "/";
-	str += ofToString(undoStringParams.getRedoLength());
-	//str += "\n";
-	//str += "DESCRIPTOR\n";
-	//str += undoStringParams.getUndoStateDescriptor() + "\n";
+		ofParameterGroup _group = groups[i];
+		ofDeserialize(undoXmlsParams[i], _group);// load the ofParameterGroup
 
-	ofLogNotice(__FUNCTION__) << str;
+		std::string str = "";
+		str += "UNDO HISTORY: " + ofToString(undoStringsParams[i].getUndoLength()) + "/";
+		str += ofToString(undoStringsParams[i].getRedoLength());
+		//str += "\n";
+		//str += "DESCRIPTOR\n";
+		//str += undoStringParams.getUndoStateDescriptor() + "\n";
+
+		ofLogNotice(__FUNCTION__) << str;
+	}
 }
+
+////--------------------------------------------------------------
+//void ofxPresetsManager::undoStoreParams() {
+//	undoXmlParams.clear();
+//	ofParameterGroup _group = groups[0];
+//	ofSerialize(undoXmlParams, _group);// fill the xml with the ofParameterGroup
+//	undoStringParams = (undoXmlParams.toString());// fill the ofxUndoSimple with the xml as string
+//	undoStringParams.store();
+//
+//	std::string str = "";
+//	str += "UNDO HISTORY: " + ofToString(undoStringParams.getUndoLength()) + "/";
+//	str += ofToString(undoStringParams.getRedoLength());
+//	//str += "\n";
+//	//str += "DESCRIPTOR\n";
+//	//str += undoStringParams.getUndoStateDescriptor() + "\n";
+//
+//	ofLogNotice(__FUNCTION__) << str;
+//}
+//
+////--------------------------------------------------------------
+//void ofxPresetsManager::undoRefreshParams() {
+//	undoXmlParams.clear();
+//	undoXmlParams.parse(undoStringParams);// fill the xml with the string 
+//	ofParameterGroup _group = groups[0];
+//	ofDeserialize(undoXmlParams, _group);// load the ofParameterGroup
+//
+//	std::string str = "";
+//	str += "UNDO HISTORY: " + ofToString(undoStringParams.getUndoLength()) + "/";
+//	str += ofToString(undoStringParams.getRedoLength());
+//	//str += "\n";
+//	//str += "DESCRIPTOR\n";
+//	//str += undoStringParams.getUndoStateDescriptor() + "\n";
+//
+//	ofLogNotice(__FUNCTION__) << str;
+//}
+
 #endif
 
 //----

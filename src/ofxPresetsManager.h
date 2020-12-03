@@ -90,7 +90,7 @@
 //
 //#define USE_IMGUI_EXTERNAL						// this is to group all ImGui panels into one unique instance in ofApp
 #define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT		// customize ImGui font
-//#define INCLUDE_ofxUndoSimple					// undo engine to store after randomize preset parameters (& recall)
+#define INCLUDE_ofxUndoSimple					// undo engine to store after randomize preset parameters (& recall)
 //#define USE_JSON								// file settings format
 //										   
 //	DEBUG									   
@@ -510,10 +510,18 @@ public:
 	// should expand to all groups. here only habndles one group
 private:
 #ifdef INCLUDE_ofxUndoSimple
-	ofxUndoSimple<std::string> undoStringParams;
-	ofXml undoXmlParams;
+	//ofxUndoSimple<std::string> undoStringParams;
+	//ofXml undoXmlParams;
+	
+	vector <ofxUndoSimple<std::string>> undoStringsParams;
+	vector <ofXml> undoXmlsParams;
+	
 	void undoRefreshParams();
 	void undoStoreParams();
+
+	void doUndo();
+	void doRedo();
+	void doClearHistory();
 #endif
 
 	//----
