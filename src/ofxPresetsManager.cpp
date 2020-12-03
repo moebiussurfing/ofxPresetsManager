@@ -950,7 +950,7 @@ void ofxPresetsManager::drawPresetClicker()
 			std::string info = groups[i].getName();
 
 			// mark selected group. useful to navigate with arrow keys
-			if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1 && ENABLE_Keys.get()) info = "* " + info;
+			if (i == GuiGROUP_Selected_Index.get() && groups.size() > 0 && ENABLE_Keys.get()) info = "* " + info;
 
 			// double font to improve different background colors
 			int gap = 1;
@@ -3182,11 +3182,10 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo += "E                EDIT/LIVE\n";
 	helpInfo += "Ctrl+Space       PLAY RANDOMIZER\n";
 	helpInfo += "Ctrl+R           RANDOMIZE PRESET\n";
-	helpInfo += "UNDO ENGINE\n";
 	helpInfo += "Ctrl+Z           UNDO\n";
 	helpInfo += "Ctrl+Shift+Z     REDO\n";
-	helpInfo += "Ctrl+C           CLEAR\n";
-	helpInfo += "Ctrl+s           STORE\n";
+	helpInfo += "Ctrl+C           CLEAR HISTORY\n";
+	helpInfo += "Ctrl+s           STORE POINT\n";
 }
 
 //--------------------------------------------------------------

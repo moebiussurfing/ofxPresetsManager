@@ -797,7 +797,7 @@ public:
 	string getGroupsPath()
 	{
 		string _names = "";
-		_names = getGroupPath(0);// simpler: get first group bc all are in the same folder
+		_names = getGroupPath(0);// simpler: get first group bc all groups are in the same parent folder
 		return _names;
 	}
 

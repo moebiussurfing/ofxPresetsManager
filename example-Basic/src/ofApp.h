@@ -16,7 +16,7 @@ public:
 	void setupScene();
 	void drawScene();
 
-	// preset params
+	// parameters for scene presets
 	ofParameterGroup params;
 	ofParameterGroup paramsNested;
 	ofParameter<bool> fill;

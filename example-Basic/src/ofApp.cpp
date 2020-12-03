@@ -1,25 +1,11 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup()
-{
-	ofSetFrameRate(60);
-	ofSetVerticalSync(true);
-
-	// define our parameters (ofParameterGroup params) for our scene and add them to our params
-	setupScene();
-
-	// add our ofParameterGroup to the presetManager 
-	// and define key triggers for each preset. the amount of keys will be the amount of favourites presets
-	presetsManager.add(params, { '0', '1', '2', '3', '4', '5' });
-	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
-}
-
-//--------------------------------------------------------------
 void ofApp::setupScene()
 {
 	// preset parameters
-	params.setName("sceneParamsGroup");// preset settings main container	
+	params.setName("sceneParamsGroup");// main container
+
 	params.add(shapeType.set("shapeType", 1, 1, 2));
 	params.add(amount.set("amount", 10, 1, 24));
 	params.add(separation.set("separation", 10, 1, 100));
@@ -28,13 +14,26 @@ void ofApp::setupScene()
 	paramsNested.add(fill.set("fill", true));
 	paramsNested.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
 	paramsNested.add(lineWidth.set("lineWidth", 1, 0.1, 10));
-	params.add(paramsNested);// container ready to add to presetsManager
+
+	// container ready to add to presetsManager
+	params.add(paramsNested);
 }
 
 //--------------------------------------------------------------
-void ofApp::draw()
+void ofApp::setup()
 {
-	drawScene();
+	ofSetFrameRate(60);
+	ofSetVerticalSync(true);
+
+	// define our parameters (ofParameterGroup params) for our scene 
+	// and add them to our params
+	setupScene();
+
+	// add our ofParameterGroup to the presetManager 
+	// and define key triggers for each preset. 
+	// the amount of keys will be the amount of favourites presets
+	presetsManager.add(params, { '0', '1', '2', '3', '4', '5' });
+	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
 }
 
 //--------------------------------------------------------------
@@ -61,11 +60,8 @@ void ofApp::drawScene()
 
 	// show help and debug preset
 	std::string str = "HELP\n";
-	str += "H            : Show Help info\n";
-	str += "0,1,2,3,4,5  : Load Preset\n";
-	//str += "Ctrl+G       : Show Gui\n";
-	//str += "Ctrl+Click   : Save to Preset\n";
-	//str += "Alt+Click    : Swap Presets\n";
+	str += "H            : Show Help\n";
+	str += "0,1,2,3,4,5  : Presets Keys\n";
 	str += "\n";
 
 	str += "DEBUG SCENE\n";
@@ -82,6 +78,12 @@ void ofApp::drawScene()
 	str += "color        : " + sc + "\n";
 	str += "lineWidth    : " + ofToString(lineWidth);
 	ofDrawBitmapStringHighlight(str, 35, 50);
+}
+
+//--------------------------------------------------------------
+void ofApp::draw()
+{
+	drawScene();
 }
 
 //--------------------------------------------------------------
