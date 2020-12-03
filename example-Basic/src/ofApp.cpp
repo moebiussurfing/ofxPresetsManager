@@ -61,12 +61,13 @@ void ofApp::drawScene()
 
 	// show help and debug preset
 	std::string str = "HELP\n";
+	str += "H            : Show Help info\n";
 	str += "G            : Show Gui\n";
 	str += "0,1,2,3,4,5  : Load Preset\n";
-	str += "Ctrl+Click   : Save to Preset\n";
-	str += "Alt+Click    : Swap Presets\n";
-	str += "H            : Show file paths info\n";
+	//str += "Ctrl+Click   : Save to Preset\n";
+	//str += "Alt+Click    : Swap Presets\n";
 	str += "\n";
+
 	str += "DEBUG SCENE\n";
 	str += "shapeType    : " + ofToString(shapeType) + "\n";
 	str += "amount       : " + ofToString(amount) + "\n";

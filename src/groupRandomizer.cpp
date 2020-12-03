@@ -872,10 +872,11 @@ void groupRandomizer::setupRandomizerIndex()
 //----------------------------------------------------------------
 void groupRandomizer::keyPressed(int key)
 {
-	if (key == 'R')
-	{
-		doRandomPreset();
-	}
+	////if ((mod_CONTROL && !mod_ALT) && key == 'R')
+	//if (key == 'R')
+	//{
+	//	doRandomPreset();
+	//}
 
 	////bool bEnableKeyRandomizers = false;
 	////if (bEnableKeyRandomizers) 

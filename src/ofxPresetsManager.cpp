@@ -1657,6 +1657,16 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		bool mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
 		bool mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
 
+		if (true)
+		{
+			ofLogNotice(__FUNCTION__)
+				<< " key: " << key
+				//<< " mod_COMMAND: " << mod_COMMAND
+				<< " mod_CONTROL: " << mod_CONTROL
+				<< " mod_SHIFT: " << mod_SHIFT
+				<< " mod_ALT: " << mod_ALT;
+		}
+
 		// TODO: TEST: to force disable engine
 		//bImGui_mouseOver = false;
 
@@ -1728,11 +1738,14 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			}
 
 			// random index
-			else if ((mod_CONTROL && !mod_ALT) && key == 'r')
+			else if ((mod_CONTROL && !mod_ALT) && (key == 'R' || key == 18))
 			{
 				//for (int i = 0; i < groups.size(); i++) 
-				{// ??
+				{
 					doRandomizePresetSelected(GuiGROUP_Selected_Index);
+					
+					// worfklow
+					doStoreUndo();
 				}
 			}
 
@@ -1754,23 +1767,23 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 
 			//----
 
-			// TODO: not working on windows..
+			// TODO: not working on windows.. We need to add int code
 #ifdef INCLUDE_ofxUndoSimple
 			if (MODE_Editor.get())
 			{
-				if (!mod_SHIFT && mod_CONTROL && key == 'z')// previous
+				if (!mod_SHIFT && mod_CONTROL && (key == 'z' || key == 26))// previous
 				{
 					doUndo();
 				}
-				else if (mod_SHIFT && mod_CONTROL && key == 'Z')// next
+				else if (mod_SHIFT && mod_CONTROL && (key == 'Z'|| key == 26))// next
 				{
 					doRedo();
 				}
-				else if (mod_SHIFT && mod_CONTROL && key == 'C')// clear
+				else if (mod_SHIFT && mod_CONTROL && key == 'C' || key == 3)// clear
 				{
 					doClearHistory();
 				}
-				else if (!mod_SHIFT && mod_CONTROL && key == 's')// store
+				else if (!mod_SHIFT && mod_CONTROL && key == 's' || key == 19)// store
 				{
 					doStoreUndo();
 				}
@@ -1847,14 +1860,16 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 
 		//--
 
-		// randomizers
-		if (MODE_Editor.get())
-		{
+		//// randomizers
+		//if (MODE_Editor.get())
+		//{
 			groupRandomizers[GuiGROUP_Selected_Index].keyPressed(key);
 
-			// workflow
-			doStoreUndo();
-		}
+		//	// workflow
+		//	// workaround
+		//	if (key == 'R')
+		//		doStoreUndo();
+		//}
 	}
 }
 
@@ -3165,7 +3180,12 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo += "+Alt             SWAP\n";
 	helpInfo += "Arrows           NAVIGATE\n";
 	helpInfo += "Ctrl+Space       PLAY RANDOMIZER\n";
-	helpInfo += "R                RANDOMIZE PRESET\n";
+	helpInfo += "Ctrl+R           RANDOMIZE PRESET\n";
+	helpInfo += "                 UNDO ENGINE\n";
+	helpInfo += "Ctrl+Z           UNDO\n";
+	helpInfo += "Ctrl+Shift+Z     REDO\n";
+	helpInfo += "Ctrl+C           CLEAR\n";
+	helpInfo += "Ctrl+s           STORE\n";
 	helpInfo += "E                EDIT/LIVE\n";
 }
 
