@@ -1685,7 +1685,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			if (key == modeKeySave)
 			{
 				bModKeySave = true;
-				ofLogNotice(__FUNCTION__) << "\t modKey Save TRUE";
+				ofLogNotice(__FUNCTION__) << "modKey Save TRUE";
 				//return;
 			}
 
@@ -1693,7 +1693,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			else if (key == modKeySwap)
 			{
 				bModKeySwap = true;
-				ofLogNotice(__FUNCTION__) << "\t modKey Swap TRUE";
+				ofLogNotice(__FUNCTION__) << "modKey Swap TRUE";
 				//return;
 			}
 
@@ -1702,7 +1702,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			if (false) {}
 
 			// hide/show control gui
-			else if (key == 'g' && (mod_CONTROL && !mod_ALT && !mod_SHIFT))
+			else if ((key == 'g' || key == 7) && (mod_CONTROL && !mod_ALT && !mod_SHIFT))
 			{
 				SHOW_Gui_AdvancedControl = !SHOW_Gui_AdvancedControl;
 				setVisible_GUI_Internal(SHOW_Gui_AdvancedControl);
@@ -1882,12 +1882,12 @@ void ofxPresetsManager::keyReleased(ofKeyEventArgs &eventArgs)
 		if (eventArgs.key == modeKeySave && ENABLE_Keys)
 		{
 			bModKeySave = false;
-			ofLogNotice(__FUNCTION__) << "\t modKey Save FALSE";
+			ofLogNotice(__FUNCTION__) << "modKey Save FALSE";
 		}
 		else if (eventArgs.key == modKeySwap && ENABLE_Keys)
 		{
 			bModKeySwap = false;
-			ofLogNotice(__FUNCTION__) << "\t modKey Swap FALSE";
+			ofLogNotice(__FUNCTION__) << "modKey Swap FALSE";
 		}
 	}
 }
@@ -3179,14 +3179,14 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo += "+Ctrl            SAVE/COPY\n";
 	helpInfo += "+Alt             SWAP\n";
 	helpInfo += "Arrows           NAVIGATE\n";
+	helpInfo += "E                EDIT/LIVE\n";
 	helpInfo += "Ctrl+Space       PLAY RANDOMIZER\n";
 	helpInfo += "Ctrl+R           RANDOMIZE PRESET\n";
-	helpInfo += "                 UNDO ENGINE\n";
+	helpInfo += "UNDO ENGINE\n";
 	helpInfo += "Ctrl+Z           UNDO\n";
 	helpInfo += "Ctrl+Shift+Z     REDO\n";
 	helpInfo += "Ctrl+C           CLEAR\n";
 	helpInfo += "Ctrl+s           STORE\n";
-	helpInfo += "E                EDIT/LIVE\n";
 }
 
 //--------------------------------------------------------------
