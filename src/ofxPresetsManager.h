@@ -47,13 +47,14 @@
 //		- Live mode: simpler gui and maybe better performance intended when no need to edit or see parameters.
 //
 //	* Several Features
-//		- Store standalone name presets to make variations and help your favourite banks organizations.
+//		- Store standalone name presets to make variations and help your favourite banks organization.
 //		- Keys interaction can be disabled to avoid colliding with other addons/ofApp key commands.
 //		- Layout customization and 2 colors themes.
 //		- Randomization engine to allow more complex scenes, jumping between presets using different timers.
 //		- You don't need to use another gui like ofxGui: just ofParameters! Sometimes ImGui is enough.
 //		- Clone presets, move placing/sorting into your favourites.
-//		- More info into README.md
+//		- All your favourite presets (left-right) from your groups (up-down) can be browsed using arrow keys.
+//		- Active group is marked with an '*' (when keys control are enabled).	
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 

@@ -3,25 +3,33 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-	ofSetCircleResolution(200);
-
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
 
+	ofSetCircleResolution(200);
+
 	//--
 
-	// setup your parameters
+	// setup your parameters groups before add to the addon!
 	setupParameters();
 
 	//--
 
+	// optional:
+	
+	// some API controls:
 	//presetsManager.setEnableKeysArrowBrowse(true);
 	//presetsManager.setEnableKeys(true);
 	presetsManager.setSizeBox_PresetClicker(50);
 
-	// add our ofParameterGroup to the preset manager 
+	//--
+
+	// main initializer
+
+	// build your presets manager:
+	// add our ofParameterGroup to the preset manager. 
 	// also define wich key triggers are associated to each preset. 
-	// the amount of keys will be also the amount of favorites/clickable presets per group
+	// the amount of keys will be also the amount of favorites/clickable presets for each group.
 
 	// group 0
 	presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' });
@@ -37,7 +45,10 @@ void ofApp::setup()
 
 	//--
 
-	// customize user-kit name: will create this main settings file: 'bin/data/myKit_01.json'
+	// optional:
+
+	// customize user-kit name: 
+	// then will create this named main settings file: 'bin/data/myKit_01.json'
 	// must call setup after adding all ofParameterGroup's
 	std::string name = "myKit_01";
 	presetsManager.setup(name);
@@ -143,6 +154,8 @@ void ofApp::draw()
 	if (show1) drawScene1();
 	if (show2) drawScene2();
 	if (show3) drawScene3();
+
+	//-
 
 #ifdef USE_GUI_LOCAL 
 	// local gui parameters: to show or to edit presets params

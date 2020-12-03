@@ -4,7 +4,7 @@
 
 #include "ofxPresetsManager.h"
 
-//#define USE_GUI_LOCAL //-> we can even use our personal local gui
+//#define USE_GUI_LOCAL //-> we can even use our personal local gui. But we can use the bundled ImGui only too.
 #ifdef USE_GUI_LOCAL 
 #include "ofxGui.h"
 #include "ofxSurfingHelpers.h"
