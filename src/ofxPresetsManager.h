@@ -4,11 +4,11 @@
 /// ofxPresetsManager 
 /// by moebiusSurfing, 2020.
 ///
-/// this addon is based in the original ofxGuiPresetSelector addon 
+/// this addon is based and inspired on the original ofxGuiPresetSelector addon 
 /// by Nicola Pisanti, MIT License, 2016
 /// https://github.com/npisanti/ofxGuiPresetSelector
-/// all modifications and new features by moebiussurfing
-/// my idea is to allow use ofParameterGroup's as managed content instead of ofxPanel
+/// added modifications and several new features.
+/// my idea is to allow use ofParameterGroup's as managed content instead of ofxGui's panels.
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -39,13 +39,8 @@
 
 ///------
 
-///	BUGS:
-///			! broken swap key
-///			! broken key command to randomize
-
-///-
-
 ///	TODO:
+/// IDEAS:
 ///	
 ///	+++		open/save dialog to project User-Kit session in a single file.
 ///				or allowed to all the groups?
@@ -88,29 +83,33 @@
 //
 //	DEFINES
 //
-//#define USE_IMGUI_EXTERNAL						// this is to group all ImGui panels into one unique instance in ofApp
-#define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT		// customize ImGui font
-#define INCLUDE_ofxUndoSimple					// undo engine to store after randomize preset parameters (& recall)
-//#define USE_JSON								// file settings format
+#define INCLUDE_ofxUndoSimple	// undo engine to store after randomize a preset or manually (to browse history states)
+//#define USE_IMGUI_EXTERNAL	// this is to group all ImGui panels into one unique instance in ofApp
+// currently there's a bug when using more than one single ofxImGui instance!
+// this line is proposed as debugging when adding this feature (multi instance).
+#define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT	// customize ImGui font
+//#define USE_JSON	// set the file settings format (xml or json). already defined into ofxSurfingHelpers
+//										   
 //										   
 //	DEBUG									   
 //										   
-//#define INCLUDE_PERFORMANCE_MEASURES			// measure performance ofxTimeMeasurements
+//#define INCLUDE_PERFORMANCE_MEASURES			// measure performance ofxTimeMeasurements. not using now. must restore!
 //#define DEBUG_randomTest						// uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
-//#define DEBUG_BLOCK_SAVE_SETTINGS				// disable save settings//enable this bc sometimes there's crashes on exit
+//#define DEBUG_BLOCK_SAVE_SETTINGS				// disable save settings//enable this bc sometimes there's crashes on exit...
 //
 //--------------------------------------
 
 
 #include "ofxSurfingConstants.h" // -> defines (modes) are here "to share between addons" in one place
-#include "ofxInteractiveRect.h"
+#include "ofxInteractiveRect.h" // engine to move the user clicker buttons panel. TODO: add resize by mouse too.
 
 //--
 
-// gui
-// uasing alternative branch: https://github.com/MacFurax/ofxImGui/tree/docking
-// this branch allows docking, layout store/recall, some extra widgets 
-
+// this ImGui included (/lib) branch it's based on: https://github.com/MacFurax/ofxImGui/tree/docking
+// this branch allows docking, layout store/recall, some extra widgets.
+// my future plans are it's to switch to another branch that will support multi instances someday:
+// https://github.com/Daandelange/ofxImGui
+// this feature will allow that you use multiple ImGui instances running into different classes of your app.
 #include "ofxImGui.h"
 
 // undo engine
@@ -141,18 +140,6 @@
 
 class ofxPresetsManager : public ofBaseApp
 {
-
-public:
-	// mini preview rectangles positions and sizes
-	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
-	string path_RectanglePresetClicker = "_RectanglePresetClicker";
-	ofParameter<bool> MODE_EditPresetClicker;
-	ofParameter<float> _rectRatio;
-	ofParameter<bool> SHOW_BackGround_EditPresetClicker;
-	//ofParameter<bool> bResetRects;
-	float _RectClick_w;
-	float _RectClick_Pad;
-
 	//--
 
 public:
@@ -161,11 +148,11 @@ public:
 
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
-	void drawImGui();
-	void drawHelp(int x, int y);
 	void exit();
 	void windowResized(int w, int h);
 
+	void drawImGui();
+	void drawHelp(int x, int y);
 	void clear();
 	
 	//--
@@ -207,6 +194,17 @@ public:
 
 private:
 	void drawPresetClicker();// user clickeable box panel preset selector
+
+//public:
+	// mini preview rectangles positions and sizes
+	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
+	string path_RectanglePresetClicker = "_RectanglePresetClicker";
+	ofParameter<bool> MODE_EditPresetClicker;
+	ofParameter<float> _rectRatio;
+	ofParameter<bool> SHOW_BackGround_EditPresetClicker;
+	//ofParameter<bool> bResetRects;
+	float _RectClick_w;
+	float _RectClick_Pad;
 
 	//--
 
@@ -504,24 +502,20 @@ public:
 	
 	//----
 
-	// undo engine
-
-	// TODO:
-	// should expand to all groups. here only habndles one group
-private:
 #ifdef INCLUDE_ofxUndoSimple
-	//ofxUndoSimple<std::string> undoStringParams;
-	//ofXml undoXmlParams;
-	
+	// undo engine
+	// you can manually store all the parameters states to store points
+	// then you can browse doing undo/redo to decide what states you like more.
+	// when doing a random, the engine auto stores the states.
+private:
 	vector <ofxUndoSimple<std::string>> undoStringsParams;
 	vector <ofXml> undoXmlsParams;
 	
-	void undoRefreshParams();
+	void doRefreshUndoParams();
 	void doStoreUndo();
-
 	void doUndo();
 	void doRedo();
-	void doClearHistory();
+	void doClearUndoHistory();
 #endif
 
 	//----
@@ -575,6 +569,8 @@ private:
 
 private:
 	// TODO:
+	// this is not finished yet!
+	// it's intended as a faster mode that uses memory loaded xmls instead of reading the files from the hard drive.
 	// add json..
 	// should use keys[i].size() instead of this:
 #ifdef USE_JSON
@@ -1272,6 +1268,7 @@ public:
 	//--
 
 	// TODO:
+	// not finished yet...
 	// timer autosave
 private:
 	ofParameter<bool> bAutosaveTimer;

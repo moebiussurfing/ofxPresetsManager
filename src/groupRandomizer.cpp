@@ -643,7 +643,7 @@ void groupRandomizer::setupRandomizerParams()
 	addGroupToEditor(group);// enqueue all content params and create a toggle for each one
 
 	// add to group
-	bRandomizeEditor.set("RANDOMIZE PRESET PARAMETERS", false);
+	bRandomizeEditor.set("RANDOMIZE PARAMETERS", false);
 	bRandomizeEditorPopulateFavs.set("POPULATE FAVS!", false);
 	bRandomizeEditorAll.set("ALL", false);
 	bRandomizeEditorNone.set("NONE", false);
@@ -1074,14 +1074,14 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		//	{
 		//		//ofLogNotice(__FUNCTION__) << "UNDO <-";
 		//		//undoStringParams.undo();
-		//		//undoRefreshParams();
+		//		//doRefreshUndoParams();
 		//	}
 		//	ImGui::SameLine();
 		//	if (ImGui::Button("REDO", ImVec2(wHalf, 20)))
 		//	{
 		//		//ofLogNotice(__FUNCTION__) << "REDO ->";
 		//		//undoStringParams.redo();
-		//		//undoRefreshParams();
+		//		//doRefreshUndoParams();
 		//	}
 		//	//string str = "";
 		//	//str += ofToString(undoStringParams.getUndoLength()) + "/";

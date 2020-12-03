@@ -125,7 +125,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	autoLoad.set("AUTO LOAD", true);
 	autoSave.set("AUTO SAVE", true);
-	MODE_MemoryLive.set("MODE MEMORY", false);
+	MODE_MemoryLive.set("MODE MEMORY", false);// TODO: not implemented
 	loadToMemory.set("LOAD TO MEMORY", false);
 	saveFromMemory.set("SAVE FROM MEMORY", false);
 	bAutosaveTimer.set("TIMER AUTO SAVE", false);
@@ -165,7 +165,7 @@ ofxPresetsManager::ofxPresetsManager()
 	// internal control params
 
 	params_Options.setName("OPTIONS");
-	params_Options.add(MODE_MemoryLive);
+	//params_Options.add(MODE_MemoryLive);// TODO: not implemented
 	params_Options.add(loadToMemory);
 	params_Options.add(saveFromMemory);
 	params_Options.add(autoLoad);
@@ -1657,14 +1657,16 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		bool mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
 		bool mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
 
-		if (true)
+		bool bDebug = false;
+		if (bDebug)
 		{
 			ofLogNotice(__FUNCTION__)
 				<< " key: " << key
-				//<< " mod_COMMAND: " << mod_COMMAND
 				<< " mod_CONTROL: " << mod_CONTROL
 				<< " mod_SHIFT: " << mod_SHIFT
-				<< " mod_ALT: " << mod_ALT;
+				<< " mod_ALT: " << mod_ALT
+				//<< " mod_COMMAND: " << mod_COMMAND
+				;
 		}
 
 		// TODO: TEST: to force disable engine
@@ -1682,7 +1684,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			//-
 
 			// mode key for saving with mouse or trigger keys
-			if (key == modeKeySave)
+			if (key == modeKeySave && !bModKeySave)
 			{
 				bModKeySave = true;
 				ofLogNotice(__FUNCTION__) << "modKey Save TRUE";
@@ -1690,7 +1692,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			}
 
 			// mode key for swap with mouse or trigger keys
-			else if (key == modKeySwap)
+			else if (key == modKeySwap && !bModKeySwap)
 			{
 				bModKeySwap = true;
 				ofLogNotice(__FUNCTION__) << "modKey Swap TRUE";
@@ -1743,7 +1745,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				//for (int i = 0; i < groups.size(); i++) 
 				{
 					doRandomizePresetSelected(GuiGROUP_Selected_Index);
-					
+
 					// worfklow
 					doStoreUndo();
 				}
@@ -1775,13 +1777,13 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				{
 					doUndo();
 				}
-				else if (mod_SHIFT && mod_CONTROL && (key == 'Z'|| key == 26))// next
+				else if (mod_SHIFT && mod_CONTROL && (key == 'Z' || key == 26))// next
 				{
 					doRedo();
 				}
 				else if (mod_SHIFT && mod_CONTROL && key == 'C' || key == 3)// clear
 				{
-					doClearHistory();
+					doClearUndoHistory();
 				}
 				else if (!mod_SHIFT && mod_CONTROL && key == 's' || key == 19)// store
 				{
@@ -1863,7 +1865,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//// randomizers
 		//if (MODE_Editor.get())
 		//{
-			groupRandomizers[GuiGROUP_Selected_Index].keyPressed(key);
+		groupRandomizers[GuiGROUP_Selected_Index].keyPressed(key);
 
 		//	// workflow
 		//	// workaround
@@ -1879,12 +1881,12 @@ void ofxPresetsManager::keyReleased(ofKeyEventArgs &eventArgs)
 	if (bDoneSetup)
 	{
 		// mod keys
-		if (eventArgs.key == modeKeySave && ENABLE_Keys)
+		if (eventArgs.key == modeKeySave && ENABLE_Keys && bModKeySave)
 		{
 			bModKeySave = false;
 			ofLogNotice(__FUNCTION__) << "modKey Save FALSE";
 		}
-		else if (eventArgs.key == modKeySwap && ENABLE_Keys)
+		else if (eventArgs.key == modKeySwap && ENABLE_Keys && bModKeySwap)
 		{
 			bModKeySwap = false;
 			ofLogNotice(__FUNCTION__) << "modKey Swap FALSE";
@@ -1972,7 +1974,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 				else if (bModKeySwap)
 				{
-					ofLogNotice(__FUNCTION__) << "SWAP";
+					//ofLogNotice(__FUNCTION__) << "SWAP";
 
 					if (yIndex < PRESETS_Selected_Index.size())// a valid group index
 					{
@@ -2128,92 +2130,38 @@ void ofxPresetsManager::doPopulateFavs(int groupIndex)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::doSwap(int groupIndex, int fromIndex, int toIndex)
+void ofxPresetsManager::doSwap(int groupIndex, int _srcIndex, int _destIndex)
 {
-	//DISABLE_CALLBACKS_SELECTORS = true;
+	ofLogNotice(__FUNCTION__)
+		<< "group: #" << groupIndex << " "
+		<< groups[groupIndex].getName() << " : "
+		<< _srcIndex << " <-> "
+		<< _destIndex;
 
-	ofLogNotice(__FUNCTION__) << "group: #" << groupIndex << " " << groups[groupIndex].getName() << " : " << fromIndex << "<->" << toIndex;
+	std::string _path_Src = getPresetPath(groups[groupIndex].getName(), _srcIndex);
+	std::string _path_Dst = getPresetPath(groups[groupIndex].getName(), _destIndex);
 
-	std::string srcName = getPresetPath(groups[groupIndex].getName(), fromIndex);
-	std::string dstName = getPresetPath(groups[groupIndex].getName(), toIndex);
+	ofLogNotice(__FUNCTION__) << "From: " << _path_Src;
+	ofLogNotice(__FUNCTION__) << "\t To: " << _path_Dst;
 
-	ofLogNotice(__FUNCTION__) << "From: " << srcName;
-	ofLogNotice(__FUNCTION__) << "\t To: " << dstName;
+	// 0. rename dest file to temp file
+	std::string _path_TEMP = "TEMP_Src.xml";
+	ofFile _file;
+	_file.open(_path_Dst);
+	_file.renameTo(_path_TEMP);
 
-	std::string _pathTEMPSrc = "tempSrc.xml";
-	//bool b;
+	// 1. save current (src) to dest
+	ofXml _settings;
+	ofSerialize(_settings, groups[groupIndex]);
+	_settings.save(_path_Dst);
 
+	// 2. load dest (now is already src)
+	PRESETS_Selected_Index[groupIndex] = _destIndex;
+	loadPreset(_destIndex, groupIndex);
 
-	//ofFile presetFileFrom;
-	////presetFileFrom.open(dstName);
-	//presetFileFrom.open(srcName);
-
-	//presetFileFrom.renameTo(_pathTEMPSrc);// temp name
-	////bool ofFile::renameTo(const filesystem::path &path, bool bRelativeToData = true, bool overwrite = false)
-
-	//ofFile presetFileTo;
-	//presetFileTo.open(dstName);
-	//presetFileTo.renameTo(srcName);
-	////presetFileTo.open(dstName);
-	////presetFileTo.renameTo(srcName);
-
-	////presetFileFrom.renameTo(srcName);
-	//presetFileFrom.renameTo(dstName);
-	//
-	//DISABLE_CALLBACKS_SELECTORS = false;
-	//
-	//// workflow
-	//// 6. auto load source (the same preset was selected before swap clicked!)
-	////PRESETS_Selected_Index[groupIndex] = toIndex;
-	//loadPreset(toIndex, groupIndex);
-
+	// 3. restore TEMP (dst) to src
+	_file.renameTo(_path_Src);
 }
-
-////--------------------------------------------------------------
-//void ofxPresetsManager::doSwap(int groupIndex, int fromIndex, int toIndex)
-//{
-//	ofLogNotice(__FUNCTION__) << "group: #" << groupIndex << " "<< groups[groupIndex].getName() << " : " << fromIndex << "<->" << toIndex;
-//
-//	std::string srcName = getPresetPath(groups[groupIndex].getName(), fromIndex);
-//	std::string dstName = getPresetPath(groups[groupIndex].getName(), toIndex);
-//	ofLogNotice(__FUNCTION__) << "From: " << srcName;
-//	ofLogNotice(__FUNCTION__) << "\t To: " << dstName;
-//
-//	// 1. save source preset (from memory) to temp file
-//	std::string _pathTEMPSrc = "tempSrc.xml";
-//	ofXml _settingsSrc;
-//	ofSerialize(_settingsSrc, groups[groupIndex]);
-//
-//	bool b = _settingsSrc.save(_pathTEMPSrc);
-//	if (!b) ofLogError(__FUNCTION__) << "Error saving TEMP: " << _pathTEMPSrc;
-//	else ofLogNotice(__FUNCTION__) << "Saved current from to TEMP file: " << _pathTEMPSrc;
-//
-//	// 2. load destination "from kit" to memory
-//	std::string _pathDest = getPresetPath(groups[groupIndex].getName(), toIndex);
-//	ofLogNotice(__FUNCTION__) << "Destination: " << _pathDest;
-//
-//	ofXml _settingsDest;
-//	_settingsDest.load(_pathDest);
-//	ofDeserialize(_settingsDest, groups[groupIndex]);
-//
-//	// 3. save destination preset (from memory) to temp file
-//	ofXml _settingsDst2;
-//	ofSerialize(_settingsDst2, groups[groupIndex]);
-//
-//	// 4. using files
-//	// save source (from dest)
-//	_settingsDst2.save(srcName);
-//	_settingsSrc.save(dstName);
-//
-//	// 5. delete temp file
-//	ofFile _file;
-//	_file.removeFile(_pathTEMPSrc);
-//
-//	// workflow
-//	// 6. auto load source (the same preset was selected before swap clicked!)
-//	//PRESETS_Selected_Index[groupIndex] = toIndex;
-//	loadPreset(toIndex, groupIndex);
-//}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::setToggleKeysControl(bool active)
@@ -2391,21 +2339,21 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 			saveFromMemory = false;
 			saveAllKitFromMemory();
 		}
-		else if (name == "MODE MEMORY")
-		{
-			ofLogNotice(__FUNCTION__) << "MODE MEMORY: " << e;
+		//else if (name == "MODE MEMORY")// TODO: not implemented
+		//{
+		//	ofLogNotice(__FUNCTION__) << "MODE MEMORY: " << e;
 
-			if (MODE_MemoryLive)
-			{
-				//reload all xml preset files to memory
-				load_AllKit_ToMemory();
-			}
-			else
-			{
-				//save all xml preset files to disk from memory
-				saveAllKitFromMemory();
-			}
-		}
+		//	if (MODE_MemoryLive)
+		//	{
+		//		//reload all xml preset files to memory
+		//		load_AllKit_ToMemory();
+		//	}
+		//	else
+		//	{
+		//		//save all xml preset files to disk from memory
+		//		saveAllKitFromMemory();
+		//	}
+		//}
 
 		//--
 
@@ -2735,12 +2683,12 @@ void ofxPresetsManager::exit()
 
 	//-
 
-	// TODO:
-	// MODE B: direct from memory
-	if (MODE_MemoryLive && autoSave)
-	{
-		saveAllKitFromMemory();// update of files is required bc presets are on memmory only
-	}
+	//// TODO: not implemented
+	//// MODE B: direct from memory
+	//if (MODE_MemoryLive && autoSave)
+	//{
+	//	saveAllKitFromMemory();// update of files is required bc presets are on memmory only
+	//}
 
 	//--
 
@@ -3003,7 +2951,7 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 			ImGui::SameLine();
 			if (ImGui::Button("Clear History"))
 			{
-				doClearHistory();
+				doClearUndoHistory();
 			}
 		}
 #endif
@@ -3022,16 +2970,17 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 				//ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
 
 				ofxImGui::AddParameter(SHOW_Panel_AllParameter); ImGui::SameLine();
-				ofxImGui::AddParameter(SHOW_Panel_AllSelectors);//ImGui::SameLine();
+				ofxImGui::AddParameter(SHOW_Panel_StandalonePresets); //ImGui::SameLine();
 
-				if (MODE_Editor)
+				//if (MODE_Editor)
 				{
 					ofxImGui::AddParameter(SHOW_Panel_Randomizer); ImGui::SameLine();
-					ofxImGui::AddParameter(SHOW_Panel_StandalonePresets); //ImGui::SameLine();
+					ofxImGui::AddParameter(SHOW_Panel_AllSelectors);//ImGui::SameLine();
 				}
 
 				ofxImGui::AddParameter(SHOW_Panel_Click); ImGui::SameLine();
 				ofxImGui::AddParameter(ENABLE_Keys);//ImGui::SameLine(); 
+				
 				if (MODE_Editor)
 				{
 					ofxImGui::AddParameter(MODE_EditPresetClicker); ImGui::SameLine();
@@ -3065,7 +3014,7 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 		{
 			ofxImGui::AddParameter(autoSave); ImGui::SameLine();
 			//ofxImGui::AddParameter(autoLoad);//ImGui::SameLine();
-			ofxImGui::AddParameter(MODE_MemoryLive);
+			//ofxImGui::AddParameter(MODE_MemoryLive);// TODO: not implemented
 			//ImGui::SameLine();
 			//ofxImGui::AddParameter(MODE_EditPresetClicker);
 
@@ -4054,7 +4003,7 @@ void ofxPresetsManager::doStoreUndo() {// TODO: not used..
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::doClearHistory() {
+void ofxPresetsManager::doClearUndoHistory() {
 	ofLogNotice(__FUNCTION__) << "UNDO CLEAR : " << GuiGROUP_Selected_Index;
 	undoStringsParams[GuiGROUP_Selected_Index].clear();
 	//undoStringParams.clear();
@@ -4065,7 +4014,7 @@ void ofxPresetsManager::doUndo() {
 	ofLogNotice(__FUNCTION__) << "UNDO < Group #" << GuiGROUP_Selected_Index << " " << groups[GuiGROUP_Selected_Index].getName();
 	undoStringsParams[GuiGROUP_Selected_Index].undo();
 	//undoStringParams.undo();
-	undoRefreshParams();
+	doRefreshUndoParams();
 }
 
 //--------------------------------------------------------------
@@ -4073,11 +4022,11 @@ void ofxPresetsManager::doRedo() {
 	ofLogNotice(__FUNCTION__) << "REDO < Group #" << GuiGROUP_Selected_Index << " " << groups[GuiGROUP_Selected_Index].getName();
 	undoStringsParams[GuiGROUP_Selected_Index].redo();
 	//undoStringParams.redo();
-	undoRefreshParams();
+	doRefreshUndoParams();
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::undoRefreshParams() {
+void ofxPresetsManager::doRefreshUndoParams() {
 	int i = GuiGROUP_Selected_Index.get();
 	//for (int i = 0; i < groups.size(); i++)
 	{
