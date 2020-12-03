@@ -12,10 +12,10 @@ docs/tagfile.xml
 /bin/*
 !/bin/data/
 
-*.XML
-*.xml
-*.JSON
-*.json
+#*.XML
+#*.xml
+#*.JSON
+#*.json
 
 [Bb]uild/
 [Oo]bj/
@@ -132,14 +132,3 @@ Desktop.ini
 *.log
 *.sql
 *.sqlite
-
-example-Basic/bin/data/ofxPresetsManager_Settings.json
-example-Basic/bin/data/ofxPresetsManager/presets/sceneParamsGroup/sceneParamsGroup_Randomizer.json
-example-Basic/bin/data/ofxPresetsManager/presets/sceneParamsGroup/sceneParamsGroup_5.json
-example-Basic/bin/data/ofxPresetsManager/presets/sceneParamsGroup/sceneParamsGroup_4.json
-example-Basic/bin/data/ofxPresetsManager/presets/sceneParamsGroup/sceneParamsGroup_3.json
-example-Basic/bin/data/ofxPresetsManager/presets/sceneParamsGroup/sceneParamsGroup_2.json
-example-Basic/bin/data/ofxPresetsManager/presets/sceneParamsGroup/sceneParamsGroup_1.json
-example-Basic/bin/data/ofxPresetsManager/presets/sceneParamsGroup/sceneParamsGroup_0.json
-example-Basic/bin/data/ofxPresetsManager/appSettings/settings_RectanglePresetClicker.xml
-example-Basic/bin/data/ofxPresetsManager/appSettings/Control_Settings.json
