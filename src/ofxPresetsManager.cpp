@@ -2311,8 +2311,9 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 			if (MODE_EditPresetClicker.get())
 			{
 				rectanglePresetClicker.enableEdit();
+
 				// workflow
-				SHOW_BackGround_EditPresetClicker = true;
+				//SHOW_BackGround_EditPresetClicker = true;
 			}
 			else
 			{
@@ -4067,7 +4068,7 @@ void ofxPresetsManager::drawHelp(int _x, int ySave)
 
 	//-
 
-	// light theme (black lines)
+	// light theme (black lines for light background)
 	if (!bThemDark)
 	{
 		_colorText = ofColor(0, 255);
@@ -4075,7 +4076,7 @@ void ofxPresetsManager::drawHelp(int _x, int ySave)
 		_colorBg = ofColor(255, 8);
 	}
 
-	// dark theme (white lines)
+	// dark theme (white lines for dark background)
 	else
 	{
 		_colorText = ofColor(255, 128);

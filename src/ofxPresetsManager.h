@@ -160,6 +160,7 @@ class ofxPresetsManager : public ofBaseApp
 	//--
 
 public:
+
 	ofxPresetsManager();
 	~ofxPresetsManager();
 
