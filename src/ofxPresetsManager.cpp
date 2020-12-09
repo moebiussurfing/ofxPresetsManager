@@ -2314,6 +2314,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 
 				// workflow
 				//SHOW_BackGround_EditPresetClicker = true;
+				if (!SHOW_Panel_Click) SHOW_Panel_Click = true;
 			}
 			else
 			{
@@ -2323,6 +2324,8 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 
 		//----
 
+		//TODO:
+		//memmory mode. not implemented...
 		else if (name == "LOAD TO MEMORY" && loadToMemory)
 		{
 			ofLogNotice(__FUNCTION__) << "loadToMemory:" << e;
@@ -2338,7 +2341,6 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 		//else if (name == "MODE MEMORY")// TODO: not implemented
 		//{
 		//	ofLogNotice(__FUNCTION__) << "MODE MEMORY: " << e;
-
 		//	if (MODE_MemoryLive)
 		//	{
 		//		//reload all xml preset files to memory
@@ -2642,7 +2644,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #endif
 		}
 	}
-		}
+}
 
 ////--------------------------------------------------------------
 //void ofxPresetsManager::addGroup_TARGET(ofParameterGroup &g)
@@ -2957,6 +2959,10 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 
 		ImGui::Dummy(ImVec2(0.0f, 5));
 
+		ofxImGui::AddParameter(ENABLE_Keys);//ImGui::SameLine(); 
+
+		ImGui::Dummy(ImVec2(0.0f, 5));
+
 		//---
 
 		// panels
@@ -2968,23 +2974,16 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 				//if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
 				//ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
 
-				ofxImGui::AddParameter(SHOW_Panel_AllParameter); ImGui::SameLine();
-				ofxImGui::AddParameter(SHOW_Panel_StandalonePresets); //ImGui::SameLine();
+				ofxImGui::AddParameter(SHOW_Panel_Click);//ImGui::SameLine();
+				ofxImGui::AddParameter(SHOW_Panel_AllParameter);//ImGui::SameLine();
+				ofxImGui::AddParameter(SHOW_Panel_StandalonePresets);//ImGui::SameLine();
 
 				//if (MODE_Editor)
 				{
-					ofxImGui::AddParameter(SHOW_Panel_Randomizer); ImGui::SameLine();
+					ofxImGui::AddParameter(SHOW_Panel_Randomizer);//ImGui::SameLine();
 					ofxImGui::AddParameter(SHOW_Panel_AllSelectors);//ImGui::SameLine();
 				}
-
-				ofxImGui::AddParameter(SHOW_Panel_Click); ImGui::SameLine();
-				ofxImGui::AddParameter(ENABLE_Keys);//ImGui::SameLine(); 
-
-				if (MODE_Editor)
-				{
-					ofxImGui::AddParameter(MODE_EditPresetClicker); ImGui::SameLine();
-					ofxImGui::AddParameter(SHOW_BackGround_EditPresetClicker);
-				}
+				ofxImGui::AddParameter(SHOW_Help);//ImGui::SameLine();
 
 				//ofxImGui::AddParameter(MODE_StandalonePresets_NEW);
 
@@ -3003,23 +3002,26 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Extra()
 {
-	//----
-
 	if (ImGui::TreeNode("EXTRA")) {
 
 		//-
 
 		if (ImGui::TreeNode("MODES"))
 		{
-			ofxImGui::AddParameter(autoSave); ImGui::SameLine();
-			//ofxImGui::AddParameter(autoLoad);//ImGui::SameLine();
-			//ofxImGui::AddParameter(MODE_MemoryLive);// TODO: not implemented
-			//ImGui::SameLine();
-			//ofxImGui::AddParameter(MODE_EditPresetClicker);
-
-			ofxImGui::AddParameter(SHOW_Help); ImGui::SameLine();
-			ofxImGui::AddParameter(bThemDark);
 			ofxImGui::AddParameter(ENABLE_Keys);
+			ofxImGui::AddParameter(autoSave);//ImGui::SameLine();
+			//ofxImGui::AddParameter(autoLoad);//ImGui::SameLine();
+			// TODO: not implemented
+			//ofxImGui::AddParameter(MODE_MemoryLive);//ImGui::SameLine();
+			//ofxImGui::AddParameter(MODE_EditPresetClicker);
+			//ofxImGui::AddParameter(SHOW_Help);//ImGui::SameLine();
+			ofxImGui::AddParameter(bThemDark);
+
+			if (MODE_Editor)
+			{
+				ofxImGui::AddParameter(MODE_EditPresetClicker); ImGui::SameLine();
+				ofxImGui::AddParameter(SHOW_BackGround_EditPresetClicker);
+			}
 
 			ImGui::TreePop();
 		}

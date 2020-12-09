@@ -803,8 +803,8 @@ void groupRandomizer::setupRandomizerIndex()
 	bRandomizeIndex.set("RANDOMIZE INDEX", false);
 	PLAY_RandomizeTimer.set("PLAY RANDOMIZER", false);
 	PLAY_RandomizeTimer.setSerializable(false);
-	MODE_DicesProbs.set("MODE USE PROBS", true);
-	MODE_LatchTrig.set("MODE LATCH", false);
+	MODE_DicesProbs.set("ENABLE MODE RANDOMIZER", true);
+	MODE_LatchTrig.set("MODE LATCH-N-BACK", false);
 	MODE_AvoidRandomRepeat.set("MODE AVOID REPEAT", true);
 	randomizeDuration.set("t DURATION", 1000, 10, randomize_MAX_DURATION);
 	randomizeDurationShortRatio.set("t RATIO", 0.25, 0.005, 1);
@@ -841,7 +841,7 @@ void groupRandomizer::setupRandomizerIndex()
 	}
 
 	// toggles to enable short duration mode
-	ofParameterGroup _gShort{ "MODE DURATION SHORT" };
+	ofParameterGroup _gShort{ "PRESETS DURATION" };
 	_gShort.clear();
 	i = 0;
 	for (auto &p : presetsRandomModeShort) {
@@ -854,11 +854,11 @@ void groupRandomizer::setupRandomizerIndex()
 	params_Randomizer.setName("RANDOM SELECTED INDEX");
 	params_Randomizer.add(PLAY_RandomizeTimer);
 	params_Randomizer.add(bRandomizeIndex);
+	params_Randomizer.add(MODE_DicesProbs);
 	params_Randomizer.add(randomizeDurationBpm);
 	params_Randomizer.add(randomizeDuration);
 	params_Randomizer.add(randomizeDurationShortRatio);
 	params_Randomizer.add(randomizeDurationShort);// locked
-	params_Randomizer.add(MODE_DicesProbs);
 	params_Randomizer.add(MODE_LatchTrig);
 	params_Randomizer.add(MODE_AvoidRandomRepeat);
 	params_Randomizer.add(_gOdds);// probs
@@ -1246,7 +1246,7 @@ void groupRandomizer::Changed_Control(ofAbstractParameter &e)
 			}
 		}
 		// latch
-		else if (name == "MODE LATCH")
+		else if (name == "MODE LATCH-N-BACK")
 		{
 			ofLogNotice(__FUNCTION__) << "MODE LATCH: " << e;
 			if (MODE_LatchTrig) {
