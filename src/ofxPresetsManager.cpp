@@ -3006,7 +3006,7 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 
 		//-
 
-		if (ImGui::TreeNode("MODES"))
+		if (ImGui::TreeNode("ADVANCED"))
 		{
 			ofxImGui::AddParameter(ENABLE_Keys);
 			ofxImGui::AddParameter(autoSave);//ImGui::SameLine();
@@ -3034,7 +3034,7 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 			{
 				// User-Kit name
 				std::string str;
-				str = "Name: ";
+				str = "Name:\n";
 				str += displayNameUserKit;
 				ImGui::Text(str.c_str());
 
@@ -3074,7 +3074,6 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 		//	if (SHOW_Gui_AdvancedControl)
 		//	{
 		//ofxImGui::Settings settings;
-
 		//		// show ALL the addon internal params! mainly to debug all settings or to use without ImGui..
 		//		ofxImGui::AddGroup(params_Control, settings);
 		//	}
