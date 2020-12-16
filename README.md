@@ -11,7 +11,8 @@ ofxPresetsManager
 - `Easy to integrate` into your projects.
 - `Autogenerates a GUI` to tweak all the parameters.
 - `Cute Gui` based on `docked ImGui` windows using ofxImGui.
-- Lot of `customizations` and `helpers`: clone presets, change GUI layout and button sizes, dark/light themes, re-arrange/sorting presets, play timed randomizer to switch between presets, randomize some parameters, browse multi groups by arrow keys, UNDO history engine...etc.  
+- Lot of `customizations` and `helpers`:  
+Clone presets, change GUI layout and button sizes, dark/light themes, re-arrange/sorting presets, play timed randomizer to switch between presets, randomize some parameters, browse multi groups by arrow keys, UNDO history engine...etc.  
 
 **Two Types of Presets**:  
 * **Favourite Presets**:  
