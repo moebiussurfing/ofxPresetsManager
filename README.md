@@ -220,10 +220,10 @@ which inspired this addon a lot. Some of his code is also used here.*
 
 ## NOTES
 * Should improve **ofxImGui** contexts because we can't use more than one instance yet.  
-* Other ideas noted into `ofxPresetsManager.h`.   
-* Add minimal/lite class compatible but without any GUI or using a tiny `ofxGui` version.
+* Other ideas noted into ```ofxPresetsManager.h```.   
+* Add minimal/lite class compatible but without any GUI or using a tiny ```ofxGui``` version.
 * Better performant version without using hard disk files. Memory Mode, using vector of XML/JSON instead of files.
-* **Feedback**, **issues**, and **PR**'s are very welcome!
+* **Feedback**, **Issues**, and **PR**'s are very welcome!
 
 ## Author
 Addon by **@moebiusSurfing**  
