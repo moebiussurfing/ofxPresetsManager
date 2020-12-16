@@ -435,6 +435,10 @@ private:
 	float _RectClick_w;
 	float _RectClick_Pad;
 
+	ofColor _colorText;// lines and text color
+	ofColor _colorButton;// bg selected button
+	ofColor _colorBg;// background color
+
 	//--
 
 	//----
@@ -758,7 +762,7 @@ public:
 	}
 
 	//--------------------------------------------------------------
-	string getGroupName(int i)
+	string getGroupName(int i = 0)
 	{
 		string _name = "ERROR UNKNOWN";
 		if (i < groups.size()) _name = groups[i];

@@ -183,7 +183,10 @@ void ofApp::keyPressed(int key)
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-	presetsManager.exit();// required to store settings. (maybe required before destruct our class params..)
+	presetsManager.exit();
+	// required to store all gui/layout settings. 
+	// but also recommended to draw group/presets current states
+	// before destruct our class params.
 }
 
 //--

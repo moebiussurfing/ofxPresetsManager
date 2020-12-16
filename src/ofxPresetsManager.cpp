@@ -382,6 +382,9 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Control.add(params_Options);
 	params_Control.add(params_Gui);
 
+	params_Control.add(MODE_EditPresetClicker);
+	params_Control.add(bThemDark);
+
 	//--
 
 	// user-kit
@@ -468,10 +471,10 @@ void ofxPresetsManager::startup()
 
 	//--
 
+	DISABLE_CALLBACKS = false;// enable callbacks after setup
+
 	// load all app session settings & randomizers (not the related presets)
 	load_ControlSettings();// here bPathDirCustom is loaded (but if files are present, not in first runtime)
-
-	DISABLE_CALLBACKS = false;// enable callbacks after setup
 
 	//--
 
@@ -526,6 +529,16 @@ void ofxPresetsManager::startup()
 	//clamp inside window
 	clicker_Pos.x = ofClamp(clicker_Pos.x, 0, ofGetWidth());
 	clicker_Pos.y = ofClamp(clicker_Pos.y, 0, ofGetHeight());
+
+	//--
+
+	////TODO: startup bug that do not load clicker fine..
+	//MODE_EditPresetClicker = true;
+	////{
+	////	clicker_pos.x = rectanglepresetclicker.x;
+	////	clicker_pos.y = rectanglepresetclicker.y;
+	////}
+	//MODE_EditPresetClicker = false;
 
 	//--
 
@@ -700,7 +713,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 //--------------------------------------------------------------
 void ofxPresetsManager::windowResized(int w, int h)
 {
-	ofLogNotice(__FUNCTION__) << w << "," << h;
+	ofLogVerbose(__FUNCTION__) << w << "," << h;
 }
 
 //--------------------------------------------------------------
@@ -716,9 +729,6 @@ void ofxPresetsManager::drawPresetClicker()
 	float _pad = 3.0f;
 	std::string _label;
 
-	ofColor _colorText;// lines and text color
-	ofColor _colorButton;// bg selected button
-	ofColor _colorBg;// background color
 
 	//-
 
@@ -730,21 +740,21 @@ void ofxPresetsManager::drawPresetClicker()
 
 	//-
 
-	// light theme (black lines)
-	if (!bThemDark)
-	{
-		_colorText = ofColor(0, 255);
-		_colorButton = ofColor(0, 64);
-		_colorBg = ofColor(255, 8);
-	}
+	//// light theme (black lines)
+	//if (!bThemDark)
+	//{
+	//	_colorText = ofColor(0, 255);
+	//	_colorButton = ofColor(0, 128);
+	//	_colorBg = ofColor(225, 64);
+	//}
 
-	// dark theme (white lines)
-	else
-	{
-		_colorText = ofColor(255, 128);
-		_colorButton = ofColor(32, 200);
-		_colorBg = ofColor(0, 128);
-	}
+	//// dark theme (white lines)
+	//else
+	//{
+	//	_colorText = ofColor(255, 150);
+	//	_colorButton = ofColor(16, 225);
+	//	_colorBg = ofColor(0, 128);
+	//}
 
 	// display help info layout
 	bool bLateralPosition = false;// false = on top of clicker
@@ -757,7 +767,8 @@ void ofxPresetsManager::drawPresetClicker()
 	//----
 
 	// bg rectangle editor
-	if (SHOW_BackGround_EditPresetClicker) {
+	if (SHOW_BackGround_EditPresetClicker)
+	{
 		ofFill();
 		ofSetColor(_colorBg);
 		rectanglePresetClicker.draw();
@@ -765,7 +776,8 @@ void ofxPresetsManager::drawPresetClicker()
 	}
 
 	// get clicker position from being edited rectangle
-	if (MODE_EditPresetClicker) {
+	if (MODE_EditPresetClicker)
+	{
 		_RectClick_w = getGroupNamesWidth();
 		clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
 		clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
@@ -979,10 +991,14 @@ void ofxPresetsManager::drawPresetClicker()
 		//--
 
 		// 8. help info text: 
-		drawHelp(0, ySave);
+		if (clicker_Pos.y > ofGetHeight() * 0.5) drawHelp(0, ySave);
+		else drawHelp(100, ySave + groups.size()*cellSize + 20);
 	}
 
 	ofPopMatrix();
+
+		// 8. help info text: 
+
 	ofPopStyle();
 }
 
@@ -991,6 +1007,7 @@ ofxPresetsManager::~ofxPresetsManager()
 {
 	// TODO: not sure if can avoid call manually exit(), bc here groups could be externally destroyed..
 	// so we would prefer to call presetsManager.exit() manually on the first place sorting.
+	// if exit() is called manually on app exit(), we will call it twice... Could be a problem?
 	//exit();
 }
 
@@ -2306,6 +2323,26 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 			if (!MODE_Editor) MODE_EditPresetClicker = false;
 		}
 
+		//-
+
+		if (name == bThemDark.getName())
+		{	// light theme (black lines)
+			if (!bThemDark)
+			{
+				_colorText = ofColor(0, 255);
+				_colorButton = ofColor(0, 128);
+				_colorBg = ofColor(225, 64);
+			}
+
+			// dark theme (white lines)
+			else
+			{
+				_colorText = ofColor(255, 150);
+				_colorButton = ofColor(16, 225);
+				_colorBg = ofColor(0, 128);
+			}
+		}
+
 		if (name == MODE_EditPresetClicker.getName())
 		{
 			if (MODE_EditPresetClicker.get())
@@ -2567,7 +2604,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 #endif
 #endif
 		}
-	}
+}
 }
 
 //--------------------------------------------------------------
@@ -2629,8 +2666,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 			else {
 				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
-		}
 	}
+}
 
 	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
@@ -4061,29 +4098,30 @@ void ofxPresetsManager::Changed_GuiGROUP_Selected_Index(int & index)
 //--------------------------------------------------------------
 void ofxPresetsManager::drawHelp(int _x, int ySave)
 {
-	ofColor _colorText;// lines and text color
-	ofColor _colorButton;// bg selected button
-	ofColor _colorBg;// background color
+	//ofColor _colorText;// lines and text color
+	//ofColor _colorButton;// bg selected button
+	//ofColor _colorBg;// background color
+
 	bool bLeftPosition = true;// left or right. only if lateral pos true
 	bool bLateralPosition = false;// false = on top of clicker
 
 	//-
 
-	// light theme (black lines for light background)
-	if (!bThemDark)
-	{
-		_colorText = ofColor(0, 255);
-		_colorButton = ofColor(0, 64);
-		_colorBg = ofColor(255, 8);
-	}
+	//// light theme (black lines for light background)
+	//if (!bThemDark)
+	//{
+	//	_colorText = ofColor(0, 255);
+	//	_colorButton = ofColor(0, 64);
+	//	_colorBg = ofColor(255, 8);
+	//}
 
-	// dark theme (white lines for dark background)
-	else
-	{
-		_colorText = ofColor(255, 128);
-		_colorButton = ofColor(32, 200);
-		_colorBg = ofColor(0, 128);
-	}
+	//// dark theme (white lines for dark background)
+	//else
+	//{
+	//	_colorText = ofColor(255, 128);
+	//	_colorButton = ofColor(32, 200);
+	//	_colorBg = ofColor(0, 128);
+	//}
 
 	//--
 
