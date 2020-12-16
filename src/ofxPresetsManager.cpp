@@ -991,14 +991,10 @@ void ofxPresetsManager::drawPresetClicker()
 		//--
 
 		// 8. help info text: 
-		if (clicker_Pos.y > ofGetHeight() * 0.5) drawHelp(0, ySave);
-		else drawHelp(100, ySave + groups.size()*cellSize + 20);
+		drawHelp(0, ySave);
 	}
 
 	ofPopMatrix();
-
-		// 8. help info text: 
-
 	ofPopStyle();
 }
 
@@ -4098,32 +4094,13 @@ void ofxPresetsManager::Changed_GuiGROUP_Selected_Index(int & index)
 //--------------------------------------------------------------
 void ofxPresetsManager::drawHelp(int _x, int ySave)
 {
-	//ofColor _colorText;// lines and text color
-	//ofColor _colorButton;// bg selected button
-	//ofColor _colorBg;// background color
-
 	bool bLeftPosition = true;// left or right. only if lateral pos true
 	bool bLateralPosition = false;// false = on top of clicker
 
-	//-
-
-	//// light theme (black lines for light background)
-	//if (!bThemDark)
-	//{
-	//	_colorText = ofColor(0, 255);
-	//	_colorButton = ofColor(0, 64);
-	//	_colorBg = ofColor(255, 8);
-	//}
-
-	//// dark theme (white lines for dark background)
-	//else
-	//{
-	//	_colorText = ofColor(255, 128);
-	//	_colorButton = ofColor(32, 200);
-	//	_colorBg = ofColor(0, 128);
-	//}
-
 	//--
+
+	//if (rectanglePresetClicker.getY() > (ofGetHeight() * 0.5)) 
+	//else drawHelp(0, ySave + groups.size()*cellSize + 20);
 
 	{
 		bShowClickerInfo = SHOW_Help.get();
