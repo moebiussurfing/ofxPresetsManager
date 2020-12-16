@@ -1,22 +1,10 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup()
+void ofApp::setupPresets()
 {
-	ofSetFrameRate(60);
-	ofSetVerticalSync(true);
-
-	ofSetCircleResolution(200);
-
-	//--
-
-	// setup your parameters groups before add to the addon!
-	setupParameters();
-
-	//--
-
 	// optional:
-	
+
 	// some API controls:
 	//presetsManager.setEnableKeysArrowBrowse(true);
 	//presetsManager.setEnableKeys(true);
@@ -52,6 +40,24 @@ void ofApp::setup()
 	// must call setup after adding all ofParameterGroup's
 	std::string name = "myKit_01";
 	presetsManager.setup(name);
+}
+
+//--------------------------------------------------------------
+void ofApp::setup()
+{
+	ofSetFrameRate(60);
+	ofSetVerticalSync(true);
+
+	ofSetCircleResolution(200);
+
+	//--
+
+	// setup your parameters groups before add to the addon!
+	setupParameters();
+
+	//--
+	
+	setupPresets();
 }
 
 //--------------------------------------------------------------

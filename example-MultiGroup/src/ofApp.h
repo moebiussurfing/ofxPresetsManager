@@ -17,6 +17,7 @@ class ofApp : public ofBaseApp
 
 public:
 	void setup();
+	void setupPresets();
     void draw();
     void exit();
     void keyPressed(int key);
