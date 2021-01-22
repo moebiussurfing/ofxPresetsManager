@@ -100,6 +100,9 @@
 
 #include "ofMain.h"
 
+//#include <iostream>
+//#include <memory>
+
 //--------------------------------------
 //
 //	DEFINES
@@ -157,7 +160,6 @@
 
 class ofxPresetsManager : public ofBaseApp
 {
-	//--
 
 public:
 
@@ -166,6 +168,7 @@ public:
 
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
+
 	void windowResized(int w, int h);
 	void exit();
 
@@ -205,7 +208,7 @@ public:
 	void startup();// must be called after setup (who is called after all group adds) to set initial states well
 
 	void doCheckPresetsFoldersAreEmpty();// used on startup. check if all favorites preset are present, and creates folders and content if not
-	
+
 	//--
 
 	// core engine
