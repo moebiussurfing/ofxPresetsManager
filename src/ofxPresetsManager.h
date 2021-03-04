@@ -157,6 +157,8 @@
 #define TSGL_STOP
 #endif
 
+#define WIDGET_HEIGHT 30
+
 //-------------------------------
 
 class ofxPresetsManager : public ofBaseApp

@@ -116,7 +116,7 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Help.set("SHOW HELP", false);
 	SHOW_Gui_AdvancedControl.set("SHOW ADVANCED", false);
 	SHOW_Panel_Click.set("SHOW CLICKER", true);
-	SHOW_Panel_AllParameter.set("SHOW ALL PARAMETERS", true);
+	SHOW_Panel_AllParameter.set("SHOW PARAMETERS", true);
 	SHOW_Panel_AllSelectors.set("SHOW SELECTORS", true);
 	SHOW_Panel_StandalonePresets.set("SHOW STANDALONES", true);
 	MODE_StandalonePresets_NEW.set("NEW!", false);
@@ -2600,7 +2600,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 #endif
 #endif
 		}
-}
+	}
 }
 
 //--------------------------------------------------------------
@@ -2662,8 +2662,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 			else {
 				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
+		}
 	}
-}
 
 	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
@@ -2776,18 +2776,17 @@ void ofxPresetsManager::ImGui_Setup()
 
 	//gui_ImGui.setup();
 	//gui_ImGui.enableDocking();
-	
+
 	// daan fork
 	ImGuiConfigFlags flags;
-	flags = ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+	flags = ImGuiConfigFlags_DockingEnable;
+	flags |= ImGuiConfigFlags_ViewportsEnable;
 	flags |= ImGuiDockNodeFlags_NoWindowMenuButton;//from imgui_internal.h
 	flags |= ImGuiDockNodeFlags_NoCloseButton;//?
 	flags |= ImGuiDockNodeFlags_NoResizeX;
 	flags |= ImGuiDockNodeFlags_NoWindowMenuButton;
 
 	gui_ImGui.setup(nullptr, true, flags, true, false);
-
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 	//--	
 
@@ -2829,6 +2828,12 @@ void ofxPresetsManager::ImGui_Draw_WindowBegin()
 	//-
 
 	gui_ImGui.begin();
+
+	//TODO:
+	// Define the ofWindow as a docking space
+	ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 0)); // Fixes imgui to expected behaviour. Otherwise add in ImGui::DockSpace() [±line 14505] : if (flags & ImGuiDockNodeFlags_PassthruCentralNode) window_flags |= ImGuiWindowFlags_NoBackground;
+	ImGuiID dockNodeID = ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode);
+	ImGui::PopStyleColor();
 
 	//-
 
@@ -2881,21 +2886,21 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 			{
 				if (ofxImGui::BeginWindow("Group select", settings, &b))
 				{
-					ImGui::Dummy(ImVec2(0.0f, 5));
+					ImGui::Dummy(ImVec2(0, 5));
 
 					// main group link selector
 					if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);// last group is the main link group
 
 					//-
 
-					ImGui::Dummy(ImVec2(0.0f, 5));
+					ImGui::Dummy(ImVec2(0, 5));
 
 					// selector to show their randomizers
 					if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
 
 					//-
 
-					//ImGui::Dummy(ImVec2(0.0f, 5));
+					//ImGui::Dummy(ImVec2(0, 5));
 
 					// name of selected group
 					std::string str;
@@ -2969,9 +2974,15 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 
 	if (ofxImGui::BeginWindow("Main Panel", settings, false))
 	{
+		float _h = WIDGET_HEIGHT;
+		float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
+		float _w100 = ImGui::GetWindowWidth();
+		float _w99 = _w100 - 20;
+		float _w50 = _w99 / 2 - _spc;
+
 		//---
 
-		ImGui::Dummy(ImVec2(0.0f, 5));
+		ImGui::Dummy(ImVec2(0, 5));
 
 		// label for User-Kit folder
 		std::string str;
@@ -2980,13 +2991,13 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 		str = path_UserKit_Folder;
 		ImGui::Text(str.c_str());
 
-		ImGui::Dummy(ImVec2(0.0f, 5));
+		ImGui::Dummy(ImVec2(0, 5));
 
 		//--
 
 		// mode edit
 		//ofxImGui::AddParameter(MODE_Editor);
-		ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30, "EDIT MODE", "LIVE MODE");
+		ofxSurfingHelpers::AddBigToggle(MODE_Editor, 2 * WIDGET_HEIGHT, "EDIT MODE", "LIVE MODE");
 		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30); // TODO: repair method. collides when multiple toggles..
 
 		//--
@@ -2995,66 +3006,80 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 		if (MODE_Editor.get())
 		{
 			// undo engine
-			ImGui::Dummy(ImVec2(0.0f, 5));
+			ImGui::Dummy(ImVec2(0, 5));
+
 			str = "UNDO ENGINE";
 			ImGui::Text(str.c_str());
 			str = "History: " + ofToString(undoStringsParams[GuiGROUP_Selected_Index].getUndoLength()) + "/";
 			str += ofToString(undoStringsParams[GuiGROUP_Selected_Index].getRedoLength());
 			ImGui::Text(str.c_str());
 
-			if (ImGui::Button("Store"))
+			if (ImGui::Button("Store", ImVec2(_w50, _h)))
 			{
 				doStoreUndo();
 			}
 			ImGui::SameLine();
-			if (ImGui::Button("Undo"))
+			if (ImGui::Button("Clear", ImVec2(_w50, _h)))
+			{
+				doClearUndoHistory();
+			}
+			//ImGui::SameLine();
+
+			if (ImGui::Button("Undo", ImVec2(_w50, _h)))
 			{
 				doUndo();
 			}
 			ImGui::SameLine();
-			if (ImGui::Button("Redo"))
+			if (ImGui::Button("Redo", ImVec2(_w50, _h)))
 			{
 				doRedo();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Clear History"))
-			{
-				doClearUndoHistory();
 			}
 		}
 #endif
 
-		ImGui::Dummy(ImVec2(0.0f, 5));
+		ImGui::Dummy(ImVec2(0, 5));
 
 		ofxImGui::AddParameter(ENABLE_Keys);//ImGui::SameLine(); 
 
-		ImGui::Dummy(ImVec2(0.0f, 5));
+		ImGui::Dummy(ImVec2(0, 5));
 
 		//---
 
 		// panels
 		//if (MODE_Editor)
 		{
-			if (ImGui::TreeNode("PANELS"))
+			if (ImGui::CollapsingHeader("PANELS"))
+				//if (ImGui::TreeNode("PANELS"))
 			{
-				// handled by docker mode
-				//if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
-				//ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
+				//float _pd = ImGui::GetStyle().FramePadding.x;
+				//float _pd = ImGui::GetStyle().IndentSpacing.x;
+				float _h = WIDGET_HEIGHT;
+				float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
+				float _w100 = ImGui::GetWindowWidth();
+				float _w99 = _w100 - 20;
+				//float _w99 = _w100 - 5 * _spc;
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Click, _w99, _h);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllParameter, _w99, _h);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_StandalonePresets, _w99, _h);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Randomizer, _w99, _h);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllSelectors, _w99, _h);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Help, _w99, _h);
 
-				ofxImGui::AddParameter(SHOW_Panel_Click);//ImGui::SameLine();
-				ofxImGui::AddParameter(SHOW_Panel_AllParameter);//ImGui::SameLine();
-				ofxImGui::AddParameter(SHOW_Panel_StandalonePresets);//ImGui::SameLine();
+				//// handled by docker mode
+				////if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
+				////ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
+				//ofxImGui::AddParameter(SHOW_Panel_Click);//ImGui::SameLine();
+				//ofxImGui::AddParameter(SHOW_Panel_AllParameter);//ImGui::SameLine();
+				//ofxImGui::AddParameter(SHOW_Panel_StandalonePresets);//ImGui::SameLine();
+				////if (MODE_Editor)
+				//{
+				//	ofxImGui::AddParameter(SHOW_Panel_Randomizer);//ImGui::SameLine();
+				//	ofxImGui::AddParameter(SHOW_Panel_AllSelectors);//ImGui::SameLine();
+				//}
+				//ofxImGui::AddParameter(SHOW_Help);//ImGui::SameLine();
+				////ofxImGui::AddParameter(MODE_StandalonePresets_NEW);
 
-				//if (MODE_Editor)
-				{
-					ofxImGui::AddParameter(SHOW_Panel_Randomizer);//ImGui::SameLine();
-					ofxImGui::AddParameter(SHOW_Panel_AllSelectors);//ImGui::SameLine();
-				}
-				ofxImGui::AddParameter(SHOW_Help);//ImGui::SameLine();
-
-				//ofxImGui::AddParameter(MODE_StandalonePresets_NEW);
-
-				ImGui::TreePop();
+				//ImGui::TreePop();
 			}
 		}
 
@@ -3069,12 +3094,24 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Extra()
 {
-	if (ImGui::TreeNode("EXTRA")) {
+	if (ImGui::CollapsingHeader("EXTRA"))
+		//if (ImGui::TreeNode("EXTRA"))
+	{
 
 		//-
 
-		if (ImGui::TreeNode("ADVANCED"))
+		if (ImGui::CollapsingHeader("ADVANCED"))
+			//if (ImGui::TreeNode("ADVANCED"))
 		{
+			//float _pd = ImGui::GetStyle().FramePadding.x;
+			//float _pd = ImGui::GetStyle().IndentSpacing.x;
+			float _h = WIDGET_HEIGHT;
+			float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
+			float _w100 = ImGui::GetWindowWidth();
+			float _w99 = _w100 - 20;
+			float _w50 = _w99 / 2 - _spc;
+			//float _w99 = _w100 - 5 * _spc;
+
 			ofxImGui::AddParameter(ENABLE_Keys);
 			ofxImGui::AddParameter(autoSave);//ImGui::SameLine();
 			//ofxImGui::AddParameter(autoLoad);//ImGui::SameLine();
@@ -3086,19 +3123,28 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 
 			if (MODE_Editor)
 			{
-				ofxImGui::AddParameter(MODE_EditPresetClicker); ImGui::SameLine();
-				ofxImGui::AddParameter(SHOW_BackGround_EditPresetClicker);
+				ofxSurfingHelpers::AddBigToggle(MODE_EditPresetClicker, _w50, _h); ImGui::SameLine();
+				ofxSurfingHelpers::AddBigToggle(SHOW_BackGround_EditPresetClicker, _w50, _h);
+
+				//ofxImGui::AddParameter(MODE_EditPresetClicker); ImGui::SameLine();
+				//ofxImGui::AddParameter(SHOW_BackGround_EditPresetClicker);
 			}
 
-			ImGui::TreePop();
+			//ImGui::TreePop();
 		}
 
 		//--
 
 		if (MODE_Editor)
 		{
-			if (ImGui::TreeNode("USER-KIT"))
+			if (ImGui::CollapsingHeader("USER-KIT"))
+				//if (ImGui::TreeNode("USER-KIT"))
 			{
+				float _h = WIDGET_HEIGHT;
+				float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
+				float _w100 = ImGui::GetWindowWidth();
+				float _w99 = _w100 - 20;
+
 				// User-Kit name
 				std::string str;
 				str = "Name:\n";
@@ -3106,8 +3152,8 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 				ImGui::Text(str.c_str());
 
 				// button to Open File Dialog as folder
-				if (ImGui::Button("Set Custom folder")) {
-
+				if (ImGui::Button("Set Custom folder", ImVec2(_w99, _h)))
+				{
 					ofFileDialogResult openFileResult = ofSystemLoadDialog("Select User-Kit folder", true, ofToDataPath(path_UserKit_Folder, true));
 
 					// check if the user opened a file
@@ -3121,12 +3167,12 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 					else ofLogNotice(__FUNCTION__) << ("User hit cancel");
 				}
 
-				ImGui::Dummy(ImVec2(0.0f, 5));
+				ImGui::Dummy(ImVec2(0, 5));
 
 				// monitor custom state
 				//ofxImGui::AddParameter(bPathDirCustom);
 
-				ImGui::TreePop();
+				//ImGui::TreePop();
 			}
 		}
 
@@ -3147,7 +3193,7 @@ void ofxPresetsManager::ImGui_Draw_Extra()
 		//	ImGui::TreePop();
 		//}
 
-		ImGui::TreePop();
+		//ImGui::TreePop();
 	}
 }
 
@@ -3356,7 +3402,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 			//---
 
-			ImGui::Dummy(ImVec2(0.0f, 5));
+			ImGui::Dummy(ImVec2(0, 5));
 
 			// label for User-Kit folder
 			str = "User-Kit";
@@ -3364,14 +3410,14 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 			str = path_UserKit_Folder;
 			ImGui::Text(str.c_str());
 
-			ImGui::Dummy(ImVec2(0.0f, 5));
+			ImGui::Dummy(ImVec2(0, 5));
 
 			//--
 
 			// user selected wich group to edit
 			if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);
 
-			//ImGui::Dummy(ImVec2(0.0f, 5));
+			//ImGui::Dummy(ImVec2(0, 5));
 
 			//--
 
@@ -3381,7 +3427,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 			str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
 			ImGui::Text(str.c_str());
 
-			ImGui::Dummy(ImVec2(0.0f, 5));
+			ImGui::Dummy(ImVec2(0, 5));
 
 			//--
 
@@ -3389,14 +3435,14 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 			{
 				//---
 
-				ImGui::Dummy(ImVec2(0.0f, 5));
+				ImGui::Dummy(ImVec2(0, 5));
 
 				//// label presets folder
 				////str = "User-Kit";
 				////ImGui::Text(str.c_str());
 				//str = "/" + path_PresetsStandalone + "/" + groups[groupIndex].getName();// append group name
 				//ImGui::Text(str.c_str());
-				//ImGui::Dummy(ImVec2(0.0f, 5));
+				//ImGui::Dummy(ImVec2(0, 5));
 
 				//-
 
@@ -3426,7 +3472,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 				//	save(PRESETS_Selected_Index[groupIndex], groupIndex);
 				//}
 
-				ImGui::Dummy(ImVec2(0.0f, 5));
+				ImGui::Dummy(ImVec2(0, 5));
 
 				//-
 
@@ -3545,7 +3591,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 				{
 					// 4.2 update
 
-					ImGui::Dummy(ImVec2(0.0f, 5));
+					ImGui::Dummy(ImVec2(0, 5));
 
 					if (ImGui::Button("UPDATE"))
 					{
