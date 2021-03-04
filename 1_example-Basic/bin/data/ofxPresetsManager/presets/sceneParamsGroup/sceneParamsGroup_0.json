@@ -1,9 +1,9 @@
 {
     "sceneParamsGroup": {
-        "amount": "22",
-        "separation": "10",
-        "shapeType": "2",
-        "size": "18",
+        "amount": "3",
+        "separation": "46",
+        "shapeType": "1",
+        "size": "53",
         "styleGroup": {
             "color": "0, 0, 0, 1",
             "fill": "1",

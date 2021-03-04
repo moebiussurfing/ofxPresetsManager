@@ -903,13 +903,19 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 	// 1. randomizers
 	string str;
 	str = "GROUP " + group.getName();
+	
+	static bool auto_resize = true;
+	ImGuiWindowFlags flagsw;
+	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
-	ofxImGui::Settings settings;
+	float _h = WIDGET_HEIGHT;
+	float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
+	float _w100 = ImGui::GetWindowWidth();
+	float _w99 = _w100 - 20;
+	float _w50 = _w99 / 2 - _spc;
 
-	if (ofxImGui::BeginWindow(str.c_str(), settings))
+	if (ofxImGui::BeginWindow(str.c_str(), settings, flagsw))
 	{
-		//---
-
 		// preset selector
 
 		ImGui::Dummy(ImVec2(0.0f, 5));
@@ -985,13 +991,13 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		// main helpers
 		if (MODE_Editor)
 		{
-			if (ImGui::Button("CLONE ALL"))
+			if (ImGui::Button("CLONE ALL", ImVec2(_w50, _h)))
 			{
 				bCloneAll = true;
 			}
 
 			ImGui::SameLine();
-			if (ImGui::Button("CLONE >"))
+			if (ImGui::Button("CLONE >", ImVec2(_w50, _h)))
 			{
 				bCloneRight = true;
 			}
@@ -1026,7 +1032,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 		//ofxImGui::AddParameter(PLAY_RandomizeTimer);
 		//ofxSurfingHelpers::AddBigToggle(PLAY_RandomizeTimer, 30);
-		ofxSurfingHelpers::AddBigToggle(PLAY_RandomizeTimer, 30, "STOP RANDOMIZER", "PLAY RANDOMIZER");
+		ofxSurfingHelpers::AddBigToggle(PLAY_RandomizeTimer, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
 
 		//-
 
@@ -1055,12 +1061,14 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 		//--
 
-		if (MODE_Editor) {
+		if (MODE_Editor) 
+		{
 			// 1.0.3 bang randomize
 
 			ImGui::Dummy(ImVec2(0.0f, 5));
 
-			ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 30);
+			ofxSurfingHelpers::AddBigButton(bRandomizeEditor, _w99, 2 * _h);
+			//ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 2 * _h);
 			//ofxImGui::AddParameter(bRandomizeEditor);// trig random current preset: will randomize all enabled toggle parameters
 		}
 
@@ -1095,7 +1103,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 			ImGui::Dummy(ImVec2(0.0f, 5));
 
-			if (ImGui::TreeNode("EDIT RANDOMIZERS"))
+			if (ImGui::CollapsingHeader("EDIT RANDOMIZERS"))
 			{
 				// 1.1 randomizers presets
 				//if (MODE_DicesProbs) 
@@ -1114,9 +1122,10 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 					//ImGui::SetNextWindowCollapsed(false);// ?? not working
 					ofxImGui::AddGroup(params_Editor, settings);
 				}
-				ImGui::TreePop();
 			}
 		}
+
+		ImGui::Checkbox("Auto-Resize", &auto_resize);
 	}
 	ofxImGui::EndWindow(settings);
 }

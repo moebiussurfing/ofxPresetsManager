@@ -865,11 +865,11 @@ public:
 	{
 		SHOW_Help = !SHOW_Help;
 	}
-	//--------------------------------------------------------------
-	void setPosition_GUI_ImGui(int x, int y)
-	{
-		ImGui_Position = ofVec2f(x, y);
-	}
+	////--------------------------------------------------------------
+	//void setPosition_GUI_ImGui(int x, int y)
+	//{
+	//	ImGui_Position = ofVec2f(x, y);
+	//}
 	//--------------------------------------------------------------
 	void setVisible_GUI(bool b)
 	{
@@ -1066,12 +1066,12 @@ public:
 
 #ifndef USE_IMGUI_EXTERNAL
 	ofxImGui::Gui gui_ImGui;
-	void ImGui_Setup();
+	void gui_Setup();
 	void gui_Begin();
 	void gui_End();
 	ImFont* customFont = nullptr;
 	ImGuiStyle *style = nullptr;
-	ofxImGui::Settings mainSettings = ofxImGui::Settings();
+	ofxImGui::Settings settings;
 #endif
 
 	//-
@@ -1083,10 +1083,10 @@ private:
 	int cellSize = 80;// default box button size
 	ofVec2f clicker_Pos;// default clicker position
 
-private:
-	// ImGui 
-	ofParameter<glm::vec2> ImGui_Position;// ImGui browser panel position. 
-	ofParameter<glm::vec2> ImGui_Size;// ImGui browser panel position. 
+//private:
+//	// ImGui 
+//	ofParameter<glm::vec2> ImGui_Position;// ImGui browser panel position. 
+//	ofParameter<glm::vec2> ImGui_Size;// ImGui browser panel position. 
 
 	//--
 

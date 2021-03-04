@@ -6,6 +6,10 @@
 #include "ofxSurfing_ImGui.h"
 //#include "ofxImGui.h"
 
+#define WIDGET_HEIGHT 30
+#define PANEL_WIDGETS_WIDTH 225
+#define PANEL_WIDGETS_HEIGHT 100
+
 class groupRandomizer
 {
 
@@ -45,6 +49,8 @@ public:
 
 public:
 	void ImGui_Draw_GroupRandomizers();
+
+	ofxImGui::Settings settings;
 
 	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
 
