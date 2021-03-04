@@ -452,10 +452,10 @@ void groupRandomizer::doRandomPreset() {
 	ofParameterGroup _group = group;
 	doRandomGroup(_group);
 
-//#ifdef INCLUDE_ofxUndoSimple
-//	if (MODE_Editor.get())
-//		doStoreUndo();// store scene
-//#endif
+	//#ifdef INCLUDE_ofxUndoSimple
+	//	if (MODE_Editor.get())
+	//		doStoreUndo();// store scene
+	//#endif
 }
 
 //--------------------------------------------------------------
@@ -903,19 +903,19 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 	// 1. randomizers
 	string str;
 	str = "GROUP " + group.getName();
-	
+
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
-	float _h = WIDGET_HEIGHT;
-	float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
-	float _w100 = ImGui::GetWindowWidth();
-	float _w99 = _w100 - 20;
-	float _w50 = _w99 / 2 - _spc;
-
 	if (ofxImGui::BeginWindow(str.c_str(), settings, flagsw))
 	{
+		float _h = WIDGET_HEIGHT;
+		float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
+		float _w100 = ImGui::GetWindowWidth();
+		float _w99 = _w100 - 20;
+		float _w50 = _w99 / 2 - _spc;
+
 		// preset selector
 
 		ImGui::Dummy(ImVec2(0.0f, 5));
@@ -1061,7 +1061,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 		//--
 
-		if (MODE_Editor) 
+		if (MODE_Editor)
 		{
 			// 1.0.3 bang randomize
 
