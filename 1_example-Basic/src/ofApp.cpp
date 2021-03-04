@@ -13,7 +13,8 @@ void ofApp::setupScene()
 	paramsNested.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
 	paramsNested.add(lineWidth.set("lineWidth", 1, 0.1, 10));
 	params.add(paramsNested);
-	// the container is ready to be added into presetsManager!
+
+	// the group container is ready to be added to presetsManager!
 }
 
 //--------------------------------------------------------------
@@ -21,6 +22,7 @@ void ofApp::setup()
 {
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
+	font.load("assets/fonts/telegrama_render.otf", 11, true, true, true);
 
 	// define our parameters (ofParameterGroup params) for our scene 
 	// and add them to our params
@@ -32,6 +34,9 @@ void ofApp::setup()
 	presetsManager.add(params, { '0', '1', '2', '3', '4', '5' });
 	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
 }
+
+
+/* Scene */
 
 //--------------------------------------------------------------
 void ofApp::drawScene()
@@ -74,7 +79,9 @@ void ofApp::drawScene()
 		ofToString(color.get().a, 1);
 	str += "color        : " + sc + "\n";
 	str += "lineWidth    : " + ofToString(lineWidth);
-	ofDrawBitmapStringHighlight(str, 35, 50);
+
+	//ofDrawBitmapStringHighlight(str, 35, 50);
+	ofxSurfingHelpers::drawTextBoxed(font, str, 35, 50);
 }
 
 //--------------------------------------------------------------
@@ -83,10 +90,4 @@ void ofApp::draw()
 	drawScene();
 
 	// nothing more!
-}
-
-//--------------------------------------------------------------
-void ofApp::exit()
-{
-	//presetsManager.exit();// this call is required only to auto-store current selected preset settings on exit. 
 }

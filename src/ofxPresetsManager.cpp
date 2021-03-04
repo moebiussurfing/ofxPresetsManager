@@ -2774,12 +2774,36 @@ void ofxPresetsManager::ImGui_Setup()
 
 	//--
 
+	//gui_ImGui.setup();
 	//gui_ImGui.enableDocking();
+	
+	// daan fork
+	ImGuiConfigFlags flags;
+	flags = ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+	flags |= ImGuiDockNodeFlags_NoWindowMenuButton;//from imgui_internal.h
+	flags |= ImGuiDockNodeFlags_NoCloseButton;//?
+	flags |= ImGuiDockNodeFlags_NoResizeX;
+	flags |= ImGuiDockNodeFlags_NoWindowMenuButton;
 
-	gui_ImGui.setup();
-	//gui_ImGui.setup(false, true); // No autodraw, Allow chaining
+	gui_ImGui.setup(nullptr, true, flags, true, false);
 
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+	//--	
+
+	auto &io = ImGui::GetIO();
+	io.ConfigDockingWithShift = true;
+	io.ConfigWindowsResizeFromEdges = false;//?
+
+	// fonts
+#ifdef INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT
+	auto normalCharRanges = io.Fonts->GetGlyphRangesDefault();
+	float _size = 11.f;
+	std::string _name = "telegrama_render.otf";
+	std::string _path = "assets/fonts/" + _name;//assets folder
+	customFont = gui_ImGui.addFont(_path, _size, nullptr, normalCharRanges);
+	io.FontDefault = customFont;//
+#endif
 
 	//--
 
@@ -2788,6 +2812,8 @@ void ofxPresetsManager::ImGui_Setup()
 	ofxSurfingHelpers::ImGui_ThemeMoebiusSurfing();
 	//ofxSurfingHelpers::ImGui_ThemeModernDark();
 #endif
+
+	mainSettings = ofxImGui::Settings();
 
 	//--
 
@@ -2805,11 +2831,19 @@ void ofxPresetsManager::ImGui_Draw_WindowBegin()
 	gui_ImGui.begin();
 
 	//-
+
+#ifdef INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT
+	ImGui::PushFont(customFont);
+#endif
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_WindowEnd()
 {
+#ifdef INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT
+	ImGui::PopFont();
+#endif
+
 	//--
 
 	gui_ImGui.end();

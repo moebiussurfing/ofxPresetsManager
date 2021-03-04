@@ -133,6 +133,7 @@
 // https://github.com/Daandelange/ofxImGui
 // this feature will allow that you use multiple ImGui instances running into different classes of your app.
 #include "ofxImGui.h"
+#include "imgui_internal.h" // <-- example uses some imgui internals...
 
 //--
 
@@ -1064,6 +1065,9 @@ public:
 	void ImGui_Setup();
 	void ImGui_Draw_WindowBegin();
 	void ImGui_Draw_WindowEnd();
+	ImFont* customFont = nullptr;
+	ImGuiStyle *style = nullptr;
+	ofxImGui::Settings mainSettings = ofxImGui::Settings();
 #endif
 
 	//-

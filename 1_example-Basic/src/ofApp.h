@@ -10,11 +10,6 @@ class ofApp : public ofBaseApp
 public:
 	void setup();
 	void draw();
-	void exit();
-
-	// scene
-	void setupScene();
-	void drawScene();
 
 	// the main container
 	ofParameterGroup params;
@@ -31,4 +26,10 @@ public:
 
 	// presetsManager
 	ofxPresetsManager presetsManager;
+
+	// scene
+	void setupScene();
+	void drawScene();
+	
+	ofTrueTypeFont font;
 };
