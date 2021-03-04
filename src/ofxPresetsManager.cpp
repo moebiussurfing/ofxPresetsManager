@@ -656,9 +656,9 @@ void ofxPresetsManager::update(ofEventArgs & args)
 
 #ifndef USE_IMGUI_EXTERNAL	
 //---------------------------------------------------------------------
-void ofxPresetsManager::drawImGui()
+void ofxPresetsManager::gui_Draw()
 {
-	ImGui_Draw_WindowBegin();
+	gui_Begin();
 	{
 		// mouse over ImGui engine
 		bMouseOver_Changed = false;
@@ -681,7 +681,7 @@ void ofxPresetsManager::drawImGui()
 			ofLogNotice(__FUNCTION__) << "bImGui_mouseOver: " << (bImGui_mouseOver ? "\t\t\t\t > INSIDE" : "< OUTSIDE");
 		}
 	}
-	ImGui_Draw_WindowEnd();
+	gui_End();
 }
 #endif
 
@@ -702,9 +702,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 	// ImGui
 
 #ifndef USE_IMGUI_EXTERNAL	
-	drawImGui();
-	//gui_ImGui.draw(); //    <-- Also calls gui.end()
-
+	gui_Draw();
 #endif
 
 	//----
@@ -2748,11 +2746,6 @@ void ofxPresetsManager::exit()
 	save_ControlSettings();
 
 	rectanglePresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
-
-	//--
-
-	// TODO: debug crash
-	//gui_ImGui.exit();
 }
 
 //--
@@ -2767,24 +2760,25 @@ void ofxPresetsManager::ImGui_Setup()
 
 	//--
 
-	// font customize
-#ifdef INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT
-	ofxSurfingHelpers::ImGui_FontCustom();
-#endif
+//	// font customize
+//#ifdef INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT
+//	ofxSurfingHelpers::ImGui_FontCustom();
+//#endif
 
 	//--
 
+	// official
 	//gui_ImGui.setup();
 	//gui_ImGui.enableDocking();
 
 	// daan fork
 	ImGuiConfigFlags flags;
 	flags = ImGuiConfigFlags_DockingEnable;
-	flags |= ImGuiConfigFlags_ViewportsEnable;
-	flags |= ImGuiDockNodeFlags_NoWindowMenuButton;//from imgui_internal.h
-	flags |= ImGuiDockNodeFlags_NoCloseButton;//?
-	flags |= ImGuiDockNodeFlags_NoResizeX;
-	flags |= ImGuiDockNodeFlags_NoWindowMenuButton;
+	//flags |= ImGuiConfigFlags_ViewportsEnable;
+	//flags |= ImGuiDockNodeFlags_NoWindowMenuButton;//from imgui_internal.h
+	//flags |= ImGuiDockNodeFlags_NoCloseButton;//?
+	//flags |= ImGuiDockNodeFlags_NoResizeX;
+	//flags |= ImGuiDockNodeFlags_NoWindowMenuButton;
 
 	gui_ImGui.setup(nullptr, true, flags, true, false);
 
@@ -2823,17 +2817,19 @@ void ofxPresetsManager::ImGui_Setup()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_WindowBegin()
+void ofxPresetsManager::gui_Begin()
 {
 	//-
 
 	gui_ImGui.begin();
 
-	//TODO:
-	// Define the ofWindow as a docking space
-	ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 0)); // Fixes imgui to expected behaviour. Otherwise add in ImGui::DockSpace() [±line 14505] : if (flags & ImGuiDockNodeFlags_PassthruCentralNode) window_flags |= ImGuiWindowFlags_NoBackground;
-	ImGuiID dockNodeID = ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode);
-	ImGui::PopStyleColor();
+	////TODO:
+	//// Define the ofWindow as a docking space
+	//ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 0)); // Fixes imgui to expected behaviour. Otherwise add in ImGui::DockSpace() [±line 14505] : if (flags & ImGuiDockNodeFlags_PassthruCentralNode) window_flags |= ImGuiWindowFlags_NoBackground;
+	//ImGuiID dockNodeID = ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode);
+	//ImGui::PopStyleColor();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(PANEL_WIDGETS_WIDTH, PANEL_WIDGETS_HEIGHT));
 
 	//-
 
@@ -2843,11 +2839,13 @@ void ofxPresetsManager::ImGui_Draw_WindowBegin()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_WindowEnd()
+void ofxPresetsManager::gui_End()
 {
 #ifdef INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT
 	ImGui::PopFont();
 #endif
+	
+	ImGui::PopStyleVar();
 
 	//--
 
@@ -2873,6 +2871,10 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 	{
 		bool b = false;
 
+	static bool auto_resize = false;
+	ImGuiWindowFlags flagsw;
+	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
+
 		// main panel
 		ImGui_Draw_MainPanel();// main control + extra
 
@@ -2884,7 +2886,8 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 			// hide this panels when no more than one group! it's for multi groups
 			if (groups.size() > 1)
 			{
-				if (ofxImGui::BeginWindow("Group select", settings, &b))
+				//if (ofxImGui::BeginWindow("Group select", settings, &b))
+				if (ofxImGui::BeginWindow("Group select", settings, flagsw))
 				{
 					ImGui::Dummy(ImVec2(0, 5));
 
@@ -2941,7 +2944,11 @@ void ofxPresetsManager::ImGui_Draw_PresetParameters()
 {
 	ofxImGui::Settings settings;
 
-	if (ofxImGui::BeginWindow("All Parameters", settings, false))
+	static bool auto_resize = false;
+	ImGuiWindowFlags flagsw;
+	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
+
+	if (ofxImGui::BeginWindow("All Parameters", settings, flagsw))
 	{
 		//ofxImGui::AddDrag(PRESETS_Selected_Index[0]);
 
@@ -2958,7 +2965,11 @@ void ofxPresetsManager::ImGui_Draw_GroupsSelectors()
 {
 	ofxImGui::Settings settings;
 
-	if (ofxImGui::BeginWindow("Group Selectors", settings, false))
+	static bool auto_resize = false;
+	ImGuiWindowFlags flagsw;
+	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
+
+	if (ofxImGui::BeginWindow("Group Selectors", settings, flagsw))
 	{
 		ofxImGui::AddGroup(params_GroupsSelectors, settings);
 	}
@@ -2972,7 +2983,11 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 
 	bool b = true;
 
-	if (ofxImGui::BeginWindow("Main Panel", settings, false))
+	static bool auto_resize = false;
+	ImGuiWindowFlags flagsw;
+	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
+
+	if (ofxImGui::BeginWindow("Main Panel", settings, flagsw))
 	{
 		float _h = WIDGET_HEIGHT;
 		float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
@@ -3095,7 +3110,7 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 void ofxPresetsManager::ImGui_Draw_Extra()
 {
 	if (ImGui::CollapsingHeader("EXTRA"))
-		//if (ImGui::TreeNode("EXTRA"))
+	//if (ImGui::TreeNode("EXTRA"))
 	{
 
 		//-
@@ -3390,9 +3405,14 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 	{
 		bool b = true;
 
+		static bool auto_resize = false;
+		ImGuiWindowFlags flagsw;
+		flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
+
 		ofxImGui::Settings settings;
 
-		if (ofxImGui::BeginWindow("Standalone Presets", settings, &b))
+		//if (ofxImGui::BeginWindow("Standalone Presets", settings, &b))
+		if (ofxImGui::BeginWindow("Standalone Presets", settings, flagsw))
 		{
 			int groupIndex = GuiGROUP_Selected_Index.get();
 			int _numfiles = standaloneFileNames[groupIndex].size();

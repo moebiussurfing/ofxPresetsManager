@@ -11,7 +11,7 @@ public:
 	void setup();
 	void draw();
 
-	// the main container
+	// the main group container
 	ofParameterGroup params;
 	
 	// all the parameters for the scene 

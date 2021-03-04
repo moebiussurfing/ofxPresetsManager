@@ -158,6 +158,8 @@
 #endif
 
 #define WIDGET_HEIGHT 30
+#define PANEL_WIDGETS_WIDTH 225
+#define PANEL_WIDGETS_HEIGHT 100
 
 //-------------------------------
 
@@ -175,7 +177,7 @@ public:
 	void windowResized(int w, int h);
 	void exit();
 
-	void drawImGui();
+	void gui_Draw();
 	void drawHelp(int x, int y);
 	void clear();
 
@@ -1065,8 +1067,8 @@ public:
 #ifndef USE_IMGUI_EXTERNAL
 	ofxImGui::Gui gui_ImGui;
 	void ImGui_Setup();
-	void ImGui_Draw_WindowBegin();
-	void ImGui_Draw_WindowEnd();
+	void gui_Begin();
+	void gui_End();
 	ImFont* customFont = nullptr;
 	ImGuiStyle *style = nullptr;
 	ofxImGui::Settings mainSettings = ofxImGui::Settings();
