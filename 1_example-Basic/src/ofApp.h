@@ -10,9 +10,6 @@ class ofApp : public ofBaseApp
 public:
 	void setup();
 	void draw();
-
-	// the main group container
-	ofParameterGroup params;
 	
 	// all the parameters for the scene 
 	ofParameterGroup paramsNested;
@@ -23,6 +20,9 @@ public:
 	ofParameter<int> amount;
 	ofParameter<int> separation;
 	ofParameter<int> size;
+
+	// the main group container
+	ofParameterGroup params;
 
 	// presetsManager
 	ofxPresetsManager presetsManager;

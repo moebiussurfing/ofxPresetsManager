@@ -906,7 +906,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 	string str;
 	str = "GROUP " + group.getName();
 
-	static bool auto_resize = true;
+	static bool auto_resize = false;//TODO: BUG:
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
@@ -948,7 +948,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 			// Manually wrapping
 			// (we should eventually provide this as an automatic layout feature, but for now you can do it manually)
 
-			ImGuiStyle& style = ImGui::GetStyle();
+			ImGuiStyle& style2 = ImGui::GetStyle();
 			int _amtButtons = amountPresets;
 			float _windowVisible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
 
@@ -962,11 +962,11 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 				{
 					if (PRESET_Selected_IndexMain.get() == n)// when selected
 					{
-						const ImVec4 colorActive = style.Colors[ImGuiCol_ButtonHovered];// changes the color
+						const ImVec4 colorActive = style2.Colors[ImGuiCol_ButtonHovered];// changes the color
 						ImGui::PushStyleColor(ImGuiCol_Button, colorActive);
 					}
 					else {
-						const ImVec4 colorButton = style.Colors[ImGuiCol_Button];// do not changes the color
+						const ImVec4 colorButton = style2.Colors[ImGuiCol_Button];// do not changes the color
 						ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
 					}
 					// draw button
@@ -978,7 +978,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 					ImGui::PopStyleColor();
 				}
 				float last_button_x2 = ImGui::GetItemRectMax().x;
-				float next_button_x2 = last_button_x2 + style.ItemSpacing.x + button_sz.x; // Expected position if next button was on same line
+				float next_button_x2 = last_button_x2 + style2.ItemSpacing.x + button_sz.x; // Expected position if next button was on same line
 				if (n + 1 < _amtButtons && next_button_x2 < _windowVisible_x2) ImGui::SameLine();
 
 				ImGui::PopID();
@@ -1102,6 +1102,9 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		//}
 
 		//--
+		
+		//TODO: BUG:
+		//there's a bug on resizing auto..
 
 		if (MODE_Editor)
 		{
@@ -1112,6 +1115,10 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 				// 1.1 randomizers presets
 
 				//if (MODE_DicesProbs) 
+				//ofxImGui::Settings settingsG;
+				//settingsG.treeLevel = 2;
+				//settingsG.lockPosition = true;
+
 				ofxImGui::AddGroup(params_Randomizer, settings);
 
 #ifdef DEBUG_randomTest
