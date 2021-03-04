@@ -76,6 +76,8 @@ void groupRandomizer::startup()
 
 	doDices();
 
+	settings = ofxImGui::Settings();
+
 	//--
 
 	// workflow
@@ -918,7 +920,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 		// preset selector
 
-		ImGui::Dummy(ImVec2(0.0f, 5));
+		ImGui::Dummy(ImVec2(0, 5));
 
 		////string str = "User-Kit: " + displayNameUserKit;
 		//str = "  Group    " + group.getName();
@@ -927,12 +929,12 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		str = "  Preset   " + ofToString(PRESET_Selected_IndexMain.get());
 		ImGui::Text(str.c_str());
 
-		ImGui::Dummy(ImVec2(0.0f, 5));
+		ImGui::Dummy(ImVec2(0, 5));
 
 		ofxImGui::AddParameter(PRESET_Selected_IndexMain);
 
 		//ImGui::SameLine();
-		//ImGui::Dummy(ImVec2(0.0f, 5));
+		//ImGui::Dummy(ImVec2(0, 5));
 
 		//--
 
@@ -985,7 +987,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 		//--
 
-		ImGui::Dummy(ImVec2(0.0f, 5));
+		ImGui::Dummy(ImVec2(0, 5));
 
 		// TODO: not implemented bc must be backward..
 		// main helpers
@@ -1018,15 +1020,13 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 		// 1. presets randomizers
 
-		ImGuiStyle *style = &ImGui::GetStyle();
-
 		//--
 
-		ImGui::Dummy(ImVec2(0.0f, 10));
+		ImGui::Dummy(ImVec2(0, 10));
 
 		str = "RANDOMIZER";
 		ImGui::Text(str.c_str());
-		ImGui::Dummy(ImVec2(0.0f, 5));
+		ImGui::Dummy(ImVec2(0, 5));
 
 		// 1.0.1 play randomizer index
 
@@ -1041,6 +1041,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		auto parameter = randomizeDurationBpm;
 		auto tmpRef = randomizeDurationBpm.get();
 		auto name = ofxImGui::GetUniqueName(randomizeDurationBpm);
+
 		if (ImGui::SliderFloat(ofxImGui::GetUniqueName(parameter), (float *)&tmpRef, parameter.getMin(), parameter.getMax()))
 		{
 			parameter.set(tmpRef);
@@ -1049,15 +1050,18 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		//--
 
 		// 1.0.2 draw progress bar for the randomizer timer
+		{
+			ImGuiStyle *style = &ImGui::GetStyle();
 
-		ImGui::PushID("prog");
-		const ImVec4 color = style->Colors[ImGuiCol_ButtonHovered];//we can force change this color on theme... only used here
-		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, color);
-		//ImGui::ProgressBar(randomizerProgress.get());
-		ImGui::ProgressBar(_prog);
-		ImGui::PopStyleColor();
-		ImGui::PopID();
-		//cout << _prog << endl;
+			ImGui::PushID("prog");
+			const ImVec4 color = style->Colors[ImGuiCol_ButtonHovered];//we can force change this color on theme... only used here
+			ImGui::PushStyleColor(ImGuiCol_PlotHistogram, color);
+			//ImGui::ProgressBar(randomizerProgress.get());
+			ImGui::ProgressBar(_prog);
+			ImGui::PopStyleColor();
+			ImGui::PopID();
+			//cout << _prog << endl;
+		}
 
 		//--
 
@@ -1065,7 +1069,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		{
 			// 1.0.3 bang randomize
 
-			ImGui::Dummy(ImVec2(0.0f, 5));
+			ImGui::Dummy(ImVec2(0, 5));
 
 			ofxSurfingHelpers::AddBigButton(bRandomizeEditor, _w99, 2 * _h);
 			//ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 2 * _h);
@@ -1099,15 +1103,15 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 		//--
 
-		if (MODE_Editor) {
-
-			ImGui::Dummy(ImVec2(0.0f, 5));
+		if (MODE_Editor)
+		{
+			ImGui::Dummy(ImVec2(0, 5));
 
 			if (ImGui::CollapsingHeader("EDIT RANDOMIZERS"))
 			{
 				// 1.1 randomizers presets
+
 				//if (MODE_DicesProbs) 
-				//ImGui::SetNextWindowCollapsed(true);// ?? not working
 				ofxImGui::AddGroup(params_Randomizer, settings);
 
 #ifdef DEBUG_randomTest
@@ -1119,7 +1123,6 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 				if (MODE_Editor)
 				{
-					//ImGui::SetNextWindowCollapsed(false);// ?? not working
 					ofxImGui::AddGroup(params_Editor, settings);
 				}
 			}

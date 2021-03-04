@@ -2941,6 +2941,8 @@ void ofxPresetsManager::ImGui_Draw_PresetParameters()
 		{
 			ofxImGui::AddGroup(groups[i], settings);
 		}
+
+		ImGui::Checkbox("Auto-Resize", &auto_resize);
 	}
 	ofxImGui::EndWindow(settings);
 }
