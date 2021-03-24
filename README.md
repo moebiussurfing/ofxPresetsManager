@@ -8,9 +8,6 @@ Also *empowered* with a *nice GUI* and many *helpers* and customizations.
 ## Screenshot
 ![image](/readme_images/Capture_v2.JPG?raw=true "image")  
 
-## GIF
-![gif](/readme_images/Capture_ofxPresetsManager.gif?raw=true "gif")  
-
 ## Features
 - Powerful handling of several nested `ofParameter`'s into `ofParameterGroup`'s as containers.
 - Easy to integrate into your projects.
@@ -107,8 +104,6 @@ ofApp::setup()
 * **1_example-Basic**:  
 Illustrates how to handle some ```ofParameter```'s bundled into one ```ofParameterGroup``` used as a container.  
 
-![image](/readme_images/Capture-example-Basic.PNG?raw=true "image")  
-
 * **2_example-MultiGroup**:  
 Helps to learn how to handle multiple `ofParameterGroup`'s.  
 ```.cpp
@@ -133,17 +128,16 @@ This allows you to control the presets on the **Client OF_APP**.
 The **Server OF_APP** draws your scene using the *linked/received* parameters from the **Client OF_APP**.  
 This is useful because in some scenarios could help improve the performance or the compiling time and dependencies.  
 
-**VIDEO**  
-
+**VIDEO:**  
 [![ofxPresetsManager](http://img.youtube.com/vi/kV-t8lIdNRg/0.jpg)](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
 
 ## Dependencies
 * [ofxImGui](https://github.com/Daandelange/ofxImGui/tree/jvcleave) [Fork]
 * [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
 * [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)
-* [ofxRemoteParameters](https://github.com/c-mendoza/ofxRemoteParameters) [Only for the examples 3A-3B]
-Below add-ons are bundled. Already included in `OF_ADDON/libs`.  
-Do not require to manually include in `Project Generator`.  
+* [ofxRemoteParameters](https://github.com/c-mendoza/ofxRemoteParameters) [Only for the examples 3A-3B]  
+Below add-ons are bundled. Already included in **OF_ADDON/libs**.  
+Do not require to manually include in **Project Generator**.  
 * [ofxUndo](https://github.com/nariakiiwatani/ofxUndo)
 
 ## Thanks
@@ -157,7 +151,7 @@ which inspired this addon a lot. Some of his code is also used here.*
 - **Windows10** / **VS2017** / **OF ~0.11**
 - **macOS. High Sierra** / **Xcode9** & **Xcode10** / **OF ~0.11**
 
-## Versions History
+## History of Changes
 **v2.0**
 * Added examples for **ofxRemoteParameters** from **@c-mendoza**.
 * Switched to **ofxImGui** fork from **@Daandelange** allowing multiple ImGui instances, to combine many addons using **ImGui**.
@@ -165,7 +159,7 @@ which inspired this addon a lot. Some of his code is also used here.*
 ## Notes
 * A Better performant version without using hard disk files. **Memory Mode**, using a vector of XML/JSON instead of files.
 * Improve deserialization and ofParameter callbacks / triggering to improve speed.
-* Add tweening or filtering to ease transitions between presets when switching.
+* Add params tweening or filtering to ease transitions between presets when switching.
 * Add a minimal / lite class to play compatible preset files but without any GUI or using a tiny **ofxGui**/**ImGui** version.
 * More ideas noted into **ofxPresetsManager.h**.   
 * **Feedback**, **Issues**, **PR**'s, and any kind of help are very welcome!
