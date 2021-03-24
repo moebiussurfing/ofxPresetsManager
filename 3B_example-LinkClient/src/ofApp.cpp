@@ -7,7 +7,7 @@ const static std::string SERVER_IP_ADDRESS = "127.0.0.1";
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-	ofSetWindowTitle("OF CLIENT");
+	ofSetWindowTitle("OF CLIENT ofxRemoteParameters");
 	ofSetWindowPosition(0, 25);
 
 	ofSetLogLevel(OF_LOG_VERBOSE);

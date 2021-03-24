@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-	ofSetWindowTitle("OF SERVER");
+	ofSetWindowTitle("OF SERVER ofxRemoteParameters");
 	ofSetWindowPosition(1920 / 2, 25);
 
 	ofSetLogLevel(OF_LOG_VERBOSE);
