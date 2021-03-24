@@ -5,6 +5,9 @@ ofxPresetsManager
 **ofxPresetsManager** is an **openFrameworks** addon to handle presets of several `ofParameter`'s nested into single or multiple `ofParameterGroup` containers.  
 Also *empowered* with a *nice GUI* and many *helpers* and customizations.
 
+## Screenshot
+![image](/readme_images/Capture_v2.JPG?raw=true "image")  
+
 ## GIF
 ![gif](/readme_images/Capture_ofxPresetsManager.gif?raw=true "gif")  
 
@@ -24,14 +27,11 @@ Also *empowered* with a *nice GUI* and many *helpers* and customizations.
 
 ## **Two Types of Presets**
 
-* **Favourite Presets**:  
+* **Favorite Presets**:  
 Fast clickable-boxes/key-trigged presets.  
 
-![image](/readme_images/Capture_favourites.PNG?raw=true "image")  
 * **Standalone Presets**:  
 Archived and named presets that we can load into and from favorites.  
-
-![image](/readme_images/Capture_standalone.PNG?raw=true "image")  
 
 ## Working Modes
 
@@ -55,12 +55,8 @@ GUI selectors for each added group:
 * **RANDOM SELECTED INDEX**:  
 To select a preset index by random and probabilities, customizable tempo, and two types of preset/states durations: normal and short. 
 
-![gif](/readme_images/Capture_randomizer1.gif?raw=true "gif")  
-
 * **RANDOM EDIT**:  
 To randomize some enabled parameters from the current preset.  
-
-![image](/readme_images/Capture_randomizer2.PNG?raw=true "image")  
 
 ## Basic Usage
 1. Set up your scene and `initialize` the related ```ofParameter```'s.
@@ -79,37 +75,37 @@ The file settings (one file for each preset) will be placed by default into ```/
 
 ofxPresetsManager presetsManager;
 
-ofParameterGroup params;// main params container
+ofParameterGroup params;// group params container
 ofParameter<int> shapeType;
 ofParameter<int> amount;
-//...more ofParameter's or nested ofParameterGroup's
+//...
 ```
 
 ### ofApp.cpp
 ```.cpp
-ofApp::setup(){
-	// define the scene parameters 
+ofApp::setup()
+{
+	// set the scene parameters 
 	// and add them to the ofParameterGroup container. 
 	params.setName("sceneParamsGroup");	
 	params.add(shapeType.set("shapeType", 1, 1, 2));
 	params.add(amount.set("amount", 10, 1, 24));
-	//...more ofParameter's
+	//...
 
-	// add the ofParameterGroup to the presetManager object
+	// add the ofParameterGroup to presetManager
 	// and define key triggers for each preset. 
 	// the number of keys will be the number of favorites presets for the added group.
 	presetsManager.add(params, { 'a', 'b', '0', '1', '2', '3' });
-	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
+	presetsManager.setup(); // must call after adding all the ofParameterGroup(s)
 }
 
 // nothing more!!
-// but some extra customization or on-runtime commands are available.
 ```
 
 ## Examples Screenshots
 
 * **1_example-Basic**:  
-Illustrates how to handle some ```ofParameters``` bundled into one ```ofParameterGroup``` used as a container.  
+Illustrates how to handle some ```ofParameter```'s bundled into one ```ofParameterGroup``` used as a container.  
 
 ![image](/readme_images/Capture-example-Basic.PNG?raw=true "image")  
 
@@ -142,19 +138,19 @@ This is useful because in some scenarios could help improve the performance or t
 [![ofxPresetsManager](http://img.youtube.com/vi/kV-t8lIdNRg/0.jpg)](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
 
 ## Dependencies
-* [ofxImGui](https://github.com/Daandelange/ofxImGui/tree/jvcleave) [FORK]
+* [ofxImGui](https://github.com/Daandelange/ofxImGui/tree/jvcleave) [Fork]
 * [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
 * [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)
-* [ofxRemoteParameters](https://github.com/c-mendoza/ofxRemoteParameters) [For the examples 3A-3B only]
-
+* [ofxRemoteParameters](https://github.com/c-mendoza/ofxRemoteParameters) [Only for the examples 3A-3B]
 Below add-ons are bundled. Already included in `OF_ADDON/libs`.  
 Do not require to manually include in `Project Generator`.  
 * [ofxUndo](https://github.com/nariakiiwatani/ofxUndo)
 
+## Thanks
 *Thanks to all the above coders!*  
 *Special thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector  
 which inspired this addon a lot. Some of his code is also used here.*  
-
+  
 *Special Thanks 2 goes to **@Daandelange** for his work to the DEFINITIVE **ofxImGui** repository. Thanks **Daan**!*
 
 ## Tested Systems
@@ -169,7 +165,8 @@ which inspired this addon a lot. Some of his code is also used here.*
 ## Notes
 * A Better performant version without using hard disk files. **Memory Mode**, using a vector of XML/JSON instead of files.
 * Improve deserialization and ofParameter callbacks / triggering to improve speed.
-* Add a minimal/lite class to play compatible preset files but without any GUI or using a tiny **ofxGui**/**ImGui** version.
+* Add tweening or filtering to ease transitions between presets when switching.
+* Add a minimal / lite class to play compatible preset files but without any GUI or using a tiny **ofxGui**/**ImGui** version.
 * More ideas noted into **ofxPresetsManager.h**.   
 * **Feedback**, **Issues**, **PR**'s, and any kind of help are very welcome!
 
