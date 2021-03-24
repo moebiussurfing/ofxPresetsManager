@@ -3,6 +3,9 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
+	ofSetWindowTitle("OF SERVER");
+	ofSetWindowPosition(1920 / 2, 25);
+
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetFrameRate(60);
 	ofSetCircleResolution(100);
@@ -22,15 +25,16 @@ void ofApp::setup()
 
 	paramServer.setup(params);
 
-	//--
-
-	presetsManager.add(params, { '0', '1', '2', '3', '4', '5' });
-	presetsManager.setup();
+	gui.setup();
+	ImGui::StyleColorsLight();
+	//ImGui::StyleColorsDark();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw()
 {
+	/* scene */
+
 	ofBackground(ofColor::darkBlue);
 
 	// scene draw object linked to grouped parameters
@@ -49,4 +53,13 @@ void ofApp::draw()
 	}
 	ofPopMatrix();
 	ofPopStyle();
+
+	//-
+
+	/* gui */
+
+	auto mainSettings = ofxImGui::Settings();
+	gui.begin();
+	ofxImGui::AddGroup(params, mainSettings);
+	gui.end();
 }

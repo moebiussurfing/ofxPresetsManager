@@ -594,6 +594,8 @@ void ofxPresetsManager::startup()
 
 	// workaround
 	MODE_EditPresetClicker = MODE_EditPresetClicker.get();
+	//required when no xml settings yet
+	bThemDarkOrLight = bThemDarkOrLight.get();
 
 	//-------
 
@@ -604,6 +606,7 @@ void ofxPresetsManager::startup()
 	//	removeKeysListeners();
 	//	removeMouseListeners();
 	//}
+
 	// TODO:
 	bDoneSetup = true;
 }
@@ -2317,7 +2320,9 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 
 		//--
 
-		// mode edit: when false, we disabled autosave to allow faster performance ! 
+		// mode edit
+		//when false, we disabled autosave to allow faster performance ! 
+		
 		else if (name == MODE_Editor.getName())
 		{
 			ofLogNotice(__FUNCTION__) << "MODE EDITOR: " << (MODE_Editor.get() ? "TRUE" : "FALSE");
@@ -2338,6 +2343,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 		if (name == bThemDarkOrLight.getName())
 		{
 			// light theme (black lines & white bg)
+
 			if (!bThemDarkOrLight)
 			{
 				_colorText = ofColor(0, 255);
@@ -2346,6 +2352,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 			}
 
 			// dark theme (white lines & black bg)
+
 			else
 			{
 				_colorText = ofColor(255, 150);
@@ -2373,7 +2380,8 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 		//----
 
 		//TODO:
-		//memmory mode. not implemented...
+		// memmory mode. not implemented yet..
+
 		else if (name == "LOAD TO MEMORY" && loadToMemory)
 		{
 			ofLogNotice(__FUNCTION__) << "loadToMemory:" << e;

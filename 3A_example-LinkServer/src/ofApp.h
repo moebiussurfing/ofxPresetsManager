@@ -2,16 +2,15 @@
 
 #include "ofMain.h"
 
+#include "ofxImGui.h"
+
 #include "ofxRemoteParameters/Server.h"
-#include "ofxPresetsManager.h"
 
 class ofApp : public ofBaseApp {
 
 public:
 	void setup();
 	void draw();
-
-	ofTrueTypeFont font;
 
 	ofxRemoteParameters::Server paramServer;
 
@@ -27,5 +26,7 @@ public:
 
 	ofParameterGroup params;// group
 
-	ofxPresetsManager presetsManager;
+	ofxImGui::Gui gui;
+
+	ofTrueTypeFont font;
 };
