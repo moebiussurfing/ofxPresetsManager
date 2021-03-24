@@ -1,30 +1,31 @@
 ofxPresetsManager
 =============================
 
-# OVERVIEW
+# Overview
 **ofxPresetsManager** is an **openFrameworks** addon to handle presets of several `ofParameter`'s nested into single or multiple `ofParameterGroup` containers. Also *empowered* with a *nice GUI* and many *helpers* and customizations.
 
 ## GIF
 ![gif](/readme_images/Capture_ofxPresetsManager.gif?raw=true "gif")  
 
-## VIDEO
+## Video
 [![https://github.com/moebiussurfing/ofxColorManager/blob/develop/readme_images/Capture.JPG](http://img.youtube.com/vi/oSvGwpbWEuc/0.jpg)](http://www.youtube.com/watch?v=oSvGwpbWEuc "VIDEO")
 
-## FEATURES
-- Powerful handling of several nested `ofParameters` into `ofParameterGroup`'s as containers.
+## Features
+- Powerful handling of several nested `ofParameter`'s into `ofParameterGroup`'s as containers.
 - Easy to integrate into your projects.
 - Autogenerates a GUI to tweak all the parameters.
-- Gui based on Daer ImGui using ofxImGui.
+- Gui based on **Dear ImGui** using **ofxImGui**.
 - Lot of customizations, tools and helpers:  
-  * Clone, copy and arrenge presets
-  * Change GUI layout and button sizes, dark/light themes, 
-  * Play timed randomizer to switch between presets tweaking probabilities
-  * Randomize some marked parameters
-  * Handle many groups indepently
-  * Browse multi groups by arrow keys
-  * UNDO history engine
+  * Clone, copy and **arrenge presets**.
+  * Change GUI layout and button sizes, Dark/Light **Themes**. 
+  * Play timed **randomizer** to switch between presets (tweaking probabilities).
+  * **Randomize** some selected **parameters**.
+  * Handle **many Groups** indepently.
+  * **Browse** multi groups by arrow **keys**.
+  * **Undo** history engine.
 
-**Two Types of Presets**:  
+## **Two Types of Presets**
+
 * **Favourite Presets**:  
 Fast clickable-boxes/key-trigged presets.  
 
@@ -34,6 +35,7 @@ Archived and named presets that we can load into and from favourites.
 
 ![image](/readme_images/Capture_standalone.PNG?raw=true "image")  
 
+## Working Modes
 
 **Two Modes**: 
 * **Edit Mode**:  
@@ -50,7 +52,8 @@ GUI selectors for each added group:
 
 ![image](/readme_images/Capture_multigroupSelectors.PNG?raw=true "image")  
 
-**Two Randomizer Engines**: 
+## **Two Randomizer Engines**
+
 * **RANDOM SELECTED INDEX**:  
 To select a preset index by random and probabilities, customizable tempo, and two types of preset/states durations: normal and short. 
 
