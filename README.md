@@ -136,7 +136,9 @@ Both examples runs together using **ofxRemoteParameters**.
 This allows you to control the presets on the **Client OF_APP**.  
 The **Server OF_APP** draws your scene using the *linked/received* parameters from the **Client OF_APP**.  
 This is useful because in some scenarios could help improve the performance or the compiling time and dependencies.  
-** VIDEO**
+
+**VIDEO**  
+
 [![ofxPresetsManager](http://img.youtube.com/vi/kV-t8lIdNRg/0.jpg)](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
 
 ## Dependencies
