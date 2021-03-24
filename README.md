@@ -3,6 +3,7 @@ ofxPresetsManager
 
 # Overview
 **ofxPresetsManager** is an **openFrameworks** addon to handle presets of several `ofParameter`'s nested into single or multiple `ofParameterGroup` containers.  
+
 Also *empowered* with a *nice GUI* and many *helpers* and customizations.
 
 ## Screenshot
@@ -42,7 +43,8 @@ Disables autosave and hides some GUI sections to simplify and improve performanc
 
 When adding individually several `ofParameterGroup` we can handle them independently.  
 We can use arrow keys to browse the groups and their selectors.  
-Also, we have an extra selector called `GROUP_LINK` which groups the other group selectors states:  
+Also, we have an extra selector called **GROUP_LINK** which groups the other group selectors states:  
+
 GUI selectors for each added group:  
 
 ![image](/readme_images/Capture_multigroupSelectors.PNG?raw=true "image")  
@@ -57,11 +59,11 @@ To randomize some enabled parameters from the current preset.
 
 ## Basic Usage
 1. Set up your scene and `initialize` the related ```ofParameter```'s.
-2. Add the parameters to the ```ofParameterGroup container```.
+2. ```Add``` the parameters to the ```ofParameterGroup container```.
 3. ```Customize``` some settings if desired.
 4. ```Add``` the container ```to the addon``` object. 
 5. You can define how many presets you want for each group, and what keys to associate as triggers.
-6. ```Done! Just play``` with the addon GUI or the API control methods.  
+6. ```Done!``` Just Play with the addon GUI or the API control methods.  
 
 Look at the examples and ```ofxPresetsManager.h``` for more learning.  
 The file settings (one file for each preset) will be placed by default into ```/bin/data```.  
@@ -75,28 +77,28 @@ ofxPresetsManager presetsManager;
 ofParameterGroup params;// group params container
 ofParameter<int> shapeType;
 ofParameter<int> amount;
-//...
+...
 ```
 
 ### ofApp.cpp
 ```.cpp
 ofApp::setup()
 {
-	// set the scene parameters 
-	// and add them to the ofParameterGroup container. 
+	// 1. set the scene parameters 
+	// 2. add them to the ofParameterGroup container. 
 	params.setName("sceneParamsGroup");	
 	params.add(shapeType.set("shapeType", 1, 1, 2));
 	params.add(amount.set("amount", 10, 1, 24));
 	//...
 
-	// add the ofParameterGroup to presetManager
-	// and define key triggers for each preset. 
+	// 3. add the ofParameterGroup to presetManager
+	// 4. and define key triggers for each preset. 
 	// the number of keys will be the number of favorites presets for the added group.
 	presetsManager.add(params, { 'a', 'b', '0', '1', '2', '3' });
 	presetsManager.setup(); // must call after adding all the ofParameterGroup(s)
 }
 
-// nothing more!!
+// nothing more !
 ```
 
 ## Examples Screenshots
@@ -142,7 +144,7 @@ Do not require to manually include in **Project Generator**.
 
 ## Thanks
 *Thanks to all the above coders!*  
-*Special thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector  
+*Special Thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector  
 which inspired this addon a lot. Some of his code is also used here.*  
   
 *Special Thanks 2 goes to **@Daandelange** for his work to the DEFINITIVE **ofxImGui** repository. Thanks **Daan**!*
