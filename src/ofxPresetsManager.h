@@ -59,6 +59,87 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
+/*
+
+### Other API useful methods
+
+```.cpp
+// Gui and workflow
+
+// customize preset clicker boxes:
+// ofApp::setup()
+presetsManager.setSizeBox_PresetClicker(45);
+presetsManager.setVisible_PresetClicker(bShow);
+presetsManager.setToggleVisible_PresetClicker();
+
+// disable key controlling to avoid colliding command keys:
+// ofApp::keyPressed()
+presetsManager.setToggleEnableKeys();
+presetsManager.setEnableKeys(bKeys);
+
+// disable the Group_Link auto creation by default: (when added multigroups)
+// ofApp::setup()
+presetsManager.setEnableGroupLinkSelector(false);// enabled by default
+// define how many presets we want for the Group_Link selector.
+// default amount is 10 presets.
+//presetsManager.setGroupLinkSize(2);
+
+// save by code current preset from an added group:
+// ofApp::keyPressed()
+presetsManager.saveCurrentPreset(params.getName());// by name
+presetsManager.saveCurrentPreset(0);// by index
+
+// customize path to allow using more kits/session presets:
+// it makes subfolders for multiple kits for all presets.
+// also allows using a custom path folder out of /bin/data/.
+// ie: to share the same preset files folder between different apps.
+// ofApp::setup()
+presetsManager.setPath_UserKit_Folder(path);
+```
+```.cpp
+// Callbacks
+
+// some ideas to handle callbacks if required:
+// this is useful when we want to know when an index preset selector changed.
+// ie: to update our scene if required more updating than the parameters itself.
+
+// A. an easier callback system that can not know wich group selector changed:
+// ofApp::update()
+if (presetsManager.isDoneLoad())
+{
+	ofLogNotice() <<
+		"DONE LOAD PRESET.
+		SOME GROUP HAVE CURRENTLY LOADED / CHANGED
+		TO ANOTHER PRESET INDEX";
+}
+
+// B. better callbacks system for all selectors, to know when a group selector changed:
+// Which group and which presets index selector changed.
+// ofApp::setup()
+for (int i = 0; i < presetsManager.PRESETS_Selected_Index.size(); i++)
+{
+	ofAddListener(presetsManager.getSelectorsGroup().parameterChangedE(),
+		this, &ofApp::Changed_PresetsManagerSelectors);
+}
+//--------------------------------------------------------------
+void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
+{
+	string name = e.getName();
+	ofLogNotice() <<
+		"THE SELECTOR FOR THE GROUP WITH NAME " << name <<
+		" CHANGED TO PRESET INDEX: " << e;
+	if (name == params.getName())
+	{
+		// the selector index of this group changed,
+		// then we know that the ofParameters of this ofParameterGroup changed,
+		// so maybe we want to update some stuff now,
+		// apart of the updated parameters.
+	}
+}
+```
+
+*/
+
 ///------
 
 ///	TODO:
