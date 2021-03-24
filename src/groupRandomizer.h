@@ -6,7 +6,7 @@
 #include "ofxSurfing_ImGui.h"
 //#include "ofxImGui.h"
 
-#define WIDGET_HEIGHT 30
+#define BUTTON_BIG_HEIGHT 30
 #define PANEL_WIDGETS_WIDTH 225
 #define PANEL_WIDGETS_HEIGHT 100
 

@@ -116,11 +116,11 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Help.set("SHOW HELP", false);
 	SHOW_Gui_AdvancedControl.set("SHOW ADVANCED", false);
 	SHOW_Panel_Click.set("SHOW CLICKER", true);
-	SHOW_Panel_AllParameter.set("SHOW PARAMETERS", true);
-	SHOW_Panel_AllSelectors.set("SHOW SELECTORS", true);
-	SHOW_Panel_StandalonePresets.set("SHOW STANDALONES", true);
+	SHOW_Panel_AllParameter.set("SHOW PARAMETERS", false);
+	SHOW_Panel_AllSelectors.set("SHOW SELECTORS", false);
+	SHOW_Panel_StandalonePresets.set("SHOW STANDALONES", false);
 	MODE_StandalonePresets_NEW.set("NEW!", false);
-	SHOW_Panel_Randomizer.set("SHOW RANDOMIZERS", true);
+	SHOW_Panel_Randomizer.set("SHOW RANDOMIZERS", false);
 	ENABLE_Keys.set("ENABLE KEYS", true);
 
 	autoLoad.set("AUTO LOAD", true);
@@ -199,11 +199,12 @@ ofxPresetsManager::ofxPresetsManager()
 	// gui box clicker font
 	std::string str;
 
-	//sizeTTF = 8;
-	//str = "telegrama_render.otf";
+	sizeTTF = 11;
+	str = "telegrama_render.otf";
 
-	sizeTTF = 10;
-	str = "overpass-mono-bold.otf";
+	//sizeTTF = 10;
+	////str = "overpass-mono-bold.otf";
+	//str = "telegrama_render.otf";
 
 	myTTF = "assets/fonts/" + str;
 	bool bLoaded = myFont.load(myTTF, sizeTTF, true, true);
@@ -363,6 +364,10 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	//--
 
 	MODE_EditPresetClicker.set("EDIT CLICKER", false);
+	MODE_EditPresetClicker.setSerializable(false);
+
+	helpPos.set("HELP POS", false);
+
 	SHOW_BackGround_EditPresetClicker.set("BOX CLICKER", false);
 
 	//----
@@ -372,18 +377,19 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Options.add(MODE_Editor);
 	params_Options.add(bSplitGroupFolders);
 
-	params_Gui.add(bThemDark);
+	params_Gui.add(bThemDarkOrLight);
 	params_Gui.add(SHOW_ImGui_Selectors);
 	params_Gui.add(SHOW_ImGui_PresetsParams);
 	params_Gui.add(SHOW_Help);
 	params_Gui.add(MODE_EditPresetClicker);
+	params_Gui.add(helpPos);
 	params_Gui.add(SHOW_BackGround_EditPresetClicker);
 
 	params_Control.add(params_Options);
 	params_Control.add(params_Gui);
 
 	params_Control.add(MODE_EditPresetClicker);
-	params_Control.add(bThemDark);
+	params_Control.add(bThemDarkOrLight);
 
 	//--
 
@@ -459,7 +465,18 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	ofAddListener(params_UserKitSettings.parameterChangedE(), this, &ofxPresetsManager::Changed_UserKit);
 
-	//-
+	//----
+
+	//TODO:
+	//wf
+	for (int i = 0; i < groups.size(); i++) 
+	{
+		groupRandomizers[i].PLAY_RandomizeTimer.addListener(this, &ofxPresetsManager::Changed_Randomizers);
+	
+		//listeners.push(groupRandomizers[i].PLAY_RandomizeTimer.newListener(this, &ofxPresetsManager::Changed_Randomizers));
+	}
+
+	//----
 
 	startup();
 }
@@ -469,12 +486,12 @@ void ofxPresetsManager::startup()
 {
 	ofLogNotice(__FUNCTION__);
 
-	//--
-
 	DISABLE_CALLBACKS = false;// enable callbacks after setup
 
+	//--
+
 	// load all app session settings & randomizers (not the related presets)
-	load_ControlSettings();// here bPathDirCustom is loaded (but if files are present, not in first runtime)
+	load_AppSettings();// here bPathDirCustom is loaded (but if files are present, not in first runtime)
 
 	//--
 
@@ -532,16 +549,6 @@ void ofxPresetsManager::startup()
 
 	//--
 
-	////TODO: startup bug that do not load clicker fine..
-	//MODE_EditPresetClicker = true;
-	////{
-	////	clicker_pos.x = rectanglepresetclicker.x;
-	////	clicker_pos.y = rectanglepresetclicker.y;
-	////}
-	//MODE_EditPresetClicker = false;
-
-	//--
-
 	//// TODO: 
 	//// memory mode
 	//load_AllKit_ToMemory();
@@ -583,6 +590,11 @@ void ofxPresetsManager::startup()
 	// refresh in other another better place?...
 	buildHelpInfo();
 
+	//--
+
+	// workaround
+	MODE_EditPresetClicker = MODE_EditPresetClicker.get();
+
 	//-------
 
 	//// avoid troubles when all setup process have not finished property
@@ -594,8 +606,6 @@ void ofxPresetsManager::startup()
 	//}
 	// TODO:
 	bDoneSetup = true;
-
-	//--
 }
 
 //--------------------------------------------------------------
@@ -690,11 +700,18 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 {
 	//----
 
-	//user clicker boxes preset selector 
-	//(from live kit/favorites)
+	// user clicker boxes preset selector 
+
 	if (SHOW_Panel_Click)
 	{
 		drawPresetClicker();
+	}
+
+	// help info text: 
+
+	if (SHOW_Help && SHOW_ImGui)
+	{
+		drawHelp(-1, -1);
 	}
 
 	//----
@@ -721,14 +738,13 @@ void ofxPresetsManager::drawPresetClicker()
 	// draws some minimalistic graphics to monitor the active preset
 	// when graphics are drawn you can also click on them for saving/loading
 
-	//-
+	//--
 
 	float _round = 3.0f;
 	float _pad = 3.0f;
 	std::string _label;
 
-
-	//-
+	//--
 
 	if (!lastMouseButtonState && ofGetMousePressed())
 	{
@@ -737,22 +753,6 @@ void ofxPresetsManager::drawPresetClicker()
 	lastMouseButtonState = ofGetMousePressed();
 
 	//-
-
-	//// light theme (black lines)
-	//if (!bThemDark)
-	//{
-	//	_colorText = ofColor(0, 255);
-	//	_colorButton = ofColor(0, 128);
-	//	_colorBg = ofColor(225, 64);
-	//}
-
-	//// dark theme (white lines)
-	//else
-	//{
-	//	_colorText = ofColor(255, 150);
-	//	_colorButton = ofColor(16, 225);
-	//	_colorBg = ofColor(0, 128);
-	//}
 
 	// display help info layout
 	bool bLateralPosition = false;// false = on top of clicker
@@ -878,16 +878,12 @@ void ofxPresetsManager::drawPresetClicker()
 			_label = "SAVE";
 			if (!myFont.isLoaded())// without ttf font
 			{
-				ofDrawBitmapString(_label,
-					cellSize*k + 8,
-					cellSize*i + 18);
+				ofDrawBitmapString(_label, cellSize*k + 8, cellSize*i + 18);
 			}
 			else// custom font 
 			{
 				float wx = 0.5f * myFont.getStringBoundingBox(_label, 0, 0).width;
-				myFont.drawString(_label,
-					cellSize * k + 0.5 * cellSize - wx,
-					ySave);
+				myFont.drawString(_label, cellSize * k + 0.5 * cellSize - wx, ySave);
 			}
 		}
 
@@ -960,7 +956,7 @@ void ofxPresetsManager::drawPresetClicker()
 			std::string info = groups[i].getName();
 
 			// mark selected group. useful to navigate with arrow keys
-			if (i == GuiGROUP_Selected_Index.get() && groups.size() > 0 && ENABLE_Keys.get()) info = "* " + info;
+			if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1 && ENABLE_Keys.get()) info = "* " + info;
 
 			// double font to improve different background colors
 			int gap = 1;
@@ -976,20 +972,16 @@ void ofxPresetsManager::drawPresetClicker()
 			int xG = -strW - 20;
 			ySave = ySave - 2;// little up
 
-			if (!bThemDark) ofSetColor(_colorBg);// shadow
+			if (!bThemDarkOrLight) ofSetColor(_colorBg);// shadow
 			else ofSetColor(_colorButton);// shadow
+
 			if (myFont.isLoaded()) myFont.drawString(info, xG + gap, ySave + gap);
 			else ofDrawBitmapString(info, xG + gap, ySave + gap);
 
-			ofSetColor(_colorText);
+			ofSetColor(_colorText);// text
 			if (myFont.isLoaded()) myFont.drawString(info, xG, ySave);
 			else ofDrawBitmapString(info, xG, ySave);
 		}
-
-		//--
-
-		// 8. help info text: 
-		drawHelp(0, ySave);
 	}
 
 	ofPopMatrix();
@@ -999,10 +991,10 @@ void ofxPresetsManager::drawPresetClicker()
 //--------------------------------------------------------------
 ofxPresetsManager::~ofxPresetsManager()
 {
-	// TODO: not sure if can avoid call manually exit(), bc here groups could be externally destroyed..
+	// TODO: not sure if can avoid to call manually exit(), bc there are groups that could be externally destroyed..
 	// so we would prefer to call presetsManager.exit() manually on the first place sorting.
-	// if exit() is called manually on app exit(), we will call it twice... Could be a problem?
-	//exit();
+	// But if exit() is called manually too on app exit(), we will call it twice... Could be a problem ?
+	exit();
 }
 
 //--
@@ -1668,7 +1660,8 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		bool mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
 		bool mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
 
-		bool bDebug = false;
+		//bool bDebug = false;
+		bool bDebug = true;
 		if (bDebug)
 		{
 			ofLogNotice(__FUNCTION__)
@@ -2116,22 +2109,28 @@ void ofxPresetsManager::doPopulateFavs(int groupIndex)
 {
 	ofLogNotice(__FUNCTION__) << "on group: " << groupIndex;
 
-	if (groupIndex == -1)
-	{
-		ofLogError(__FUNCTION__) << "groupIndex " << groupIndex;
-		return;
-	}
+	//if (groupIndex == -1 || groupIndex > groups.size())
+	//{
+	//	ofLogError(__FUNCTION__) << "groupIndex " << groupIndex << " out of range";
+	//	return;
+	//}
 
-	// TODO:
+	////--
 
+	//// TODO:
+
+	//// 1. check
 	//CheckAllFolders();//? required
 
-	//doCloneAll(gIndex);
+	//// 2. erase
+	//int ig = GuiGROUP_Selected_Index.get();
+	//doCloneAll(ig);
 
-	//for (int i = 0; i < groupsSizes[gIndex]; i++)
+	//// 3. randomize
+	//for (int i = 0; i < groupsSizes[ig]; i++)
 	//{
 	//	doRandomizePresetSelected(i);
-	//	doCloneAll(i);
+	//	//doCloneAll(i);
 	//}
 }
 
@@ -2281,6 +2280,23 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 }
 
 //--------------------------------------------------------------
+void ofxPresetsManager::Changed_Randomizers(bool &b)
+{
+	if (!DISABLE_CALLBACKS && groupRandomizers.size() > 0)
+	{
+		ofLogNotice(__FUNCTION__);
+
+		//wf
+		if (MODE_Editor.get() && b) MODE_Editor = false;
+
+		//std::string name = b.getName();
+		//if (name == groupRandomizers[0].PLAY_RandomizeTimer.getName())
+		//{
+		//}
+	}
+}
+
+//--------------------------------------------------------------
 void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 {
 	if (!DISABLE_CALLBACKS)
@@ -2319,16 +2335,17 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 
 		//-
 
-		if (name == bThemDark.getName())
-		{	// light theme (black lines)
-			if (!bThemDark)
+		if (name == bThemDarkOrLight.getName())
+		{
+			// light theme (black lines & white bg)
+			if (!bThemDarkOrLight)
 			{
 				_colorText = ofColor(0, 255);
-				_colorButton = ofColor(0, 128);
+				_colorButton = ofColor(255, 64);
 				_colorBg = ofColor(225, 64);
 			}
 
-			// dark theme (white lines)
+			// dark theme (white lines & black bg)
 			else
 			{
 				_colorText = ofColor(255, 150);
@@ -2343,9 +2360,9 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 			{
 				rectanglePresetClicker.enableEdit();
 
-				// workflow
-				//SHOW_BackGround_EditPresetClicker = true;
-				if (!SHOW_Panel_Click) SHOW_Panel_Click = true;
+				//// workflow
+				////SHOW_BackGround_EditPresetClicker = true;
+				//if (!SHOW_Panel_Click) SHOW_Panel_Click = true;
 			}
 			else
 			{
@@ -2422,7 +2439,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::load_ControlSettings()
+void ofxPresetsManager::load_AppSettings()
 {
 	//--
 
@@ -2929,7 +2946,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_PresetParameters()
 {
-	static bool auto_resize = false;
+	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
@@ -2950,13 +2967,15 @@ void ofxPresetsManager::ImGui_Draw_PresetParameters()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_GroupsSelectors()
 {
-	static bool auto_resize = false;
+	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
 	if (ofxImGui::BeginWindow("Group Selectors", settings, flagsw))
 	{
 		ofxImGui::AddGroup(params_GroupsSelectors, settings);
+
+		ImGui::Checkbox("Auto-Resize", &auto_resize);
 	}
 	ofxImGui::EndWindow(settings);
 }
@@ -2970,117 +2989,150 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 
 	if (ofxImGui::BeginWindow("Main Panel", settings, flagsw))
 	{
-		float _h = WIDGET_HEIGHT;
+		float _h = BUTTON_BIG_HEIGHT;
 		float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
-		float _w100 = ImGui::GetWindowWidth();
-		float _w99 = _w100 - 20;
-		float _w50 = _w99 / 2 - 2 * _spc;
+		float _w100 = ImGui::GetWindowContentRegionWidth();
+		float _w99 = _w100 - _spc;
+		float _w50 = _w99 / 2 - _spc;
+		std::string str;
 
 		//---
 
 		ImGui::Dummy(ImVec2(0, 5));
 
 		// label for User-Kit folder
-		std::string str;
 		str = "User-Kit";
 		ImGui::Text(str.c_str());
 		str = path_UserKit_Folder;
 		ImGui::Text(str.c_str());
+
+		ImGui::Dummy(ImVec2(0, 2));
+
+		//TODO:
+		int ig = GuiGROUP_Selected_Index.get();
+		int ip = PRESETS_Selected_Index[ig];
+		str = "Group  " + ofToString(ig);
+		ImGui::Text(str.c_str());
+		str = "Preset " + ofToString(ip);
+		ImGui::Text(str.c_str());
+
+		//--
 
 		ImGui::Dummy(ImVec2(0, 5));
 
 		//--
 
 		// mode edit
-		//ofxImGui::AddParameter(MODE_Editor);
-		ofxSurfingHelpers::AddBigToggle(MODE_Editor, 2 * WIDGET_HEIGHT, "EDIT MODE", "LIVE MODE");
-		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, 30); // TODO: repair method. collides when multiple toggles..
+
+		ofxSurfingHelpers::AddBigToggleNamed(MODE_Editor, _w100, 2 * _h, "EDIT MODE", "LIVE MODE");
+
+		ImGui::Dummy(ImVec2(0, 2));
+
+		ImGui::PushButtonRepeat(true);
+		if (ImGui::Button("Previous", ImVec2(_w50, _h)))
+		{
+			int sel = GuiGROUP_Selected_Index.get();
+			load_Previous(sel);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Next", ImVec2(_w50, _h)))
+		{
+			int sel = GuiGROUP_Selected_Index.get();
+			load_Next(sel);
+		}
+		ImGui::PopButtonRepeat();
+
+		ImGui::Dummy(ImVec2(0, 2));
 
 		//--
+
+		if (MODE_Editor)
+		{
+			//TODO: select which added group
+			int i = 0;
+			//int ii = PRESETS_Selected_Index[i];
+
+			if (ImGui::Button("CLONE ALL", ImVec2(_w50, _h / 2)))
+			{
+				doCloneAll(i);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("CLONE >", ImVec2(_w50, _h / 2)))
+			{
+				doCloneRight(i);
+			}
+
+			//TODO:
+			//create all presets randomized
+			//if (ImGui::Button("POPULATE", ImVec2(_w100, _h / 2)))
+			//{
+			//	int ig = GuiGROUP_Selected_Index.get();
+			//	doPopulateFavs(ig);
+			//}
+		}
+		
+		ImGui::Dummy(ImVec2(0, 2));
+
+		//--
+
+		// panels
+
+		{
+			if (ImGui::CollapsingHeader("PANELS"))
+			{
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Click, _w100, _h);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllParameter, _w100, _h);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllSelectors, _w100, _h);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Randomizer, _w100, _h);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_StandalonePresets, _w100, _h);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Help, _w100, _h);
+			}
+		}
+
+		//--
+
+		// undo engine
 
 #ifdef INCLUDE_ofxUndoSimple
 		if (MODE_Editor.get())
 		{
-			// undo engine
-			ImGui::Dummy(ImVec2(0, 5));
+			if (ImGui::CollapsingHeader("UNDO ENGINE"))
+			{
+				str = "History: " + ofToString(undoStringsParams[GuiGROUP_Selected_Index].getUndoLength()) + "/";
+				str += ofToString(undoStringsParams[GuiGROUP_Selected_Index].getRedoLength());
+				ImGui::Text(str.c_str());
 
-			str = "UNDO ENGINE";
-			ImGui::Text(str.c_str());
-			str = "History: " + ofToString(undoStringsParams[GuiGROUP_Selected_Index].getUndoLength()) + "/";
-			str += ofToString(undoStringsParams[GuiGROUP_Selected_Index].getRedoLength());
-			ImGui::Text(str.c_str());
+				if (ImGui::Button("Store", ImVec2(_w50, _h)))
+				{
+					doStoreUndo();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Clear", ImVec2(_w50, _h)))
+				{
+					doClearUndoHistory();
+				}
+				//ImGui::SameLine();
 
-			if (ImGui::Button("Store", ImVec2(_w50, _h)))
-			{
-				doStoreUndo();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Clear", ImVec2(_w50, _h)))
-			{
-				doClearUndoHistory();
-			}
-			//ImGui::SameLine();
-
-			if (ImGui::Button("Undo", ImVec2(_w50, _h)))
-			{
-				doUndo();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Redo", ImVec2(_w50, _h)))
-			{
-				doRedo();
+				if (ImGui::Button("Undo", ImVec2(_w50, _h)))
+				{
+					doUndo();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Redo", ImVec2(_w50, _h)))
+				{
+					doRedo();
+				}
 			}
 		}
 #endif
 
-		ImGui::Dummy(ImVec2(0, 5));
+		//--
 
-		ofxImGui::AddParameter(ENABLE_Keys);//ImGui::SameLine(); 
+		// extra / advanced
 
-		ImGui::Dummy(ImVec2(0, 5));
-
-		//---
-
-		// panels
-		//if (MODE_Editor)
-		{
-			if (ImGui::CollapsingHeader("PANELS"))
-			{
-				////float _pd = ImGui::GetStyle().FramePadding.x;
-				////float _pd = ImGui::GetStyle().IndentSpacing.x;
-				//float _h = WIDGET_HEIGHT;
-				//float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
-				//float _w100 = ImGui::GetWindowWidth();
-				//float _w99 = _w100 - 20;
-				////float _w99 = _w100 - 5 * _spc;
-
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Click, _w99, _h);
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllParameter, _w99, _h);
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_StandalonePresets, _w99, _h);
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Randomizer, _w99, _h);
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllSelectors, _w99, _h);
-				ofxSurfingHelpers::AddBigToggle(SHOW_Help, _w99, _h);
-
-				//// handled by docker mode
-				////if (bBuildGroupSelector) ofxImGui::AddParameter(SHOW_ImGui_Selectors);
-				////ofxImGui::AddParameter(SHOW_ImGui_PresetsParams);
-				//ofxImGui::AddParameter(SHOW_Panel_Click);//ImGui::SameLine();
-				//ofxImGui::AddParameter(SHOW_Panel_AllParameter);//ImGui::SameLine();
-				//ofxImGui::AddParameter(SHOW_Panel_StandalonePresets);//ImGui::SameLine();
-				////if (MODE_Editor)
-				//{
-				//	ofxImGui::AddParameter(SHOW_Panel_Randomizer);//ImGui::SameLine();
-				//	ofxImGui::AddParameter(SHOW_Panel_AllSelectors);//ImGui::SameLine();
-				//}
-				//ofxImGui::AddParameter(SHOW_Help);//ImGui::SameLine();
-				////ofxImGui::AddParameter(MODE_StandalonePresets_NEW);
-			}
-		}
-
-		// extra
 		if (MODE_Editor) ImGui_Draw_Extra();
 
-		ImGui::Checkbox("Auto-Resize", &auto_resize);
+		//ImGui::Checkbox("Auto-Resize", &auto_resize);
 
 		//--
 	}
@@ -3090,94 +3142,83 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Draw_Extra()
 {
-	if (ImGui::CollapsingHeader("EXTRA"))
+	//if (ImGui::CollapsingHeader("EXTRA"))
 	{
 		if (ImGui::CollapsingHeader("ADVANCED"))
 		{
-			//float _pd = ImGui::GetStyle().FramePadding.x;
-			//float _pd = ImGui::GetStyle().IndentSpacing.x;
-			float _h = WIDGET_HEIGHT;
+			float _h = BUTTON_BIG_HEIGHT;
 			float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
-			float _w100 = ImGui::GetWindowWidth();
-			float _w99 = _w100 - 20;
-			float _w50 = _w99 / 2 - 2 * _spc;
-			//float _w99 = _w100 - 5 * _spc;
+			float _w100 = ImGui::GetWindowContentRegionWidth();
+			float _w99 = _w100 - _spc;
+			float _w50 = _w99 / 2 - _spc;
 
-			ofxImGui::AddParameter(ENABLE_Keys);
+			//--
+
+			ofxImGui::AddParameter(ENABLE_Keys);//ImGui::SameLine(); 
 			ofxImGui::AddParameter(autoSave);//ImGui::SameLine();
-			//ofxImGui::AddParameter(autoLoad);//ImGui::SameLine();
-			// TODO: not implemented
+			ofxImGui::AddParameter(autoLoad);//ImGui::SameLine();
+
+			// TODO: 
+			//faster memory mode vs xml files not implemented yet
 			//ofxImGui::AddParameter(MODE_MemoryLive);//ImGui::SameLine();
 			//ofxImGui::AddParameter(MODE_EditPresetClicker);
 			//ofxImGui::AddParameter(SHOW_Help);//ImGui::SameLine();
-			ofxImGui::AddParameter(bThemDark);
+
+			if (ImGui::CollapsingHeader("LAYOUT"))
+			{
+				ofxImGui::AddParameter(bThemDarkOrLight);
+
+				if (MODE_Editor)
+				{
+					ofxSurfingHelpers::AddBigToggle(MODE_EditPresetClicker, _w50, _h); ImGui::SameLine();
+					ofxSurfingHelpers::AddBigToggle(SHOW_BackGround_EditPresetClicker, _w50, _h);
+					if (SHOW_Help)ofxImGui::AddParameter(helpPos);
+				}
+			}
+
+			//--
 
 			if (MODE_Editor)
 			{
-				ofxSurfingHelpers::AddBigToggle(MODE_EditPresetClicker, _w50, _h); ImGui::SameLine();
-				ofxSurfingHelpers::AddBigToggle(SHOW_BackGround_EditPresetClicker, _w50, _h);
-
-				//ofxImGui::AddParameter(MODE_EditPresetClicker); ImGui::SameLine();
-				//ofxImGui::AddParameter(SHOW_BackGround_EditPresetClicker);
-			}
-		}
-
-		//--
-
-		if (MODE_Editor)
-		{
-			if (ImGui::CollapsingHeader("USER-KIT"))
-			{
-				float _h = WIDGET_HEIGHT;
-				float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
-				float _w100 = ImGui::GetWindowWidth();
-				float _w99 = _w100 - 20;
-
-				// User-Kit name
-				std::string str;
-				str = "Name:\n";
-				str += displayNameUserKit;
-				ImGui::Text(str.c_str());
-
-				// button to Open File Dialog as folder
-				if (ImGui::Button("Set Custom folder", ImVec2(_w99, _h)))
+				if (ImGui::CollapsingHeader("USER-KIT"))
 				{
-					ofFileDialogResult openFileResult = ofSystemLoadDialog("Select User-Kit folder", true, ofToDataPath(path_UserKit_Folder, true));
+					float _h = BUTTON_BIG_HEIGHT;
+					float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
+					float _w100 = ImGui::GetWindowContentRegionWidth();
+					float _w99 = _w100 - _spc;
+					float _w50 = _w99 / 2 - _spc;
 
-					// check if the user opened a file
-					if (openFileResult.bSuccess) {
+					//--
 
-						ofLogNotice(__FUNCTION__) << ("User selected a folder");
+					// User-Kit name
+					std::string str;
+					str = "Name:\n";
+					str += displayNameUserKit;
+					ImGui::Text(str.c_str());
 
-						// we have a file, check it and process it
-						doFileDialogProcessSelection(openFileResult);
+					// button to Open File Dialog as folder
+					if (ImGui::Button("Set Custom folder", ImVec2(_w100, _h)))
+					{
+						ofFileDialogResult openFileResult = ofSystemLoadDialog("Select User-Kit folder", true, ofToDataPath(path_UserKit_Folder, true));
+
+						// check if the user opened a file
+						if (openFileResult.bSuccess) {
+
+							ofLogNotice(__FUNCTION__) << ("User selected a folder");
+
+							// we have a file, check it and process it
+							doFileDialogProcessSelection(openFileResult);
+						}
+						else ofLogNotice(__FUNCTION__) << ("User hit cancel");
 					}
-					else ofLogNotice(__FUNCTION__) << ("User hit cancel");
+
+					ImGui::Dummy(ImVec2(0, 5));
+
+					// monitor custom state
+					//ofxImGui::AddParameter(bPathDirCustom);
 				}
-
-				ImGui::Dummy(ImVec2(0, 5));
-
-				// monitor custom state
-				//ofxImGui::AddParameter(bPathDirCustom);
 			}
 		}
-
-		//--
-
-		//// show extra
-		//if (ImGui::TreeNode("EXTRA")) {
-		//	ofxImGui::AddParameter(SHOW_ImGui);
-		//	ofxImGui::AddParameter(SHOW_Gui_AdvancedControl);
-		//	//-
-		//	// 2. advanced
-		//	if (SHOW_Gui_AdvancedControl)
-		//	{
-		//ofxImGui::Settings settings;
-		//		// show ALL the addon internal params! mainly to debug all settings or to use without ImGui..
-		//		ofxImGui::AddGroup(params_Control, settings);
-		//	}
-		//	ImGui::TreePop();
-		//}
 	}
 }
 
@@ -3218,20 +3259,28 @@ void ofxPresetsManager::buildHelpInfo() {
 
 	helpInfo += "\n";
 	helpInfo += "KEYS\n";
+	helpInfo += "\n";
+
 	helpInfo += "H                HELP\n";
 	helpInfo += "Ctrl+g           GUI\n";
+	helpInfo += "E                EDIT\n";
+	helpInfo += "\n";
+
 	helpInfo += "P                CLICKER\n";
-	helpInfo += "Keys&Mouse       LOAD\n";
-	helpInfo += "+Ctrl            SAVE/COPY\n";
-	helpInfo += "+Alt             SWAP\n";
+	helpInfo += "Keys & Mouse     LOAD\n";
+	helpInfo += " +Ctrl           SAVE\n";
+	helpInfo += " +Alt            SWAP\n";
 	helpInfo += "Arrows           NAVIGATE\n";
-	helpInfo += "E                EDIT/LIVE\n";
+	helpInfo += "\n";
+	
 	helpInfo += "Ctrl+Space       PLAY RANDOMIZER\n";
 	helpInfo += "Ctrl+R           RANDOMIZE PRESET\n";
+	helpInfo += "\n";
+
 	helpInfo += "Ctrl+Z           UNDO\n";
-	helpInfo += "Ctrl+Shift+Z     REDO\n";
-	helpInfo += "Ctrl+C           CLEAR HISTORY\n";
-	helpInfo += "Ctrl+s           STORE POINT\n";
+	helpInfo += " +Shift          REDO\n";
+	helpInfo += "Ctrl+C           CLEAR\n";
+	helpInfo += "Ctrl+s           STORE\n";
 }
 
 //--------------------------------------------------------------
@@ -3378,11 +3427,13 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 		if (ofxImGui::BeginWindow("Standalone Presets", settings, flagsw))
 		{
-			float _h = WIDGET_HEIGHT;
+			float _h = BUTTON_BIG_HEIGHT;
 			float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
-			float _w100 = ImGui::GetWindowWidth();
-			float _w99 = _w100 - 20;
+			float _w100 = ImGui::GetWindowContentRegionWidth();
+			float _w99 = _w100 - _spc;
 			float _w50 = _w99 / 2 - _spc;
+
+			//--
 
 			int groupIndex = GuiGROUP_Selected_Index.get();
 			int _numfiles = standaloneFileNames[groupIndex].size();
@@ -3440,7 +3491,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 
 				// get/copy all favs presets from favs and send/save to browser folder ("archive")
 
-				if (ImGui::Button("FROM FAVS", ImVec2(_w99, _h)))
+				if (ImGui::Button("FROM FAVS", ImVec2(_w100, _h)))
 				{
 					ofLogNotice(__FUNCTION__) << "FROM FAVS";
 
@@ -3702,7 +3753,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 				// new preset button
 
 				//ofxImGui::AddParameter(MODE_StandalonePresets_NEW);
-				ofxSurfingHelpers::AddBigToggle(MODE_StandalonePresets_NEW, _w99, _h);
+				ofxSurfingHelpers::AddBigToggle(MODE_StandalonePresets_NEW, _w100, _h);
 
 				//-
 
@@ -4063,7 +4114,7 @@ void ofxPresetsManager::doCheckPresetsFoldersAreEmpty()
 			if (dataDirectoryGroupPresets.size() == 0)
 			{
 				ofLogWarning(__FUNCTION__) << "Folder " << _path << ", used for group " << i << " "
-					<< groups[i].getName() << " is empty! Force populate favourites files...";
+					<< groups[i].getName() << " is empty! Force populate favorites files...";
 
 				// 1. populate all favourites preset files for this group
 				doPopulateFavs(i);
@@ -4164,58 +4215,86 @@ void ofxPresetsManager::Changed_GuiGROUP_Selected_Index(int & index)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::drawHelp(int _x, int ySave)
+void ofxPresetsManager::drawHelp(int _x = -1, int _y = -1)
 {
-	bool bLeftPosition = true;// left or right. only if lateral pos true
-	bool bLateralPosition = false;// false = on top of clicker
+	ofPushStyle();
+	ofPushMatrix();
+
+	//--
+
+	if (_x == -1 && _y == -1) ofTranslate(clicker_Pos);
 
 	//--
 
 	//if (rectanglePresetClicker.getY() > (ofGetHeight() * 0.5)) 
 	//else drawHelp(0, ySave + groups.size()*cellSize + 20);
 
+	bool bCenter = true;
+
+	bool bLeftPosition = false;
+	// true = left or false = right. only if helpPos/lateral pos true
+
+	// helpPos 
+	//false = top of clicker
+	//true = bottom
+
+	//--
+
 	{
-		bShowClickerInfo = SHOW_Help.get();
+		std::string ss = helpInfo;
+		float hh = ofxSurfingHelpers::getHeightBBtextBoxed(myFont, ss);
 
-		if (bShowClickerInfo)// && (i == 0))//&& ENABLE_Keys . only on first (0) for groups iterate pass..
+		int x = 0;
+		int y = 0;
+		int _padx = 0;
+		int _pady = 20;
+
+		//y += _pady;
+
+		if (bCenter)
 		{
-			std::string ss = helpInfo;
-			int _padx = 22;
-			int _pady = 30;
-			int x = 0;
-			int y = 0;
-
 			// A. vertical position below boxes
-			if (!bLateralPosition)
+
+			if (!helpPos)
 			{
-				float hh = ofxSurfingHelpers::getHeightBBtextBoxed(myFont, ss);
-				x += 4 + _padx;
+				x += _padx;
 				y -= hh + _pady;
 			}
-
-			// B. lateral position right to the boxes
 			else
 			{
-				float _w;
-				y = ySave + _pady;
-
-				if (!bLeftPosition)// on the right
-				{
-					_w = getPresetClicker_Width();
-					x = _w + _padx + 30;
-				}
-				else {// on the left
-					if (myFont.isLoaded())
-					{
-						_w = ofxSurfingHelpers::getWidthBBtextBoxed(myFont, ss);
-						_w += myFont.getStringBoundingBox(groups[0].getName(), 0, 0).getWidth();
-						_w += 70;
-					}
-					x = -_w;
-				}
+				x += _padx;
+				y += _pady;
+				//y += _pady;
+				y += groups.size() * cellSize;
 			}
-
-			ofxSurfingHelpers::drawTextBoxed(myFont, ss, x, y, _colorText, _colorBg, true, _colorButton);
 		}
+
+		//// B. lateral position right to the boxes
+		//else if (!bCenter)
+		//{
+		//	float _w;
+
+		//	if (!bLeftPosition)// on the right
+		//	{
+		//		_w = getPresetClicker_Width();
+		//		x = _w + _padx + 30;
+		//	}
+		//	else {// on the left
+		//		if (myFont.isLoaded())
+		//		{
+		//			_w = ofxSurfingHelpers::getWidthBBtextBoxed(myFont, ss);
+		//			_w += myFont.getStringBoundingBox(groups[0].getName(), 0, 0).getWidth();
+		//			_w += 70;
+		//		}
+		//		x = -_w;
+		//	}
+		//}
+
+		ofxSurfingHelpers::drawTextBoxed(myFont, ss, x, y, _colorText, _colorBg, true, _colorButton);
 	}
+
+	//--
+
+	ofPopMatrix();
+	ofPopStyle();
 }

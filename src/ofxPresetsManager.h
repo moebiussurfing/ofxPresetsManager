@@ -18,8 +18,8 @@
 //	This is a very simple guide to use ofxPresetsManager.
 //
 //	* EXAMPLES
-//	example-Basic: simpler example using one group only
-//	example-MultiGroup: more complex example using several and independent groups.
+//	1_example-Basic: simpler example using one group only
+//	2_example-MultiGroup: more complex example using several and independent groups.
 //
 //	* BASIC USAGE
 //	Here we will control ONE ofParameterGroup only, but the addon can handle more groups too!
@@ -62,6 +62,7 @@
 ///------
 
 ///	TODO:
+///	
 /// IDEAS:
 ///	
 ///	+++		open/save dialog to project User-Kit session in a single file.
@@ -91,6 +92,12 @@
 ///				or add simpler class but compatible with preset files kits
 ///
 ///	+		could make curved-tweens when changing params using ofLerp or ofxKeyTween/ofxAnimatable/ofxEasing...
+///
+
+///
+///	BUG:
+///
+///	+		first preset is overwritten on startup
 ///
 
 ///------
@@ -157,7 +164,7 @@
 #define TSGL_STOP
 #endif
 
-#define WIDGET_HEIGHT 30
+#define BUTTON_BIG_HEIGHT 50
 #define PANEL_WIDGETS_WIDTH 225
 #define PANEL_WIDGETS_HEIGHT 100
 
@@ -437,6 +444,7 @@ private:
 	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
 	string path_RectanglePresetClicker = "_RectanglePresetClicker";
 	ofParameter<bool> MODE_EditPresetClicker;
+	ofParameter<bool> helpPos;
 	ofParameter<float> _rectRatio;
 	ofParameter<bool> SHOW_BackGround_EditPresetClicker;
 	//ofParameter<bool> bResetRects;
@@ -573,7 +581,7 @@ private:
 	// app settings for many params
 //private:
 public:
-	void load_ControlSettings();// handle group selectors and some settings states
+	void load_AppSettings();// handle group selectors and some settings states
 	void save_ControlSettings();// handle group selectors and some settings states
 
 	//----
@@ -805,7 +813,7 @@ public:
 		else// simplified path info
 		{
 			if (!bPathDirCustom) _names += "/data/" + path_UserKit_Folder + "/\n";
-			_names += path_PresetsFavourites + "/         favourites\n";
+			_names += path_PresetsFavourites + "/         favorites\n";
 			_names += path_PresetsStandalone + "/         standalones\n";
 			_names += "\n";
 
@@ -1012,8 +1020,8 @@ public:
 
 	//----
 
-public:
-	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
+//public:
+	//ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
 
 private:
 	int PRESET_Selected_IndexMain_PRE = -1;// used as callback
@@ -1033,7 +1041,7 @@ private:
 	ofParameter<bool> SHOW_Help;
 	ofParameter<bool> SHOW_Gui_AdvancedControl;
 	ofParameter<bool> ENABLE_Keys;
-	ofParameter<bool> bThemDark{ "THEME DARK", true };
+	ofParameter<bool> bThemDarkOrLight{ "THEME DARK", true };
 	ofParameter<glm::vec2> Gui_Internal_Position;
 
 private:
@@ -1261,6 +1269,11 @@ private:
 private:
 	void Changed_Control(ofAbstractParameter &e);
 	void Changed_UserKit(ofAbstractParameter &e);
+
+private:
+	//ofEventListeners listeners;
+	//void Changed_Randomizers(ofAbstractParameter &e);
+	void Changed_Randomizers(bool &b);
 
 	//-
 

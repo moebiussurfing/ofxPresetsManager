@@ -906,17 +906,19 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 	string str;
 	str = "GROUP " + group.getName();
 
-	static bool auto_resize = false;//TODO: BUG:
+	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
 	if (ofxImGui::BeginWindow(str.c_str(), settings, flagsw))
 	{
-		float _h = WIDGET_HEIGHT;
+		float _h = BUTTON_BIG_HEIGHT;
 		float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
-		float _w100 = ImGui::GetWindowWidth();
-		float _w99 = _w100 - 20;
+		float _w100 = ImGui::GetWindowContentRegionWidth();
+		float _w99 = _w100 - _spc;
 		float _w50 = _w99 / 2 - _spc;
+
+		//---
 
 		// preset selector
 
@@ -926,10 +928,10 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		//str = "  Group    " + group.getName();
 		//ImGui::Text(str.c_str());
 
-		str = "  Preset   " + ofToString(PRESET_Selected_IndexMain.get());
+		str = "Preset " + ofToString(PRESET_Selected_IndexMain.get());
 		ImGui::Text(str.c_str());
 
-		ImGui::Dummy(ImVec2(0, 5));
+		//ImGui::Dummy(ImVec2(0, 5));
 
 		ofxImGui::AddParameter(PRESET_Selected_IndexMain);
 
@@ -987,34 +989,34 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 		//--
 
-		ImGui::Dummy(ImVec2(0, 5));
+		//ImGui::Dummy(ImVec2(0, 5));
 
-		// TODO: not implemented bc must be backward..
-		// main helpers
-		if (MODE_Editor)
-		{
-			if (ImGui::Button("CLONE ALL", ImVec2(_w50, _h)))
-			{
-				bCloneAll = true;
-			}
+		//// TODO: not implemented bc must be backward..
+		//// main helpers
+		//if (MODE_Editor)
+		//{
+		//	if (ImGui::Button("CLONE ALL", ImVec2(_w50, _h)))
+		//	{
+		//		bCloneAll = true;
+		//	}
 
-			ImGui::SameLine();
-			if (ImGui::Button("CLONE >", ImVec2(_w50, _h)))
-			{
-				bCloneRight = true;
-			}
+		//	ImGui::SameLine();
+		//	if (ImGui::Button("CLONE >", ImVec2(_w50, _h)))
+		//	{
+		//		bCloneRight = true;
+		//	}
 
-			// TODO:
-			//ImGui::SameLine();
-			//if (ImGui::Button("POPULATE ALL!"))
-			//{
-			//	bPopulateAll = true;
-			//	//// populate all favs
-			//	//doPopulateFavs();
-			//	//// create browser files too
-			//	//doGetFavsToStandalonePresets();
-			//}
-		}
+		//	// TODO:
+		//	//ImGui::SameLine();
+		//	//if (ImGui::Button("POPULATE ALL!"))
+		//	//{
+		//	//	bPopulateAll = true;
+		//	//	//// populate all favs
+		//	//	//doPopulateFavs();
+		//	//	//// create browser files too
+		//	//	//doGetFavsToStandalonePresets();
+		//	//}
+		//}
 
 		//--
 
@@ -1030,9 +1032,9 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 		// 1.0.1 play randomizer index
 
+		ofxSurfingHelpers::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
 		//ofxImGui::AddParameter(PLAY_RandomizeTimer);
 		//ofxSurfingHelpers::AddBigToggle(PLAY_RandomizeTimer, 30);
-		ofxSurfingHelpers::AddBigToggle(PLAY_RandomizeTimer, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
 
 		//-
 
@@ -1102,7 +1104,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		//}
 
 		//--
-		
+
 		//TODO: BUG:
 		//there's a bug on resizing auto..
 
@@ -1112,7 +1114,7 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 			if (ImGui::CollapsingHeader("EDIT RANDOMIZERS"))
 			{
-				// 1.1 randomizers presets
+				// 1.1 randomizer index presets
 
 				//if (MODE_DicesProbs) 
 				//ofxImGui::Settings settingsG;
