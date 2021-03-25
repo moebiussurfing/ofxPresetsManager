@@ -122,6 +122,7 @@ ofxPresetsManager::ofxPresetsManager()
 	MODE_StandalonePresets_NEW.set("NEW!", false);
 	SHOW_Panel_Randomizer.set("SHOW RANDOMIZERS", false);
 	ENABLE_Keys.set("ENABLE KEYS", true);
+	ENABLE_Keys.setSerializable(false);
 
 	autoLoad.set("AUTO LOAD", true);
 	autoSave.set("AUTO SAVE", true);
@@ -1657,7 +1658,7 @@ void ofxPresetsManager::setModeKeySwap(int key)
 //----------------------------------------------------------------
 void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 {
-	if (bDoneSetup)
+	//if (bDoneSetup)
 	{
 		const int key = eventArgs.key;
 
@@ -1673,10 +1674,9 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		{
 			ofLogNotice(__FUNCTION__)
 				<< "key: " << (char)key
-				<< " mod_CONTROL: " << mod_CONTROL
-				<< " mod_SHIFT: " << mod_SHIFT
-				<< " mod_ALT: " << mod_ALT
-				//<< " mod_COMMAND: " << mod_COMMAND
+				<< (mod_CONTROL ? " + CONTROL":"") 
+				<< (mod_SHIFT ? " + SHIFT":"")
+				<< (mod_ALT ? " + ALT":"")
 				;
 		}
 

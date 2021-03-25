@@ -18,7 +18,7 @@ public:
 	// group0
     ofParameterGroup params0;
     ofParameterGroup params0_Nested;
-	ofParameter<ofColor> color0;// bc ofColor not implemented on ImGui yet
+	ofParameter<ofColor> color0;
 	ofParameter<bool> show0;
 	ofParameter<bool> fill0;
 	ofParameter<float> lineWidth0;

@@ -2,7 +2,6 @@
     "ofxPresetsManager": {
         "GUI": {
             "BOX_CLICKER": "0",
-            "ENABLE_KEYS": "0",
             "GUI_INTERNAL_POSITION": "720, 450",
             "HELP_POS": "0",
             "SHOW_ADVANCED": "0",
