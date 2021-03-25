@@ -41,9 +41,9 @@ Disables autosave and hides some GUI sections to simplify and improve performanc
 
 ## **Multi groups**:  
 
-When adding individually several `ofParameterGroup` we can handle them independently.  
+When adding individually multiple `ofParameterGroup` we can handle them independently.  
 We can use arrow keys to browse the groups and their selectors.  
-Also, we have an extra selector called **GROUP_LINK** which groups all the other group selectors states:  
+Also, we will have an extra **Global Selector** called **GROUP_LINK**, which groups all the other group selectors states:  
 
 ![image](/readme_images/Capture_multigroupClicker.JPG?raw=true "image")  
 
