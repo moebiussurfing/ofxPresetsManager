@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setupScene()
 {
-	params.setName("sceneParamsGroup");
+	params.setName("sceneParamsGroup");// main group 
 	params.add(shapeType.set("shapeType", 1, 1, 2));
 	params.add(amount.set("amount", 10, 1, 24));
 	params.add(separation.set("separation", 10, 1, 100));
