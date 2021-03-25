@@ -10,17 +10,16 @@ Also *empowered* with a *nice GUI* and many *helpers* and customizations.
 ![image](/readme_images/Capture_v2.JPG?raw=true "image")  
 
 ## Features
-- Powerful handling of several nested `ofParameter`'s into `ofParameterGroup`'s as containers.
+- Handling of several nested `ofParameter`'s into `ofParameterGroup`'s as containers.
 - Easy to integrate into your projects.
 - Autogenerates a GUI to tweak all the parameters.
-- GUI based on **Dear ImGui** using **ofxImGui**.
+- GUI based on **Dear ImGui** using a fork of **ofxImGui**.
 - Lot of customizations, **tools, and helpers**:  
   * Clone, Copy, and **Organize presets**.
-  * Change GUI layout and button sizes, Dark/Light **Themes**. 
-  * Play timed **randomizer** to switch between presets (tweaking probabilities).
-  * **Randomize** some selected **parameters**.
-  * Handle **many Groups** independently.
-  * **Browse** multi groups by arrow **keys**.
+  * Change GUI layout, customize docking windows, button sizes and Dark/Light **Themes**. 
+  * Play BPM Timed **Randomizer** to switch between presets (tweaking probabilities) independent for each group.
+  * **Randomize** some selected **parameters** for a preset.
+  * Handle **many Groups** independently. **Browse** multi groups by arrow **keys**.
   * **Undo** history engine.
 
 ## **Two Types of Presets**
@@ -34,7 +33,7 @@ Archived and named presets that we can load into and from favorites.
 ## Two Working Modes
 
 * **Edit Mode**:  
-Autosaves change when switching between presets.  
+Autosaves changes when switching between presets.  
 
 * **Live Mode**:  
 Disables autosave and hides some GUI sections to simplify and improve performance.   
@@ -55,13 +54,13 @@ To select a preset index by random and probabilities, customizable tempo, and tw
 * **RANDOM EDIT**:  
 To randomize some enabled parameters from the current preset.  
 
-## Basic Usage
+## Usage
 1. Set up your scene and `initialize` the related ```ofParameter```'s.
 2. ```Add``` the parameters to the ```ofParameterGroup container```.
 3. ```Customize``` some settings if desired.
 4. ```Add``` the container ```to the addon``` object. 
-5. You can define how many presets you want for each group, and what keys to associate as triggers.
-6. ```Done!``` Just Play with the addon GUI or the API control methods.  
+5. You can ```define how many presets``` you want for each group, ```and what keys``` to associate as triggers.
+6. ```Done!``` Just Play with the addon GUI (or using the API control methods by code).  
 
 Look at the examples and ```ofxPresetsManager.h``` for more learning.  
 The file settings (one file for each preset) will be placed by default into ```/bin/data```.  
@@ -152,7 +151,7 @@ which inspired this addon a lot. Some of his code is also used here.*
 * Added examples for **ofxRemoteParameters** from **@c-mendoza**.
 * Switched to **ofxImGui** fork from **@Daandelange** allowing multiple ImGui instances, to combine many addons using **ImGui**.
 
-## Notes
+## Notes / TODO
 * A Better performant version without using hard disk files. **Memory Mode**, using a vector of XML/JSON instead of files.
 * Improve deserialization and ofParameter callbacks / triggering to improve speed.
 * Add params tweening or filtering to ease transitions between presets when switching.
@@ -165,4 +164,4 @@ An addon by **@moebiusSurfing**
 *( ManuMolina ) 2019-2021*
 
 ## License
-*MIT License.*
+*MIT License*
