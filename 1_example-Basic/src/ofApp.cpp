@@ -23,6 +23,7 @@ void ofApp::setup()
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
 	font.load("assets/fonts/telegrama_render.otf", 11, true, true, true);
+	ofSetCircleResolution(200);
 
 	// define our parameters (ofParameterGroup params) for our scene 
 	// and add them to our params
@@ -35,13 +36,10 @@ void ofApp::setup()
 	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
 }
 
-
-/* Scene */
-
 //--------------------------------------------------------------
 void ofApp::drawScene()
 {
-	ofBackground(ofColor::darkBlue);
+	ofBackground(64);
 
 	// scene draw object linked to grouped parameters
 	ofPushStyle();
@@ -60,12 +58,7 @@ void ofApp::drawScene()
 	ofPopMatrix();
 	ofPopStyle();
 
-	// show help and debug preset
-	std::string str = "HELP\n";
-	str += "H            : Show Help\n";
-	str += "0,1,2,3,4,5  : Presets Keys\n";
-	str += "\n";
-
+	std::string str;
 	str += "DEBUG SCENE\n";
 	str += "shapeType    : " + ofToString(shapeType) + "\n";
 	str += "amount       : " + ofToString(amount) + "\n";
