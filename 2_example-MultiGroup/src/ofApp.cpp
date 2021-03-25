@@ -119,35 +119,6 @@ void ofApp::setupParameters()
 	params3.add(numObjects3.set("numObjects3", 2, 1, 3));
 	params3.add(size3.set("size3", 5, 1, 100));
 	params3.add(separation3.set("separation3", 50, 5, 100));
-
-	//--
-
-#ifdef USE_GUI_LOCAL 
-	// 1. local guis
-	// a local ofApp gui to show/edit our settings/parameters
-	// we will see here show how our params/settings changes when using the presets manager
-	ofxSurfingHelpers::setThemeDark_ofxGui();
-
-	int x = 5;
-	int y = 10;
-	int w = 200 + 3;
-
-	gui0.setup("ofApp0");
-	gui0.add(params0);
-	gui0.setPosition(x, y);
-
-	gui1.setup("ofApp1");
-	gui1.add(params1);
-	gui1.setPosition(x + 1 * w, y);
-
-	gui2.setup("ofApp2");
-	gui2.add(params2);
-	gui2.setPosition(x + 2 * w, y);
-
-	gui3.setup("ofApp3");
-	gui3.add(params3);
-	gui3.setPosition(x + 3 * w, y);
-#endif
 }
 
 //--------------------------------------------------------------
@@ -184,15 +155,6 @@ void ofApp::keyPressed(int key)
 	if (key == 'h') {
 		presetsManager.setToggleVisible_Help();
 	}
-}
-
-//--------------------------------------------------------------
-void ofApp::exit()
-{
-	presetsManager.exit();
-	// required to store all gui/layout settings. 
-	// but also recommended to draw group/presets current states
-	// before destruct our class params.
 }
 
 //--

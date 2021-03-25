@@ -9,8 +9,10 @@
             }
         },
         "RANDOM_SELECTED_INDEX": {
+            "ENABLE_MODE_RANDOMIZER": "1",
             "MODE_AVOID_REPEAT": "1",
-            "MODE_DURATION_SHORT": {
+            "MODE_LATCH-N-BACK": "0",
+            "PRESETS_DURATION": {
                 "SHORT_0": "0",
                 "SHORT_1": "0",
                 "SHORT_2": "0",
@@ -22,8 +24,6 @@
                 "SHORT_8": "0",
                 "SHORT_9": "0"
             },
-            "MODE_LATCH": "0",
-            "MODE_USE_PROBS": "1",
             "PRESETS_PROBS": {
                 "PROB_0": "5",
                 "PROB_1": "5",

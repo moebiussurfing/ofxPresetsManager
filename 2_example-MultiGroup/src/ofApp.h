@@ -4,14 +4,6 @@
 
 #include "ofxPresetsManager.h"
 
-//#define USE_GUI_LOCAL //-> we can even use our personal local gui. But we can use the bundled ImGui only too.
-#ifdef USE_GUI_LOCAL 
-#include "ofxGui.h"
-#include "ofxSurfingHelpers.h"
-#include "ofxSurfingConstants.h"
-#include "ofxSurfing_ofxGui.h"
-#endif
-
 class ofApp : public ofBaseApp
 {
 
@@ -19,7 +11,6 @@ public:
 	void setup();
 	void setupPresets();
     void draw();
-    void exit();
     void keyPressed(int key);
 
 	void setupParameters();
@@ -73,14 +64,6 @@ public:
 	float _alpha = 255/0.4f;
 
 	//-
-
-	// gui panels
-#ifdef USE_GUI_LOCAL 
-	ofxPanel gui0;
-	ofxPanel gui1;
-	ofxPanel gui2;
-	ofxPanel gui3;
-#endif
 
 	bool bGui = true;
 };
