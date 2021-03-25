@@ -27,9 +27,7 @@ public:
 	// presetsManager
 	ofxPresetsManager presetsManager;
 
-	// scene
 	void setupScene();
-	void drawScene();
 	
 	ofTrueTypeFont font;
 };

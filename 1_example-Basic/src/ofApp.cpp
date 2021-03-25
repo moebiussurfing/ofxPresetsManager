@@ -37,7 +37,7 @@ void ofApp::setup()
 }
 
 //--------------------------------------------------------------
-void ofApp::drawScene()
+void ofApp::draw()
 {
 	ofBackground(64);
 
@@ -57,30 +57,4 @@ void ofApp::drawScene()
 	}
 	ofPopMatrix();
 	ofPopStyle();
-
-	std::string str;
-	str += "DEBUG SCENE\n";
-	str += "shapeType    : " + ofToString(shapeType) + "\n";
-	str += "amount       : " + ofToString(amount) + "\n";
-	str += "separation   : " + ofToString(separation) + "\n";
-	str += "size         : " + ofToString(size) + "\n";
-	str += "fill         : " + ofToString(fill) + "\n";
-	std::string sc = 
-		ofToString(color.get().r, 1) + ", " +
-		ofToString(color.get().g, 1) + ", " +
-		ofToString(color.get().b, 1) + ", " +
-		ofToString(color.get().a, 1);
-	str += "color        : " + sc + "\n";
-	str += "lineWidth    : " + ofToString(lineWidth);
-
-	//ofDrawBitmapStringHighlight(str, 35, 50);
-	ofxSurfingHelpers::drawTextBoxed(font, str, 35, 50);
-}
-
-//--------------------------------------------------------------
-void ofApp::draw()
-{
-	drawScene();
-
-	// nothing more!
 }
