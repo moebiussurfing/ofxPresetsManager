@@ -1,7 +1,7 @@
 {
     "ofxPresetsManager": {
         "GUI": {
-            "BOX_CLICKER": "1",
+            "BOX_CLICKER": "0",
             "ENABLE_KEYS": "0",
             "GUI_INTERNAL_POSITION": "720, 450",
             "HELP_POS": "0",
@@ -10,7 +10,7 @@
             "SHOW_HELP": "0",
             "SHOW_ImGui": "1",
             "SHOW_PARAMETERS": "0",
-            "SHOW_RANDOMIZERS": "0",
+            "SHOW_RANDOMIZERS": "1",
             "SHOW_SELECTORS": "0",
             "SHOW_STANDALONES": "0",
             "THEME_DARK": "0"
@@ -21,6 +21,7 @@
             "MODE_EDIT": "0",
             "TIMER_AUTO_SAVE": "0"
         },
+        "Show_All": "1",
         "THEME_DARK": "0"
     }
 }

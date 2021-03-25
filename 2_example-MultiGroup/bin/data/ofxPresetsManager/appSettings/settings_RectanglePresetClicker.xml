@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <interactiveRect>
 	<path>ofxPresetsManager/appSettings/</path>
-	<x>518</x>
-	<y>746</y>
-	<width>768</width>
+	<x>585</x>
+	<y>749</y>
+	<width>800</width>
 	<height>273</height>
 	<nombre>_RectanglePresetClicker</nombre>
 	<isEditing>0</isEditing>

@@ -124,7 +124,7 @@ for (int i = 0; i < presetsManager.PRESETS_Selected_Index.size(); i++)
 //--------------------------------------------------------------
 void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 {
-	string name = e.getName();
+	std::string name = e.getName();
 	ofLogNotice() <<
 		"THE SELECTOR FOR THE GROUP WITH NAME " << name <<
 		" CHANGED TO PRESET INDEX: " << e;
@@ -309,21 +309,21 @@ public:
 private:
 	// save to a preset
 	void save(int presetIndex, int guiIndex = 0);
-	void save(int presetIndex, string guiName);
+	void save(int presetIndex, std::string guiName);
 
 	// loads an already saved preset
 	void load(int presetIndex, int guiIndex = 0);
-	void load(int presetIndex, string guiName);
+	void load(int presetIndex, std::string guiName);
 
 	// get the last loaded preset
 	int getPresetIndex(int groupIndex) const;
-	int getPresetIndex(string groupName) const;
+	int getPresetIndex(std::string groupName) const;
 
-	int getGuiIndex(string name) const;// get index for a name of group
-	string getPresetPath(string groupName, int presetIndex);// get path of a preset of a group
+	int getGuiIndex(std::string name) const;// get index for a name of group
+	std::string getPresetPath(std::string groupName, int presetIndex);// get path of a preset of a group
 
-	string getGroupPath(string groupName);// get path of a group. for external monitor only
-	string getGroupPath(int index);// get path of a group. for external monitor only
+	std::string getGroupPath(std::string groupName);// get path of a group. for external monitor only
+	std::string getGroupPath(int index);// get path of a group. for external monitor only
 
 	//--
 
@@ -369,6 +369,7 @@ private:
 	// select active group 
 	// to show on randomize editor panel
 	ofParameter<int> GuiGROUP_Selected_Index;// only this selected group will be showed on gui to edit
+	ofParameter<bool> bSHOW_allGroups;//enable to show all, each group panels
 	void Changed_GuiGROUP_Selected_Index(int & index);
 	std::vector<groupRandomizer> groupRandomizers;
 
@@ -502,7 +503,7 @@ public:
 	//	// when a selector changes, we update the local groups too, to mantain all groups synced!
 	//	if (!bDisableCallbacks)
 	//	{
-	//		string name = e.getName();
+	//		std::string name = e.getName();
 	//		ofLogNotice(__FUNCTION__) << name << " : " << e;
 	//		cout << (__FUNCTION__) << name << " : " << e << endl;
 	//		if (0) {}
@@ -523,7 +524,7 @@ private:
 private:
 	// mini preview rectangles positions and sizes
 	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
-	string path_RectanglePresetClicker = "_RectanglePresetClicker";
+	std::string path_RectanglePresetClicker = "_RectanglePresetClicker";
 	ofParameter<bool> MODE_EditPresetClicker;
 	ofParameter<bool> helpPos;
 	ofParameter<float> _rectRatio;
@@ -791,7 +792,7 @@ public:
 
 public:
 	//--------------------------------------------------------------
-	void saveCurrentPreset(string groupName) {
+	void saveCurrentPreset(std::string groupName) {
 		int _groupIndex = -1;
 		for (int i = 0; i < groups.size(); i++) {
 			if (groups[i].getName() == groupName) _groupIndex = i;
@@ -859,17 +860,17 @@ public:
 	}
 
 	//--------------------------------------------------------------
-	string getGroupName(int i = 0)
+	std::string getGroupName(int i = 0)
 	{
-		string _name = "ERROR UNKNOWN";
+		std::string _name = "ERROR UNKNOWN";
 		if (i < groups.size()) _name = groups[i];
 		return _name;
 	}
 
 	//--------------------------------------------------------------
-	string getGroupsNames()
+	std::string getGroupsNames()
 	{
-		string _names = "";
+		std::string _names = "";
 		for (int i = 0; i < groups.size(); i++)
 		{
 			_names += groups[i].getName();
@@ -879,9 +880,9 @@ public:
 	}
 
 	//--------------------------------------------------------------
-	string getGroupsPaths(bool simplified = true)// get root paths for the preset files of the groups
+	std::string getGroupsPaths(bool simplified = true)// get root paths for the preset files of the groups
 	{
-		string _names = "";
+		std::string _names = "";
 
 		if (!simplified)// full paths info
 		{
@@ -894,9 +895,10 @@ public:
 		else// simplified path info
 		{
 			if (!bPathDirCustom) _names += "/data/" + path_UserKit_Folder + "/\n";
-			_names += path_PresetsFavourites + "/         favorites\n";
-			_names += path_PresetsStandalone + "/         standalones\n";
+			_names += path_PresetsFavourites + "/         Favorites\n";
+			_names += path_PresetsStandalone + "/         Standalones\n";
 			_names += "\n";
+			_names += "GROUPS\n";
 
 			for (int i = 0; i < groups.size(); i++)
 			{
@@ -909,9 +911,9 @@ public:
 	}
 
 	//--------------------------------------------------------------
-	string getGroupsPath()
+	std::string getGroupsPath()
 	{
-		string _names = "";
+		std::string _names = "";
 		_names = getGroupPath(0);// simpler: get first group bc all groups are in the same parent folder
 		return _names;
 	}
@@ -1040,7 +1042,7 @@ public:
 		for (int i = 0; i < groups.size(); i++)
 		{
 			float _w;
-			string info = groups[i].getName() + "* ";
+			std::string info = groups[i].getName() + "* ";
 			if (myFont.isLoaded()) { _w = myFont.getStringBoundingBox(info, 0, 0).width; }
 			else { _w = 200; }
 
@@ -1054,11 +1056,11 @@ public:
 	// customize file paths
 
 	//--------------------------------------------------------------
-	void setPath_UserKit_Folder(string folder);// path for root container folder. must be called before setup()!
-	void setPath_PresetsFavourites(string folder);// path folder for favourite/live presets
-	void setPath_PresetsStandalone(string folder);// path folder for standalone presets kit for the browser
+	void setPath_UserKit_Folder(std::string folder);// path for root container folder. must be called before setup()!
+	void setPath_PresetsFavourites(std::string folder);// path folder for favourite/live presets
+	void setPath_PresetsStandalone(std::string folder);// path folder for standalone presets kit for the browser
 	//--------------------------------------------------------------
-	void setPath_ControlSettings(string str)// for the session states settings
+	void setPath_ControlSettings(std::string str)// for the session states settings
 	{
 		ofLogNotice(__FUNCTION__) << str;
 		path_ControlSettings = str;
@@ -1066,7 +1068,7 @@ public:
 
 	// TODO: customize root path. this could be the user-kit path ??
 	////--------------------------------------------------------------
-	//void setPath_Root(string str)
+	//void setPath_Root(std::string str)
 	//{
 	//	ofLogNotice(__FUNCTION__) << str;
 	//	path_Root = str;
@@ -1132,7 +1134,7 @@ private:
 	//--
 
 private:
-	string helpInfo;// info text to display shortcuts or path settings
+	std::string helpInfo;// info text to display shortcuts or path settings
 	void buildHelpInfo();
 
 	//--
@@ -1217,13 +1219,13 @@ private:
 	// engine handler
 	bool bFilesError = false;
 	ofParameter<bool> MODE_StandalonePresets_NEW;
-	string inputText_NEW = "";//user input text
-	//string inputText_TEMP = "";
+	std::string inputText_NEW = "";//user input text
+	//std::string inputText_TEMP = "";
 
 private:
 	void doStandalonePresetsBuild(int groupIndex = -1);// standalone presets splitted from favourites presets
-	void doStandalonePresetLoad(string name, int groupIndex = -1);
-	void doStandalonePresetSave(string name, int groupIndex = -1);
+	void doStandalonePresetLoad(std::string name, int groupIndex = -1);
+	void doStandalonePresetSave(std::string name, int groupIndex = -1);
 	bool doStandalonePresetsRefresh(int groupIndex = -1);
 	void doStandalonePresetsBuildFromFavs(int groupIndex = -1);// save all favourites-presets to the standalone-presets (archive) folder
 
@@ -1340,7 +1342,7 @@ private:
 private:
 	// font to label clicker boxes
 	ofTrueTypeFont myFont;
-	string myTTF;// gui font for all gui theme
+	std::string myTTF;// gui font for all gui theme
 	int sizeTTF;
 
 	//----
@@ -1385,7 +1387,7 @@ private:
 	// custom path for preset favourites
 private:
 	ofParameter<bool> bPathDirCustom;
-	ofParameter<string> pathDirCustom;
+	ofParameter<std::string> pathDirCustom;
 public:
 	// set custom path
 	void doFileDialogProcessSelection(ofFileDialogResult openFileResult);
@@ -1408,7 +1410,7 @@ private:
 private:
 	// many times when you try to save a file, this is not possible and do not happens bc the container folder do not exist
 	//--------------------------------------------------------------
-	void CheckFolder(string _path)
+	void CheckFolder(std::string _path)
 	{
 		ofxSurfingHelpers::CheckFolder(_path);
 	}
@@ -1420,7 +1422,7 @@ private:
 		// use a container for all User-Kit together...
 		// CheckFolder(path_Root);
 
-		string _path;
+		std::string _path;
 
 		_path = path_UserKit_Folder;// current kit-preset main folder
 		CheckFolder(_path);

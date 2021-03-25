@@ -5,7 +5,7 @@ void ofApp::setupPresets()
 {
 	// optional:
 
-	// some API controls:
+	// some API extra tweak controls:
 	//presetsManager.setEnableKeysArrowBrowse(true);
 	//presetsManager.setEnableKeys(true);
 	presetsManager.setSizeBox_PresetClicker(50);
@@ -47,7 +47,6 @@ void ofApp::setup()
 {
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
-
 	ofSetCircleResolution(200);
 
 	//--
@@ -124,25 +123,14 @@ void ofApp::setupParameters()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
-	ofBackground(8);
+	ofBackground(64);
 
-	// scene draw object linked to grouped parameters
+	// scene draw 
+	// linked to grouped parameters
 	if (show0) drawScene0();
 	if (show1) drawScene1();
 	if (show2) drawScene2();
 	if (show3) drawScene3();
-
-	//-
-
-#ifdef USE_GUI_LOCAL 
-	// local gui parameters: to show or to edit presets params
-	if (bGui) {
-		gui0.draw();
-		gui1.draw();
-		gui2.draw();
-		gui3.draw();
-	}
-#endif
 }
 
 //--------------------------------------------------------------
