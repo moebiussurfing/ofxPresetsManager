@@ -112,6 +112,8 @@ presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' });
 presetsManager.add(params1, { 'a', 's', 'd', 'f' });
 // group 2
 presetsManager.add(params2, { 'z', 'x', 'c' });
+// group 3
+presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
 // initialize
 presetsManager.setup();
 ```
@@ -123,7 +125,6 @@ Both examples runs linked together using **ofxRemoteParameters**.
 This allows you to control the presets on the **Client OF_APP**.  
 The **Server OF_APP** draws your scene using the *linked/received* parameters from the **Client OF_APP**.  
 This is useful because in some scenarios could help to improve the performance or the compiling time reducing dependencies.  
-
 [VIDEO](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
 
 ## Dependencies
