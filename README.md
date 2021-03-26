@@ -2,14 +2,17 @@ ofxPresetsManager
 =============================
 
 # Overview
+
 An **openFrameworks** addon to handle presets of several `ofParameter`'s nested into single or multiple `ofParameterGroup` containers.  
 
 Also *empowered* with a *nice GUI* and many *helpers* and customizations.
 
 ## Screenshot
+
 ![image](/readme_images/Capture_v2.JPG?raw=true "image")  
 
 ## Features
+
 - Handling of several nested `ofParameter`'s into `ofParameterGroup`'s as containers.
 - Easy to integrate into your projects.
 - Autogenerates a GUI to tweak all the parameters.
@@ -22,23 +25,7 @@ Also *empowered* with a *nice GUI* and many *helpers* and customizations.
   * Handle **many Groups** independently. **Browse** multi groups by arrow **keys**.
   * **Undo** history engine.
 
-## **Two Types of Presets**
-
-* **Favorite Presets**:  
-Fast clickable-boxes/key-trigged presets.  
-
-* **Standalone Presets**:  
-Archived and named presets that we can load into and from favorites.  
-
-## Two Working Modes
-
-* **Edit Mode**:  
-Autosaves changes when switching between presets.  
-
-* **Live Mode**:  
-Disables autosave and hides some GUI sections to simplify and improve performance.   
-
-## **Multi groups**:  
+## **Multi groups**  
 
 When adding individually multiple `ofParameterGroup` we can handle them independently.  
 We can use arrow keys to browse the groups and their selectors.  
@@ -46,15 +33,34 @@ Also, we will have an extra **Global Selector** called **GROUP_LINK**, which gro
 
 ![image](/readme_images/Capture_multigroupClicker.JPG?raw=true "image")  
 
+## **Two Types of Presets**
+
+1.* **Favorite Presets**:  
+Fast clickable-boxes/key-trigged presets.  
+
+2.* **Standalone Presets**:  
+Archived and named presets that we can load into and from favorites.  
+
+## Two Working Modes
+
+1.* **Edit Mode**:  
+Auto-saves parameters changes when switching between presets.  
+Used to allow fast edititon of the parameters.  
+
+2.* **Live Mode**:  
+Disables auto-save and hides some GUI sections to simplify and improve performance.  
+Used when just playing the scenes. (We can save manually.)
+
 ## **Two Randomizer Engines**
 
-* **RANDOM SELECTED INDEX**:  
+1.* **RANDOM SELECTED INDEX**:  
 To select a preset index by random and probabilities, customizable tempo, and two types of preset/states durations: normal and short. 
 
-* **RANDOM EDIT**:  
+2. * **RANDOM EDIT**:  
 To randomize some enabled parameters from the current preset.  
 
 ## Usage
+
 1. Set up your scene and `initialize` the related ```ofParameter```'s.
 2. ```Add``` the parameters ```to``` the ```ofParameterGroup container```.
 3. ```Add``` the group ```to the addon```. 
@@ -64,7 +70,7 @@ To randomize some enabled parameters from the current preset.
 Look at the examples and ```ofxPresetsManager.h``` for more learning.  
 The file settings (one file for each preset) will be placed by default into ```/bin/data```.  
 
-### ofApp.h
+**ofApp.h**
 ```.cpp
 #include "ofxPresetsManager.h"
 
@@ -76,7 +82,7 @@ ofParameter<int> amount;
 ...
 ```
 
-### ofApp.cpp
+**ofApp.cpp**
 ```.cpp
 ofApp::setup()
 {
@@ -113,7 +119,7 @@ presetsManager.add(params1, { 'a', 's', 'd', 'f' });
 presetsManager.add(params2, { 'z', 'x', 'c' });
 // group 3
 presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
-// initialize
+
 presetsManager.setup();
 ```
 
@@ -153,7 +159,7 @@ which inspired this addon a lot. Some of his code is also used here.*
 
 ## Notes / TODO
 * A Better performant version without using hard disk files. **Memory Mode**, using a vector of XML/JSON instead of files.
-* Improve deserialization and ofParameter callbacks / triggering to improve speed.
+* Improve (silent) de-serialization and ofParameter callbacks / triggering to improve speed.
 * Add params tweening or filtering to ease transitions between presets when switching.
 * Add a minimal/lite class to play compatible preset files but without any GUI or using a tiny **ofxGui**/**ImGui** version.
 * More ideas noted into **ofxPresetsManager.h**.   
