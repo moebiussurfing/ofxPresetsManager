@@ -57,10 +57,9 @@ To randomize some enabled parameters from the current preset.
 ## Usage
 1. Set up your scene and `initialize` the related ```ofParameter```'s.
 2. ```Add``` the parameters ```to``` the ```ofParameterGroup container```.
-3. ```Customize``` some settings if desired.
-4. ```Add``` the container ```to the addon``` object. 
-5. You can ```define how many presets``` you want for each group, ```and what keys``` to associate as triggers.
-6. ```Done!``` Just Play with the addon GUI (or using the API control methods by code).  
+3. ```Add``` the group ```to the addon```. 
+4. Set ```how many presets``` you want for the group, ```and what keys``` to associate as triggers.
+5. ```Done!``` Just Play with the addon GUI (or using the API control methods by code).  
 
 Look at the examples and ```ofxPresetsManager.h``` for more learning.  
 The file settings (one file for each preset) will be placed by default into ```/bin/data```.  

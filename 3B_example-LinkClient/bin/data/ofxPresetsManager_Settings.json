@@ -6,8 +6,8 @@
         },
         "GROUP_LINK": "0",
         "PRESET_SELECTORS": {
-            "paramsGroup": {
-                "paramsGroup": "2",
+            "group": {
+                "UnknownName": "5",
                 "t_BPM": "120"
             }
         }
