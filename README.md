@@ -53,10 +53,10 @@ Used when just playing the scenes. (We can save manually.)
 
 ## **Two Randomizer Engines**
 
-1.* **RANDOM SELECTED INDEX**:  
+1. **RANDOM SELECTED INDEX**:  
 To select a preset index by random and probabilities, customizable tempo, and two types of preset/states durations: normal and short. 
 
-2. * **RANDOM EDIT**:  
+2. **RANDOM EDIT**:  
 To randomize some enabled parameters from the current preset.  
 
 ## Usage
