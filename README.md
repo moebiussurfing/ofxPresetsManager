@@ -93,6 +93,7 @@ ofApp::setup()
 	presetsManager.setup();
 }
 
+// 5. Done!
 // nothing more!
 ```
 
