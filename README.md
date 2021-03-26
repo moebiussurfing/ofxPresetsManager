@@ -35,19 +35,19 @@ Also, we will have an extra **Global Selector** called **GROUP_LINK**, which gro
 
 ## **Two Types of Presets**
 
-1.* **Favorite Presets**:  
+1. **Favorite Presets**:  
 Fast clickable-boxes/key-trigged presets.  
 
-2.* **Standalone Presets**:  
+2. **Standalone Presets**:  
 Archived and named presets that we can load into and from favorites.  
 
 ## Two Working Modes
 
-1.* **Edit Mode**:  
+1. **Edit Mode**:  
 Auto-saves parameters changes when switching between presets.  
 Used to allow fast edititon of the parameters.  
 
-2.* **Live Mode**:  
+2. **Live Mode**:  
 Disables auto-save and hides some GUI sections to simplify and improve performance.  
 Used when just playing the scenes. (We can save manually.)
 
