@@ -132,3 +132,7 @@ Desktop.ini
 *.log
 *.sql
 *.sqlite
+example-Basic/config.make
+example-Basic/Makefile
+example-Basic/openFrameworks-Info.plist
+example-Basic/Project.xcconfig

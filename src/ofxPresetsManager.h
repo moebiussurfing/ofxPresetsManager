@@ -156,13 +156,16 @@
 #define TSGL_STOP
 #endif
 
+#include "ofxMidiParams.h"
+
 //-------------------------------
 
 class ofxPresetsManager : public ofBaseApp
 {
 
 public:
-
+    ofxMidiParams mMidiParams;
+    
 	ofxPresetsManager();
 	~ofxPresetsManager();
 

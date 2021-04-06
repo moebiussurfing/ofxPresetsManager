@@ -228,6 +228,7 @@ ofxPresetsManager::ofxPresetsManager()
 	TIME_SAMPLE_GET_INSTANCE()->setEnabled(true);
 	TIME_SAMPLE_DISABLE();
 #endif
+
 }
 
 //----
@@ -596,6 +597,15 @@ void ofxPresetsManager::startup()
 	bDoneSetup = true;
 
 	//--
+
+    //midi
+    mMidiParams.connect(2, true);
+    mMidiParams.setPosition( ofGetWidth()- 2 * 320, 20 );
+    for (auto g: PRESETS_Selected_Index){
+        mMidiParams.add(g);
+    }
+    mMidiParams.load("midi-Presets.xml");
+
 }
 
 //--------------------------------------------------------------
@@ -708,6 +718,8 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 #endif
 
 	//----
+
+    mMidiParams.draw();
 }
 
 //--------------------------------------------------------------
@@ -2753,6 +2765,8 @@ void ofxPresetsManager::exit()
 
 	// TODO: debug crash
 	//gui_ImGui.exit();
+
+     mMidiParams.save("midi-Presets.xml");
 }
 
 //--
