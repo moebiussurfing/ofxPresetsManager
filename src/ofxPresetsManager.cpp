@@ -1674,9 +1674,9 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		{
 			ofLogNotice(__FUNCTION__)
 				<< "key: " << (char)key
-				<< (mod_CONTROL ? " + CONTROL":"") 
-				<< (mod_SHIFT ? " + SHIFT":"")
-				<< (mod_ALT ? " + ALT":"")
+				<< (mod_CONTROL ? " + CONTROL" : "")
+				<< (mod_SHIFT ? " + SHIFT" : "")
+				<< (mod_ALT ? " + ALT" : "")
 				;
 		}
 
@@ -2886,7 +2886,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
 		// main panel
-		ImGui_Draw_MainPanel();// main control + extra
+		ImGui_Main();// main control + extra
 
 		//-
 
@@ -2932,17 +2932,17 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		}
 
 		// all group selectors to set current preset
-		if (SHOW_Panel_AllSelectors) ImGui_Draw_GroupsSelectors();
+		if (SHOW_Panel_AllSelectors) ImGui_GroupsSelectors();
 
 		// all parameters from all groups
-		if (SHOW_Panel_AllParameter) ImGui_Draw_PresetParameters();
+		if (SHOW_Panel_AllParameter) ImGui_Parameters();
 
 		// selected randomizers for selected group
 		// handles matrix button selector too
-		if (SHOW_Panel_Randomizer) ImGui_Draw_Randomizers();
+		if (SHOW_Panel_Randomizer) ImGui_Randomizers();
 
 		// standalone presets browser
-		ImGui_Draw_StandalonePresets();
+		ImGui_Standalones();
 	}
 
 	return settings.mouseOverGui;
@@ -2950,7 +2950,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 // ImGui
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_PresetParameters()
+void ofxPresetsManager::ImGui_Parameters()
 {
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
@@ -2966,12 +2966,17 @@ void ofxPresetsManager::ImGui_Draw_PresetParameters()
 		}
 
 		ImGui::Checkbox("Auto-Resize", &auto_resize);
+
+		//-
+
+		//extra params not included into presets
+		if (bAppStateParams) ofxImGui::AddGroup(params_AppSettings, settings);
 	}
 	ofxImGui::EndWindow(settings);
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_GroupsSelectors()
+void ofxPresetsManager::ImGui_GroupsSelectors()
 {
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
@@ -2987,7 +2992,7 @@ void ofxPresetsManager::ImGui_Draw_GroupsSelectors()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_MainPanel()
+void ofxPresetsManager::ImGui_Main()
 {
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
@@ -3144,7 +3149,7 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 
 		// extra / advanced
 
-		if (MODE_Editor) ImGui_Draw_Extra();
+		if (MODE_Editor) ImGui_Advanced();
 
 		//ImGui::Checkbox("Auto-Resize", &auto_resize);
 
@@ -3154,7 +3159,7 @@ void ofxPresetsManager::ImGui_Draw_MainPanel()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_Extra()
+void ofxPresetsManager::ImGui_Advanced()
 {
 	//if (ImGui::CollapsingHeader("EXTRA"))
 	{
@@ -3433,7 +3438,7 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_StandalonePresets()
+void ofxPresetsManager::ImGui_Standalones()
 {
 	if (SHOW_Panel_StandalonePresets)
 	{
@@ -3874,7 +3879,7 @@ void ofxPresetsManager::ImGui_Draw_StandalonePresets()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Draw_Randomizers()
+void ofxPresetsManager::ImGui_Randomizers()
 {
 	// this panel will show the settings for the selected by user group (GuiGROUP_Selected_Index)
 
@@ -4322,4 +4327,15 @@ void ofxPresetsManager::drawHelp(int _x = -1, int _y = -1)
 
 	ofPopMatrix();
 	ofPopStyle();
+}
+
+
+//--------------------------------------------------------------
+void ofxPresetsManager::addExtra(ofParameterGroup &g)
+{
+	bool bAppStateParams = true;
+
+	params_AppSettings.clear();
+	//params_AppSettings.add(params_Internal);
+	params_AppSettings = g;
 }

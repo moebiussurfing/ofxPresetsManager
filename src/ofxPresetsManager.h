@@ -1142,12 +1142,12 @@ private:
 	// ImGui
 
 public:
-	void ImGui_Draw_Randomizers();
-	void ImGui_Draw_MainPanel();
-	void ImGui_Draw_Extra();
-	void ImGui_Draw_GroupsSelectors();
-	void ImGui_Draw_StandalonePresets();
-	void ImGui_Draw_PresetParameters();
+	void ImGui_Randomizers();
+	void ImGui_Main();
+	void ImGui_Advanced();
+	void ImGui_GroupsSelectors();
+	void ImGui_Standalones();
+	void ImGui_Parameters();
 
 public:
 	//void ImGui_Draw_Window();
@@ -1451,4 +1451,15 @@ private:
 			}
 		}
 	}
+
+	//--
+
+	//extra params not included into presets
+	//but soimetimes is usefull to centralize all params together
+private:
+	ofParameterGroup params_AppSettings{ "AppState" };
+	bool bAppStateParams = false;
+
+public:
+	void addExtra(ofParameterGroup &g);
 };
