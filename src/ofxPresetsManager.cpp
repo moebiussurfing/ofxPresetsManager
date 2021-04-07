@@ -1658,7 +1658,7 @@ void ofxPresetsManager::setModeKeySwap(int key)
 //----------------------------------------------------------------
 void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 {
-	//if (bDoneSetup)
+	if (bDoneSetup)
 	{
 		const int key = eventArgs.key;
 
