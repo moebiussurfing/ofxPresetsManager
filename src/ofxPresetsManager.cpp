@@ -111,16 +111,19 @@ ofxPresetsManager::ofxPresetsManager()
 	// control parameters
 
 	SHOW_ImGui.set("SHOW ImGui", false);
-	SHOW_ImGui_PresetsParams.set("SHOW PARAMETERS", false);
+	SHOW_ImGui_PresetsParams.set("SHOW PRESET PARAMETERS", false);
 	SHOW_ImGui_Selectors.set("SHOW SELECTORS", false);
+	SHOW_Panel_Click.set("SHOW CLICKER", true);
+	SHOW_Panel_AllParameters.set("SHOW PARAMETERS", false);
+	SHOW_Panel_AllSelectors.set("SHOW SELECTORS", false);
+	SHOW_Panel_Standalones.set("SHOW STANDALONES", false);
+	SHOW_Panel_Randomizer.set("SHOW RANDOMIZERS", false);
+	SHOW_Panel_RandomizerIndex.set("RANDOM INDEX", false);
+	SHOW_Panel_RandomizerFilter.set("RANDOM FILTER", false);
+
 	SHOW_Help.set("SHOW HELP", false);
 	SHOW_Gui_AdvancedControl.set("SHOW ADVANCED", false);
-	SHOW_Panel_Click.set("SHOW CLICKER", true);
-	SHOW_Panel_AllParameter.set("SHOW PARAMETERS", false);
-	SHOW_Panel_AllSelectors.set("SHOW SELECTORS", false);
-	SHOW_Panel_StandalonePresets.set("SHOW STANDALONES", false);
 	MODE_StandalonePresets_NEW.set("NEW!", false);
-	SHOW_Panel_Randomizer.set("SHOW RANDOMIZERS", false);
 	ENABLE_Keys.set("ENABLE KEYS", true);
 	ENABLE_Keys.setSerializable(false);
 
@@ -175,11 +178,13 @@ ofxPresetsManager::ofxPresetsManager()
 
 	params_Gui.setName("GUI");
 	params_Gui.add(SHOW_Gui_AdvancedControl);
-	params_Gui.add(SHOW_Panel_AllParameter);
+	params_Gui.add(SHOW_Panel_AllParameters);
 	params_Gui.add(SHOW_Panel_AllSelectors);
 	params_Gui.add(SHOW_Panel_Click);
-	params_Gui.add(SHOW_Panel_StandalonePresets);
+	params_Gui.add(SHOW_Panel_Standalones);
 	params_Gui.add(SHOW_Panel_Randomizer);
+	params_Gui.add(SHOW_Panel_RandomizerIndex);
+	params_Gui.add(SHOW_Panel_RandomizerFilter);
 	params_Gui.add(SHOW_ImGui);
 	params_Gui.add(SHOW_ImGui_PresetsParams);
 	params_Gui.add(ENABLE_Keys);
@@ -378,7 +383,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Options.add(MODE_Editor);
 	params_Options.add(bSplitGroupFolders);
 
-	params_Gui.add(bThemDarkOrLight);
+	params_Gui.add(bThemeDarkOrLight);
 	params_Gui.add(SHOW_ImGui_Selectors);
 	params_Gui.add(SHOW_ImGui_PresetsParams);
 	params_Gui.add(SHOW_Help);
@@ -390,7 +395,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Control.add(params_Gui);
 
 	params_Control.add(MODE_EditPresetClicker);
-	params_Control.add(bThemDarkOrLight);
+	params_Control.add(bThemeDarkOrLight);
 	params_Control.add(bSHOW_allGroups);
 
 	//--
@@ -472,14 +477,29 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	//----
 
+	// randomizers
+
 	//TODO:
-	//wf
+	// workflow
 	for (int i = 0; i < groups.size(); i++)
 	{
 		groupRandomizers[i].PLAY_RandomizeTimer.addListener(this, &ofxPresetsManager::Changed_Randomizers);
 
 		//listeners.push(groupRandomizers[i].PLAY_RandomizeTimer.newListener(this, &ofxPresetsManager::Changed_Randomizers));
 	}
+
+	//--
+
+	//// randomizer panels toggles
+
+	//for (int i = 0; i < groupRandomizers.size(); i++)
+	//{
+	//	groupRandomizers[i].SHOW_Panel_RandomizerIndex.makeReferenceTo(SHOW_Panel_RandomizerIndex);
+	//	groupRandomizers[i].SHOW_Panel_RandomizerFilter.makeReferenceTo(SHOW_Panel_RandomizerFilter);
+	//
+	//	//SHOW_Panel_RandomizerIndex.makeReferenceTo(groupRandomizers[i].SHOW_Panel_RandomizerIndex);
+	//	//SHOW_Panel_RandomizerFilter.makeReferenceTo(groupRandomizers[i].SHOW_Panel_RandomizerFilter);
+	//}
 
 	//----
 
@@ -600,7 +620,7 @@ void ofxPresetsManager::startup()
 	// workaround
 	MODE_EditPresetClicker = MODE_EditPresetClicker.get();
 	//required when no xml settings yet
-	bThemDarkOrLight = bThemDarkOrLight.get();
+	bThemeDarkOrLight = bThemeDarkOrLight.get();
 
 	//-------
 
@@ -614,6 +634,14 @@ void ofxPresetsManager::startup()
 
 	// TODO:
 	bDoneSetup = true;
+
+	//--
+
+	////TODO: BUG:
+	////load_AppSettings();// here bPathDirCustom is loaded (but if files are present, not in first runtime)
+
+	//std::string path = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_ControlSettings;
+	//ofxSurfingHelpers::loadGroup(params_Control, path);
 }
 
 //--------------------------------------------------------------
@@ -980,7 +1008,7 @@ void ofxPresetsManager::drawPresetClicker()
 			int xG = -strW - 20;
 			ySave = ySave - 2;// little up
 
-			if (!bThemDarkOrLight) ofSetColor(_colorBg);// shadow
+			if (!bThemeDarkOrLight) ofSetColor(_colorBg);// shadow
 			else ofSetColor(_colorButton);// shadow
 
 			if (myFont.isLoaded()) myFont.drawString(info, xG + gap, ySave + gap);
@@ -1320,8 +1348,10 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 		// TODO:
 		// avoid startup creators...
 		std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
+
 		bool b = ofxSurfingHelpers::loadGroup(groups[guiIndex], _path);
-		if (!b) {
+		if (!b)
+		{
 			ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " " << _path;
 
 			// file not found so create one file instead
@@ -1434,6 +1464,7 @@ void ofxPresetsManager::load(int presetIndex, std::string gName)
 		// TODO:
 		// avoid startup creators...
 		std::string _path = getPresetPath(groups[guiIndex].getName(), presetIndex);
+
 		bool b = ofxSurfingHelpers::loadGroup(groups[guiIndex], _path);
 		if (!b) {
 			ofLogError(__FUNCTION__) << "Error loading: " << groups[guiIndex].getName() << " : " << guiIndex << " " << _path;
@@ -2105,11 +2136,29 @@ void ofxPresetsManager::doPopulateFavsALL()
 	////CheckAllFolders();//? required
 
 	//for (int i = 0; i < groups.size(); i++)
+	//for (int i = 0; i < groups.size(); i++)
 	//{
 	//	doRandomizePresetSelected(i);
 	//	doCloneAll(i);
 	//}
 }
+
+////--------------------------------------------------------------
+//void ofxPresetsManager::doResetsParams()
+//{
+//	ofLogNotice(__FUNCTION__);
+//
+//	int ig = GuiGROUP_Selected_Index.get();
+//	int ip = PRESETS_Selected_Index[ig];
+//
+//	if (ig < groups.size()) groupRandomizers[ig].doResetGroup(groups[ig]);
+//
+//	//for (int i = 0; i < groups.size(); i++)
+//	//{
+//	//	doRandomizePresetSelected(i);
+//	//	doCloneAll(i);
+//	//}
+//}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doPopulateFavs(int groupIndex)
@@ -2267,7 +2316,11 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 							//if (autoSave && !MODE_StandalonePresets_NEW)
 							if (autoSave)
 							{
-								save(PRESETS_Selected_Index_PRE[g], g);
+								// workflow: 
+								//disable autosave when randomizer player enabled
+								//no matters edit mode
+								bool b = groupRandomizers[GuiGROUP_Selected_Index.get()].PLAY_RandomizeTimer.get();
+								if (!b) save(PRESETS_Selected_Index_PRE[g], g);
 							}
 
 							//-
@@ -2293,7 +2346,7 @@ void ofxPresetsManager::Changed_Randomizers(bool &b)
 	{
 		ofLogNotice(__FUNCTION__);
 
-		//wf
+		// workflow
 		if (MODE_Editor.get() && b) MODE_Editor = false;
 
 		//std::string name = b.getName();
@@ -2344,11 +2397,11 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 
 		//-
 
-		if (name == bThemDarkOrLight.getName())
+		if (name == bThemeDarkOrLight.getName())
 		{
 			// light theme (black lines & white bg)
 
-			if (!bThemDarkOrLight)
+			if (!bThemeDarkOrLight)
 			{
 				_colorText = ofColor(0, 255);
 				_colorButton = ofColor(255, 64);
@@ -2727,7 +2780,7 @@ void ofxPresetsManager::exit()
 	ofRemoveListener(params_Control.parameterChangedE(), this, &ofxPresetsManager::Changed_Control);
 
 	//ofRemoveListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Control);
-	//ofRemoveListener(params_Editor.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Editor);
+	//ofRemoveListener(params_FilterEditor.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Editor);
 
 	// TODO: required?
 	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
@@ -2775,6 +2828,13 @@ void ofxPresetsManager::exit()
 	save_ControlSettings();
 
 	rectanglePresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
+
+	//--
+
+	////TODO: BUG:
+	//SHOW_ImGui_PresetsParams = true;
+	//std::string path = path_UserKit_Folder + "/" + path_ControlSettings + "/" + filename_ControlSettings;
+	//ofxSurfingHelpers::saveGroup(params_Control, path);
 }
 
 //--
@@ -2798,17 +2858,25 @@ void ofxPresetsManager::gui_Setup()
 
 	// daan fork
 	ImGuiConfigFlags flags;
-	flags = ImGuiConfigFlags_DockingEnable;
+	flags = ImGuiConfigFlags_None;
+	flags |= ImGuiConfigFlags_DockingEnable;
 	flags |= ImGuiConfigFlags_ViewportsEnable;
 	//flags |= ImGuiDockNodeFlags_NoWindowMenuButton;//from imgui_internal.h
 	//flags |= ImGuiDockNodeFlags_NoCloseButton;//?
 	//flags |= ImGuiDockNodeFlags_NoResizeX;
 	//flags |= ImGuiDockNodeFlags_NoWindowMenuButton;
 
+	//--
+
 	gui_ImGui.setup(nullptr, true, flags, true, false);
+
+	//TODO: multicontext
+	//gui_ImGui.setup(nullptr, false);
+	//gui_ImGui.setup(nullptr, true); // Note: it's also possible to use autodraw
 
 	//--	
 
+	//TODO:
 	auto &io = ImGui::GetIO();
 	io.ConfigDockingWithShift = true;
 	io.ConfigWindowsResizeFromEdges = false;//?
@@ -2886,11 +2954,13 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
 		// main panel
-		ImGui_Main();// main control + extra
+		ImGui_MainPanel();// main control + extra
 
 		//-
 
-		// group selector
+		// groups selector
+		// only when more than one group!
+
 		if (SHOW_Panel_Randomizer)
 		{
 			// hide this panels when no more than one group! it's for multi groups
@@ -2931,18 +3001,20 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 			}
 		}
 
+		//-
+
 		// all group selectors to set current preset
-		if (SHOW_Panel_AllSelectors) ImGui_GroupsSelectors();
+		if (SHOW_Panel_AllSelectors) ImGui_Selectors();
 
 		// all parameters from all groups
-		if (SHOW_Panel_AllParameter) ImGui_Parameters();
+		if (SHOW_Panel_AllParameters) ImGui_Parameters();
 
 		// selected randomizers for selected group
 		// handles matrix button selector too
-		if (SHOW_Panel_Randomizer) ImGui_Randomizers();
+		ImGui_Randomizers();
 
 		// standalone presets browser
-		ImGui_Standalones();
+		if (SHOW_Panel_Standalones) ImGui_Standalones();
 	}
 
 	return settings.mouseOverGui;
@@ -2958,14 +3030,69 @@ void ofxPresetsManager::ImGui_Parameters()
 
 	if (ofxImGui::BeginWindow("Parameters", settings, flagsw))
 	{
-		//ofxImGui::AddDrag(PRESETS_Selected_Index[0]);
+		float _spcx = ImGui::GetStyle().ItemSpacing.x;
+		float _spcy = ImGui::GetStyle().ItemSpacing.y;
+		float _w100 = ImGui::GetContentRegionAvail().x;
+		float _h100 = ImGui::GetContentRegionAvail().y;
+		float _w99 = _w100 - _spcx;
+		float _w50 = _w99 / 2;
+		float _h = BUTTON_BIG_HEIGHT;
 
+		//-
+
+		//group selector
+		if (groups.size() > 1)
+			ofxImGui::AddStepper(GuiGROUP_Selected_Index);
+
+		//preset selector
+		//ofxImGui::AddStepper(PRESETS_Selected_Index[0]);
+
+		//-
+
+		// 1. each group parameters
 		for (int i = 0; i < groups.size(); i++)
 		{
 			ofxImGui::AddGroup(groups[i], settings);
 		}
 
-		ImGui::Checkbox("Auto-Resize", &auto_resize);
+		ImGui::Dummy(ImVec2(0, 5));
+
+		//--
+
+		// 2. tools
+
+		if (ImGui::CollapsingHeader("TOOLS", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			if (ImGui::Button("RANDOM FILTER", ImVec2(_w50, _h)))
+			{
+				doRandomFiltered();
+			}
+			ImGui::SameLine();
+
+			if (ImGui::Button("RANDOM FULL", ImVec2(_w50, _h)))
+			{
+				doRandomFilteredFull();
+			}
+
+			if (ImGui::Button("RESET FILTER", ImVec2(_w50, _h)))
+			{
+				doResetFiltered();
+			}
+			ImGui::SameLine();
+
+			if (ImGui::Button("RESET FULL", ImVec2(_w50, _h)))
+			{
+				doResetFilteredFull();
+			}
+
+			ImGui::Dummy(ImVec2(0, 2));
+
+			ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Randomizer, _w100, _h / 2);
+
+			ImGui::Dummy(ImVec2(0, 2));
+
+			ImGui::Checkbox("Auto-Resize", &auto_resize);
+		}
 
 		//-
 
@@ -2976,7 +3103,7 @@ void ofxPresetsManager::ImGui_Parameters()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_GroupsSelectors()
+void ofxPresetsManager::ImGui_Selectors()
 {
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
@@ -2992,22 +3119,31 @@ void ofxPresetsManager::ImGui_GroupsSelectors()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::ImGui_Main()
+void ofxPresetsManager::ImGui_MainPanel()
 {
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
+	//float ww = PANEL_WIDGETS_WIDTH;
+	//float hh = PANEL_WIDGETS_HEIGHT;
+	//ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(ww, ofGetHeight() - 100));
+
 	if (ofxImGui::BeginWindow("Main Panel", settings, flagsw))
 	{
+		float _spcx = ImGui::GetStyle().ItemSpacing.x;
+		float _spcy = ImGui::GetStyle().ItemSpacing.y;
+		float _w100 = ImGui::GetContentRegionAvail().x;
+		float _h100 = ImGui::GetContentRegionAvail().y;
+		float _w99 = _w100 - _spcx;
+		float _w50 = _w99 / 2;
 		float _h = BUTTON_BIG_HEIGHT;
-		float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
-		float _w100 = ImGui::GetWindowContentRegionWidth();
-		float _w99 = _w100 - _spc;
-		float _w50 = _w99 / 2 - _spc;
+
 		std::string str;
 
 		//---
+
+		// 0. labels
 
 		ImGui::Dummy(ImVec2(0, 5));
 
@@ -3024,48 +3160,51 @@ void ofxPresetsManager::ImGui_Main()
 		int ip = PRESETS_Selected_Index[ig];
 		str = "Preset " + ofToString(ip);
 		ImGui::Text(str.c_str());
-		str = "Group  " + ofToString(ig);
-		ImGui::Text(str.c_str());
+		if (groups.size() > 1) {
+			str = "Group  " + ofToString(ig);
+			ImGui::Text(str.c_str());
+		}
 		//ImGui::SameLine();
 		// name of selected group
 		str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
 		ImGui::Text(str.c_str());
 
-		//--
-
 		ImGui::Dummy(ImVec2(0, 5));
 
 		//--
 
-		// mode edit
+		// 1. mode edit
 
 		ofxSurfingHelpers::AddBigToggleNamed(MODE_Editor, _w100, 2 * _h, "EDIT MODE", "LIVE MODE");
 
 		ImGui::Dummy(ImVec2(0, 2));
 
 		ImGui::PushButtonRepeat(true);
-		if (ImGui::Button("Previous", ImVec2(_w50, _h)))
+		if (ImGui::Button("PREVIOUS", ImVec2(_w50, _h)))
 		{
 			int ig = GuiGROUP_Selected_Index.get();
-			load_Previous(ig);
+			load_Previous(ig, true);
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Next", ImVec2(_w50, _h)))
+		if (ImGui::Button("NEXT", ImVec2(_w50, _h)))
 		{
 			int ig = GuiGROUP_Selected_Index.get();
-			load_Next(ig);
+			load_Next(ig, true);
 		}
 		ImGui::PopButtonRepeat();
 
-		// sliders
+		// 2. sliders
+
 		if (bBuildGroupSelector) ofxImGui::AddParameter(PRESETS_Selected_Index[GuiGROUP_Selected_Index]);
 		if (bBuildGroupSelector) ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
 
 		//--
 
+		// 3. helpers
+
 		if (MODE_Editor)
 		{
-			ImGui::Dummy(ImVec2(0, 2));
+			ImGui::Dummy(ImVec2(0, 5));
 
 			//TODO: select which added group
 			int i = 0;
@@ -3090,27 +3229,35 @@ void ofxPresetsManager::ImGui_Main()
 			//}
 		}
 
-		ImGui::Dummy(ImVec2(0, 2));
+		ImGui::Dummy(ImVec2(0, 5));
 
 		//--
 
-		// panels
+		// 4. panels
 
 		{
 			if (ImGui::CollapsingHeader("PANELS"))
 			{
 				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Click, _w100, _h);
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllParameter, _w100, _h);
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllSelectors, _w100, _h);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllParameters, _w100, _h);
 				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Randomizer, _w100, _h);
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_StandalonePresets, _w100, _h);
-				ofxSurfingHelpers::AddBigToggle(SHOW_Help, _w100, _h);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_RandomizerIndex, _w100, _h); //ImGui::SameLine();
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_RandomizerFilter, _w100, _h);
+
+				// 4.2 extra
+
+				if (ImGui::CollapsingHeader("EXTRA"))
+				{
+					ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllSelectors, _w100, _h);
+					ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Standalones, _w100, _h);
+					ofxSurfingHelpers::AddBigToggle(SHOW_Help, _w100, _h);
+				}
 			}
 		}
 
 		//--
 
-		// undo engine
+		// 5. undo engine
 
 #ifdef INCLUDE_ofxUndoSimple
 		if (MODE_Editor.get())
@@ -3147,7 +3294,7 @@ void ofxPresetsManager::ImGui_Main()
 
 		//--
 
-		// extra / advanced
+		// 6. advanced
 
 		if (MODE_Editor) ImGui_Advanced();
 
@@ -3156,6 +3303,8 @@ void ofxPresetsManager::ImGui_Main()
 		//--
 	}
 	ofxImGui::EndWindow(settings);
+
+	//ImGui::PopStyleVar();
 }
 
 //--------------------------------------------------------------
@@ -3185,7 +3334,7 @@ void ofxPresetsManager::ImGui_Advanced()
 
 			if (ImGui::CollapsingHeader("LAYOUT"))
 			{
-				ofxImGui::AddParameter(bThemDarkOrLight);
+				ofxImGui::AddParameter(bThemeDarkOrLight);
 
 				if (MODE_Editor)
 				{
@@ -3440,7 +3589,6 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 //--------------------------------------------------------------
 void ofxPresetsManager::ImGui_Standalones()
 {
-	if (SHOW_Panel_StandalonePresets)
 	{
 		static bool auto_resize = true;
 		ImGuiWindowFlags flagsw;
@@ -3448,11 +3596,13 @@ void ofxPresetsManager::ImGui_Standalones()
 
 		if (ofxImGui::BeginWindow("Standalones", settings, flagsw))
 		{
-			float _h = BUTTON_BIG_HEIGHT;
-			float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
-			float _w100 = ImGui::GetWindowContentRegionWidth();
-			float _w99 = _w100 - _spc;
-			float _w50 = _w99 / 2 - _spc;
+			float _spcx = ImGui::GetStyle().ItemSpacing.x;
+			float _spcy = ImGui::GetStyle().ItemSpacing.y;
+			float _w100 = ImGui::GetContentRegionAvail().x;
+			float _h100 = ImGui::GetContentRegionAvail().y;
+			float _w99 = _w100 - _spcx;
+			float _w50 = _w99 / 2;
+			float _h = BUTTON_BIG_HEIGHT / 2;
 
 			//--
 
@@ -3512,9 +3662,9 @@ void ofxPresetsManager::ImGui_Standalones()
 
 				// get/copy all favs presets from favs and send/save to browser folder ("archive")
 
-				if (ImGui::Button("FROM FAVS", ImVec2(_w100, _h)))
+				if (ImGui::Button("CREATE FROM FAVS", ImVec2(_w100, _h)))
 				{
-					ofLogNotice(__FUNCTION__) << "FROM FAVS";
+					ofLogNotice(__FUNCTION__) << "CREATE FROM FAVS";
 
 					doStandalonePresetsBuildFromFavs(groupIndex);
 				}
@@ -3887,12 +4037,28 @@ void ofxPresetsManager::ImGui_Randomizers()
 	{
 		// show randomizers of user selected group
 		// only selected
-		if (!bSHOW_allGroups) groupRandomizers[GuiGROUP_Selected_Index.get()].ImGui_Draw_GroupRandomizers();
+		if (!bSHOW_allGroups)
+		{
+			if (SHOW_Panel_Randomizer) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizersMain();
+
+			if (SHOW_Panel_RandomizerIndex)
+				groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizerIndex();
+
+			if (SHOW_Panel_RandomizerFilter)
+				groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizerFilter();
+		}
+
 		// all
 		else
 		{
 			for (int i = 0; i < groupRandomizers.size(); i++) {
-				groupRandomizers[i].ImGui_Draw_GroupRandomizers();
+				if (SHOW_Panel_Randomizer) groupRandomizers[i].gui_RandomizersMain();
+
+				if (SHOW_Panel_RandomizerIndex)
+					groupRandomizers[i].gui_RandomizerIndex();
+
+				if (SHOW_Panel_RandomizerFilter)
+					groupRandomizers[i].gui_RandomizerFilter();
 			}
 		}
 	}

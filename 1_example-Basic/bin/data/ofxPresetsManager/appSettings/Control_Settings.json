@@ -11,7 +11,7 @@
             "SHOW_PARAMETERS": "0",
             "SHOW_RANDOMIZERS": "0",
             "SHOW_SELECTORS": "0",
-            "SHOW_STANDALONES": "0",
+            "SHOW_STANDALONES": "1",
             "THEME_DARK": "0"
         },
         "OPTIONS": {

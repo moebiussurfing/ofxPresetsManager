@@ -48,8 +48,15 @@ public:
 	}
 
 public:
-	void ImGui_Draw_GroupRandomizers();
+	void gui_RandomizersMain();
+	void gui_RandomizerIndex();
+	void gui_RandomizerFilter();
+	//ofParameter<bool> SHOW_Panel_RandomizerIndex;
+	//ofParameter<bool> SHOW_Panel_RandomizerFilter;
+	
+	//-
 
+public:
 	ofxImGui::Settings settings;
 
 	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
@@ -185,7 +192,7 @@ private:
 
 //public:
 private:
-	ofParameter<bool> bRandomizeEditor;
+	ofParameter<bool> bRandomizeFiltered;
 
 private:
 	ofParameter<bool> bRandomizeEditorAll;// put all toggles/params to true. a randomize will act over all params
@@ -196,11 +203,15 @@ private:
 	void setupRandomizerParams();
 	void addGroupToEditor(ofParameterGroup& group);// queue all contained params inside the paramGroup and nested too
 	void Changed_Editor(ofAbstractParameter &e);
+
+public:
 	void doRandomPreset();// randomize params of current selected preset
+
+	public:
 	void doRandomGroup(ofParameterGroup& group);// randomize params of current selected preset
 
 	vector<ofParameter<bool>> editorPresets;
-	ofParameterGroup params_Editor;
+	ofParameterGroup params_FilterEditor;
 	ofParameterGroup params_Editor_Toggles;
 
 	//--
@@ -290,5 +301,199 @@ public:
 private:
 	bool DISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
 
+	//---
+
+	//TODO:
+
+	public:
+
+		void doResetGroup(ofParameterGroup& group, bool bfull = false);
+
+		//--------------------------------------------------------------
+		inline void doRandomGroupFull(ofParameterGroup& group) {
+			for (auto parameter : group)
+			{
+				if (parameter->isSerializable())// avoid not serailizable params that will crash
+				{
+					// recursive..
+					auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
+					if (parameterGroup)
+					{
+						//cout << "parameterGroup: " << ofToString(parameterGroup->getName()) << endl;
+						doRandomGroupFull(*parameterGroup);
+						continue;
+					}
+
+					auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
+					if (parameterInt)
+					{
+						string name = parameterInt->getName();
+						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						ofParameter<bool> b{ "b",true };
+						if (b.get())
+						{
+							int random = ofRandom(parameterInt->getMin(), parameterInt->getMax() + 1);
+							parameterInt->set(random);
+						}
+						continue;
+					}
+
+					auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
+					if (parameterFloat)
+					{
+						string name = parameterFloat->getName();
+						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						ofParameter<bool> b{ "b",true };
+						if (b.get())
+						{
+							float random = ofRandom(parameterFloat->getMin(), parameterFloat->getMax());
+							parameterFloat->set(random);
+						}
+						continue;
+					}
+
+					auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
+					if (parameterBool)
+					{
+						string name = parameterBool->getName();
+						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						ofParameter<bool> b{ "b",true };
+						if (b.get())
+						{
+							bool random = (ofRandom(0, 2) >= 1);
+							parameterBool->set(random);
+						}
+						continue;
+					}
+
+					auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
+					if (parameterFloatColor)
+					{
+						string name = parameterFloatColor->getName();
+						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						ofParameter<bool> b{ "b",true };
+						if (b.get())
+						{
+							ofFloatColor random;
+							random = ofColor(ofRandom(0, 255), ofRandom(0, 255), ofRandom(0, 255));
+							parameterFloatColor->set(random);
+						}
+						continue;
+					}
+
+					auto parameterColor = std::dynamic_pointer_cast<ofParameter<ofColor>>(parameter);
+					if (parameterColor)
+					{
+						string name = parameterColor->getName();
+						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						ofParameter<bool> b{ "b",true };
+						if (b.get())
+						{
+							ofColor random;
+							random = ofColor(ofRandom(0, 255), ofRandom(0, 255), ofRandom(0, 255));
+							parameterColor->set(random);
+						}
+						continue;
+					}
+
+					//glm::vec compatible
+#if OF_VERSION_MINOR >= 10
+					auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
+					if (parameterVec2f)
+					{
+						string name = parameterVec2f->getName();
+						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						ofParameter<bool> b{ "b",true };
+						if (b.get())
+						{
+							float randomx = ofRandom(parameterVec2f->getMin().x, parameterVec2f->getMax().x);
+							float randomy = ofRandom(parameterVec2f->getMin().y, parameterVec2f->getMax().y);
+							parameterVec2f->set(glm::vec2(randomx, randomy));
+						}
+						continue;
+					}
+					auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
+					if (parameterVec3f)
+					{
+						string name = parameterVec3f->getName();
+						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						ofParameter<bool> b{ "b",true };
+						if (b.get())
+						{
+							float randomx = ofRandom(parameterVec3f->getMin().x, parameterVec3f->getMax().x);
+							float randomy = ofRandom(parameterVec3f->getMin().y, parameterVec3f->getMax().y);
+							float randomz = ofRandom(parameterVec3f->getMin().z, parameterVec3f->getMax().z);
+							parameterVec3f->set(glm::vec3(randomx, randomy, randomz));
+						}
+						continue;
+					}
+					auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
+					if (parameterVec4f)
+					{
+						string name = parameterVec4f->getName();
+						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						ofParameter<bool> b{ "b",true };
+						if (b.get())
+						{
+							float randomx = ofRandom(parameterVec4f->getMin().x, parameterVec4f->getMax().x);
+							float randomy = ofRandom(parameterVec4f->getMin().y, parameterVec4f->getMax().y);
+							float randomz = ofRandom(parameterVec4f->getMin().z, parameterVec4f->getMax().z);
+							float randomw = ofRandom(parameterVec4f->getMin().w, parameterVec4f->getMax().w);
+							parameterVec4f->set(glm::vec4(randomx, randomy, randomz, randomw));
+						}
+						continue;
+					}
+#endif
+
+					auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
+					if (parameterOfVec2f)
+					{
+						string name = parameterOfVec2f->getName();
+						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						ofParameter<bool> b{ "b",true };
+						if (b.get())
+						{
+							float randomx = ofRandom(parameterOfVec2f->getMin().x, parameterOfVec2f->getMax().x);
+							float randomy = ofRandom(parameterOfVec2f->getMin().y, parameterOfVec2f->getMax().y);
+							parameterOfVec2f->set(ofVec2f(randomx, randomy));
+						}
+						continue;
+					}
+					auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
+					if (parameterOfVec3f)
+					{
+						string name = parameterOfVec3f->getName();
+						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						ofParameter<bool> b{ "b",true };
+						if (b.get())
+						{
+							float randomx = ofRandom(parameterOfVec3f->getMin().x, parameterOfVec3f->getMax().x);
+							float randomy = ofRandom(parameterOfVec3f->getMin().y, parameterOfVec3f->getMax().y);
+							float randomz = ofRandom(parameterOfVec3f->getMin().z, parameterOfVec3f->getMax().z);
+							parameterOfVec3f->set(ofVec3f(randomx, randomy, randomz));
+						}
+						continue;
+					}
+					auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
+					if (parameterOfVec4f)
+					{
+						string name = parameterOfVec4f->getName();
+						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						ofParameter<bool> b{ "b",true };
+						if (b.get())
+						{
+							float randomx = ofRandom(parameterOfVec4f->getMin().x, parameterOfVec4f->getMax().x);
+							float randomy = ofRandom(parameterOfVec4f->getMin().y, parameterOfVec4f->getMax().y);
+							float randomz = ofRandom(parameterOfVec4f->getMin().z, parameterOfVec4f->getMax().z);
+							float randomw = ofRandom(parameterOfVec4f->getMin().w, parameterOfVec4f->getMax().w);
+							parameterOfVec4f->set(ofVec4f(randomx, randomy, randomz, randomw));
+						}
+						continue;
+					}
+
+					ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter: " << parameter->getName();
+				}
+			}
+		}
 };
 

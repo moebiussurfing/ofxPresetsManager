@@ -808,28 +808,58 @@ public:
 
 	// presets browsing by code from ofApp
 	//--------------------------------------------------------------
-	void load_Previous(int groupIndex = -1)// default if not defined, is the last one: main group link
+	void load_Previous(int groupIndex = -1, bool cycled = false)// default if not defined, is the last one: main group link
 	{
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		groupIndex = (int)ofClamp(groupIndex, 0, groups.size() - 1);
 
 		int _curr = PRESETS_Selected_Index[groupIndex];
-		_curr--;
-		_curr = (int)ofClamp(_curr, 0, groupsSizes[groupIndex] - 1);
+
+		
+		if (!cycled)//limited
+		{
+			_curr--;
+			_curr = (int)ofClamp(_curr, 0, groupsSizes[groupIndex] - 1);
+		}
+		else {//cycled
+			if (_curr == 0) _curr = groupsSizes[groupIndex] - 1;
+			else _curr--;
+		}
 
 		PRESETS_Selected_Index[groupIndex] = _curr;
 	}
+
 	//--------------------------------------------------------------
-	void load_Next(int groupIndex = -1)// default if not defined, is the last one: main group link
+	void load_Next(int groupIndex = -1, bool cycled = false)// default if not defined, is the last one: main group link
 	{
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		groupIndex = (int)ofClamp(groupIndex, 0, groups.size() - 1);
 
 		int _curr = PRESETS_Selected_Index[groupIndex];
-		_curr++;
-		_curr = (int)ofClamp(_curr, 0, groupsSizes[groupIndex] - 1);
+
+		if (!cycled)//limited
+		{
+			_curr++;
+			_curr = (int)ofClamp(_curr, 0, groupsSizes[groupIndex] - 1);
+		}
+		else {//cycled
+			if (_curr == groupsSizes[groupIndex] - 1) _curr = 0;
+			else _curr++;
+		}
 
 		PRESETS_Selected_Index[groupIndex] = _curr;
+	}
+
+	//--------------------------------------------------------------
+	void load_Previous(bool cycled)
+	{
+		load_Previous(GuiGROUP_Selected_Index, cycled);
+	}
+
+	//--------------------------------------------------------------
+	void load_Next(bool cycled)
+	{
+		load_Next(GuiGROUP_Selected_Index, cycled);
 	}
 
 	//--
@@ -932,6 +962,8 @@ public:
 	void doCloneAll(int groupIndex);// clone all presets from the current index group
 	void doPopulateFavs(int groupIndex);// fast populate random presets of index group
 	void doPopulateFavsALL();// fast populate random presets around all favs of index group
+	//void doResetsParams();
+	//void doResetGroup(ofParameterGroup& group);
 
 	void doSwap(int groupIndex, int fromIndex, int toIndex);
 
@@ -1112,19 +1144,21 @@ private:
 	//----
 
 private:
-	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
+	ofParameter<bool> MODE_Editor{ "EDIT MODE", true };// this mode improves performance disabling autosave, undo history..etc
 	ofParameter<bool> SHOW_Panel_Click;// to allow include as toggle parameter into external gui
 	ofParameter<bool> SHOW_ImGui;
-	ofParameter<bool> SHOW_Panel_StandalonePresets;
-	ofParameter<bool> SHOW_Panel_AllParameter;
+	ofParameter<bool> SHOW_Panel_Standalones;
+	ofParameter<bool> SHOW_Panel_AllParameters;
 	ofParameter<bool> SHOW_Panel_AllSelectors;
 	ofParameter<bool> SHOW_Panel_Randomizer;
+	ofParameter<bool> SHOW_Panel_RandomizerIndex;
+	ofParameter<bool> SHOW_Panel_RandomizerFilter;
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
 	ofParameter<bool> SHOW_ImGui_Selectors;
 	ofParameter<bool> SHOW_Help;
 	ofParameter<bool> SHOW_Gui_AdvancedControl;
 	ofParameter<bool> ENABLE_Keys;
-	ofParameter<bool> bThemDarkOrLight{ "THEME DARK", true };
+	ofParameter<bool> bThemeDarkOrLight{ "THEME DARK", true };
 	ofParameter<glm::vec2> Gui_Internal_Position;
 
 private:
@@ -1143,9 +1177,9 @@ private:
 
 public:
 	void ImGui_Randomizers();
-	void ImGui_Main();
+	void ImGui_MainPanel();
 	void ImGui_Advanced();
-	void ImGui_GroupsSelectors();
+	void ImGui_Selectors();
 	void ImGui_Standalones();
 	void ImGui_Parameters();
 
@@ -1454,6 +1488,7 @@ private:
 
 	//--
 
+	//TODO:
 	//extra params not included into presets
 	//but soimetimes is usefull to centralize all params together
 private:
@@ -1462,4 +1497,38 @@ private:
 
 public:
 	void addExtra(ofParameterGroup &g);
+
+	//--
+
+	// tools
+
+	//TODO:
+	void doResetFilteredFull() {
+		int ig = GuiGROUP_Selected_Index.get();
+		if (ig < groups.size())
+			groupRandomizers[ig].doResetGroup(groups[ig], true);
+	}
+
+	void doResetFiltered() {
+		int ig = GuiGROUP_Selected_Index.get();
+		if (ig < groups.size())
+			groupRandomizers[ig].doResetGroup(groups[ig], false);
+	}
+
+	void doRandomFilteredFull() {
+		int ig = GuiGROUP_Selected_Index.get();
+		if (ig < groups.size())
+			groupRandomizers[ig].doRandomGroupFull(groups[ig]);
+	}
+
+	void doRandomFiltered() {
+		int ig = GuiGROUP_Selected_Index.get();
+		if (ig < groups.size())
+			groupRandomizers[ig].doRandomPreset();
+
+	}
+
+	void setThemeDarkOrLight(bool b) {
+		bThemeDarkOrLight = b;
+	}
 };

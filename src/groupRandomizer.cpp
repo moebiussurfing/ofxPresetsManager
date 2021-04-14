@@ -40,7 +40,7 @@ void groupRandomizer::setup(ofParameterGroup &_group, int _numPresets) {
 
 	// to store settings
 	params_RandomizerSettings.add(params_Randomizer);
-	params_RandomizerSettings.add(params_Editor);
+	params_RandomizerSettings.add(params_FilterEditor);
 
 	//-
 
@@ -460,6 +460,9 @@ void groupRandomizer::doRandomPreset() {
 	//#endif
 }
 
+//TODO:
+//make a simpler method to the local index, selected
+//like .doRandomPreset();
 //--------------------------------------------------------------
 void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 	for (auto parameter : group)
@@ -637,6 +640,137 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 }
 
 //--------------------------------------------------------------
+void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
+	for (auto parameter : group)
+	{
+		if (parameter->isSerializable())// avoid not serailizable params that will crash
+		{
+			// recursive..
+			auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
+			if (parameterGroup)
+			{
+				string name = parameterGroup->getName();
+				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				//bool b = parameterGroup->isSerializable();//another posible approach to filter..
+				if (bfull || b) doResetGroup(*parameterGroup, bfull);
+				continue;
+			}
+
+			auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
+			if (parameterInt)
+			{
+				string name = parameterInt->getName();
+				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				if (bfull || b) parameterInt->set(parameterInt->getMin());
+				continue;
+			}
+
+			auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
+			if (parameterFloat)
+			{
+				string name = parameterFloat->getName();
+				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				if (bfull || b) parameterFloat->set(parameterFloat->getMin());
+				continue;
+			}
+
+			auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
+			if (parameterBool)
+			{
+				string name = parameterBool->getName();
+				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				if (bfull || b) parameterBool->set(false);
+				continue;
+			}
+
+			auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
+			if (parameterFloatColor)
+			{
+				string name = parameterFloatColor->getName();
+				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				if (bfull || b) parameterFloatColor->set(ofFloatColor(0, 0, 0, 1));
+				continue;
+			}
+
+			auto parameterColor = std::dynamic_pointer_cast<ofParameter<ofColor>>(parameter);
+			if (parameterColor)
+			{
+				string name = parameterColor->getName();
+				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				if (bfull || b) parameterColor->set(ofColor(0, 0, 0, 255));
+				continue;
+			}
+
+			//glm::vec compatible
+#if OF_VERSION_MINOR >= 10
+			auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
+			if (parameterVec2f)
+			{
+				string name = parameterVec2f->getName();
+				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				if (bfull || b) parameterVec2f->set(glm::vec2(parameterVec2f->getMin().x, parameterVec2f->getMin().y));
+				continue;
+			}
+			auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
+			if (parameterVec3f)
+			{
+				string name = parameterVec3f->getName();
+				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				if (bfull || b)  parameterVec3f->set(glm::vec3(
+					parameterVec3f->getMin().x,
+					parameterVec3f->getMin().y,
+					parameterVec3f->getMin().z));
+				continue;
+			}
+			auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
+			if (parameterVec4f)
+			{
+				string name = parameterVec4f->getName();
+				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				if (bfull || b) parameterVec4f->set(glm::vec4(
+					parameterVec4f->getMin().x,
+					parameterVec4f->getMin().y,
+					parameterVec4f->getMin().z,
+					parameterVec4f->getMin().w));
+				continue;
+			}
+#endif
+
+			auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
+			if (parameterOfVec2f)
+			{
+				string name = parameterOfVec2f->getName();
+				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				if (bfull || b) parameterOfVec2f->set(ofVec2f(parameterOfVec2f->getMin().x, parameterOfVec2f->getMin().y));
+				continue;
+			}
+			auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
+			if (parameterOfVec3f)
+			{
+				string name = parameterOfVec3f->getName();
+				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				if (bfull || b) parameterOfVec3f->set(ofVec3f(parameterOfVec3f->getMin().x, parameterOfVec3f->getMin().y, parameterOfVec3f->getMin().z));
+				continue;
+			}
+			auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
+			if (parameterOfVec4f)
+			{
+				string name = parameterOfVec4f->getName();
+				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				if (bfull || b) parameterOfVec4f->set(ofVec4f(
+					parameterOfVec4f->getMin().x,
+					parameterOfVec4f->getMin().y,
+					parameterOfVec4f->getMin().z,
+					parameterOfVec4f->getMin().w));
+				continue;
+			}
+
+			ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter: " << parameter->getName();
+		}
+	}
+}
+
+//--------------------------------------------------------------
 void groupRandomizer::setupRandomizerParams()
 {
 	params_randomizer.setName("RANDOMIZERS");
@@ -645,17 +779,17 @@ void groupRandomizer::setupRandomizerParams()
 	addGroupToEditor(group);// enqueue all content params and create a toggle for each one
 
 	// add to group
-	bRandomizeEditor.set("RANDOMIZE PARAMETERS", false);
+	bRandomizeFiltered.set("RANDOM FILTER", false);
 	bRandomizeEditorPopulateFavs.set("POPULATE FAVS!", false);
 	bRandomizeEditorAll.set("ALL", false);
 	bRandomizeEditorNone.set("NONE", false);
 
-	params_Editor.clear();
-	params_Editor.setName("RANDOM EDIT");
-	params_Editor.add(bRandomizeEditor);
-	params_Editor.add(bRandomizeEditorAll);
-	params_Editor.add(bRandomizeEditorNone);
-	//params_Editor.add(bRandomizeEditorPopulateFavs);// TODO: not implemented
+	params_FilterEditor.clear();
+	params_FilterEditor.setName("RANDOM FILTER CONTROL");
+	params_FilterEditor.add(bRandomizeFiltered);
+	params_FilterEditor.add(bRandomizeEditorAll);
+	params_FilterEditor.add(bRandomizeEditorNone);
+	//params_FilterEditor.add(bRandomizeEditorPopulateFavs);// TODO: not implemented
 
 	params_Editor_Toggles.setName("PRESET PARAMETERS");
 	params_Editor_Toggles.clear();
@@ -663,10 +797,10 @@ void groupRandomizer::setupRandomizerParams()
 	for (auto &p : editorPresets) {
 		params_Editor_Toggles.add(p);
 	}
-	params_Editor.add(params_Editor_Toggles);
+	params_FilterEditor.add(params_Editor_Toggles);
 
 	// exclude
-	bRandomizeEditor.setSerializable(false);
+	bRandomizeFiltered.setSerializable(false);
 	bRandomizeEditorPopulateFavs.setSerializable(false);
 	bRandomizeEditorAll.setSerializable(false);
 	bRandomizeEditorNone.setSerializable(false);
@@ -674,7 +808,7 @@ void groupRandomizer::setupRandomizerParams()
 	//--
 
 	// callback
-	ofAddListener(params_Editor.parameterChangedE(), this, &groupRandomizer::Changed_Editor);
+	ofAddListener(params_FilterEditor.parameterChangedE(), this, &groupRandomizer::Changed_Editor);
 }
 
 //--------------------------------------------------------------
@@ -695,7 +829,7 @@ void groupRandomizer::exit()
 
 	ofRemoveListener(params_Control.parameterChangedE(), this, &groupRandomizer::Changed_Control);
 	ofRemoveListener(params_Randomizer.parameterChangedE(), this, &groupRandomizer::Changed_Control);
-	ofRemoveListener(params_Editor.parameterChangedE(), this, &groupRandomizer::Changed_Editor);
+	ofRemoveListener(params_FilterEditor.parameterChangedE(), this, &groupRandomizer::Changed_Editor);
 }
 
 //--------------------------------------------------------------
@@ -802,7 +936,7 @@ void groupRandomizer::update()
 //--------------------------------------------------------------
 void groupRandomizer::setupRandomizerIndex()
 {
-	bRandomizeIndex.set("RANDOMIZE INDEX", false);
+	bRandomizeIndex.set("RANDOM INDEX", false);
 	PLAY_RandomizeTimer.set("PLAY RANDOMIZER", false);
 	PLAY_RandomizeTimer.setSerializable(false);
 	MODE_DicesProbs.set("ENABLE MODE RANDOMIZER", true);
@@ -853,7 +987,7 @@ void groupRandomizer::setupRandomizerIndex()
 	}
 
 	params_Randomizer.clear();
-	params_Randomizer.setName("RANDOM SELECTED INDEX");
+	params_Randomizer.setName("RANDOM INDEX CONTROLS");
 	params_Randomizer.add(PLAY_RandomizeTimer);
 	params_Randomizer.add(bRandomizeIndex);
 	params_Randomizer.add(MODE_DicesProbs);
@@ -900,23 +1034,88 @@ void groupRandomizer::keyPressed(int key)
 }
 
 //--------------------------------------------------------------
-void groupRandomizer::ImGui_Draw_GroupRandomizers()
+void groupRandomizer::gui_RandomizerIndex()
+{
+	static bool auto_resize = true;
+	ImGuiWindowFlags flagsw;
+	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
+
+	float ww = PANEL_WIDGETS_WIDTH;
+	float hh = 50;
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(ww, hh));
+
+	if (ofxImGui::BeginWindow("EDITOR A", settings, flagsw))
+	{
+		float _spcx = ImGui::GetStyle().ItemSpacing.x;
+		float _spcy = ImGui::GetStyle().ItemSpacing.y;
+		float _w100 = ImGui::GetContentRegionAvail().x;
+		float _h100 = ImGui::GetContentRegionAvail().y;
+		float _w99 = _w100 - _spcx;
+		float _w50 = _w99 / 2;
+		float _h = BUTTON_BIG_HEIGHT / 2;
+
+		ofxImGui::AddGroup(params_Randomizer, settings);
+
+#ifdef DEBUG_randomTest
+		ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
+#endif
+	}
+	ofxImGui::EndWindow(settings);
+
+	ImGui::PopStyleVar();
+}
+
+//--------------------------------------------------------------
+void groupRandomizer::gui_RandomizerFilter()
+{
+	static bool auto_resize = true;
+	ImGuiWindowFlags flagsw;
+	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
+
+	float ww = PANEL_WIDGETS_WIDTH;
+	float hh = 50;
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(ww, hh));
+
+	if (ofxImGui::BeginWindow("EDITOR B", settings, flagsw))
+	{
+		float _spcx = ImGui::GetStyle().ItemSpacing.x;
+		float _spcy = ImGui::GetStyle().ItemSpacing.y;
+		float _w100 = ImGui::GetContentRegionAvail().x;
+		float _h100 = ImGui::GetContentRegionAvail().y;
+		float _w99 = _w100 - _spcx;
+		float _w50 = _w99 / 2;
+		float _h = BUTTON_BIG_HEIGHT / 2;
+
+		ofxImGui::AddGroup(params_FilterEditor, settings);
+	}
+	ofxImGui::EndWindow(settings);
+
+	ImGui::PopStyleVar();
+}
+
+//--------------------------------------------------------------
+void groupRandomizer::gui_RandomizersMain()
 {
 	// 1. randomizers
-	string str;
-	str = "GROUP " + group.getName();
+	string str = "GROUP " + group.getName();
 
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
+	//float ww = PANEL_WIDGETS_WIDTH;
+	//float hh = PANEL_WIDGETS_HEIGHT;
+	//ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(ww, ofGetHeight() - 100));
+
 	if (ofxImGui::BeginWindow(str.c_str(), settings, flagsw))
 	{
+		float _spcx = ImGui::GetStyle().ItemSpacing.x;
+		float _spcy = ImGui::GetStyle().ItemSpacing.y;
+		float _w100 = ImGui::GetContentRegionAvail().x;
+		float _h100 = ImGui::GetContentRegionAvail().y;
+		float _w99 = _w100 - _spcx;
+		float _w50 = _w99 / 2;
 		float _h = BUTTON_BIG_HEIGHT;
-		float _spc = ImGui::GetStyle().ItemInnerSpacing.x;
-		float _w100 = ImGui::GetWindowContentRegionWidth();
-		float _w99 = _w100 - _spc;
-		float _w50 = _w99 / 2 - _spc;
 
 		//---
 
@@ -990,7 +1189,6 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		//--
 
 		//ImGui::Dummy(ImVec2(0, 5));
-
 		//// TODO: not implemented bc must be backward..
 		//// main helpers
 		//if (MODE_Editor)
@@ -999,13 +1197,11 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		//	{
 		//		bCloneAll = true;
 		//	}
-
 		//	ImGui::SameLine();
 		//	if (ImGui::Button("CLONE >", ImVec2(_w50, _h)))
 		//	{
 		//		bCloneRight = true;
 		//	}
-
 		//	// TODO:
 		//	//ImGui::SameLine();
 		//	//if (ImGui::Button("POPULATE ALL!"))
@@ -1022,12 +1218,12 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 		// 1. presets randomizers
 
-		//--
+		//-
 
-		ImGui::Dummy(ImVec2(0, 10));
+		//ImGui::Dummy(ImVec2(0, 10));
 
-		str = "RANDOMIZER";
-		ImGui::Text(str.c_str());
+		//str = "RANDOMIZER";
+		//ImGui::Text(str.c_str());
 		ImGui::Dummy(ImVec2(0, 5));
 
 		// 1.0.1 play randomizer index
@@ -1043,7 +1239,6 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 		auto parameter = randomizeDurationBpm;
 		auto tmpRef = randomizeDurationBpm.get();
 		auto name = ofxImGui::GetUniqueName(randomizeDurationBpm);
-
 		if (ImGui::SliderFloat(ofxImGui::GetUniqueName(parameter), (float *)&tmpRef, parameter.getMin(), parameter.getMax()))
 		{
 			parameter.set(tmpRef);
@@ -1073,9 +1268,14 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 			ImGui::Dummy(ImVec2(0, 5));
 
-			ofxSurfingHelpers::AddBigButton(bRandomizeEditor, _w99, 2 * _h);
-			//ofxSurfingHelpers::AddBigButton(bRandomizeEditor, 2 * _h);
-			//ofxImGui::AddParameter(bRandomizeEditor);// trig random current preset: will randomize all enabled toggle parameters
+			// random index
+			ofxSurfingHelpers::AddBigButton(bRandomizeIndex, _w99, _h * 2);
+
+			// random filter
+			ofxSurfingHelpers::AddBigButton(bRandomizeFiltered, _w99, _h * 2);
+
+			//ofxSurfingHelpers::AddBigButton(bRandomizeFiltered, 2 * _h);
+			//ofxImGui::AddParameter(bRandomizeFiltered);// trig random current preset: will randomize all enabled toggle parameters
 		}
 
 		//--
@@ -1105,41 +1305,42 @@ void groupRandomizer::ImGui_Draw_GroupRandomizers()
 
 		//--
 
-		//TODO: BUG:
-		//there's a bug on resizing auto..
-
-		if (MODE_Editor)
+		/*
+		// workflow
+		//if (MODE_Editor)
 		{
 			ImGui::Dummy(ImVec2(0, 5));
 
-			if (ImGui::CollapsingHeader("EDIT RANDOMIZERS"))
+			// 1.0 edit folder
+
+			if (ImGui::CollapsingHeader("EDIT"))
 			{
 				// 1.1 randomizer index presets
 
-				//if (MODE_DicesProbs) 
-				//ofxImGui::Settings settingsG;
-				//settingsG.treeLevel = 2;
-				//settingsG.lockPosition = true;
-
+				//gui_RandomizerIndex();
 				ofxImGui::AddGroup(params_Randomizer, settings);
 
-#ifdef DEBUG_randomTest
-				ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
-#endif
 				//--
 
-				// 1.2 randomizers editor
+				// 1.2 randomizers fillter editor
 
-				if (MODE_Editor)
-				{
-					ofxImGui::AddGroup(params_Editor, settings);
-				}
+				//gui_RandomizerFilter();
+				ofxImGui::AddGroup(params_FilterEditor, settings);
 			}
 		}
+		*/
+		
+		//ImGui::Dummy(ImVec2(0, 5));
+		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_RandomizerIndex, _w99, _h);
+		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_RandomizerFilter, _w99, _h);
 
+
+		ImGui::Dummy(ImVec2(0, 2));
 		ImGui::Checkbox("Auto-Resize", &auto_resize);
 	}
 	ofxImGui::EndWindow(settings);
+
+	//ImGui::PopStyleVar();
 }
 
 //--------------------------------------------------------------
@@ -1153,9 +1354,9 @@ void groupRandomizer::Changed_Editor(ofAbstractParameter &e)
 
 		//-
 
-		if (name == bRandomizeEditor.getName() && bRandomizeEditor)// trig randomize
+		if (name == bRandomizeFiltered.getName() && bRandomizeFiltered)// trig randomize
 		{
-			bRandomizeEditor = false;
+			bRandomizeFiltered = false;
 
 			doRandomPreset();
 		}
