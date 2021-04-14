@@ -1502,31 +1502,31 @@ public:
 
 	// tools
 
-	//TODO:
-	void doResetFilteredFull() {
+	void doResetFull() {//reset all params to min
 		int ig = GuiGROUP_Selected_Index.get();
 		if (ig < groups.size())
 			groupRandomizers[ig].doResetGroup(groups[ig], true);
 	}
 
-	void doResetFiltered() {
+	void doResetFiltered() {//reset filter enabled params to random min/max
 		int ig = GuiGROUP_Selected_Index.get();
 		if (ig < groups.size())
 			groupRandomizers[ig].doResetGroup(groups[ig], false);
 	}
 
-	void doRandomFilteredFull() {
+	void doRandomFull() {//random all params to min
 		int ig = GuiGROUP_Selected_Index.get();
 		if (ig < groups.size())
 			groupRandomizers[ig].doRandomGroupFull(groups[ig]);
 	}
 
-	void doRandomFiltered() {
+	void doRandomFiltered() {//random filter enabled params to random min/max
 		int ig = GuiGROUP_Selected_Index.get();
 		if (ig < groups.size())
 			groupRandomizers[ig].doRandomPreset();
-
 	}
+
+	//--
 
 	void setThemeDarkOrLight(bool b) {
 		bThemeDarkOrLight = b;

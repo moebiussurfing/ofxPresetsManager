@@ -3071,7 +3071,7 @@ void ofxPresetsManager::ImGui_Parameters()
 
 			if (ImGui::Button("RANDOM FULL", ImVec2(_w50, _h)))
 			{
-				doRandomFilteredFull();
+				doRandomFull();
 			}
 
 			if (ImGui::Button("RESET FILTER", ImVec2(_w50, _h)))
@@ -3082,7 +3082,7 @@ void ofxPresetsManager::ImGui_Parameters()
 
 			if (ImGui::Button("RESET FULL", ImVec2(_w50, _h)))
 			{
-				doResetFilteredFull();
+				doResetFull();
 			}
 
 			ImGui::Dummy(ImVec2(0, 2));
