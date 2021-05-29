@@ -25,7 +25,6 @@ public:
 
 	// the main group container
 	ofParameterGroup params;
-	ofParameterGroup params2;
 
 	// presetsManager
 	ofxPresetsManager presetsManager;

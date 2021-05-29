@@ -708,8 +708,8 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//	//auto save timer
 		//	timerLast_Autosave = ofGetElapsedTimeMillis();
 		//}
-		}
 	}
+}
 
 #ifndef USE_IMGUI_EXTERNAL	
 //---------------------------------------------------------------------
@@ -1588,8 +1588,8 @@ void ofxPresetsManager::loadPreset(int presetIndex, int groupIndex)
 {
 	if (groupIndex < 0)
 		//if (groupIndex == -1)
-	/*if (groupIndex == -1) */groupIndex = groups.size() - 1;// set last group that is the group link selector
-	
+		/*if (groupIndex == -1) */groupIndex = groups.size() - 1;// set last group that is the group link selector
+
 	ofLogNotice(__FUNCTION__) << "group: " << groupIndex << " preset: " << presetIndex;
 	load(presetIndex, groupIndex);
 }
@@ -1805,7 +1805,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 #ifdef INCLUDE_ofxUndoSimple
 				doStoreUndo();
 #endif
-		}
+			}
 
 			//else if ((mod_CONTROL && !mod_ALT)  && key == 'e')
 			//{
@@ -1845,7 +1845,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				{
 					doStoreUndo();
 				}
-	}
+			}
 #endif
 
 			//----
@@ -1914,7 +1914,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 					}
 				}
 			}
-}
+		}
 
 		//--
 
@@ -1928,7 +1928,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//	if (key == 'R')
 		//		doStoreUndo();
 		//}
-}
+	}
 }
 
 //--------------------------------------------------------------
@@ -2993,11 +2993,11 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		// groups selectors
 		// only when more than one group!
 
-		if (SHOW_Panel_Randomizer)
+		//TODO:CRASH
+		// hide this panels when no more than one group! it's for multi groups
+		if (groups.size() > 1)
 		{
-			//TODO:CRASH
-			// hide this panels when no more than one group! it's for multi groups
-			if (groups.size() > 1)
+			if (SHOW_Panel_Randomizer)
 			{
 				if (ofxImGui::BeginWindow("Randomizers Selector", settings, flagsw))
 				{
@@ -3027,8 +3027,6 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 					// selector to show their randomizers
 					ofxImGui::AddParameter(bSHOW_allGroups);
-
-					//-
 				}
 				ofxImGui::EndWindow(settings);
 			}
@@ -3137,9 +3135,10 @@ void ofxPresetsManager::gui_Parameters()
 				doResetFull();
 			}
 
-			ImGui::Dummy(ImVec2(0, 2));
-
-			ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Randomizer, _w100, _h / 2);
+			if (groups.size() > 1) {
+				ImGui::Dummy(ImVec2(0, 2));
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Randomizer, _w100, _h / 2);
+			}
 
 			ImGui::Dummy(ImVec2(0, 2));
 
@@ -3312,7 +3311,9 @@ void ofxPresetsManager::gui_MainPanel()
 				float _hh = _h / 2;
 				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Click, _w100, _hh);
 				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllParameters, _w100, _hh);
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Randomizer, _w100, _hh);
+				if (groups.size() > 1) {
+					ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Randomizer, _w100, _hh);
+				}
 				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_RandomizerIndex, _w100, _hh); //ImGui::SameLine();
 				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_RandomizerFilter, _w100, _hh);
 
@@ -3379,7 +3380,7 @@ void ofxPresetsManager::gui_MainPanel()
 		//ImGui::Checkbox("Auto-Resize", &auto_resize);
 
 		//-
-		
+
 		//must be insisde some window
 		bLockMouseByImGui = false;
 		bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
@@ -4157,13 +4158,13 @@ void ofxPresetsManager::gui_Randomizers()
 		}
 
 		//-
-		
+
 		// show randomizers of user selected group
 
 		// all
 		if (bSHOW_allGroups)
 		{
-			for (int i = 0; i < groupRandomizers.size(); i++) 
+			for (int i = 0; i < groupRandomizers.size(); i++)
 			{
 				//if (SHOW_Panel_Randomizer) groupRandomizers[i].gui_RandomizersMain();
 
@@ -4316,7 +4317,7 @@ void ofxPresetsManager::doStandalonePresetSave(std::string name, int groupIndex)
 	ofLogNotice(__FUNCTION__) << "name: " << name << fileExtension << " group: " << groupIndex;
 
 	if (groupIndex < 0)
-	//if (groupIndex == -1)
+		//if (groupIndex == -1)
 	{
 		ofLogError(__FUNCTION__) << "groupIndex " << groupIndex;
 		return;
@@ -4344,7 +4345,7 @@ void ofxPresetsManager::doStandalonePresetLoad(std::string name, int groupIndex)
 	ofLogNotice(__FUNCTION__) << "name: " << name << fileExtension << " group: " << groupIndex;
 
 	if (groupIndex < 0)
-	//if (groupIndex == -1)
+		//if (groupIndex == -1)
 	{
 		ofLogError(__FUNCTION__) << "groupIndex " << groupIndex;
 		return;
@@ -4520,8 +4521,8 @@ void ofxPresetsManager::doRefreshUndoParams() {
 		//str += undoStringParams.getUndoStateDescriptor() + "\n";
 
 		ofLogNotice(__FUNCTION__) << str;
-		}
 	}
+}
 
 #endif
 

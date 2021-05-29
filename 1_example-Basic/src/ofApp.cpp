@@ -19,13 +19,6 @@ void ofApp::setupScene()
 	params.add(separation.set("separation", 10, 1, 100));
 	params.add(paramsNested2);
 
-	//-
-
-	params2.setName("paramsGroup2");// main group 2
-	params2.add(shapeType.set("shapeType", 1, 1, 2));
-	params2.add(size.set("size", 100, 5, 200));
-	params2.add(paramsNested1);
-
 	// the group container is ready to be added to presetsManager!
 }
 
@@ -50,7 +43,6 @@ void ofApp::setup()
 	// and define key triggers for each preset. 
 	// the amount of keys will be the amount of favourites presets
 	presetsManager.add(params, { '0', '1', '2', '3', '4', '5' });
-	presetsManager.add(params2, { 'q', 'w', 'e', 'r' });
 
 	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
 }
