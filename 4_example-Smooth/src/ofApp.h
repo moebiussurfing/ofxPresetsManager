@@ -3,7 +3,7 @@
 #include "ofMain.h"
 
 #include "ofxPresetsManager.h"
-//#include "ofxSurfingSmooth.h"
+#include "ofxWindowApp.h"
 
 class ofApp : public ofBaseApp
 {
@@ -13,7 +13,7 @@ public:
 	void draw();
 	void keyPressed(int key);
 
-	// all the parameters for the scene 
+	// scene parameters 
 	ofParameterGroup paramsNested1;
 	ofParameterGroup paramsNested2;
 	ofParameter<bool> fill;
@@ -24,16 +24,13 @@ public:
 	ofParameter<int> separation;
 	ofParameter<int> size;
 
-	// the main group container
+	// group container
 	ofParameterGroup params;
 
-	// presetsManager
+	// presets manager
 	ofxPresetsManager presetsManager;
 
 	void setupScene();
 	
-	ofTrueTypeFont font;
-
-	//ofxSurfingSmooth smoother;
-
+	ofxWindowApp windowApp;
 };

@@ -3,14 +3,10 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-	ofSetFrameRate(60);
-	//ofSetVerticalSync(true);
-	//window shape
-	int _gap = 28;
-	ofSetWindowPosition(1920, _gap);
-	ofSetWindowShape(1920, 1080 - _gap);
+	//ofSetFrameRate(60);
 
-	font.load("assets/fonts/telegrama_render.otf", 11, true, true, true);
+	//-
+
 	ofSetCircleResolution(200);
 
 	// define our parameters (ofParameterGroup params) for our scene 
@@ -22,9 +18,6 @@ void ofApp::setup()
 	// the amount of keys will be the amount of favourites presets
 	presetsManager.add(params, { '0', '1', '2', '3', '4', '5' });
 	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
-
-	// smoother
-	//smoother.setup(params);
 }
 
 //--------------------------------------------------------------
@@ -35,7 +28,7 @@ void ofApp::setupScene()
 	paramsNested2.setName("itemSubGroup");// another nested group
 
 	paramsNested1.add(fill.set("fill", true));
-	paramsNested1.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
+	//paramsNested1.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
 	paramsNested1.add(lineWidth.set("lineWidth", 1, 0.1, 10));
 
 	paramsNested2.add(shapeType.set("shapeType", 1, 1, 2));
@@ -54,22 +47,35 @@ void ofApp::draw()
 {
 	ofBackground(64);
 
-	//// get smoothed params
-	////bool _fill = smoother.get(fill);// not implemented
-	//float _lineWidth = smoother.get(lineWidth);
-	//int _shapeType = smoother.get(shapeType);
-	//int _size = smoother.get(size);
-	//int _amount = smoother.get(amount);
-	//int _separation = smoother.get(separation);
+	//-
 
-	float _lineWidth = (lineWidth);
-	int _shapeType = (shapeType);
-	int _size = (size);
-	int _amount = (amount);
-	int _separation = (separation);
+	// get scene parameters
 
+	float _lineWidth;
+	int _shapeType;
+	int _size;
+	int _amount;
+	int _separation;
+
+	// A. get smoothed params
+	//bool _fill = smoother.get(fill);// not implemented
+	_lineWidth = presetsManager.getSmooth(lineWidth);
+	_shapeType = presetsManager.getSmooth(shapeType);
+	_size = presetsManager.getSmooth(size);
+	_amount = presetsManager.getSmooth(amount);
+	_separation = presetsManager.getSmooth(separation);
+
+	//// B. raw params (not smoothed)
+	//_lineWidth = (lineWidth);
+	//_shapeType = (shapeType);
+	//_size = (size);
+	//_amount = (amount);
+	//_separation = (separation);
+
+	//-
 
 	// scene draw
+
 	ofPushStyle();
 	ofPushMatrix();
 	ofTranslate(500, 50);

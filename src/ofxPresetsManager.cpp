@@ -461,7 +461,24 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 			_g.add(groupRandomizers[i].randomizeDurationBpm);// bpm
 			//_g.add(groupRandomizers[i].bRandomizeIndex);// random index
 			params_GroupsSelectors.add(_g);
+
+			//----
+
+//			// smoother
+//#ifdef INCLUDE_ofxSurfingSmooth
+//			params_Smooth.add(groups[i]);
+//#endif
 		}
+
+		//----
+
+		// smoother
+#ifdef INCLUDE_ofxSurfingSmooth
+		if (groups.size() > 0) {
+			params_Smooth.add(groups[0]);
+			smoother.setup(params_Smooth);
+		}
+#endif
 	}
 
 	params_UserKitSettings.add(GuiGROUP_Selected_Index);
@@ -3289,6 +3306,8 @@ void ofxPresetsManager::gui_MainPanel()
 				doCloneRight(i);
 			}
 
+			//-
+
 			//TODO:
 			//create all presets randomized
 			//if (ImGui::Button("POPULATE", ImVec2(_w99, _h / 2)))
@@ -3329,6 +3348,10 @@ void ofxPresetsManager::gui_MainPanel()
 					ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Standalones, _w100, _hh);
 					ofxSurfingHelpers::AddBigToggle(SHOW_Help, _w100, _hh);
 
+#ifdef INCLUDE_ofxSurfingSmooth
+					ofxSurfingHelpers::AddBigToggle(smoother.bGui, _w100, _hh);
+#endif
+
 					ImGui::TreePop();
 				}
 			}
@@ -3367,8 +3390,8 @@ void ofxPresetsManager::gui_MainPanel()
 				{
 					doRedo();
 				}
-	}
-}
+			}
+		}
 #endif
 
 		//--
@@ -3381,11 +3404,17 @@ void ofxPresetsManager::gui_MainPanel()
 
 		//-
 
-		//must be insisde some window
+		// mouse over gui
+
+		static bool bAutoLocKeysOnMouseHoverGui = false;
+
 		bLockMouseByImGui = false;
-		bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
-		bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
-		bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+		if (bAutoLocKeysOnMouseHoverGui) {
+			bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
+			bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
+			bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+			//must be insisde some window
+		}
 
 		//--
 	}

@@ -195,6 +195,7 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 //
 //	DEFINES
 //
+#define INCLUDE_ofxSurfingSmooth // smooth engine
 //#define INCLUDE_ofxUndoSimple	// undo engine to store after randomize a preset or manually (to browse history states)
 //
 #define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT	// customize ImGui font
@@ -224,6 +225,10 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 #include "imgui_internal.h" // <-- example uses some imgui internals...
 
 //--
+
+#ifdef INCLUDE_ofxSurfingSmooth
+#include "ofxSurfingSmooth.h"
+#endif
 
 #include "ofxSurfingConstants.h" // defines (modes) are here "to share between addons" in one place
 #include "ofxInteractiveRect.h" // engine to move the user clicker buttons panel. TODO: add resize by mouse too.
@@ -258,6 +263,17 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 
 class ofxPresetsManager : public ofBaseApp
 {
+	//--
+
+#ifdef INCLUDE_ofxSurfingSmooth
+public:
+	ofxSurfingSmooth smoother;
+	ofParameterGroup params_Smooth{ "Smooth" };
+	float getSmooth(ofParameter<float> param) { return smoother.get(param); }
+	int getSmooth(ofParameter<int> param) { return smoother.get(param); }
+#endif
+
+	//--
 
 public:
 	ofParameter<bool> bLockMouseByImGui{ "Mouse Locked", false };//mouse is over gui
@@ -823,7 +839,7 @@ public:
 
 		int _curr = PRESETS_Selected_Index[groupIndex];
 
-		
+
 		if (!cycled)//limited
 		{
 			_curr--;

@@ -5,3 +5,4 @@ ofxPresetsManager
 ofxScaleDragRect
 ofxSurfingHelpers
 ofxSurfingSmooth
+ofxWindowApp
