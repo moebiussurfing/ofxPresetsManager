@@ -5,11 +5,6 @@
             "Path": "DEFAULT_DATA_PATH"
         },
         "GROUP_LINK": "0",
-        "PRESET_SELECTORS": {
-            "sceneParamsGroup": {
-                "sceneParamsGroup": "0",
-                "t_BPM": "400"
-            }
-        }
+        "GROUP_SELECT": "0"
     }
 }

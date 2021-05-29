@@ -3,6 +3,7 @@
 #include "ofMain.h"
 
 #include "ofxPresetsManager.h"
+//#include "ofxSurfingSmooth.h"
 
 class ofApp : public ofBaseApp
 {
@@ -25,7 +26,6 @@ public:
 
 	// the main group container
 	ofParameterGroup params;
-	ofParameterGroup params2;
 
 	// presetsManager
 	ofxPresetsManager presetsManager;
@@ -33,4 +33,7 @@ public:
 	void setupScene();
 	
 	ofTrueTypeFont font;
+
+	//ofxSurfingSmooth smoother;
+
 };

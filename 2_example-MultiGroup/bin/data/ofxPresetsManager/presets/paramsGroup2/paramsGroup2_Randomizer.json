@@ -1,14 +1,14 @@
 {
     "Randomizers": {
-        "RANDOM_EDIT": {
+        "RANDOM_FILTER_CONTROL": {
             "PRESET_PARAMETERS": {
                 "fill2": "1",
-                "numObjects2": "0",
+                "numObjects2": "1",
                 "show2": "1",
                 "size2": "1"
             }
         },
-        "RANDOM_SELECTED_INDEX": {
+        "RANDOM_INDEX_CONTROLS": {
             "ENABLE_MODE_RANDOMIZER": "1",
             "MODE_AVOID_REPEAT": "1",
             "MODE_LATCH-N-BACK": "0",
@@ -22,8 +22,8 @@
                 "PROB_1": "5",
                 "PROB_2": "5"
             },
-            "t_BPM": "390.879",
-            "t_DURATION": "307",
+            "t_BPM": "120",
+            "t_DURATION": "1000",
             "t_RATIO": "0.25"
         }
     }

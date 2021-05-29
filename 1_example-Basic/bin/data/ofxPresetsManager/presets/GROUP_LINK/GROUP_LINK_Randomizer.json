@@ -2,10 +2,8 @@
     "Randomizers": {
         "RANDOM_FILTER_CONTROL": {
             "PRESET_PARAMETERS": {
-                "paramsGroup0": "1",
-                "paramsGroup1": "1",
-                "paramsGroup2": "1",
-                "paramsGroup3": "1"
+                "paramsGroup": "1",
+                "paramsGroup2": "1"
             }
         },
         "RANDOM_INDEX_CONTROLS": {

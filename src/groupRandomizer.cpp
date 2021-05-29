@@ -40,7 +40,7 @@ void groupRandomizer::setup(ofParameterGroup &_group, int _numPresets) {
 
 	// to store settings
 	params_RandomizerSettings.add(params_Randomizer);
-	params_RandomizerSettings.add(params_FilterEditor);
+	params_RandomizerSettings.add(params_RandomizersFiltered);
 
 	//-
 
@@ -95,7 +95,7 @@ void groupRandomizer::doCheckRandomReady()
 
 	//// workflow
 	//bool bAllFalse = false;// if is true means that all are disabled
-	//for (auto &p : editorPresets)
+	//for (auto &p : randomizersFiltered_TogglesVector)
 	//{
 	//	ofLogNotice(__FUNCTION__) << p.getName() << " : " << p.get();
 	//	if (!p.get()) bAllFalse = true;// some one is false
@@ -108,14 +108,14 @@ void groupRandomizer::doCheckRandomReady()
 	//}
 	//else
 	//{
-	//	bRandomizeEditorAll = true;// someone is true
+	//	bRandomizeFiltered_All = true;// someone is true
 	//	ofLogNotice(__FUNCTION__) << "All are disabled. Force set all randomizer params enable!";
 	//}
 
 
 	// workflow
 	bool bSomeTrue = false;
-	for (auto &p : editorPresets)
+	for (auto &p : randomizersFiltered_TogglesVector)
 	{
 		ofLogNotice(__FUNCTION__) << p.getName() << " : " << p.get();
 		if (p.get() == true) bSomeTrue = bSomeTrue || true;// some one is true
@@ -125,7 +125,7 @@ void groupRandomizer::doCheckRandomReady()
 	}
 	else// none is true
 	{
-		bRandomizeEditorAll = true;// someone is true
+		bRandomizeFiltered_All = true;// someone is true
 		ofLogNotice(__FUNCTION__) << "All are disabled. Force set all randomizer params enable!";
 	}
 }
@@ -332,9 +332,7 @@ void groupRandomizer::doResetDices()
 }
 
 //--------------------------------------------------------------
-void groupRandomizer::addGroupToEditor(ofParameterGroup& group) {
-	//editorPresets.clear();// ?
-
+void groupRandomizer::addGroupToRandomizerFiletered(ofParameterGroup& group) {
 	// TODO:
 	// if we want to make nested folders (not all toggles into same and only one level, we need to create subgroups too...)
 
@@ -344,12 +342,18 @@ void groupRandomizer::addGroupToEditor(ofParameterGroup& group) {
 		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
 		if (parameterGroup)
 		{
-			addGroupToEditor(*parameterGroup);
+			// exclude params not marked as serializable
+			if (!parameterGroup->isSerializable()) return;
+
+			addGroupToRandomizerFiletered(*parameterGroup);
 			continue;
 		}
 
 		// exclude params not marked as serializable
-		if (parameter->isSerializable())
+		if (!parameter->isSerializable()) return;
+
+		//--
+
 		{
 			// parameter, try everything we know how to handle.
 
@@ -359,21 +363,21 @@ void groupRandomizer::addGroupToEditor(ofParameterGroup& group) {
 			if (parameterVec2f)
 			{
 				ofParameter<bool> b{ parameterVec2f->getName(), false };
-				editorPresets.push_back(b);
+				randomizersFiltered_TogglesVector.push_back(b);
 				continue;
 			}
 			auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
 			if (parameterVec3f)
 			{
 				ofParameter<bool> b{ parameterVec3f->getName(), false };
-				editorPresets.push_back(b);
+				randomizersFiltered_TogglesVector.push_back(b);
 				continue;
 			}
 			auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
 			if (parameterVec4f)
 			{
 				ofParameter<bool> b{ parameterVec4f->getName(), false };
-				editorPresets.push_back(b);
+				randomizersFiltered_TogglesVector.push_back(b);
 				continue;
 			}
 #endif
@@ -382,7 +386,7 @@ void groupRandomizer::addGroupToEditor(ofParameterGroup& group) {
 			{
 				//ofxImGui::AddParameter(*parameterOfVec2f);
 				ofParameter<bool> b{ parameterOfVec2f->getName(), false };
-				editorPresets.push_back(b);
+				randomizersFiltered_TogglesVector.push_back(b);
 				continue;
 			}
 			auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
@@ -390,14 +394,14 @@ void groupRandomizer::addGroupToEditor(ofParameterGroup& group) {
 			{
 				//ofxImGui::AddParameter(*parameterOfVec3f);
 				ofParameter<bool> b{ parameterOfVec3f->getName(), false };
-				editorPresets.push_back(b);
+				randomizersFiltered_TogglesVector.push_back(b);
 				continue;
 			}
 			auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
 			if (parameterOfVec4f)
 			{
 				ofParameter<bool> b{ parameterOfVec4f->getName(), false };
-				editorPresets.push_back(b);
+				randomizersFiltered_TogglesVector.push_back(b);
 				//ofxImGui::AddParameter(*parameterOfVec4f);
 				continue;
 			}
@@ -406,14 +410,14 @@ void groupRandomizer::addGroupToEditor(ofParameterGroup& group) {
 			if (parameterColor)
 			{
 				ofParameter<bool> b{ parameterColor->getName(), false };
-				editorPresets.push_back(b);
+				randomizersFiltered_TogglesVector.push_back(b);
 				continue;
 			}
 			auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
 			if (parameterFloatColor)
 			{
 				ofParameter<bool> b{ parameterFloatColor->getName(), false };
-				editorPresets.push_back(b);
+				randomizersFiltered_TogglesVector.push_back(b);
 				continue;
 			}
 			// normal types
@@ -421,7 +425,7 @@ void groupRandomizer::addGroupToEditor(ofParameterGroup& group) {
 			if (parameterFloat)
 			{
 				ofParameter<bool> b{ parameterFloat->getName(), false };
-				editorPresets.push_back(b);
+				randomizersFiltered_TogglesVector.push_back(b);
 				//ofxImGui::AddParameter(*parameterFloat);
 				continue;
 			}
@@ -429,14 +433,14 @@ void groupRandomizer::addGroupToEditor(ofParameterGroup& group) {
 			if (parameterInt)
 			{
 				ofParameter<bool> b{ parameterInt->getName(), false };
-				editorPresets.push_back(b);
+				randomizersFiltered_TogglesVector.push_back(b);
 				continue;
 			}
 			auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
 			if (parameterBool)
 			{
 				ofParameter<bool> b{ parameterBool->getName(), false };
-				editorPresets.push_back(b);
+				randomizersFiltered_TogglesVector.push_back(b);
 				continue;
 			}
 
@@ -449,7 +453,7 @@ void groupRandomizer::addGroupToEditor(ofParameterGroup& group) {
 void groupRandomizer::doRandomPreset() {
 	ofLogNotice(__FUNCTION__);
 
-	//if(params_Editor_Toggles.size() == 0) params_Editor_Toggles
+	//if(params_Filtered_Toggles.size() == 0) params_Filtered_Toggles
 
 	ofParameterGroup _group = group;
 	doRandomGroup(_group);
@@ -482,7 +486,7 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 			if (parameterInt)
 			{
 				string name = parameterInt->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (b.get())
 				{
 					int random = ofRandom(parameterInt->getMin(), parameterInt->getMax() + 1);
@@ -495,7 +499,7 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 			if (parameterFloat)
 			{
 				string name = parameterFloat->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (b.get())
 				{
 					float random = ofRandom(parameterFloat->getMin(), parameterFloat->getMax());
@@ -508,7 +512,7 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 			if (parameterBool)
 			{
 				string name = parameterBool->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (b.get())
 				{
 					bool random = (ofRandom(0, 2) >= 1);
@@ -521,7 +525,7 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 			if (parameterFloatColor)
 			{
 				string name = parameterFloatColor->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (b.get())
 				{
 					ofFloatColor random;
@@ -535,7 +539,7 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 			if (parameterColor)
 			{
 				string name = parameterColor->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (b.get())
 				{
 					ofColor random;
@@ -551,7 +555,7 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 			if (parameterVec2f)
 			{
 				string name = parameterVec2f->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (b.get())
 				{
 					float randomx = ofRandom(parameterVec2f->getMin().x, parameterVec2f->getMax().x);
@@ -564,7 +568,7 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 			if (parameterVec3f)
 			{
 				string name = parameterVec3f->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (b.get())
 				{
 					float randomx = ofRandom(parameterVec3f->getMin().x, parameterVec3f->getMax().x);
@@ -578,7 +582,7 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 			if (parameterVec4f)
 			{
 				string name = parameterVec4f->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (b.get())
 				{
 					float randomx = ofRandom(parameterVec4f->getMin().x, parameterVec4f->getMax().x);
@@ -595,7 +599,7 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 			if (parameterOfVec2f)
 			{
 				string name = parameterOfVec2f->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (b.get())
 				{
 					float randomx = ofRandom(parameterOfVec2f->getMin().x, parameterOfVec2f->getMax().x);
@@ -608,7 +612,7 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 			if (parameterOfVec3f)
 			{
 				string name = parameterOfVec3f->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (b.get())
 				{
 					float randomx = ofRandom(parameterOfVec3f->getMin().x, parameterOfVec3f->getMax().x);
@@ -622,7 +626,7 @@ void groupRandomizer::doRandomGroup(ofParameterGroup& group) {
 			if (parameterOfVec4f)
 			{
 				string name = parameterOfVec4f->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (b.get())
 				{
 					float randomx = ofRandom(parameterOfVec4f->getMin().x, parameterOfVec4f->getMax().x);
@@ -650,8 +654,12 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterGroup)
 			{
 				string name = parameterGroup->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);//TODO: crashes here..
 				//bool b = parameterGroup->isSerializable();//another posible approach to filter..
+
+				//auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
+				//if (parameterBool)
+
 				if (bfull || b) doResetGroup(*parameterGroup, bfull);
 				continue;
 			}
@@ -660,7 +668,7 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterInt)
 			{
 				string name = parameterInt->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (bfull || b) parameterInt->set(parameterInt->getMin());
 				continue;
 			}
@@ -669,7 +677,7 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterFloat)
 			{
 				string name = parameterFloat->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (bfull || b) parameterFloat->set(parameterFloat->getMin());
 				continue;
 			}
@@ -678,7 +686,7 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterBool)
 			{
 				string name = parameterBool->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (bfull || b) parameterBool->set(false);
 				continue;
 			}
@@ -687,7 +695,7 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterFloatColor)
 			{
 				string name = parameterFloatColor->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (bfull || b) parameterFloatColor->set(ofFloatColor(0, 0, 0, 1));
 				continue;
 			}
@@ -696,7 +704,7 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterColor)
 			{
 				string name = parameterColor->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (bfull || b) parameterColor->set(ofColor(0, 0, 0, 255));
 				continue;
 			}
@@ -707,7 +715,7 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterVec2f)
 			{
 				string name = parameterVec2f->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (bfull || b) parameterVec2f->set(glm::vec2(parameterVec2f->getMin().x, parameterVec2f->getMin().y));
 				continue;
 			}
@@ -715,7 +723,7 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterVec3f)
 			{
 				string name = parameterVec3f->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (bfull || b)  parameterVec3f->set(glm::vec3(
 					parameterVec3f->getMin().x,
 					parameterVec3f->getMin().y,
@@ -726,7 +734,7 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterVec4f)
 			{
 				string name = parameterVec4f->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (bfull || b) parameterVec4f->set(glm::vec4(
 					parameterVec4f->getMin().x,
 					parameterVec4f->getMin().y,
@@ -740,7 +748,7 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterOfVec2f)
 			{
 				string name = parameterOfVec2f->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (bfull || b) parameterOfVec2f->set(ofVec2f(parameterOfVec2f->getMin().x, parameterOfVec2f->getMin().y));
 				continue;
 			}
@@ -748,7 +756,7 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterOfVec3f)
 			{
 				string name = parameterOfVec3f->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (bfull || b) parameterOfVec3f->set(ofVec3f(parameterOfVec3f->getMin().x, parameterOfVec3f->getMin().y, parameterOfVec3f->getMin().z));
 				continue;
 			}
@@ -756,7 +764,7 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterOfVec4f)
 			{
 				string name = parameterOfVec4f->getName();
-				ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 				if (bfull || b) parameterOfVec4f->set(ofVec4f(
 					parameterOfVec4f->getMin().x,
 					parameterOfVec4f->getMin().y,
@@ -771,54 +779,60 @@ void groupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 }
 
 //--------------------------------------------------------------
-void groupRandomizer::setupRandomizerParams()
+void groupRandomizer::setup_RandomizerFiletered()
 {
 	params_randomizer.setName("RANDOMIZERS");
-	editorPresets.clear();
+	randomizersFiltered_TogglesVector.clear();
+	addGroupToRandomizerFiletered(group);// enqueue all content params and create a toggle for each one
+	//this is to allow filter (by enabling toggles) each param or not.
 
-	addGroupToEditor(group);// enqueue all content params and create a toggle for each one
 
 	// add to group
 	bRandomizeFiltered.set("RANDOM FILTER", false);
-	bRandomizeEditorPopulateFavs.set("POPULATE FAVS!", false);
-	bRandomizeEditorAll.set("ALL", false);
-	bRandomizeEditorNone.set("NONE", false);
+	bRandomizeFiltered_PopulateFavs.set("POPULATE FAVS!", false);
+	bRandomizeFiltered_All.set("ALL", false);
+	bRandomizeFiltered_None.set("NONE", false);
 
-	params_FilterEditor.clear();
-	params_FilterEditor.setName("RANDOM FILTER CONTROL");
-	params_FilterEditor.add(bRandomizeFiltered);
-	params_FilterEditor.add(bRandomizeEditorAll);
-	params_FilterEditor.add(bRandomizeEditorNone);
-	//params_FilterEditor.add(bRandomizeEditorPopulateFavs);// TODO: not implemented
+	params_RandomizersFiltered.clear();
+	params_RandomizersFiltered.setName("RANDOM FILTER CONTROL");
+	params_RandomizersFiltered.add(bRandomizeFiltered);
+	params_RandomizersFiltered.add(bRandomizeFiltered_All);
+	params_RandomizersFiltered.add(bRandomizeFiltered_None);
+	//params_RandomizersFiltered.add(bRandomizeFiltered_PopulateFavs);// TODO: not implemented
 
-	params_Editor_Toggles.setName("PRESET PARAMETERS");
-	params_Editor_Toggles.clear();
-
-	for (auto &p : editorPresets) {
-		params_Editor_Toggles.add(p);
+	params_Filtered_Toggles.setName("PRESET PARAMETERS");
+	params_Filtered_Toggles.clear();
+	for (auto &p : randomizersFiltered_TogglesVector)
+	{
+		params_Filtered_Toggles.add(p);
 	}
-	params_FilterEditor.add(params_Editor_Toggles);
+	params_RandomizersFiltered.add(params_Filtered_Toggles);
 
 	// exclude
 	bRandomizeFiltered.setSerializable(false);
-	bRandomizeEditorPopulateFavs.setSerializable(false);
-	bRandomizeEditorAll.setSerializable(false);
-	bRandomizeEditorNone.setSerializable(false);
+	bRandomizeFiltered_PopulateFavs.setSerializable(false);
+	bRandomizeFiltered_All.setSerializable(false);
+	bRandomizeFiltered_None.setSerializable(false);
 
 	//--
 
 	// callback
-	ofAddListener(params_FilterEditor.parameterChangedE(), this, &groupRandomizer::Changed_Editor);
+	ofAddListener(params_RandomizersFiltered.parameterChangedE(), this, &groupRandomizer::Changed_Editor);
+
+	//--
+
+	////TODO:
+	//setup_RandomizerPowered();
 }
 
 //--------------------------------------------------------------
 void groupRandomizer::buildRandomizers()
 {
 	// radomizer
-	setupRandomizerIndex();
+	setup_RandomizerIndexes();
 
 	// preset editor tools
-	setupRandomizerParams();
+	setup_RandomizerFiletered();
 }
 
 //--------------------------------------------------------------
@@ -829,7 +843,7 @@ void groupRandomizer::exit()
 
 	ofRemoveListener(params_Control.parameterChangedE(), this, &groupRandomizer::Changed_Control);
 	ofRemoveListener(params_Randomizer.parameterChangedE(), this, &groupRandomizer::Changed_Control);
-	ofRemoveListener(params_FilterEditor.parameterChangedE(), this, &groupRandomizer::Changed_Editor);
+	ofRemoveListener(params_RandomizersFiltered.parameterChangedE(), this, &groupRandomizer::Changed_Editor);
 }
 
 //--------------------------------------------------------------
@@ -934,7 +948,7 @@ void groupRandomizer::update()
 }
 
 //--------------------------------------------------------------
-void groupRandomizer::setupRandomizerIndex()
+void groupRandomizer::setup_RandomizerIndexes()
 {
 	bRandomizeIndex.set("RANDOM INDEX", false);
 	PLAY_RandomizeTimer.set("PLAY RANDOMIZER", false);
@@ -1046,15 +1060,18 @@ void groupRandomizer::gui_RandomizerIndex()
 
 	if (ofxImGui::BeginWindow("EDITOR A", settings, flagsw))
 	{
-		float _spcx = ImGui::GetStyle().ItemSpacing.x;
-		float _spcy = ImGui::GetStyle().ItemSpacing.y;
-		float _w100 = ImGui::GetContentRegionAvail().x;
-		float _h100 = ImGui::GetContentRegionAvail().y;
-		float _w99 = _w100 - _spcx;
-		float _w50 = _w99 / 2;
-		float _h = BUTTON_BIG_HEIGHT / 2;
+		//float _spcx = ImGui::GetStyle().ItemSpacing.x;
+		//float _spcy = ImGui::GetStyle().ItemSpacing.y;
+		//float _w100 = ImGui::GetContentRegionAvail().x;
+		//float _h100 = ImGui::GetContentRegionAvail().y;
+		//float _w99 = _w100 - _spcx;
+		//float _w50 = _w99 / 2;
+		//float _h = BUTTON_BIG_HEIGHT / 2;
 
-		ofxImGui::AddGroup(params_Randomizer, settings);
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
+		flags |= ImGuiTreeNodeFlags_DefaultOpen;
+		ofxImGui::AddGroup(params_Randomizer, flags);
+		//ofxImGui::AddGroup(params_Randomizer, settings);
 
 #ifdef DEBUG_randomTest
 		ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
@@ -1078,15 +1095,32 @@ void groupRandomizer::gui_RandomizerFilter()
 
 	if (ofxImGui::BeginWindow("EDITOR B", settings, flagsw))
 	{
-		float _spcx = ImGui::GetStyle().ItemSpacing.x;
-		float _spcy = ImGui::GetStyle().ItemSpacing.y;
-		float _w100 = ImGui::GetContentRegionAvail().x;
-		float _h100 = ImGui::GetContentRegionAvail().y;
-		float _w99 = _w100 - _spcx;
-		float _w50 = _w99 / 2;
-		float _h = BUTTON_BIG_HEIGHT / 2;
+		//float _spcx;
+		//float _spcy;
+		//float _w100;
+		//float _h100;
+		//float _w99;
+		//float _w50;
+		//float _w33;
+		//float _w25;
+		//float _h;
+		//ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
-		ofxImGui::AddGroup(params_FilterEditor, settings);
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
+		flags |= ImGuiTreeNodeFlags_DefaultOpen;
+		ofxImGui::AddGroup(params_RandomizersFiltered, flags);
+		//ofxImGui::AddGroup(params_RandomizersFiltered, settings);
+
+		//--
+
+		//ImGui::Dummy(ImVec2(0.f, 2.f));
+		//ImGui::Separator();
+		//ImGui::Dummy(ImVec2(0.f, 2.f));
+
+		//--
+
+		//ofxImGui::AddGroup(params_RandomizersPowered, settings);
+
 	}
 	ofxImGui::EndWindow(settings);
 
@@ -1109,13 +1143,16 @@ void groupRandomizer::gui_RandomizersMain()
 
 	if (ofxImGui::BeginWindow(str.c_str(), settings, flagsw))
 	{
-		float _spcx = ImGui::GetStyle().ItemSpacing.x;
-		float _spcy = ImGui::GetStyle().ItemSpacing.y;
-		float _w100 = ImGui::GetContentRegionAvail().x;
-		float _h100 = ImGui::GetContentRegionAvail().y;
-		float _w99 = _w100 - _spcx;
-		float _w50 = _w99 / 2;
-		float _h = BUTTON_BIG_HEIGHT;
+		float _spcx;
+		float _spcy;
+		float _w100;
+		float _h100;
+		float _w99;
+		float _w50;
+		float _w33;
+		float _w25;
+		float _h;
+		ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
 		//---
 
@@ -1232,18 +1269,6 @@ void groupRandomizer::gui_RandomizersMain()
 		//ofxImGui::AddParameter(PLAY_RandomizeTimer);
 		//ofxSurfingHelpers::AddBigToggle(PLAY_RandomizeTimer, 30);
 
-		//-
-
-		// 1.0.1B bpm slider
-
-		auto parameter = randomizeDurationBpm;
-		auto tmpRef = randomizeDurationBpm.get();
-		auto name = ofxImGui::GetUniqueName(randomizeDurationBpm);
-		if (ImGui::SliderFloat(ofxImGui::GetUniqueName(parameter), (float *)&tmpRef, parameter.getMin(), parameter.getMax()))
-		{
-			parameter.set(tmpRef);
-		}
-
 		//--
 
 		// 1.0.2 draw progress bar for the randomizer timer
@@ -1258,6 +1283,26 @@ void groupRandomizer::gui_RandomizersMain()
 			ImGui::PopStyleColor();
 			ImGui::PopID();
 			//cout << _prog << endl;
+		}
+
+		//-
+
+		// 1.0.1B bpm slider
+
+		//auto parameter = randomizeDurationBpm;
+		//auto tmpRef = randomizeDurationBpm.get();
+		//auto name = ofxImGui::GetUniqueName(randomizeDurationBpm);
+		//if (ImGui::SliderFloat(ofxImGui::GetUniqueName(parameter), (float *)&tmpRef, parameter.getMin(), parameter.getMax()))
+		//{
+		//	parameter.set(tmpRef);
+		//}
+		ofxImGui::AddParameter(randomizeDurationBpm);
+
+		//-
+
+		if (ImGui::Button("Reset", ImVec2(_w100, _h)))
+		{
+			randomizeDurationBpm = 120;
 		}
 
 		//--
@@ -1325,11 +1370,11 @@ void groupRandomizer::gui_RandomizersMain()
 				// 1.2 randomizers fillter editor
 
 				//gui_RandomizerFilter();
-				ofxImGui::AddGroup(params_FilterEditor, settings);
+				ofxImGui::AddGroup(params_RandomizersFiltered, settings);
 			}
 		}
 		*/
-		
+
 		//ImGui::Dummy(ImVec2(0, 5));
 		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_RandomizerIndex, _w99, _h);
 		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_RandomizerFilter, _w99, _h);
@@ -1360,25 +1405,25 @@ void groupRandomizer::Changed_Editor(ofAbstractParameter &e)
 
 			doRandomPreset();
 		}
-		else if (name == bRandomizeEditorAll.getName() && bRandomizeEditorAll)// all
+		else if (name == bRandomizeFiltered_All.getName() && bRandomizeFiltered_All)// all
 		{
-			bRandomizeEditorAll = false;
+			bRandomizeFiltered_All = false;
 
-			for (auto &p : editorPresets) {
+			for (auto &p : randomizersFiltered_TogglesVector) {
 				p.set(true);
 			}
 		}
-		else if (name == bRandomizeEditorNone.getName() && bRandomizeEditorNone)// none
+		else if (name == bRandomizeFiltered_None.getName() && bRandomizeFiltered_None)// none
 		{
-			bRandomizeEditorNone = false;
+			bRandomizeFiltered_None = false;
 
-			for (auto &p : editorPresets) {
+			for (auto &p : randomizersFiltered_TogglesVector) {
 				p.set(false);
 			}
 		}
-		else if (name == bRandomizeEditorPopulateFavs.getName() && bRandomizeEditorPopulateFavs)// populate random all favs
+		else if (name == bRandomizeFiltered_PopulateFavs.getName() && bRandomizeFiltered_PopulateFavs)// populate random all favs
 		{
-			bRandomizeEditorPopulateFavs = false;
+			bRandomizeFiltered_PopulateFavs = false;
 			//doPopulateFavs();
 		}
 	}
@@ -1593,4 +1638,134 @@ void groupRandomizer::loadPreset(int p)
 //void groupRandomizer::setup(ofParameterGroup &g, int _numPresets, ofParameter<int> &index) {
 //	setup(g, _numPresets);
 //	setSelectorTARGET(index);
+//}
+
+////--
+//
+////TODO:
+////randomizer powered
+////better random engine with min- max for the params
+//
+////--------------------------------------------------------------
+//void groupRandomizer::setup_RandomizerPowered()
+//{
+//	params_RandomizersPowered.setName("Powered Randomizer");
+//	params_RandomizersPowered.clear();
+//
+//	randomizersPowered_TogglesVector.clear();
+//	randomizersPowered_Vector.clear();
+//
+//	addGroupToRandomizerPowered(group);
+//}
+//
+////--------------------------------------------------------------
+//void groupRandomizer::addGroupToRandomizerPowered(ofParameterGroup& group) {
+//
+//	for (auto parameter : group)
+//	{
+//		// group
+//		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
+//		if (parameterGroup)
+//		{
+//			if (!parameterGroup->isSerializable()) return;
+//
+//			addGroupToRandomizerPowered(*parameterGroup);
+//			continue;
+//		}
+//
+//		// exclude params not marked as serializable
+//		if (parameter->isSerializable())
+//		{
+//			// parameter, try everything we know how to handle.
+//
+//			// x,y,z vectors
+//#if OF_VERSION_MINOR >= 10
+//			auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
+//			if (parameterVec2f)
+//			{
+//				ofParameter<bool> b{ parameterVec2f->getName(), false };
+//				params_RandomizersPowered.push_back(b);
+//				continue;
+//			}
+//			auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
+//			if (parameterVec3f)
+//			{
+//				ofParameter<bool> b{ parameterVec3f->getName(), false };
+//				params_RandomizersPowered.push_back(b);
+//				continue;
+//			}
+//			auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
+//			if (parameterVec4f)
+//			{
+//				ofParameter<bool> b{ parameterVec4f->getName(), false };
+//				params_RandomizersPowered.push_back(b);
+//				continue;
+//			}
+//#endif
+//			auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
+//			if (parameterOfVec2f)
+//			{
+//				//ofxImGui::AddParameter(*parameterOfVec2f);
+//				ofParameter<bool> b{ parameterOfVec2f->getName(), false };
+//				params_RandomizersPowered.push_back(b);
+//				continue;
+//			}
+//			auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
+//			if (parameterOfVec3f)
+//			{
+//				//ofxImGui::AddParameter(*parameterOfVec3f);
+//				ofParameter<bool> b{ parameterOfVec3f->getName(), false };
+//				params_RandomizersPowered.push_back(b);
+//				continue;
+//			}
+//			auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
+//			if (parameterOfVec4f)
+//			{
+//				ofParameter<bool> b{ parameterOfVec4f->getName(), false };
+//				params_RandomizersPowered.push_back(b);
+//				//ofxImGui::AddParameter(*parameterOfVec4f);
+//				continue;
+//			}
+//			// colors
+//			auto parameterColor = std::dynamic_pointer_cast<ofParameter<ofColor>>(parameter);
+//			if (parameterColor)
+//			{
+//				ofParameter<bool> b{ parameterColor->getName(), false };
+//				params_RandomizersPowered.push_back(b);
+//				continue;
+//			}
+//			auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
+//			if (parameterFloatColor)
+//			{
+//				ofParameter<bool> b{ parameterFloatColor->getName(), false };
+//				params_RandomizersPowered.push_back(b);
+//				continue;
+//			}
+//			// normal types
+//			auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
+//			if (parameterFloat)
+//			{
+//				ofParameter<bool> b{ parameterFloat->getName(), false };
+//				params_RandomizersPowered.push_back(b);
+//				//ofxImGui::AddParameter(*parameterFloat);
+//				continue;
+//			}
+//			auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
+//			if (parameterInt)
+//			{
+//				ofParameter<bool> b{ parameterInt->getName(), false };
+//				params_RandomizersPowered.push_back(b);
+//				continue;
+//			}
+//			auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
+//			if (parameterBool)
+//			{
+//				ofParameter<bool> b{ parameterBool->getName(), false };
+//				params_RandomizersPowered.push_back(b);
+//				continue;
+//			}
+//
+//			ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
+//		}
+//	}
 //}

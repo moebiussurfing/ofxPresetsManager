@@ -1,0 +1,7 @@
+ofxGui
+ofxHistoryPlot
+ofxImGui
+ofxPresetsManager
+ofxScaleDragRect
+ofxSurfingHelpers
+ofxSurfingSmooth

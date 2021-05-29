@@ -180,7 +180,7 @@ private:
 	vector<int> randomFactorsDices;
 
 	void buildRandomizers();
-	void setupRandomizerIndex();// engine to get a random between all posible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
+	void setup_RandomizerIndexes();// engine to get a random between all posible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
 	void doRandomIndex();// randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
 	int doRandomIndexChanged();
 	void doResetDices();// reset all probs to 0
@@ -195,13 +195,13 @@ private:
 	ofParameter<bool> bRandomizeFiltered;
 
 private:
-	ofParameter<bool> bRandomizeEditorAll;// put all toggles/params to true. a randomize will act over all params
-	ofParameter<bool> bRandomizeEditorNone;// put to disabled all toggles
-	ofParameter<bool> bRandomizeEditorPopulateFavs;// create all presets
+	ofParameter<bool> bRandomizeFiltered_All;// put all toggles/params to true. a randomize will act over all params
+	ofParameter<bool> bRandomizeFiltered_None;// put to disabled all toggles
+	ofParameter<bool> bRandomizeFiltered_PopulateFavs;// create all presets
 
 	// system to select what params of current selected preset to: clone, randomize etc
-	void setupRandomizerParams();
-	void addGroupToEditor(ofParameterGroup& group);// queue all contained params inside the paramGroup and nested too
+	void setup_RandomizerFiletered();
+	void addGroupToRandomizerFiletered(ofParameterGroup& group);// queue all contained params inside the paramGroup and nested too
 	void Changed_Editor(ofAbstractParameter &e);
 
 public:
@@ -210,9 +210,20 @@ public:
 	public:
 	void doRandomGroup(ofParameterGroup& group);// randomize params of current selected preset
 
-	vector<ofParameter<bool>> editorPresets;
-	ofParameterGroup params_FilterEditor;
-	ofParameterGroup params_Editor_Toggles;
+	vector<ofParameter<bool>> randomizersFiltered_TogglesVector;
+	ofParameterGroup params_RandomizersFiltered;
+	ofParameterGroup params_Filtered_Toggles;
+
+	//--
+
+	////TODO:
+	////randomizer powered
+	////better random engine with min- max for the params
+	//ofParameterGroup params_RandomizersPowered;
+	//void setup_RandomizerPowered();
+	//void addGroupToRandomizerPowered(ofParameterGroup& group);
+	//vector<ofAbstractParameter> randomizersPowered_Vector;
+	//vector<ofParameter<bool>> randomizersPowered_TogglesVector;
 
 	//--
 
@@ -328,7 +339,7 @@ private:
 					if (parameterInt)
 					{
 						string name = parameterInt->getName();
-						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 						ofParameter<bool> b{ "b",true };
 						if (b.get())
 						{
@@ -342,7 +353,7 @@ private:
 					if (parameterFloat)
 					{
 						string name = parameterFloat->getName();
-						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 						ofParameter<bool> b{ "b",true };
 						if (b.get())
 						{
@@ -356,7 +367,7 @@ private:
 					if (parameterBool)
 					{
 						string name = parameterBool->getName();
-						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 						ofParameter<bool> b{ "b",true };
 						if (b.get())
 						{
@@ -370,7 +381,7 @@ private:
 					if (parameterFloatColor)
 					{
 						string name = parameterFloatColor->getName();
-						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 						ofParameter<bool> b{ "b",true };
 						if (b.get())
 						{
@@ -385,7 +396,7 @@ private:
 					if (parameterColor)
 					{
 						string name = parameterColor->getName();
-						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 						ofParameter<bool> b{ "b",true };
 						if (b.get())
 						{
@@ -402,7 +413,7 @@ private:
 					if (parameterVec2f)
 					{
 						string name = parameterVec2f->getName();
-						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 						ofParameter<bool> b{ "b",true };
 						if (b.get())
 						{
@@ -416,7 +427,7 @@ private:
 					if (parameterVec3f)
 					{
 						string name = parameterVec3f->getName();
-						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 						ofParameter<bool> b{ "b",true };
 						if (b.get())
 						{
@@ -431,7 +442,7 @@ private:
 					if (parameterVec4f)
 					{
 						string name = parameterVec4f->getName();
-						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 						ofParameter<bool> b{ "b",true };
 						if (b.get())
 						{
@@ -449,7 +460,7 @@ private:
 					if (parameterOfVec2f)
 					{
 						string name = parameterOfVec2f->getName();
-						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 						ofParameter<bool> b{ "b",true };
 						if (b.get())
 						{
@@ -463,7 +474,7 @@ private:
 					if (parameterOfVec3f)
 					{
 						string name = parameterOfVec3f->getName();
-						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 						ofParameter<bool> b{ "b",true };
 						if (b.get())
 						{
@@ -478,7 +489,7 @@ private:
 					if (parameterOfVec4f)
 					{
 						string name = parameterOfVec4f->getName();
-						//ofParameter<bool> b = params_Editor_Toggles.getBool(name);
+						//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
 						ofParameter<bool> b{ "b",true };
 						if (b.get())
 						{

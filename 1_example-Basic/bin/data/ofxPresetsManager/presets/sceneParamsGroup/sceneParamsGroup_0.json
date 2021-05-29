@@ -1,13 +1,15 @@
 {
     "sceneParamsGroup": {
-        "amount": "3",
-        "separation": "46",
-        "shapeType": "2",
-        "size": "53",
-        "styleGroup": {
-            "color": "1, 0.99999, 0.99999, 1",
-            "fill": "1",
-            "lineWidth": "1"
-        }
+        "amount": "18",
+        "itemSubGroup": {
+            "shapeType": "1",
+            "size": "148",
+            "styleSubGroup": {
+                "color": "0.423529, 0.227451, 0.333333, 1",
+                "fill": "1",
+                "lineWidth": "6.89618"
+            }
+        },
+        "separation": "43"
     }
 }

@@ -3,12 +3,16 @@
 //--------------------------------------------------------------
 void ofApp::setupPresets()
 {
-	// optional:
+	// optional: 
 
 	// some API extra tweak controls:
+
+	//presetsManager.setEnableGroupLinkSelector(false);// disbale main group link selector
+	//presetsManager.setGroupLinkSize(5);// set amount of presets for link group
+
 	//presetsManager.setEnableKeysArrowBrowse(true);
 	//presetsManager.setEnableKeys(true);
-	presetsManager.setSizeBox_PresetClicker(50);
+	presetsManager.setSizeBox_PresetClicker(50);// clicker size
 
 	//--
 

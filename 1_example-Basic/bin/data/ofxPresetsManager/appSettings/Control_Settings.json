@@ -4,23 +4,26 @@
             "BOX_CLICKER": "1",
             "GUI_INTERNAL_POSITION": "960, 530.5",
             "HELP_POS": "0",
+            "RANDOM_FILTER": "0",
+            "RANDOM_INDEX": "0",
             "SHOW_ADVANCED": "0",
             "SHOW_CLICKER": "1",
-            "SHOW_HELP": "1",
+            "SHOW_HELP": "0",
             "SHOW_ImGui": "1",
             "SHOW_PARAMETERS": "0",
+            "SHOW_PRESET_PARAMETERS": "0",
             "SHOW_RANDOMIZERS": "0",
             "SHOW_SELECTORS": "0",
-            "SHOW_STANDALONES": "1",
-            "THEME_DARK": "0"
+            "SHOW_STANDALONES": "0",
+            "THEME_DARK": "1"
         },
         "OPTIONS": {
             "AUTO_LOAD": "1",
-            "AUTO_SAVE": "0",
-            "MODE_EDIT": "0",
+            "AUTO_SAVE": "1",
+            "EDIT_MODE": "1",
             "TIMER_AUTO_SAVE": "0"
         },
         "Show_All": "0",
-        "THEME_DARK": "0"
+        "THEME_DARK": "1"
     }
 }

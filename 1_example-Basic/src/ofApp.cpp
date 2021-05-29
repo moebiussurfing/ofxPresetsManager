@@ -3,16 +3,28 @@
 //--------------------------------------------------------------
 void ofApp::setupScene()
 {
-	params.setName("sceneParamsGroup");// main group 
-	params.add(shapeType.set("shapeType", 1, 1, 2));
+	params.setName("paramsGroup");// main group 1
+	paramsNested1.setName("styleSubGroup");// another nested group
+	paramsNested2.setName("itemSubGroup");// another nested group
+
+	paramsNested1.add(fill.set("fill", true));
+	paramsNested1.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
+	paramsNested1.add(lineWidth.set("lineWidth", 1, 0.1, 10));
+
+	paramsNested2.add(shapeType.set("shapeType", 1, 1, 2));
+	paramsNested2.add(size.set("size", 100, 5, 200));
+	paramsNested2.add(paramsNested1);
+
 	params.add(amount.set("amount", 10, 1, 24));
 	params.add(separation.set("separation", 10, 1, 100));
-	params.add(size.set("size", 100, 5, 200));
-	paramsNested.setName("styleGroup");// another nested group
-	paramsNested.add(fill.set("fill", true));
-	paramsNested.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
-	paramsNested.add(lineWidth.set("lineWidth", 1, 0.1, 10));
-	params.add(paramsNested);
+	params.add(paramsNested2);
+
+	//-
+
+	params2.setName("paramsGroup2");// main group 2
+	params2.add(shapeType.set("shapeType", 1, 1, 2));
+	params2.add(size.set("size", 100, 5, 200));
+	params2.add(paramsNested1);
 
 	// the group container is ready to be added to presetsManager!
 }
@@ -21,7 +33,12 @@ void ofApp::setupScene()
 void ofApp::setup()
 {
 	ofSetFrameRate(60);
-	ofSetVerticalSync(true);
+	//ofSetVerticalSync(true);
+	//window shape
+	int _gap = 28;
+	ofSetWindowPosition(1920, _gap);
+	ofSetWindowShape(1920, 1080 - _gap);
+
 	font.load("assets/fonts/telegrama_render.otf", 11, true, true, true);
 	ofSetCircleResolution(200);
 
@@ -33,6 +50,8 @@ void ofApp::setup()
 	// and define key triggers for each preset. 
 	// the amount of keys will be the amount of favourites presets
 	presetsManager.add(params, { '0', '1', '2', '3', '4', '5' });
+	presetsManager.add(params2, { 'q', 'w', 'e', 'r' });
+
 	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
 }
 
@@ -57,4 +76,10 @@ void ofApp::draw()
 	}
 	ofPopMatrix();
 	ofPopStyle();
+}
+
+//--------------------------------------------------------------
+void ofApp::keyPressed(int key) {
+
+	if (key == ' ') presetsManager.load_Next(0, true);
 }

@@ -1,14 +1,14 @@
 {
     "Randomizers": {
-        "RANDOM_EDIT": {
+        "RANDOM_FILTER_CONTROL": {
             "PRESET_PARAMETERS": {
-                "numObjects1": "0",
+                "numObjects1": "1",
                 "separation1": "1",
                 "shapeSide1": "1",
                 "show1": "1"
             }
         },
-        "RANDOM_SELECTED_INDEX": {
+        "RANDOM_INDEX_CONTROLS": {
             "ENABLE_MODE_RANDOMIZER": "1",
             "MODE_AVOID_REPEAT": "1",
             "MODE_LATCH-N-BACK": "0",

@@ -195,7 +195,7 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 //
 //	DEFINES
 //
-#define INCLUDE_ofxUndoSimple	// undo engine to store after randomize a preset or manually (to browse history states)
+//#define INCLUDE_ofxUndoSimple	// undo engine to store after randomize a preset or manually (to browse history states)
 //
 #define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT	// customize ImGui font
 //#define USE_IMGUI_EXTERNAL	// this is to group all ImGui panels into one unique instance in ofApp
@@ -228,6 +228,7 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 #include "ofxSurfingConstants.h" // defines (modes) are here "to share between addons" in one place
 #include "ofxInteractiveRect.h" // engine to move the user clicker buttons panel. TODO: add resize by mouse too.
 #include "ofxSurfingHelpers.h"
+#include "ofxSurfing_ImGui.h"
 #include "groupRandomizer.h"
 
 // undo engine
@@ -249,12 +250,18 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 #define PANEL_WIDGETS_WIDTH 225
 #define PANEL_WIDGETS_HEIGHT 100
 
+//TODO:
+#define USE_IM_GUI
+#define USE_JSON		//uncomment to use default xml instead json for ofParameterGroup de/serializers
+
 //-------------------------------
 
 class ofxPresetsManager : public ofBaseApp
 {
 
 public:
+	ofParameter<bool> bLockMouseByImGui{ "Mouse Locked", false };//mouse is over gui
+
 
 	ofxPresetsManager();
 	~ofxPresetsManager();
@@ -265,7 +272,7 @@ public:
 	void windowResized(int w, int h);
 	void exit();
 
-	void gui_Draw();
+	void ImGui_Draw();
 	void drawHelp(int x, int y);
 	void clear();
 
@@ -385,7 +392,7 @@ private:
 	bool bAllowGroupSelector = true;// to allow disable main group. not allways we need it..
 	int groupLinkSize = 10;// default ammount of presets we want to the group link
 public:
-	void setGroupLinkSize(int size) {// customize how many group link presets we want to create
+	void setGroupLinkSize(int size) {// customize how many group link presets we want to create. must call before setup
 		groupLinkSize = size;
 	}
 	void setEnableGroupLinkSelector(bool b) {// disable the use of main group selector. must call before setup. enabled by default
@@ -523,6 +530,7 @@ private:
 
 private:
 	// mini preview rectangles positions and sizes
+	void doRectFit();
 	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
 	std::string path_RectanglePresetClicker = "_RectanglePresetClicker";
 	ofParameter<bool> MODE_EditPresetClicker;
@@ -1176,12 +1184,12 @@ private:
 	// ImGui
 
 public:
-	void ImGui_Randomizers();
-	void ImGui_MainPanel();
-	void ImGui_Advanced();
-	void ImGui_Selectors();
-	void ImGui_Standalones();
-	void ImGui_Parameters();
+	void gui_Randomizers();
+	void gui_MainPanel();
+	void gui_Advanced();
+	void gui_Selectors();
+	void gui_Standalones();
+	void gui_Parameters();
 
 public:
 	//void ImGui_Draw_Window();
@@ -1191,9 +1199,9 @@ public:
 
 #ifndef USE_IMGUI_EXTERNAL
 	ofxImGui::Gui gui_ImGui;
-	void gui_Setup();
-	void gui_Begin();
-	void gui_End();
+	void ImGui_Setup();
+	void ImGui_Begin();
+	void ImGui_End();
 	ImFont* customFont = nullptr;
 	ImGuiStyle *style = nullptr;
 	ofxImGui::Settings settings;
@@ -1530,5 +1538,16 @@ public:
 
 	void setThemeDarkOrLight(bool b) {
 		bThemeDarkOrLight = b;
+	}
+
+	ofParameter<bool> getPlayToggle() {
+		return groupRandomizers[0].PLAY_RandomizeTimer;
+	}
+
+	bool bMouseOverGui;
+	bool isMouseOverGui() {
+		bool b = rectanglePresetClicker.inside(ofGetMouseX(), ofGetMouseY());
+		//return bMouseOverGui;
+		return b;
 	}
 };
