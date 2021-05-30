@@ -20,6 +20,14 @@ void ofApp::setup()
 	presetsManager.add(params2, { 'q', 'w', 'e', 'r' });
 	presetsManager.setup(); // must call after adding all the ofParameterGroup(s)
 	presetsManager.setSizeBox_PresetClicker(50); // a bit smaller
+
+	//// randomizer
+	//params_Randomizator.setName("Randomizator");
+	//params_Randomizator.add(params);
+	//randomizer.setup(params_Randomizator);
+	//randomizer.bGui = true;
+	////randomizer.setImGuiAutodraw(false);
+	////randomizer.setImGuiSharedMode(true);
 }
 
 //--------------------------------------------------------------

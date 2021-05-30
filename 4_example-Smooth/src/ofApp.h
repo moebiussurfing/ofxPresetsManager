@@ -4,6 +4,7 @@
 
 #include "ofxPresetsManager.h"
 #include "ofxWindowApp.h"
+//#include "ofxSurfingRandomizer.h"
 
 class ofApp : public ofBaseApp
 {
@@ -39,4 +40,7 @@ public:
 	void setupScene();
 	
 	ofxWindowApp windowApp;
+
+	//ofxSurfingRandomizer randomizer;
+	//ofParameterGroup params_Randomizator;
 };
