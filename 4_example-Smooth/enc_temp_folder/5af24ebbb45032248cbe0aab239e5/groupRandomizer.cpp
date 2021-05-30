@@ -788,7 +788,7 @@ void groupRandomizer::setup_RandomizerFiletered()
 
 
 	// add to group
-	bRandomizeFiltered.set("RANDOM PARAMS", false);
+	bRandomizeFiltered.set("RANDOM FILTER", false);
 	bRandomizeFiltered_PopulateFavs.set("POPULATE FAVS!", false);
 	bRandomizeFiltered_All.set("ALL", false);
 	bRandomizeFiltered_None.set("NONE", false);
@@ -1092,7 +1092,7 @@ void groupRandomizer::gui_RandomizerIndex()
 }
 
 //--------------------------------------------------------------
-void groupRandomizer::gui_RandomizerParams()
+void groupRandomizer::gui_RandomizerFilter()
 {
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
@@ -1385,7 +1385,7 @@ void groupRandomizer::gui_RandomizersMain()
 
 				// 1.2 randomizers fillter editor
 
-				//gui_RandomizerParams();
+				//gui_RandomizerFilter();
 				ofxImGui::AddGroup(params_RandomizersFiltered, settings);
 			}
 		}
@@ -1393,7 +1393,7 @@ void groupRandomizer::gui_RandomizersMain()
 
 		//ImGui::Dummy(ImVec2(0, 5));
 		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_RandomizerIndex, _w99, _h);
-		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_RandomizerParams, _w99, _h);
+		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_RandomizerFilter, _w99, _h);
 
 
 		ImGui::Dummy(ImVec2(0, 2));

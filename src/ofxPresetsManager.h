@@ -1176,7 +1176,7 @@ private:
 	ofParameter<bool> SHOW_Panel_AllSelectors;
 	ofParameter<bool> SHOW_Panel_Randomizer;
 	ofParameter<bool> SHOW_Panel_RandomizerIndex;
-	ofParameter<bool> SHOW_Panel_RandomizerFilter;
+	ofParameter<bool> SHOW_Panel_RandomizerParams;
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
 	ofParameter<bool> SHOW_ImGui_Selectors;
 	ofParameter<bool> SHOW_Help;

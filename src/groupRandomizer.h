@@ -58,9 +58,9 @@ public:
 public:
 	void gui_RandomizersMain();
 	void gui_RandomizerIndex();
-	void gui_RandomizerFilter();
+	void gui_RandomizerParams();
 	//ofParameter<bool> SHOW_Panel_RandomizerIndex;
-	//ofParameter<bool> SHOW_Panel_RandomizerFilter;
+	//ofParameter<bool> SHOW_Panel_RandomizerParams;
 	
 	//-
 

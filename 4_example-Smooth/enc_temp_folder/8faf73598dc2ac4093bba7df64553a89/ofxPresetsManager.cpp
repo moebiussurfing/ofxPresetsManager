@@ -119,7 +119,7 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Panel_Standalones.set("SHOW STANDALONES", false);
 	SHOW_Panel_Randomizer.set("SHOW RANDOMIZERS", false);
 	SHOW_Panel_RandomizerIndex.set("RANDOM INDEX", false);
-	SHOW_Panel_RandomizerParams.set("RANDOM PARAMS", false);
+	SHOW_Panel_RandomizerFilter.set("RANDOM FILTER", false);
 
 	SHOW_Panels.set("SHOW PANELS", true);
 	SHOW_Help.set("SHOW HELP", false);
@@ -185,7 +185,7 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.add(SHOW_Panel_Standalones);
 	params_Gui.add(SHOW_Panel_Randomizer);
 	params_Gui.add(SHOW_Panel_RandomizerIndex);
-	params_Gui.add(SHOW_Panel_RandomizerParams);
+	params_Gui.add(SHOW_Panel_RandomizerFilter);
 	params_Gui.add(SHOW_ImGui);
 	params_Gui.add(SHOW_ImGui_PresetsParams);
 	params_Gui.add(ENABLE_Keys);
@@ -517,10 +517,10 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	//for (int i = 0; i < groupRandomizers.size(); i++)
 	//{
 	//	groupRandomizers[i].SHOW_Panel_RandomizerIndex.makeReferenceTo(SHOW_Panel_RandomizerIndex);
-	//	groupRandomizers[i].SHOW_Panel_RandomizerParams.makeReferenceTo(SHOW_Panel_RandomizerParams);
+	//	groupRandomizers[i].SHOW_Panel_RandomizerFilter.makeReferenceTo(SHOW_Panel_RandomizerFilter);
 	//
 	//	//SHOW_Panel_RandomizerIndex.makeReferenceTo(groupRandomizers[i].SHOW_Panel_RandomizerIndex);
-	//	//SHOW_Panel_RandomizerParams.makeReferenceTo(groupRandomizers[i].SHOW_Panel_RandomizerParams);
+	//	//SHOW_Panel_RandomizerFilter.makeReferenceTo(groupRandomizers[i].SHOW_Panel_RandomizerFilter);
 	//}
 
 	//----
@@ -3182,7 +3182,7 @@ void ofxPresetsManager::gui_Parameters()
 		if (ImGui::CollapsingHeader("TOOLS", ImGuiTreeNodeFlags_None))
 			//if (ImGui::CollapsingHeader("TOOLS", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			if (ImGui::Button("RANDOM PARAMS", ImVec2(_w50, _h)))
+			if (ImGui::Button("RANDOM FILTER", ImVec2(_w50, _h)))
 			{
 				doRandomFiltered();
 			}
@@ -3287,7 +3287,7 @@ void ofxPresetsManager::gui_Panels()
 					ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Randomizer, _w100, _hh);
 				}
 				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_RandomizerIndex, _w100, _hh); //ImGui::SameLine();
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_RandomizerParams, _w100, _hh);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_RandomizerFilter, _w100, _hh);
 			}
 			ImGui::Unindent();
 
@@ -4321,7 +4321,7 @@ void ofxPresetsManager::gui_Standalones()
 //--------------------------------------------------------------
 void ofxPresetsManager::gui_Randomizers()
 {
-	if (!SHOW_Panel_RandomizerIndex && !SHOW_Panel_RandomizerParams && !SHOW_Panel_Randomizer) { return; }
+	if (!SHOW_Panel_RandomizerIndex && !SHOW_Panel_RandomizerFilter && !SHOW_Panel_Randomizer) { return; }
 
 	//--
 
@@ -4346,7 +4346,7 @@ void ofxPresetsManager::gui_Randomizers()
 
 				if (SHOW_Panel_RandomizerIndex) groupRandomizers[i].gui_RandomizerIndex();
 
-				if (SHOW_Panel_RandomizerParams) groupRandomizers[i].gui_RandomizerParams();
+				if (SHOW_Panel_RandomizerFilter) groupRandomizers[i].gui_RandomizerFilter();
 			}
 		}
 
@@ -4357,7 +4357,7 @@ void ofxPresetsManager::gui_Randomizers()
 
 			if (SHOW_Panel_RandomizerIndex) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizerIndex();
 
-			if (SHOW_Panel_RandomizerParams) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizerParams();
+			if (SHOW_Panel_RandomizerFilter) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizerFilter();
 		}
 	}
 }
