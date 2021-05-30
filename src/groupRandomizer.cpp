@@ -61,6 +61,13 @@ void groupRandomizer::setup(ofParameterGroup &_group, int _numPresets) {
 	ofAddListener(params_Randomizer.parameterChangedE(), this, &groupRandomizer::Changed_Control);
 
 	//----
+	
+	// randomizer
+#ifdef INCLUDE_ofxSurfingRandomizer
+	randomizer.setup(_group);
+#endif
+
+	//----
 
 	// startup
 	startup();
@@ -1104,16 +1111,26 @@ void groupRandomizer::gui_RandomizerParams()
 
 	if (ofxImGui::BeginWindow("EDITOR B", settings, flagsw))
 	{
-		//float _spcx;
-		//float _spcy;
-		//float _w100;
-		//float _h100;
-		//float _w99;
-		//float _w50;
-		//float _w33;
-		//float _w25;
-		//float _h;
-		//ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
+		float _spcx;
+		float _spcy;
+		float _w100;
+		float _h100;
+		float _w99;
+		float _w50;
+		float _w33;
+		float _w25;
+		float _h;
+		ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
+
+		//--
+
+#ifdef INCLUDE_ofxSurfingRandomizer
+		ofxSurfingHelpers::AddBigToggle(randomizer.bGui, _w100, _h);
+		
+		ImGui::Dummy(ImVec2(0.f, 2.f));
+#endif
+
+		//--
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
 		flags |= ImGuiTreeNodeFlags_DefaultOpen;

@@ -144,6 +144,8 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 
 ///	TODO:
 ///	
+/// +	ful width of presets boxes responsive
+///
 /// IDEAS:
 ///	
 ///	+++		open/save dialog to project User-Kit session in a single file.
@@ -196,6 +198,10 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 //	DEFINES
 //
 #define INCLUDE_ofxSurfingSmooth // smooth engine
+
+//TODO: not working
+//#define INCLUDE_ofxSurfingRandomizer // randomizer engine
+
 //#define INCLUDE_ofxUndoSimple	// undo engine to store after randomize a preset or manually (to browse history states)
 //
 #define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT	// customize ImGui font
@@ -230,6 +236,12 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 #include "ofxSurfingSmooth.h"
 #endif
 
+#ifdef INCLUDE_ofxSurfingRandomizer
+#include "ofxSurfingRandomizer.h"
+#endif
+
+//--
+
 #include "ofxSurfingConstants.h" // defines (modes) are here "to share between addons" in one place
 #include "ofxInteractiveRect.h" // engine to move the user clicker buttons panel. TODO: add resize by mouse too.
 #include "ofxSurfingHelpers.h"
@@ -263,9 +275,18 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 
 class ofxPresetsManager : public ofBaseApp
 {
+#ifdef INCLUDE_ofxSurfingRandomizer
+	public:
+//private:
+	//protected:
+	ofxSurfingRandomizer randomizer;
+	ofParameterGroup params_Randomizator;
+#endif
+
 	//--
 
 #ifdef INCLUDE_ofxSurfingSmooth
+//private:
 public:
 	ofxSurfingSmooth smoother;
 	ofParameterGroup params_Smooth{ "Smooth" };

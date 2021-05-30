@@ -2,16 +2,35 @@
 
 #include "ofMain.h"
 
+//-----
+//
+//#define INCLUDE_ofxSurfingRandomizer // randomizer engine
+//
+//-----
+
 #include "ofxSurfingHelpers.h"
 #include "ofxSurfing_ImGui.h"
+#include "ofxSurfing_ImGuiBundle.h"
 //#include "ofxImGui.h"
 
-#define BUTTON_BIG_HEIGHT 30
-#define PANEL_WIDGETS_WIDTH 225
-#define PANEL_WIDGETS_HEIGHT 100
+#ifdef INCLUDE_ofxSurfingRandomizer
+#include "ofxSurfingRandomizer.h"
+#endif
+
+//#define BUTTON_BIG_HEIGHT 30
+//#define PANEL_WIDGETS_WIDTH 225
+//#define PANEL_WIDGETS_HEIGHT 100
 
 class groupRandomizer
 {
+
+
+#ifdef INCLUDE_ofxSurfingRandomizer
+private:
+//protected:
+//public:
+	ofxSurfingRandomizer randomizer;
+#endif
 
 public:
 	groupRandomizer();

@@ -525,6 +525,18 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	//----
 
+	// randomizer
+#ifdef INCLUDE_ofxSurfingRandomizer
+	params_Randomizator.setName("Randomizator");
+	for (int i = 0; i < groups.size() - 1; i++)
+	{
+		params_Randomizator.add(groups[i]);
+	}
+	randomizer.setup(params_Randomizator);
+#endif
+
+	//----
+
 	startup();
 }
 
@@ -3010,7 +3022,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		static bool auto_resize = true;
 		ImGuiWindowFlags flagsw;
 		flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
-		
+
 		float _spcx;
 		float _spcy;
 		float _w100;
@@ -3256,7 +3268,7 @@ void ofxPresetsManager::gui_Panels()
 	float _w33;
 	float _w25;
 	float _h;
-			float _hh;
+	float _hh;
 
 	//float ww = PANEL_WIDGETS_WIDTH;
 	//float hh = PANEL_WIDGETS_HEIGHT;
@@ -3312,7 +3324,7 @@ void ofxPresetsManager::gui_Panels()
 #endif
 				ImGui::Dummy(ImVec2(0, 2));
 
-				ofxSurfingHelpers::AddBigToggle(SHOW_Help, _w100, _hh/2);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Help, _w100, _hh / 2);
 
 				//ImGui::TreePop();
 			}
@@ -3390,7 +3402,11 @@ void ofxPresetsManager::gui_MainPanel()
 		ofxSurfingHelpers::AddBigToggleNamed(MODE_Editor, _w100, 2 * _h, "EDIT MODE", "LIVE MODE");
 		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, _w100, 2 * _h);
 
+		//-
+
 		ImGui::Dummy(ImVec2(0, 2));
+
+		// 1.2 next / previous
 
 		ImGui::PushButtonRepeat(true);
 		{
@@ -3407,11 +3423,17 @@ void ofxPresetsManager::gui_MainPanel()
 			}
 		}
 		ImGui::PopButtonRepeat();
-
 		ImGui::Dummy(ImVec2(0, 2));
 
 		ofxSurfingHelpers::AddBigToggle(SHOW_Panels, _w100, _h);
 		ImGui::Dummy(ImVec2(0, 2));
+		
+		//--
+
+#ifdef INCLUDE_ofxSurfingRandomizer
+		ofxSurfingHelpers::AddBigToggle(randomizer.bGui, _w100, _h);
+		ImGui::Dummy(ImVec2(0.f, 2.f));
+#endif
 
 		//--
 
@@ -3535,8 +3557,8 @@ void ofxPresetsManager::gui_MainPanel()
 				{
 					doRedo();
 				}
+			}
 	}
-}
 #endif
 
 		//--
@@ -3562,7 +3584,7 @@ void ofxPresetsManager::gui_MainPanel()
 		}
 
 		//--
-		}
+}
 	ofxImGui::EndWindow(settings);
 
 	//ImGui::PopStyleVar();
