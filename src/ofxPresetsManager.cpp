@@ -582,9 +582,9 @@ void ofxPresetsManager::startup()
 	//TODO:
 	//should remove pos var and use only the rectangle 
 	rectanglePresetClicker.setLockResize(true);
-	rectanglePresetClicker.width = getPresetClicker_Width() + 2 * _RectClick_Pad + _RectClick_w;
-	rectanglePresetClicker.height = getPresetClicker_Height() + 2 * _RectClick_Pad;
 	//TODO:
+	//rectanglePresetClicker.width = getPresetClicker_Width() + 2 * _RectClick_Pad + _RectClick_w;
+	//rectanglePresetClicker.height = getPresetClicker_Height() + 2 * _RectClick_Pad;
 	//rectanglePresetClicker.x = getPresetClicker_Position().x - _RectClick_Pad - _RectClick_w;
 	//rectanglePresetClicker.y = getPresetClicker_Position().y - _RectClick_Pad;
 	_rectRatio = rectanglePresetClicker.width / rectanglePresetClicker.height;
@@ -593,12 +593,12 @@ void ofxPresetsManager::startup()
 	rectanglePresetClicker.loadSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
 	doRectFit();
 
-	clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
-	clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
+	//clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
+	//clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
 
-	//clamp inside window
-	clicker_Pos.x = ofClamp(clicker_Pos.x, 0, ofGetWidth());
-	clicker_Pos.y = ofClamp(clicker_Pos.y, 0, ofGetHeight());
+	////clamp inside window
+	//clicker_Pos.x = ofClamp(clicker_Pos.x, 0, ofGetWidth());
+	//clicker_Pos.y = ofClamp(clicker_Pos.y, 0, ofGetHeight());
 
 	//--
 
@@ -3295,11 +3295,11 @@ void ofxPresetsManager::gui_Panels()
 
 			// 4.2 extra
 
-			//ImGui::Indent();
-			ImGuiTreeNodeFlags flagsTree;
-			flagsTree = ImGuiTreeNodeFlags_Framed;
-			//if (ImGui::CollapsingHeader("EXTRA"))
-			if (ImGui::TreeNodeEx("EXTRA", flagsTree))
+			//ImGuiTreeNodeFlags flagsTree;
+			//flagsTree = ImGuiTreeNodeFlags_Framed;
+			//if (ImGui::TreeNodeEx("EXTRA", flagsTree))
+			ImGui::Indent();
+			if (ImGui::CollapsingHeader("EXTRA"))
 			{
 				ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 				_hh = _h;
@@ -3312,11 +3312,11 @@ void ofxPresetsManager::gui_Panels()
 #endif
 				ImGui::Dummy(ImVec2(0, 2));
 
-				ofxSurfingHelpers::AddBigToggle(SHOW_Help, _w100, _hh);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Help, _w100, _hh/2);
 
-				ImGui::TreePop();
+				//ImGui::TreePop();
 			}
-			//ImGui::Unindent();
+			ImGui::Unindent();
 		}
 	}
 
@@ -3618,8 +3618,8 @@ void ofxPresetsManager::gui_Advanced()
 
 				if (MODE_Editor)
 				{
-					ofxSurfingHelpers::AddBigToggle(MODE_EditPresetClicker, _w50, _h / 2); ImGui::SameLine();
-					ofxSurfingHelpers::AddBigToggle(SHOW_BackGround_EditPresetClicker, _w50, _h / 2);
+					ofxSurfingHelpers::AddBigToggle(MODE_EditPresetClicker, _w100, _h / 2); //ImGui::SameLine();
+					ofxSurfingHelpers::AddBigToggle(SHOW_BackGround_EditPresetClicker, _w100, _h / 2);
 					if (SHOW_Help)ofxImGui::AddParameter(helpPos);
 				}
 
@@ -4837,7 +4837,6 @@ void ofxPresetsManager::doRectFit()
 	{
 		rectanglePresetClicker.setY(_ymax);
 	}
-
 }
 
 

@@ -15,7 +15,8 @@ public:
 
 	// scene parameters 
 
-	ofParameterGroup params;// group container
+	// main group 1
+	ofParameterGroup params;
 	ofParameterGroup paramsNested1;
 	ofParameterGroup paramsNested2;
 	ofParameter<bool> fill;
@@ -26,7 +27,8 @@ public:
 	ofParameter<int> separation;
 	ofParameter<int> size;
 
-	ofParameterGroup params2;// group container
+	// main group 2
+	ofParameterGroup params2;
 	ofParameter<int> shapeType2;
 	ofParameter<int> amount2;
 	ofParameter<int> size2;
