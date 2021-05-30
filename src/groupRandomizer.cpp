@@ -888,6 +888,8 @@ void groupRandomizer::update()
 			// A. long mode
 			if (presetsRandomModeShort[PRESET_Selected_IndexMain] == false)// get if it's marked as shor or long by default (false)
 			{
+				timerPlayerPct = ofMap(timerRandomizer, 0, randomizeDuration, 0, 1, true);
+
 				if (timerRandomizer >= randomizeDuration)
 				{
 					if (MODE_LatchTrig) {
@@ -901,9 +903,13 @@ void groupRandomizer::update()
 				}
 			}
 
+			//-
+
 			// B. short mode
 			else
 			{
+				timerPlayerPct = ofMap(timerRandomizer, 0, randomizeDurationShort, 0, 1, true);
+
 				if (timerRandomizer >= randomizeDurationShort)
 				{
 					if (MODE_LatchTrig) {
@@ -913,6 +919,9 @@ void groupRandomizer::update()
 				}
 			}
 		}
+	}
+	else {
+		timerPlayerPct = 0;
 	}
 
 	//--
@@ -1153,6 +1162,8 @@ void groupRandomizer::gui_RandomizersMain()
 		float _w25;
 		float _h;
 		ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
+		
+		_h = _h / 2;
 
 		//---
 
@@ -1169,7 +1180,9 @@ void groupRandomizer::gui_RandomizersMain()
 
 		//ImGui::Dummy(ImVec2(0, 5));
 
+		ImGui::PushItemWidth(_w50);
 		ofxImGui::AddParameter(PRESET_Selected_IndexMain);
+		ImGui::PopItemWidth();
 
 		//ImGui::SameLine();
 		//ImGui::Dummy(ImVec2(0, 5));
@@ -1296,7 +1309,10 @@ void groupRandomizer::gui_RandomizersMain()
 		//{
 		//	parameter.set(tmpRef);
 		//}
+
+		ImGui::PushItemWidth(_w50);
 		ofxImGui::AddParameter(randomizeDurationBpm);
+		ImGui::PopItemWidth();
 
 		//-
 

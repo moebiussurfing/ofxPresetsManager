@@ -20,11 +20,19 @@ public:
 	void setup(ofParameterGroup &g, int _numPresets);
 	void setup(ofParameterGroup &g, vector<int> keysList);
 
+private:
+	float timerPlayerPct;
+public:
+	float getPlayerPct() {
+		return timerPlayerPct;
+	}
+
 	// TODO: target pointer
 	//void setup(ofParameterGroup &g, vector<int> keysList, ofParameter<int> &index);
 	//void setSelectorTARGET(ofParameter<int> &index);
 	//ofParameter<int> selectorTARGET;
 
+public:
 	void startup();
 	void doCheckRandomReady();
 

@@ -14,6 +14,8 @@ public:
 	void keyPressed(int key);
 
 	// scene parameters 
+
+	ofParameterGroup params;// group container
 	ofParameterGroup paramsNested1;
 	ofParameterGroup paramsNested2;
 	ofParameter<bool> fill;
@@ -24,9 +26,11 @@ public:
 	ofParameter<int> separation;
 	ofParameter<int> size;
 
-	// group container
-	ofParameterGroup params;
-
+	ofParameterGroup params2;// group container
+	ofParameter<int> shapeType2;
+	ofParameter<int> amount2;
+	ofParameter<int> size2;
+	
 	// presets manager
 	ofxPresetsManager presetsManager;
 

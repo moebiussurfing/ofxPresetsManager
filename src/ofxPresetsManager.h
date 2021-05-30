@@ -269,8 +269,8 @@ class ofxPresetsManager : public ofBaseApp
 public:
 	ofxSurfingSmooth smoother;
 	ofParameterGroup params_Smooth{ "Smooth" };
-	float getSmooth(ofParameter<float> param) { return smoother.get(param); }
-	int getSmooth(ofParameter<int> param) { return smoother.get(param); }
+	float get(ofParameter<float> param) { return smoother.get(param); }
+	int get(ofParameter<int> param) { return smoother.get(param); }
 #endif
 
 	//--
@@ -1180,6 +1180,7 @@ private:
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
 	ofParameter<bool> SHOW_ImGui_Selectors;
 	ofParameter<bool> SHOW_Help;
+	ofParameter<bool> SHOW_Panels;
 	ofParameter<bool> SHOW_Gui_AdvancedControl;
 	ofParameter<bool> ENABLE_Keys;
 	ofParameter<bool> bThemeDarkOrLight{ "THEME DARK", true };
@@ -1202,6 +1203,7 @@ private:
 public:
 	void gui_Randomizers();
 	void gui_MainPanel();
+	void gui_Panels();
 	void gui_Advanced();
 	void gui_Selectors();
 	void gui_Standalones();
