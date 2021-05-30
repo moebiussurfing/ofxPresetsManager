@@ -527,12 +527,13 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	// randomizer
 #ifdef INCLUDE_ofxSurfingRandomizer
-	params_Randomizator.setName("Randomizator");
-	for (int i = 0; i < groups.size() - 1; i++)
-	{
-		params_Randomizator.add(groups[i]);
-	}
-	randomizer.setup(params_Randomizator);
+	//params_Randomizator.setName("Randomizator");
+	//for (int i = 0; i < groups.size() - 1; i++)
+	//{
+	//	params_Randomizator.add(groups[i]);
+	//}
+	//randomizer.setup(params_Randomizator);
+	randomizer.setup(groups[0]);
 #endif
 
 	//----

@@ -275,10 +275,12 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 
 class ofxPresetsManager : public ofBaseApp
 {
+	//--
+
 #ifdef INCLUDE_ofxSurfingRandomizer
-	public:
+public:
 //private:
-	//protected:
+//protected:
 	ofxSurfingRandomizer randomizer;
 	ofParameterGroup params_Randomizator;
 #endif
