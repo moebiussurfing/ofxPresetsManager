@@ -1328,8 +1328,8 @@ void groupRandomizer::gui_RandomizersMain()
 		//}
 
 		ImGui::PushItemWidth(_w50);
+		ofxImGui::AddParameter(randomizeDurationBpm);
 		ofxSurfingHelpers::AddDragFloatSlider(randomizeDurationBpm);
-		//ofxImGui::AddParameter(randomizeDurationBpm);
 		ImGui::PopItemWidth();
 
 		//-

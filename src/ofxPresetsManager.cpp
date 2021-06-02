@@ -3551,13 +3551,18 @@ void ofxPresetsManager::gui_MainPanel()
 		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, _w100, 2 * _h);
 
 		// SAVE
-		if (!MODE_Editor)
+		//if (!MODE_Editor)
 		{
-			if (ImGui::Button("SAVE", ImVec2(_w100, _h)))
+			if (ImGui::Button("RELOAD", ImVec2(_w50, _h)))
+			{
+				loadPreset(PRESETS_Selected_Index[GuiGROUP_Selected_Index], GuiGROUP_Selected_Index);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("SAVE", ImVec2(_w50, _h)))
 			{
 				savePreset(PRESETS_Selected_Index[GuiGROUP_Selected_Index], GuiGROUP_Selected_Index);
 			}
-			ImGui::Dummy(ImVec2(0, 2));
+			//ImGui::Dummy(ImVec2(0, 2));
 		}
 
 		//-
@@ -3582,17 +3587,18 @@ void ofxPresetsManager::gui_MainPanel()
 		}
 		ImGui::PopButtonRepeat();
 
-		//ImGui::Dummy(ImVec2(0, 2));
+		ImGui::Dummy(ImVec2(0, 2));
 
 		ofxSurfingHelpers::AddBigToggle(SHOW_Panels, _w100, _h);
+
 		ImGui::Dummy(ImVec2(0, 2));
 
 		//--
 
-#ifdef INCLUDE_ofxSurfingRandomizer
-		//ofxSurfingHelpers::AddBigToggle(dataRandomizer.bGui, _w100, _h);
-		ImGui::Dummy(ImVec2(0.f, 2.f));
-#endif
+//#ifdef INCLUDE_ofxSurfingRandomizer
+//		//ofxSurfingHelpers::AddBigToggle(dataRandomizer.bGui, _w100, _h);
+//		ImGui::Dummy(ImVec2(0.f, 2.f));
+//#endif
 
 		//--
 
@@ -3746,7 +3752,7 @@ void ofxPresetsManager::gui_MainPanel()
 				if (ImGui::Button("Clear", ImVec2(_w50, _h / 2)))
 				{
 					doClearUndoHistory();
-				}
+			}
 				//ImGui::SameLine();
 
 				if (ImGui::Button("Undo", ImVec2(_w50, _h / 2)))
@@ -3758,7 +3764,7 @@ void ofxPresetsManager::gui_MainPanel()
 				{
 					doRedo();
 				}
-			}
+		}
 	}
 #endif
 
@@ -4920,8 +4926,8 @@ void ofxPresetsManager::doRefreshUndoParams() {
 		//str += undoStringParams.getUndoStateDescriptor() + "\n";
 
 		ofLogNotice(__FUNCTION__) << str;
-	}
-}
+			}
+		}
 
 #endif
 
