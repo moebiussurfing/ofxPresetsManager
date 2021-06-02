@@ -3357,7 +3357,9 @@ void ofxPresetsManager::gui_Panels()
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
-
+	bool bOpen ;
+	ImGuiWindowFlags _flagw;
+		
 	float _spcx;
 	float _spcy;
 	float _w100;
@@ -3402,7 +3404,9 @@ void ofxPresetsManager::gui_Panels()
 
 #ifdef INCLUDE_ofxSurfingTween
 			ImGui::Indent();
-			if (ImGui::CollapsingHeader("TWEENER"))
+			bOpen = true;
+			_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
+			if (ImGui::CollapsingHeader("TWEENER", _flagw))
 			{
 				ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
@@ -3417,7 +3421,9 @@ void ofxPresetsManager::gui_Panels()
 			//-
 
 			ImGui::Indent();
-			if (ImGui::CollapsingHeader("PLAYER"))
+			bOpen = true;
+			_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
+			if (ImGui::CollapsingHeader("PLAYER", _flagw))
 			{
 				ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
@@ -3440,7 +3446,9 @@ void ofxPresetsManager::gui_Panels()
 			//-
 
 			ImGui::Indent();
-			if (ImGui::CollapsingHeader("RANDOMIZERS"))
+			bOpen = true;
+			_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
+			if (ImGui::CollapsingHeader("RANDOMIZERS", _flagw))
 			{
 				ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
@@ -3464,7 +3472,9 @@ void ofxPresetsManager::gui_Panels()
 			//flagsTree = ImGuiTreeNodeFlags_Framed;
 			//if (ImGui::TreeNodeEx("EXTRA", flagsTree))
 			ImGui::Indent();
-			if (ImGui::CollapsingHeader("EXTRA"))
+			bOpen = false;
+			_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
+			if (ImGui::CollapsingHeader("EXTRA", _flagw))
 			{
 				ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
