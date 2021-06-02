@@ -13,9 +13,9 @@
 #include "ofxSurfing_ImGuiBundle.h"
 //#include "ofxImGui.h"
 
-#ifdef INCLUDE_ofxSurfingRandomizer
-#include "ofxSurfingRandomizer.h"
-#endif
+//#ifdef INCLUDE_ofxSurfingRandomizer
+//#include "ofxSurfingRandomizer.h"
+//#endif
 
 //#define BUTTON_BIG_HEIGHT 30
 //#define PANEL_WIDGETS_WIDTH 225
@@ -25,12 +25,12 @@ class groupRandomizer
 {
 
 
-#ifdef INCLUDE_ofxSurfingRandomizer
-private:
-//protected:
-//public:
-	ofxSurfingRandomizer randomizer;
-#endif
+//#ifdef INCLUDE_ofxSurfingRandomizer
+//private:
+////protected:
+////public:
+//	ofxSurfingRandomizer randomizer;
+//#endif
 
 public:
 	groupRandomizer();
@@ -78,7 +78,7 @@ public:
 	void gui_RandomizersMain();
 	void gui_RandomizerIndex();
 	void gui_RandomizerParams();
-	//ofParameter<bool> SHOW_Panel_RandomizerIndex;
+	//ofParameter<bool> SHOW_Panel_EditPlayer;
 	//ofParameter<bool> SHOW_Panel_RandomizerParams;
 	
 	//-

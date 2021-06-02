@@ -117,9 +117,9 @@ ofxPresetsManager::ofxPresetsManager()
 	SHOW_Panel_AllParameters.set("SHOW PARAMETERS", false);
 	SHOW_Panel_AllSelectors.set("SHOW SELECTORS", false);
 	SHOW_Panel_Standalones.set("SHOW STANDALONES", false);
-	SHOW_Panel_Randomizer.set("SHOW RANDOMIZERS", false);
-	SHOW_Panel_RandomizerIndex.set("RANDOM INDEX", false);
-	SHOW_Panel_RandomizerParams.set("RANDOM PARAMS", false);
+	SHOW_Panel_Player.set("SHOW PLAYERS", false);
+	SHOW_Panel_EditPlayer.set("EDIT PLAYER", false);
+	//SHOW_Panel_RandomizerParams.set("RANDOM PARAMS", false);
 
 	SHOW_Panels.set("SHOW PANELS", true);
 	SHOW_Help.set("SHOW HELP", false);
@@ -183,9 +183,9 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.add(SHOW_Panel_AllSelectors);
 	params_Gui.add(SHOW_Panel_Click);
 	params_Gui.add(SHOW_Panel_Standalones);
-	params_Gui.add(SHOW_Panel_Randomizer);
-	params_Gui.add(SHOW_Panel_RandomizerIndex);
-	params_Gui.add(SHOW_Panel_RandomizerParams);
+	params_Gui.add(SHOW_Panel_Player);
+	params_Gui.add(SHOW_Panel_EditPlayer);
+	//params_Gui.add(SHOW_Panel_RandomizerParams);
 	params_Gui.add(SHOW_ImGui);
 	params_Gui.add(SHOW_ImGui_PresetsParams);
 	params_Gui.add(ENABLE_Keys);
@@ -419,7 +419,8 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		//----
 
 		// user gui selector
-		bSHOW_allGroups.set("Show All", false);
+		bSHOW_allGroups.set("SHOW ALL", false);
+
 		//bSHOW_allGroups.setSerializable(false);
 
 		GuiGROUP_Selected_Index.set("GROUP SELECT", 0, 0, groups.size() - 1);
@@ -482,6 +483,8 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 			smoother.setup(params_Smooth);
 		}
 #endif
+
+		//----
 	}
 
 	params_UserKitSettings.add(GuiGROUP_Selected_Index);
@@ -516,29 +519,78 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	//for (int i = 0; i < groupRandomizers.size(); i++)
 	//{
-	//	groupRandomizers[i].SHOW_Panel_RandomizerIndex.makeReferenceTo(SHOW_Panel_RandomizerIndex);
+	//	groupRandomizers[i].SHOW_Panel_EditPlayer.makeReferenceTo(SHOW_Panel_EditPlayer);
 	//	groupRandomizers[i].SHOW_Panel_RandomizerParams.makeReferenceTo(SHOW_Panel_RandomizerParams);
 	//
-	//	//SHOW_Panel_RandomizerIndex.makeReferenceTo(groupRandomizers[i].SHOW_Panel_RandomizerIndex);
+	//	//SHOW_Panel_EditPlayer.makeReferenceTo(groupRandomizers[i].SHOW_Panel_EditPlayer);
 	//	//SHOW_Panel_RandomizerParams.makeReferenceTo(groupRandomizers[i].SHOW_Panel_RandomizerParams);
 	//}
 
-	//----
 
-	// randomizer
-#ifdef INCLUDE_ofxSurfingRandomizer
-	//params_Randomizator.setName("Randomizator");
-	//for (int i = 0; i < groups.size() - 1; i++)
-	//{
-	//	params_Randomizator.add(groups[i]);
-	//}
-	//randomizer.setup(params_Randomizator);
-	randomizer.setup(groups[0]);
-#endif
+	//----------------
+
+	// SURFING ENGINES
+	setupEngines();
 
 	//----
 
 	startup();
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::setupEngines() {
+
+	//----
+
+	// RANDOMIZER
+
+#ifdef INCLUDE_ofxSurfingRandomizer
+	params_Randomizator.setName("Parameters_RANDOMiZER");
+	if (groups.size() == 1)
+	{
+		params_Randomizator.add(groups[0]);
+		dataRandomizer.setup(params_Randomizator);
+	}
+	else
+	{
+		int prelast = 0;
+		if (bAllowGroupSelector) prelast = groups.size() - 1;
+		else  prelast = groups.size();
+
+		for (int i = 0; i < prelast; i++)//exclude last GLOBAL_GROUP
+		{
+			params_Randomizator.add(groups[i]);
+		}
+		dataRandomizer.setup(params_Randomizator);
+	}
+#endif
+
+	//----
+
+	// TWEENER
+
+#ifdef INCLUDE_ofxSurfingTween
+	params_Tween.setName("Parameters");
+	if (groups.size() == 1)
+	{
+		params_Tween.add(groups[0]);
+		dataTween.setup(params_Tween);
+	}
+	else
+	{
+		int prelast = 0;
+		if (bAllowGroupSelector) prelast = groups.size() - 1;
+		else  prelast = groups.size();
+
+		for (int i = 0; i < prelast; i++)//exclude last GLOBAL_GROUP
+		{
+			params_Tween.add(groups[i]);
+		}
+		dataTween.setup(params_Tween);
+	}
+#endif
+
+	//----
 }
 
 //--------------------------------------------------------------
@@ -742,6 +794,16 @@ void ofxPresetsManager::update(ofEventArgs & args)
 		//	//auto save timer
 		//	timerLast_Autosave = ofGetElapsedTimeMillis();
 		//}
+
+		//--
+
+		// tweener
+#ifdef INCLUDE_ofxSurfingTween
+		if (isDoneLoad()) {
+			dataTween.doGo();
+		}
+#endif
+
 	}
 }
 
@@ -1768,6 +1830,15 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				;
 		}
 
+		//--
+
+		// tweener
+#ifdef INCLUDE_ofxSurfingTween
+		//dataTween.keyPressed(key);
+#endif
+
+		//--
+
 		// TODO: TEST: to force disable engine
 		//bImGui_mouseOver = false;
 
@@ -1885,7 +1956,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				{
 					doStoreUndo();
 				}
-		}
+			}
 #endif
 
 			//----
@@ -1954,7 +2025,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 					}
 				}
 			}
-	}
+		}
 
 		//--
 
@@ -1963,12 +2034,14 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//{
 		groupRandomizers[GuiGROUP_Selected_Index].keyPressed(key);
 
+		//--
+
 		//	// workflow
 		//	// workaround
 		//	if (key == 'R')
 		//		doStoreUndo();
 		//}
-}
+	}
 }
 
 //--------------------------------------------------------------
@@ -2454,6 +2527,14 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 			}
 
 			if (!MODE_Editor) MODE_EditPresetClicker = false;
+
+			//-
+
+			// workflow
+//#ifdef INCLUDE_ofxSurfingTween
+//			dataTween.setLiveEditMode(MODE_Editor);
+//#endif
+
 		}
 
 		//-
@@ -2728,12 +2809,12 @@ void ofxPresetsManager::saveAllKitFromMemory()
 			if (!b) ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets > " << _path;
 #endif
 #endif
-	}
+		}
 		else {
 			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
-}
+	}
 
 	// debug params
 	if (true)
@@ -2746,7 +2827,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 #ifdef USE_JSON
 #endif
 #endif
-	}
+		}
 	}
 }
 
@@ -2822,8 +2903,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
+		}
 	}
-}
 }
 
 ////--------------------------------------------------------------
@@ -3042,6 +3123,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 		//-
 
+		/*
 		// extra window
 		// groups selectors
 		// only when more than one group!
@@ -3050,26 +3132,27 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		// hide this panels when no more than one group! it's for multi groups
 		if (groups.size() > 1)
 		{
-			if (SHOW_Panel_Randomizer)
+			if (SHOW_Panel_Player)
 			{
-				if (ofxImGui::BeginWindow("Randomizers Selector", settings, flagsw))
+				//if (ofxImGui::BeginWindow("Randomizers Selector", settings, flagsw))
+				if (ofxImGui::BeginWindow("PLAYER SELECTOR", settings, flagsw))
 				{
 					ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
 					std::string str;
 
-					ImGui::Dummy(ImVec2(0, 5));
+					//ImGui::Dummy(ImVec2(0, 5));
 
 					// 1. selected group
-					str = "Selected Group:";
+					str = "Group:";
 					ImGui::Text(str.c_str());
 					if (bBuildGroupSelector) {
 						ImGui::PushItemWidth(_w50);
 						ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
 						ImGui::PopItemWidth();
 					}
-					str = "Group Name:";
-					ImGui::Text(str.c_str());
+					//str = "Group Name:";
+					//ImGui::Text(str.c_str());
 					str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
 					ImGui::Text(str.c_str());
 
@@ -3079,8 +3162,8 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 					// 2. main group link selector
 
-					str = "Global Group:";
-					ImGui::Text(str.c_str());
+					//str = "Global Group:";
+					//ImGui::Text(str.c_str());
 					if (bBuildGroupSelector) {
 						ImGui::PushItemWidth(_w50);
 						ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);// last group is the main link group
@@ -3090,11 +3173,13 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 					ImGui::Dummy(ImVec2(0, 2));
 
 					// selector to show their randomizers
-					ofxImGui::AddParameter(bSHOW_allGroups);
+					//ofxImGui::AddParameter(bSHOW_allGroups);
+					ofxSurfingHelpers::AddBigToggle(bSHOW_allGroups, _w100, _h / 2);
 				}
 				ofxImGui::EndWindow(settings);
 			}
 		}
+		*/
 
 		//-
 
@@ -3112,6 +3197,12 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 		// standalone presets browser
 		if (SHOW_Panel_Standalones) gui_Standalones();
+
+		//--
+
+#ifdef INCLUDE_ofxSurfingRandomizer
+		dataRandomizer.drawImGuiWidgets();
+#endif
 	}
 
 	return bLockMouseByImGui.get();
@@ -3162,8 +3253,11 @@ void ofxPresetsManager::gui_Parameters()
 		// 1. each group parameters
 		for (int i = 0; i < groups.size(); i++)
 		{
-			ImGui::Separator();
-			ImGui::Dummy(ImVec2(0, 5));
+			if (groups.size() > 1)
+			{
+				ImGui::Separator();
+				ImGui::Dummy(ImVec2(0, 5));
+			}
 
 			bool bLast = (i == groups.size() - 1);
 
@@ -3174,7 +3268,7 @@ void ofxPresetsManager::gui_Parameters()
 
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
 			flags |= ImGuiTreeNodeFlags_Framed;
-			if (!bLast) flags |= ImGuiTreeNodeFlags_DefaultOpen;
+			if (!bLast || groups.size() >= 1) flags |= ImGuiTreeNodeFlags_DefaultOpen;
 
 			//if (bLast) {
 			//	ImGui::Separator();
@@ -3186,9 +3280,12 @@ void ofxPresetsManager::gui_Parameters()
 			if (!bLast) ImGui::Dummy(ImVec2(0, 5));
 		}
 
-		ImGui::Dummy(ImVec2(0, 5));
 
 		//--
+
+		/*
+
+		ImGui::Dummy(ImVec2(0, 5));
 
 		// 2. tools
 
@@ -3219,13 +3316,14 @@ void ofxPresetsManager::gui_Parameters()
 
 			if (groups.size() > 1) {
 				ImGui::Dummy(ImVec2(0, 2));
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Randomizer, _w100, _h / 2);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Player, _w100, _h / 2);
 			}
 
 			ImGui::Dummy(ImVec2(0, 2));
 
 			ImGui::Checkbox("Auto-Resize", &auto_resize);
 		}
+		*/
 
 		//-
 
@@ -3242,7 +3340,7 @@ void ofxPresetsManager::gui_Selectors()
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
-	if (ofxImGui::BeginWindow("Selectors", settings, flagsw))
+	if (ofxImGui::BeginWindow("SELECTORS", settings, flagsw))
 	{
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
 		flags |= ImGuiTreeNodeFlags_DefaultOpen;
@@ -3283,24 +3381,78 @@ void ofxPresetsManager::gui_Panels()
 
 		// 4. panels
 
-			//if (ImGui::CollapsingHeader("PANELS"))
+		//if (ImGui::CollapsingHeader("PANELS"))
 		{
 			ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 			_hh = _h;
-			//_hh = _h / 2;
 
 			ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Click, _w100, _hh);
 			ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllParameters, _w100, _hh);
+			ImGui::Dummy(ImVec2(0, 2));
+
+			//-
+
+			// SURFING ENGINES
+
+#ifdef INCLUDE_ofxSurfingSmooth
+			ofxSurfingHelpers::AddBigToggle(smoother.bGui, _w100, _hh);
+#endif
+
+			//-
+
+#ifdef INCLUDE_ofxSurfingTween
+			ImGui::Indent();
+			if (ImGui::CollapsingHeader("TWEENER"))
+			{
+				ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
+
+				ofxSurfingHelpers::AddBigToggle(dataTween.bGui, _w100, _hh);
+				ofxSurfingHelpers::AddBigToggle(dataTween.enableTween, _w100, _hh / 2);
+				ofxSurfingHelpers::AddBigToggle(dataTween.enableLiveMode, _w100, _hh / 2);
+				ImGui::Dummy(ImVec2(0, 2));
+			}
+			ImGui::Unindent();
+#endif
+
+			//-
+
+			ImGui::Indent();
+			if (ImGui::CollapsingHeader("PLAYER"))
+			{
+				ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
+
+				if (groups.size() >= 1)
+				{
+					ImGui::Dummy(ImVec2(0, 2));
+					ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Player, _w100, _hh);
+				}
+
+				//ofxSurfingHelpers::AddBigToggle(SHOW_Panel_EditPlayer, _w100, _hh / 2); //ImGui::SameLine();
+				////ofxSurfingHelpers::AddBigToggle(SHOW_Panel_RandomizerParams, _w100, _hh);
+				//ImGui::Dummy(ImVec2(0.f, 2.f));
+				//ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Player, _w100, _h / 2);
+
+				// selector to show their randomizers
+				ofxSurfingHelpers::AddBigToggle(bSHOW_allGroups, _w100, _h / 2);
+			}
+			ImGui::Unindent();
+
+			//-
 
 			ImGui::Indent();
 			if (ImGui::CollapsingHeader("RANDOMIZERS"))
 			{
 				ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
-				if (groups.size() > 1) {
-					ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Randomizer, _w100, _hh);
-				}
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_RandomizerIndex, _w100, _hh); //ImGui::SameLine();
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_RandomizerParams, _w100, _hh);
+
+#ifdef INCLUDE_ofxSurfingRandomizer
+				//ImGui::Dummy(ImVec2(0.f, 2.f));
+				ofxSurfingHelpers::AddBigToggle(dataRandomizer.bGui, _w100, _h);
+				//ofxSurfingHelpers::AddBigToggle(dataRandomizer.bParams, _w50, _h / 2);
+				//ImGui::SameLine();
+				//ofxSurfingHelpers::AddBigToggle(dataRandomizer.bEditor, _w50, _h / 2);
+				ofxSurfingHelpers::AddBigToggle(dataRandomizer.bEditor, _w100, _h / 2);
+#endif
+				ImGui::Dummy(ImVec2(0.f, 2.f));
 			}
 			ImGui::Unindent();
 
@@ -3315,17 +3467,11 @@ void ofxPresetsManager::gui_Panels()
 			if (ImGui::CollapsingHeader("EXTRA"))
 			{
 				ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
-				_hh = _h;
 
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllSelectors, _w100, _hh);
-				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Standalones, _w100, _hh);
-
-#ifdef INCLUDE_ofxSurfingSmooth
-				ofxSurfingHelpers::AddBigToggle(smoother.bGui, _w100, _hh);
-#endif
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_AllSelectors, _w100, _h / 2);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Standalones, _w100, _h / 2);
 				ImGui::Dummy(ImVec2(0, 2));
-
-				ofxSurfingHelpers::AddBigToggle(SHOW_Help, _w100, _hh / 2);
+				ofxSurfingHelpers::AddBigToggle(SHOW_Help, _w100, _h / 2);
 
 				//ImGui::TreePop();
 			}
@@ -3360,7 +3506,7 @@ void ofxPresetsManager::gui_MainPanel()
 
 	//ofxImGui::Settings settings;
 
-	if (ofxImGui::BeginWindow("Main Panel", settings, flagsw))
+	if (ofxImGui::BeginWindow("MAIN PANEL", settings, flagsw))
 	{
 		ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
@@ -3383,8 +3529,6 @@ void ofxPresetsManager::gui_MainPanel()
 		//TODO:
 		int ig = GuiGROUP_Selected_Index.get();
 		int ip = PRESETS_Selected_Index[ig];
-		str = "Preset " + ofToString(ip) + "/" + ofToString(keys[ig].size() - 1);
-		ImGui::Text(str.c_str());
 		if (groups.size() > 1) {
 			str = "Group  " + ofToString(ig) + "/" + ofToString(groups.size() - 1);
 			ImGui::Text(str.c_str());
@@ -3392,6 +3536,9 @@ void ofxPresetsManager::gui_MainPanel()
 		//ImGui::SameLine();
 		// name of selected group
 		str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
+		ImGui::Text(str.c_str());
+
+		str = "Preset " + ofToString(ip) + "/" + ofToString(keys[ig].size() - 1);
 		ImGui::Text(str.c_str());
 
 		ImGui::Dummy(ImVec2(0, 5));
@@ -3403,36 +3550,47 @@ void ofxPresetsManager::gui_MainPanel()
 		ofxSurfingHelpers::AddBigToggleNamed(MODE_Editor, _w100, 2 * _h, "EDIT MODE", "LIVE MODE");
 		//ofxSurfingHelpers::AddBigToggle(MODE_Editor, _w100, 2 * _h);
 
+		// SAVE
+		if (!MODE_Editor)
+		{
+			if (ImGui::Button("SAVE", ImVec2(_w100, _h)))
+			{
+				savePreset(PRESETS_Selected_Index[GuiGROUP_Selected_Index], GuiGROUP_Selected_Index);
+			}
+			ImGui::Dummy(ImVec2(0, 2));
+		}
+
 		//-
 
-		ImGui::Dummy(ImVec2(0, 2));
+		//ImGui::Dummy(ImVec2(0, 2));
 
 		// 1.2 next / previous
 
 		ImGui::PushButtonRepeat(true);
 		{
-			if (ImGui::Button("<", ImVec2(_w50, _h)))
+			if (ImGui::Button("<", ImVec2(_w50, _h / 2)))
 			{
 				int ig = GuiGROUP_Selected_Index.get();
 				load_Previous(ig, true);
 			}
 			ImGui::SameLine();
-			if (ImGui::Button(">", ImVec2(_w50, _h)))
+			if (ImGui::Button(">", ImVec2(_w50, _h / 2)))
 			{
 				int ig = GuiGROUP_Selected_Index.get();
 				load_Next(ig, true);
 			}
 		}
 		ImGui::PopButtonRepeat();
-		ImGui::Dummy(ImVec2(0, 2));
+
+		//ImGui::Dummy(ImVec2(0, 2));
 
 		ofxSurfingHelpers::AddBigToggle(SHOW_Panels, _w100, _h);
 		ImGui::Dummy(ImVec2(0, 2));
-		
+
 		//--
 
 #ifdef INCLUDE_ofxSurfingRandomizer
-		ofxSurfingHelpers::AddBigToggle(randomizer.bGui, _w100, _h);
+		//ofxSurfingHelpers::AddBigToggle(dataRandomizer.bGui, _w100, _h);
 		ImGui::Dummy(ImVec2(0.f, 2.f));
 #endif
 
@@ -3440,19 +3598,59 @@ void ofxPresetsManager::gui_MainPanel()
 
 		// 2. selectors sliders
 
-		if (ImGui::CollapsingHeader("SELECTORS"))
+		if (ImGui::CollapsingHeader("SELECTOR"))
 		{
 			ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
 			//multi groups ?
 			//if (bBuildGroupSelector) 
 			{
+				// 1. selected group
+				str = "Group:";
+				ImGui::Text(str.c_str());
+				if (bBuildGroupSelector) {
+					ImGui::PushItemWidth(_w50);
+					ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
+					ImGui::PopItemWidth();
+				}
+				//str = "Group Name:";
+				//ImGui::Text(str.c_str());
+				str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
+				ImGui::Text(str.c_str());
+
+				//-
+
 				ImGui::PushItemWidth(_w50);
+				ImGui::Dummy(ImVec2(0, 2));
+
+				//if (groups.size() > 1) {
+				//	ImGui::Text("Group:");
+				//	ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
+				//}
+
 				ImGui::Text("Preset:");
 				ofxImGui::AddParameter(PRESETS_Selected_Index[GuiGROUP_Selected_Index]);
-				ImGui::Text("Group:");
-				ofxImGui::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
+				ImGui::Dummy(ImVec2(0, 2));
+
+				//// 2. main group link selector
+				//str = "Global Group:";
+				//ImGui::Text(str.c_str());
+				//if (bBuildGroupSelector) {
+				//	ImGui::PushItemWidth(_w50);
+				//	ofxImGui::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);// last group is the main link group
+				//	ImGui::PopItemWidth();
+				//	ImGui::Dummy(ImVec2(0, 2));
+				//}
+
 				ImGui::PopItemWidth();
+
+				//ImGui::Dummy(ImVec2(0, 2));
+
+				//ofxSurfingHelpers::AddBigToggle(SHOW_Panel_Player, _w100, _h / 2);
+
+				//// selector to show their randomizers
+				//ofxSurfingHelpers::AddBigToggle(bSHOW_allGroups, _w100, _h / 2);
+				ImGui::Dummy(ImVec2(0, 2));
 			}
 		}
 
@@ -3507,6 +3705,7 @@ void ofxPresetsManager::gui_MainPanel()
 
 			for (int i = 0; i < groupRandomizers.size(); i++)
 			{
+				ImGui::PushID(i);
 				string s = groups[i].getName();
 				ImGui::Text(s.c_str());
 
@@ -3520,6 +3719,7 @@ void ofxPresetsManager::gui_MainPanel()
 				if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
 				ofxSurfingHelpers::AddBigToggle(groupRandomizers[i].PLAY_RandomizeTimer, _w100, _h / 2, false);
 				if (b) ImGui::PopStyleColor();
+				ImGui::PopID();
 			}
 		}
 
@@ -3593,7 +3793,7 @@ void ofxPresetsManager::gui_MainPanel()
 	//crash
 	//ImGui::PopStyleColor();
 	//ImGui::PopStyleColor();
-	}
+}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::gui_Advanced()
@@ -4344,13 +4544,13 @@ void ofxPresetsManager::gui_Standalones()
 //--------------------------------------------------------------
 void ofxPresetsManager::gui_Randomizers()
 {
-	if (!SHOW_Panel_RandomizerIndex && !SHOW_Panel_RandomizerParams && !SHOW_Panel_Randomizer) { return; }
+	if (!SHOW_Panel_EditPlayer && !SHOW_Panel_RandomizerParams && !SHOW_Panel_Player) { return; }
 
 	//--
 
 	// this panel will show the settings for the selected by user group (GuiGROUP_Selected_Index)
 
-	//if (SHOW_Panel_Randomizer)
+	//if (SHOW_Panel_Player)
 	{
 		if (GuiGROUP_Selected_Index > groupRandomizers.size() - 1) {
 			return;
@@ -4365,22 +4565,22 @@ void ofxPresetsManager::gui_Randomizers()
 		{
 			for (int i = 0; i < groupRandomizers.size(); i++)
 			{
-				if (SHOW_Panel_Randomizer) groupRandomizers[i].gui_RandomizersMain();
+				if (SHOW_Panel_Player) groupRandomizers[i].gui_RandomizersMain();
 
-				if (SHOW_Panel_RandomizerIndex) groupRandomizers[i].gui_RandomizerIndex();
+				if (SHOW_Panel_EditPlayer) groupRandomizers[i].gui_RandomizerIndex();
 
-				if (SHOW_Panel_RandomizerParams) groupRandomizers[i].gui_RandomizerParams();
+				//if (SHOW_Panel_RandomizerParams) groupRandomizers[i].gui_RandomizerParams();
 			}
 		}
 
 		// only selected
 		else
 		{
-			if (SHOW_Panel_Randomizer) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizersMain();
+			if (SHOW_Panel_Player) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizersMain();
 
-			if (SHOW_Panel_RandomizerIndex) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizerIndex();
+			if (SHOW_Panel_EditPlayer) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizerIndex();
 
-			if (SHOW_Panel_RandomizerParams) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizerParams();
+			//if (SHOW_Panel_RandomizerParams) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizerParams();
 		}
 	}
 }

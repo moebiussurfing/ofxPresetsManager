@@ -62,10 +62,10 @@ void groupRandomizer::setup(ofParameterGroup &_group, int _numPresets) {
 
 	//----
 	
-	// randomizer
-#ifdef INCLUDE_ofxSurfingRandomizer
-	randomizer.setup(_group);
-#endif
+//	// randomizer
+//#ifdef INCLUDE_ofxSurfingRandomizer
+//	randomizer.setup(_group);
+//#endif
 
 	//----
 
@@ -1074,7 +1074,7 @@ void groupRandomizer::gui_RandomizerIndex()
 	float hh = 50;
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(ww, hh));
 
-	if (ofxImGui::BeginWindow("EDITOR A", settings, flagsw))
+	if (ofxImGui::BeginWindow("EDIT PLAYER", settings, flagsw))
 	{
 		//float _spcx = ImGui::GetStyle().ItemSpacing.x;
 		//float _spcy = ImGui::GetStyle().ItemSpacing.y;
@@ -1101,56 +1101,56 @@ void groupRandomizer::gui_RandomizerIndex()
 //--------------------------------------------------------------
 void groupRandomizer::gui_RandomizerParams()
 {
-	static bool auto_resize = true;
-	ImGuiWindowFlags flagsw;
-	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
-
-	float ww = PANEL_WIDGETS_WIDTH;
-	float hh = 50;
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(ww, hh));
-
-	if (ofxImGui::BeginWindow("EDITOR B", settings, flagsw))
-	{
-		float _spcx;
-		float _spcy;
-		float _w100;
-		float _h100;
-		float _w99;
-		float _w50;
-		float _w33;
-		float _w25;
-		float _h;
-		ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
-
-		//--
-
-#ifdef INCLUDE_ofxSurfingRandomizer
-		ofxSurfingHelpers::AddBigToggle(randomizer.bGui, _w100, _h);
-		
-		ImGui::Dummy(ImVec2(0.f, 2.f));
-#endif
-
-		//--
-
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
-		flags |= ImGuiTreeNodeFlags_DefaultOpen;
-		ofxImGui::AddGroup(params_RandomizersFiltered, flags);
-		//ofxImGui::AddGroup(params_RandomizersFiltered, settings);
-
-		//--
-
-		//ImGui::Dummy(ImVec2(0.f, 2.f));
-		//ImGui::Separator();
-		//ImGui::Dummy(ImVec2(0.f, 2.f));
-
-		//--
-
-		//ofxImGui::AddGroup(params_RandomizersPowered, settings);
-
-	}
-	ofxImGui::EndWindow(settings);
-
-	ImGui::PopStyleVar();
+//	static bool auto_resize = true;
+//	ImGuiWindowFlags flagsw;
+//	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
+//
+//	float ww = PANEL_WIDGETS_WIDTH;
+//	float hh = 50;
+//	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(ww, hh));
+//
+//	if (ofxImGui::BeginWindow("EDITOR B", settings, flagsw))
+//	{
+//		float _spcx;
+//		float _spcy;
+//		float _w100;
+//		float _h100;
+//		float _w99;
+//		float _w50;
+//		float _w33;
+//		float _w25;
+//		float _h;
+//		ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
+//
+//		//--
+////
+////#ifdef INCLUDE_ofxSurfingRandomizer
+////		ofxSurfingHelpers::AddBigToggle(randomizer.bGui, _w100, _h);
+////		
+////		ImGui::Dummy(ImVec2(0.f, 2.f));
+////#endif
+//
+//		//--
+//
+//		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
+//		flags |= ImGuiTreeNodeFlags_DefaultOpen;
+//		ofxImGui::AddGroup(params_RandomizersFiltered, flags);
+//		//ofxImGui::AddGroup(params_RandomizersFiltered, settings);
+//
+//		//--
+//
+//		//ImGui::Dummy(ImVec2(0.f, 2.f));
+//		//ImGui::Separator();
+//		//ImGui::Dummy(ImVec2(0.f, 2.f));
+//
+//		//--
+//
+//		//ofxImGui::AddGroup(params_RandomizersPowered, settings);
+//
+//	}
+//	ofxImGui::EndWindow(settings);
+//
+//	ImGui::PopStyleVar();
 }
 
 //--------------------------------------------------------------
@@ -1192,7 +1192,7 @@ void groupRandomizer::gui_RandomizersMain()
 		//str = "  Group    " + group.getName();
 		//ImGui::Text(str.c_str());
 
-		str = "Preset " + ofToString(PRESET_Selected_IndexMain.get());
+		str = "Preset: " + ofToString(PRESET_Selected_IndexMain.get());
 		ImGui::Text(str.c_str());
 
 		//ImGui::Dummy(ImVec2(0, 5));
@@ -1202,7 +1202,7 @@ void groupRandomizer::gui_RandomizersMain()
 		ImGui::PopItemWidth();
 
 		//ImGui::SameLine();
-		//ImGui::Dummy(ImVec2(0, 5));
+		ImGui::Dummy(ImVec2(0, 2));
 
 		//--
 
@@ -1291,7 +1291,7 @@ void groupRandomizer::gui_RandomizersMain()
 
 		//str = "RANDOMIZER";
 		//ImGui::Text(str.c_str());
-		ImGui::Dummy(ImVec2(0, 5));
+		ImGui::Dummy(ImVec2(0, 2));
 
 		// 1.0.1 play randomizer index
 
@@ -1328,10 +1328,13 @@ void groupRandomizer::gui_RandomizersMain()
 		//}
 
 		ImGui::PushItemWidth(_w50);
-		ofxImGui::AddParameter(randomizeDurationBpm);
+		ofxSurfingHelpers::AddDragFloatSlider(randomizeDurationBpm);
+		//ofxImGui::AddParameter(randomizeDurationBpm);
 		ImGui::PopItemWidth();
 
 		//-
+		
+		ImGui::Dummy(ImVec2(0, 2));
 
 		if (ImGui::Button("Reset", ImVec2(_w100, _h)))
 		{
@@ -1339,7 +1342,8 @@ void groupRandomizer::gui_RandomizersMain()
 		}
 
 		//--
-
+		
+		/*
 		if (MODE_Editor)
 		{
 			// 1.0.3 bang randomize
@@ -1355,6 +1359,7 @@ void groupRandomizer::gui_RandomizersMain()
 			//ofxSurfingHelpers::AddBigButton(bRandomizeFiltered, 2 * _h);
 			//ofxImGui::AddParameter(bRandomizeFiltered);// trig random current preset: will randomize all enabled toggle parameters
 		}
+		*/
 
 		//--
 
@@ -1409,7 +1414,7 @@ void groupRandomizer::gui_RandomizersMain()
 		*/
 
 		//ImGui::Dummy(ImVec2(0, 5));
-		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_RandomizerIndex, _w99, _h);
+		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_EditPlayer, _w99, _h);
 		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_RandomizerParams, _w99, _h);
 
 

@@ -4,7 +4,6 @@
 
 #include "ofxPresetsManager.h"
 #include "ofxWindowApp.h"
-//#include "ofxSurfingRandomizer.h"
 
 class ofApp : public ofBaseApp
 {
@@ -17,9 +16,9 @@ public:
 	// scene parameters 
 
 	// main group 1
-	ofParameterGroup params;
-	ofParameterGroup paramsNested1;
-	ofParameterGroup paramsNested2;
+	ofParameterGroup params1;
+	ofParameterGroup paramsNested11;
+	ofParameterGroup paramsNested12;
 	ofParameter<bool> fill;
 	ofParameter<float> lineWidth;
 	ofParameter<ofFloatColor> color;
@@ -40,7 +39,4 @@ public:
 	void setupScene();
 	
 	ofxWindowApp windowApp;
-
-	//ofxSurfingRandomizer randomizer;
-	//ofParameterGroup params_Randomizator;
 };

@@ -1,187 +1,41 @@
 
 /// ofxPresetsManager.h 
 ///
-/// ofxPresetsManager 
-/// by moebiusSurfing, 2020.
+// ofxPresetsManager 
+// by moebiusSurfing, 2019. 2020. 2021.
 ///
-/// this addon is based and inspired on the original ofxGuiPresetSelector addon 
+/// this add-on is based and inspired on the original ofxGuiPresetSelector addon 
 /// by Nicola Pisanti, MIT License, 2016
 /// https://github.com/npisanti/ofxGuiPresetSelector
+///
 /// added modifications and several new features.
 /// my idea is to allow use ofParameterGroup's as managed content instead of ofxGui's panels.
 
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//
-//	DOCUMENTATION
-//
-//	This is a very simple guide to use ofxPresetsManager.
-//
-//	* EXAMPLES
-//	1_example-Basic: simpler example using one group only
-//	2_example-MultiGroup: more complex example using several and independent groups.
-//
-//	* BASIC USAGE
-//	Here we will control ONE ofParameterGroup only, but the addon can handle more groups too!
-//
-//	0. init your scene and the related parameters / settings.
-//	1. add your parameters to the ofParameterGroup acting as the main container.
-//  2.0 optionally customize some settings if desired.
-//	2.1 add the container to the addon instantiatied class object. 
-//	2.2 you can define how many presets you want for the group, 
-//	and what keys to associate as triggers.
-//	3. done! just play with the addon gui. 
-//
-//	* Preset Files
-//		- There's one file for each preset (includes all settings/parameters). 
-//		files will be placed into /bin/data by default. but path can be customized, 
-//		mainly to share the same settings folder between apps.
-//		- When using multiple groups, each group has his own folder.
-//
-//	* Two Types of Presets
-//		- Favourites: the clickable-boxes/key-trigged presets
-//		- Standalones: the archived and named presets files that you can load from/to favoutires
-//
-//	* Two Modes
-//		- Edit mode: autosave when browsing bank presets, undo engine allowed, all gui panels visible or enabled.
-//		- Live mode: simpler gui and maybe better performance intended when no need to edit or see parameters.
-//
-//	* Several Features
-//		- Store standalone name presets to make variations and help your favourite banks organization.
-//		- Keys interaction can be disabled to avoid colliding with other addons/ofApp key commands.
-//		- Layout customization and 2 colors themes.
-//		- Randomization engine to allow more complex scenes, jumping between presets using different timers.
-//		- You don't need to use another gui like ofxGui: just ofParameters! Sometimes ImGui is enough.
-//		- Clone presets, move placing/sorting into your favourites.
-//		- All your favourite presets (left-right) from your groups (up-down) can be browsed using arrow keys.
-//		- Active group is marked with an '*' (when keys control are enabled).	
-//
-/////////////////////////////////////////////////////////////////////////////////////////
-
-
-/*
-
-### Other API useful methods
-
-```.cpp
-// Gui and workflow
-
-// customize preset clicker boxes:
-// ofApp::setup()
-presetsManager.setSizeBox_PresetClicker(45);
-presetsManager.setVisible_PresetClicker(bShow);
-presetsManager.setToggleVisible_PresetClicker();
-
-// disable key controlling to avoid colliding command keys:
-// ofApp::keyPressed()
-presetsManager.setToggleEnableKeys();
-presetsManager.setEnableKeys(bKeys);
-
-// disable the Group_Link auto creation by default: (when added multigroups)
-// ofApp::setup()
-presetsManager.setEnableGroupLinkSelector(false);// enabled by default
-// define how many presets we want for the Group_Link selector.
-// default amount is 10 presets.
-//presetsManager.setGroupLinkSize(2);
-
-// save by code current preset from an added group:
-// ofApp::keyPressed()
-presetsManager.saveCurrentPreset(params.getName());// by name
-presetsManager.saveCurrentPreset(0);// by index
-
-// customize path to allow using more kits/session presets:
-// it makes subfolders for multiple kits for all presets.
-// also allows using a custom path folder out of /bin/data/.
-// ie: to share the same preset files folder between different apps.
-// ofApp::setup()
-presetsManager.setPath_UserKit_Folder(path);
-```
-```.cpp
-// Callbacks
-
-// some ideas to handle callbacks if required:
-// this is useful when we want to know when an index preset selector changed.
-// ie: to update our scene if required more updating than the parameters itself.
-
-// A. an easier callback system that can not know wich group selector changed:
-// ofApp::update()
-if (presetsManager.isDoneLoad())
-{
-	ofLogNotice() <<
-		"DONE LOAD PRESET.
-		SOME GROUP HAVE CURRENTLY LOADED / CHANGED
-		TO ANOTHER PRESET INDEX";
-}
-
-// B. better callbacks system for all selectors, to know when a group selector changed:
-// Which group and which presets index selector changed.
-// ofApp::setup()
-for (int i = 0; i < presetsManager.PRESETS_Selected_Index.size(); i++)
-{
-	ofAddListener(presetsManager.getSelectorsGroup().parameterChangedE(),
-		this, &ofApp::Changed_PresetsManagerSelectors);
-}
-//--------------------------------------------------------------
-void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
-{
-	std::string name = e.getName();
-	ofLogNotice() <<
-		"THE SELECTOR FOR THE GROUP WITH NAME " << name <<
-		" CHANGED TO PRESET INDEX: " << e;
-	if (name == params.getName())
-	{
-		// the selector index of this group changed,
-		// then we know that the ofParameters of this ofParameterGroup changed,
-		// so maybe we want to update some stuff now,
-		// apart of the updated parameters.
-	}
-}
-```
-
-*/
-
 ///------
 
-///	TODO:
-///	
-/// +	ful width of presets boxes responsive
-///
-/// IDEAS:
-///	
-///	+++		open/save dialog to project User-Kit session in a single file.
-///				or allowed to all the groups?
-///	
-///	++		randomize editor preset
-///				preset mini engine. ABC dropdown list for randomizers
-///				could add also several randomizer settings presets. selectable by dropdown list..
-///				add limit range min/max to randomize
-///				do nesting toggles to improve view. create a group for related toggles..	
-///				clone using editor toggles to avoid clone disabled toggle params
-///				mode state to allow overwrite only enabled toggle params
-///	
-///	++		add populator engine to create all preset files if it's a new empty project
-///				add setter to enable some params to randomize
-///				call populate. disable debug_display red info
-///	
-///	++		lock (by toggle) params that we want to ignore on changing presets
-///				can be done enabling/disabling serializable for each param with a group of toggles
-///	
-///	++		performance: 
-///				restore-back memory_mode. (use xml objects into memory vs hd files) to extra groups too
-///	
-///	+		fix autosave timer. exclude log
-///	++		make a lite-minimal version compatible ! without ImGui, maybe with ofxGui or even without any GUI.
-///				add define to disable all browser/ImGui/randomize stuff to make addon minimal expression 
-///				or add simpler class but compatible with preset files kits
-///
-///	+		could make curved-tweens when changing params using ofLerp or ofxKeyTween/ofxAnimatable/ofxEasing...
-///
+//	TODO:
+//	
+// +	fix store box clicker. double click to edit. better letters positione on buttons
+// +	full width of presets boxes responsive
+// +	new edit mode: mark a param and when modifing current preset, save to all the oters and overwrite	
+// +	lite version with combo list. maybe without any gui
 
-///
-///	BUG:
-///
-///	+		first preset is overwritten on startup
-///
+// IDEAS:
+//	
+//	+++		open/save dialog to project User-Kit session in a single file.
+//				or allowed to all the groups?
+//	
+//	++		add populator engine to create all preset files if it's a new empty project
+//				add setter to enable some params to randomize
+//				call populate. disable debug_display red info
+//	
+//	++		lock (by toggle) params that we want to ignore on changing presets
+//				can be done enabling/disabling serializable for each param with a group of toggles
+//	
+//	++		performance: 
+//				restore-back memory_mode. (use xml objects into memory vs hd files) to extra groups too
+//	
+//	+		fix autosave timer. exclude log
 
 ///------
 
@@ -190,20 +44,39 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 
 #include "ofMain.h"
 
-//#include <iostream>
-//#include <memory>
 
-//--------------------------------------
+
+//-----------------------------------------------------------------------------------------------------------------
 //
 //	DEFINES
-//
-#define INCLUDE_ofxSurfingSmooth // smooth engine
 
-//TODO: not working
-//#define INCLUDE_ofxSurfingRandomizer // randomizer engine
+
+//-
+
+//	1. SURFING ENGINES
+
+//	Tween/Smooth transitions between presets
+//	We can enable only one of the three!
+//
+//	1.2 TWEEN 
+#define INCLUDE_ofxSurfingTween 
+//
+//	1.1 SMOOTH
+//#define INCLUDE_ofxSurfingSmooth 
+//
+//	1.3 RANDOMIZER
+#define INCLUDE_ofxSurfingRandomizer //TODO: not working
+
+//-
+
+//	2. EXTRA FEATURES
 
 //#define INCLUDE_ofxUndoSimple	// undo engine to store after randomize a preset or manually (to browse history states)
-//
+
+//-
+
+// 3. CUSTOMIZATION
+
 #define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT	// customize ImGui font
 //#define USE_IMGUI_EXTERNAL	// this is to group all ImGui panels into one unique instance in ofApp
 // currently there's a bug when using more than one single ofxImGui instance!
@@ -211,29 +84,41 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 //
 //#define USE_JSON	// set the file settings format (xml or json). already defined into ofxSurfingHelpers
 #define NUM_MAX_GROUPS 10
-//										   
-//-------
-//
-//	DEBUG									   
-//										   
+										   
+//-
+
+//	4. DEBUG
+										   
 //#define DEBUG_PERFORMANCE_MEASURES			// measure performance ofxTimeMeasurements. not using now. must restore!
 //#define DEBUG_randomTest						// uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
 //#define DEBUG_BLOCK_SAVE_SETTINGS				// disable save settings//enable this bc sometimes there's crashes on exit...
 //
-//--------------------------------------
+//
+//-----------------------------------------------------------------------------------------------------------------
 
-// this ImGui included (/lib) branch it's based on: https://github.com/MacFurax/ofxImGui/tree/docking
-// this branch allows docking, layout store/recall, some extra widgets.
-// my future plans are it's to switch to another branch that will support multi instances someday:
-// https://github.com/Daandelange/ofxImGui
-// this feature will allow that you use multiple ImGui instances running into different classes of your app.
-#include "ofxImGui.h"
-#include "imgui_internal.h" // <-- example uses some imgui internals...
 
 //--
 
+// extra c libs
+
+//#include <iostream>
+//#include <memory>
+
+//--
+
+#include "ofxImGui.h"
+#include "imgui_internal.h" // some imgui internals
+
+//--
+
+// SURFING ENGINES
+
 #ifdef INCLUDE_ofxSurfingSmooth
 #include "ofxSurfingSmooth.h"
+#endif
+
+#ifdef INCLUDE_ofxSurfingTween
+#include "ofxSurfingTween.h"
 #endif
 
 #ifdef INCLUDE_ofxSurfingRandomizer
@@ -269,27 +154,29 @@ void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
 
 //TODO:
 #define USE_IM_GUI
-#define USE_JSON		//uncomment to use default xml instead json for ofParameterGroup de/serializers
+#define USE_JSON //uncomment to use default xml instead json for ofParameterGroup de/serializers
 
 //-------------------------------
 
 class ofxPresetsManager : public ofBaseApp
 {
-	//--
+	//----
 
-#ifdef INCLUDE_ofxSurfingRandomizer
+	// SURFING ENGINES
+
+#ifdef INCLUDE_ofxSurfingTween
 public:
-//private:
-//protected:
-	ofxSurfingRandomizer randomizer;
-	ofParameterGroup params_Randomizator;
+	ofxSurfingTween dataTween;
+	ofParameterGroup params_Tween;
+	float get(ofParameter<float> param) { return dataTween.get(param); }
+	int get(ofParameter<int> param) { return dataTween.get(param); }
 #endif
 
 	//--
 
 #ifdef INCLUDE_ofxSurfingSmooth
-//private:
 public:
+//private:
 	ofxSurfingSmooth smoother;
 	ofParameterGroup params_Smooth{ "Smooth" };
 	float get(ofParameter<float> param) { return smoother.get(param); }
@@ -298,10 +185,21 @@ public:
 
 	//--
 
+#ifdef INCLUDE_ofxSurfingRandomizer
 public:
+//private:
+//protected:
+	ofxSurfingRandomizer dataRandomizer;
+	ofParameterGroup params_Randomizator;
+#endif
+
+	//----
+
+
+private:
 	ofParameter<bool> bLockMouseByImGui{ "Mouse Locked", false };//mouse is over gui
 
-
+public:
 	ofxPresetsManager();
 	~ofxPresetsManager();
 
@@ -347,6 +245,8 @@ public:
 	void startup();// must be called after setup (who is called after all group adds) to set initial states well
 
 	void doCheckPresetsFoldersAreEmpty();// used on startup. check if all favorites preset are present, and creates folders and content if not
+
+	void setupEngines();
 
 	//--
 
@@ -431,7 +331,7 @@ private:
 	bool bAllowGroupSelector = true;// to allow disable main group. not allways we need it..
 	int groupLinkSize = 10;// default ammount of presets we want to the group link
 public:
-	void setGroupLinkSize(int size) {// customize how many group link presets we want to create. must call before setup
+	void setGroupLinkSize(int size) {// customize how many group link presets we want to create. must be called before setup!
 		groupLinkSize = size;
 	}
 	void setEnableGroupLinkSelector(bool b) {// disable the use of main group selector. must call before setup. enabled by default
@@ -1197,8 +1097,8 @@ private:
 	ofParameter<bool> SHOW_Panel_Standalones;
 	ofParameter<bool> SHOW_Panel_AllParameters;
 	ofParameter<bool> SHOW_Panel_AllSelectors;
-	ofParameter<bool> SHOW_Panel_Randomizer;
-	ofParameter<bool> SHOW_Panel_RandomizerIndex;
+	ofParameter<bool> SHOW_Panel_Player;
+	ofParameter<bool> SHOW_Panel_EditPlayer;
 	ofParameter<bool> SHOW_Panel_RandomizerParams;
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
 	ofParameter<bool> SHOW_ImGui_Selectors;
@@ -1592,3 +1492,136 @@ public:
 		return b;
 	}
 };
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//	DOCUMENTATION
+//
+//	This is a very simple guide to use ofxPresetsManager.
+//
+//	* EXAMPLES
+//	1_example-Basic: simpler example using one group only
+//	2_example-MultiGroup: more complex example using several and independent groups.
+//
+//	* BASIC USAGE
+//	Here we will control ONE ofParameterGroup only, but the addon can handle more groups too!
+//
+//	0. init your scene and the related parameters / settings.
+//	1. add your parameters to the ofParameterGroup acting as the main container.
+//  2.0 optionally customize some settings if desired.
+//	2.1 add the container to the addon instantiatied class object. 
+//	2.2 you can define how many presets you want for the group, 
+//	and what keys to associate as triggers.
+//	3. done! just play with the addon gui. 
+//
+//	* Preset Files
+//		- There's one file for each preset (includes all settings/parameters). 
+//		files will be placed into /bin/data by default. but path can be customized, 
+//		mainly to share the same settings folder between apps.
+//		- When using multiple groups, each group has his own folder.
+//
+//	* Two Types of Presets
+//		- Favourites: the clickable-boxes/key-trigged presets
+//		- Standalones: the archived and named presets files that you can load from/to favoutires
+//
+//	* Two Modes
+//		- Edit mode: autosave when browsing bank presets, undo engine allowed, all gui panels visible or enabled.
+//		- Live mode: simpler gui and maybe better performance intended when no need to edit or see parameters.
+//
+//	* Several Features
+//		- Store standalone name presets to make variations and help your favourite banks organization.
+//		- Keys interaction can be disabled to avoid colliding with other addons/ofApp key commands.
+//		- Layout customization and 2 colors themes.
+//		- Randomization engine to allow more complex scenes, jumping between presets using different timers.
+//		- You don't need to use another gui like ofxGui: just ofParameters! Sometimes ImGui is enough.
+//		- Clone presets, move placing/sorting into your favourites.
+//		- All your favourite presets (left-right) from your groups (up-down) can be browsed using arrow keys.
+//		- Active group is marked with an '*' (when keys control are enabled).	
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
+/*
+
+### Other API useful methods
+
+```.cpp
+// Gui and workflow
+
+// customize preset clicker boxes:
+// ofApp::setup()
+presetsManager.setSizeBox_PresetClicker(45);
+presetsManager.setVisible_PresetClicker(bShow);
+presetsManager.setToggleVisible_PresetClicker();
+
+// disable key controlling to avoid colliding command keys:
+// ofApp::keyPressed()
+presetsManager.setToggleEnableKeys();
+presetsManager.setEnableKeys(bKeys);
+
+// disable the Group_Link auto creation by default: (when added multigroups)
+// ofApp::setup()
+presetsManager.setEnableGroupLinkSelector(false);// enabled by default
+// define how many presets we want for the Group_Link selector.
+// default amount is 10 presets.
+//presetsManager.setGroupLinkSize(2);
+
+// save by code current preset from an added group:
+// ofApp::keyPressed()
+presetsManager.saveCurrentPreset(params.getName());// by name
+presetsManager.saveCurrentPreset(0);// by index
+
+// customize path to allow using more kits/session presets:
+// it makes subfolders for multiple kits for all presets.
+// also allows using a custom path folder out of /bin/data/.
+// ie: to share the same preset files folder between different apps.
+// ofApp::setup()
+presetsManager.setPath_UserKit_Folder(path);
+```
+```.cpp
+// Callbacks
+
+// some ideas to handle callbacks if required:
+// this is useful when we want to know when an index preset selector changed.
+// ie: to update our scene if required more updating than the parameters itself.
+
+// A. an easier callback system that can not know wich group selector changed:
+// ofApp::update()
+if (presetsManager.isDoneLoad())
+{
+	ofLogNotice() <<
+		"DONE LOAD PRESET.
+		SOME GROUP HAVE CURRENTLY LOADED / CHANGED
+		TO ANOTHER PRESET INDEX";
+}
+
+// B. better callbacks system for all selectors, to know when a group selector changed:
+// Which group and which presets index selector changed.
+// ofApp::setup()
+for (int i = 0; i < presetsManager.PRESETS_Selected_Index.size(); i++)
+{
+	ofAddListener(presetsManager.getSelectorsGroup().parameterChangedE(),
+		this, &ofApp::Changed_PresetsManagerSelectors);
+}
+//--------------------------------------------------------------
+void ofApp::Changed_PresetsManagerSelectors(ofAbstractParameter &e)
+{
+	std::string name = e.getName();
+	ofLogNotice() <<
+		"THE SELECTOR FOR THE GROUP WITH NAME " << name <<
+		" CHANGED TO PRESET INDEX: " << e;
+	if (name == params.getName())
+	{
+		// the selector index of this group changed,
+		// then we know that the ofParameters of this ofParameterGroup changed,
+		// so maybe we want to update some stuff now,
+		// apart of the updated parameters.
+	}
+}
+```
+
+*/

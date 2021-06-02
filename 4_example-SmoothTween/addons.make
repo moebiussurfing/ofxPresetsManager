@@ -1,9 +1,12 @@
+ofxAnimatable
 ofxGui
 ofxHistoryPlot
 ofxImGui
 ofxPresetsManager
 ofxScaleDragRect
+ofxSurfingAnimators
 ofxSurfingHelpers
 ofxSurfingRandomizer
 ofxSurfingSmooth
+ofxSurfingTween
 ofxWindowApp
