@@ -532,6 +532,10 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	helpTextBoxWidget.setPath(path_UserKit_Folder);
 	helpTextBoxWidget.setup();
 
+	// preset clicker
+	doubleClicker.set(0, 0, ofGetWidth(), ofGetHeight());//full screen
+	doubleClicker.setDebug(false);
+
 	//----------------
 
 	// SURFING ENGINES
@@ -635,40 +639,10 @@ void ofxPresetsManager::startup()
 
 	// preset clicker
 
-	// reset mini previews layout
-	float _size = cellSize;
-	setSizeBox_PresetClicker(_size);
-	float _xx = 200;
-	float _yy = ofGetHeight() - getPresetClicker_Height() - 20;
-
-	// layout
-	setPosition_PresetClicker(_xx, _yy);
-
-	// clicker_Pos
-	_RectClick_Pad = 10;
-	_RectClick_w = getGroupNamesWidth();
-	//_ratio = ndiReceiveTexture.getHeight() / ndiReceiveTexture.getWidth();
-
-	//TODO:
-	//should remove pos var and use only the rectangle 
-	rectanglePresetClicker.setLockResize(true);
-	//TODO:
-	//rectanglePresetClicker.width = getPresetClicker_Width() + 2 * _RectClick_Pad + _RectClick_w;
-	//rectanglePresetClicker.height = getPresetClicker_Height() + 2 * _RectClick_Pad;
-	//rectanglePresetClicker.x = getPresetClicker_Position().x - _RectClick_Pad - _RectClick_w;
-	//rectanglePresetClicker.y = getPresetClicker_Position().y - _RectClick_Pad;
-	_rectRatio = rectanglePresetClicker.width / rectanglePresetClicker.height;
-
+	rectangle_PresetClicker.setLockResize(true);
 	// load settings
-	rectanglePresetClicker.loadSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
+	rectangle_PresetClicker.loadSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
 	doRectFit();
-
-	//clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
-	//clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
-
-	////clamp inside window
-	//clicker_Pos.x = ofClamp(clicker_Pos.x, 0, ofGetWidth());
-	//clicker_Pos.y = ofClamp(clicker_Pos.y, 0, ofGetHeight());
 
 	//--
 
@@ -916,22 +890,49 @@ void ofxPresetsManager::drawPresetClicker()
 	if (SHOW_BackGround_EditPresetClicker)
 	{
 		ofFill();
-		ofSetColor(_colorBg);
-		rectanglePresetClicker.draw();
-		ofDrawRectRounded(rectanglePresetClicker, _round);
+
+		ofColor colorBg;
+		if (rectangle_PresetClicker.isEditing()) {
+			float a = ofxSurfingHelpers::getFadeBlink();
+			ofColor c = ofColor(_colorBg, 255 * a);
+			rectangle_PresetClicker.draw();
+
+			colorBg = c;
+		}
+		else
+		{
+			colorBg = _colorBg;
+		}
+
+		ofSetColor(colorBg);
+		rectangle_PresetClicker.draw();
+		ofDrawRectRounded(rectangle_PresetClicker, _round);
 	}
 
 	// get clicker position from being edited rectangle
-	//TODO:
 	//if (MODE_EditPresetClicker)
 	{
 		doRectFit();
 
-		_RectClick_w = getGroupNamesWidth();
-		clicker_Pos.x = rectanglePresetClicker.x + _RectClick_Pad + _RectClick_w;
-		clicker_Pos.y = rectanglePresetClicker.y + _RectClick_Pad;
-		//rectanglePresetClicker.width = MIN(getPresetClicker_Width() + 2 * _RectClick_Pad + _RectClick_w, 1000);
-		//rectanglePresetClicker.height = rectanglePresetClicker.width / _rectRatio;
+		_RectClick_Pad = 20;//spacing to borders
+
+		float _RectClick_w = getGroupNamesWidth();
+		clicker_Pos.x = rectangle_PresetClicker.x + _RectClick_Pad + _RectClick_w;
+		clicker_Pos.y = rectangle_PresetClicker.y + _RectClick_Pad;
+	}
+
+	//-
+
+	// doubleClick
+	{
+		// double click swap edit mode
+		if (doubleClicker.isMouseDoubleClick()) {
+			MODE_EditPresetClicker = !MODE_EditPresetClicker;
+		}
+		// triple clicks swap layout mode
+		if (doubleClicker.isMouseTripleClick()) {
+			SHOW_BackGround_EditPresetClicker = !SHOW_BackGround_EditPresetClicker;
+		}
 	}
 
 	//--
@@ -1961,7 +1962,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				{
 					doStoreUndo();
 				}
-			}
+		}
 #endif
 
 			//----
@@ -2030,7 +2031,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 					}
 				}
 			}
-		}
+	}
 
 		//--
 
@@ -2046,8 +2047,8 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//	if (key == 'R')
 		//		doStoreUndo();
 		//}
-	}
 }
+	}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::keyReleased(ofKeyEventArgs &eventArgs)
@@ -2569,7 +2570,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 		{
 			if (MODE_EditPresetClicker.get())
 			{
-				rectanglePresetClicker.enableEdit();
+				rectangle_PresetClicker.enableEdit();
 
 				//// workflow
 				////SHOW_BackGround_EditPresetClicker = true;
@@ -2577,13 +2578,13 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 			}
 			else
 			{
-				rectanglePresetClicker.disableEdit();
+				rectangle_PresetClicker.disableEdit();
 
 				//--
 
 				// all app settings
 				//save_ControlSettings();
-				rectanglePresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
+				rectangle_PresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
 			}
 		}
 
@@ -2814,12 +2815,12 @@ void ofxPresetsManager::saveAllKitFromMemory()
 			if (!b) ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets > " << _path;
 #endif
 #endif
-		}
+	}
 		else {
 			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
-	}
+}
 
 	// debug params
 	if (true)
@@ -2832,7 +2833,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 #ifdef USE_JSON
 #endif
 #endif
-		}
+	}
 	}
 }
 
@@ -2908,8 +2909,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
-		}
 	}
+}
 }
 
 ////--------------------------------------------------------------
@@ -2979,7 +2980,7 @@ void ofxPresetsManager::exit()
 
 	// all app settings
 	save_ControlSettings();
-	rectanglePresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
+	rectangle_PresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
 
 	//--
 
@@ -3362,9 +3363,9 @@ void ofxPresetsManager::gui_Panels()
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
-	bool bOpen ;
+	bool bOpen;
 	ImGuiWindowFlags _flagw;
-		
+
 	float _spcx;
 	float _spcy;
 	float _w100;
@@ -3767,7 +3768,7 @@ void ofxPresetsManager::gui_MainPanel()
 				if (ImGui::Button("Clear", ImVec2(_w50, _h / 2)))
 				{
 					doClearUndoHistory();
-			}
+				}
 				//ImGui::SameLine();
 
 				if (ImGui::Button("Undo", ImVec2(_w50, _h / 2)))
@@ -3779,7 +3780,7 @@ void ofxPresetsManager::gui_MainPanel()
 				{
 					doRedo();
 				}
-		}
+			}
 	}
 #endif
 
@@ -4941,8 +4942,8 @@ void ofxPresetsManager::doRefreshUndoParams() {
 		//str += undoStringParams.getUndoStateDescriptor() + "\n";
 
 		ofLogNotice(__FUNCTION__) << str;
-			}
-		}
+	}
+}
 
 #endif
 
@@ -4976,6 +4977,8 @@ void ofxPresetsManager::addExtra(ofParameterGroup &g)
 //--------------------------------------------------------------
 void ofxPresetsManager::doRectFit()
 {
+	// calculate preset clicker box, depending of amout groups and subscribed keys/preset for each group
+
 	float _ww;
 	float _hh = cellSize * groups.size();
 	_hh += 2 * _RectClick_Pad;//pads
@@ -4991,14 +4994,52 @@ void ofxPresetsManager::doRectFit()
 	_ww += getGroupNamesWidth();//name
 	_ww += 2 * _RectClick_Pad;//pads
 
-	rectanglePresetClicker.setWidth(_ww);
-	rectanglePresetClicker.setHeight(_hh);
-	//rectanglePresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
+	rectangle_PresetClicker.setWidth(_ww);
+	rectangle_PresetClicker.setHeight(_hh);
 
-	//fit iniside window
-	float _ymax = ofGetHeight() - _hh - _RectClick_Pad;
-	if (rectanglePresetClicker.getY() > _ymax)
+	//-
+
+	// fit iniside window
 	{
-		rectanglePresetClicker.setY(_ymax);
+		float _w = ofGetWidth();
+		float _h = ofGetHeight();
+
+		int _padx = 10;
+		int _pady = 10;
+
+		int _xx;
+		int _yy;
+
+		float _ww = rectangle_PresetClicker.getWidth();
+		float _hh = rectangle_PresetClicker.getHeight();
+
+		float _xmax = _w - _ww - _padx;
+		float _ymax = _h - _hh - _pady;
+
+		if (rectangle_PresetClicker.getY() > _ymax)
+		{
+			rectangle_PresetClicker.setY(_ymax);
+		}
+		else if (rectangle_PresetClicker.getX() < _padx)
+		{
+			rectangle_PresetClicker.setX(_padx);
+		}
+		else if (rectangle_PresetClicker.getX() > _xmax)
+		{
+			rectangle_PresetClicker.setX(_xmax);
+		}
+		else if (rectangle_PresetClicker.getY() < _pady)
+		{
+			rectangle_PresetClicker.setY(_pady);
+		}
 	}
+
+	//-
+
+	// doubleClicker
+	int _x = rectangle_PresetClicker.getX();
+	int _y = rectangle_PresetClicker.getY();
+	int _w = rectangle_PresetClicker.getWidth();
+	int _h = rectangle_PresetClicker.getHeight();
+	doubleClicker.set(_x, _y, _w, _h);
 }

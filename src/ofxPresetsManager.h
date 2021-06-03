@@ -472,19 +472,20 @@ private:
 private:
 	// mini preview rectangles positions and sizes
 	void doRectFit();
-	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
-	std::string path_RectanglePresetClicker = "_RectanglePresetClicker";
+	ofxInteractiveRect rectangle_PresetClicker = { "rectangle_PresetClicker" };
+	std::string path_RectanglePresetClicker = "_PresetClicker";
 	ofParameter<bool> MODE_EditPresetClicker;
-	//ofParameter<bool> helpPos;
-	ofParameter<float> _rectRatio;
 	ofParameter<bool> SHOW_BackGround_EditPresetClicker;
-	//ofParameter<bool> bResetRects;
-	float _RectClick_w;
 	float _RectClick_Pad;
+	//ofParameter<bool> helpPos;
+	//ofParameter<float> _rectRatio;
+	//ofParameter<bool> bResetRects;
 
 	ofColor _colorText;// lines and text color
 	ofColor _colorButton;// bg selected button
 	ofColor _colorBg;// background color
+	
+	DoubleClicker doubleClicker;
 
 	//--
 
@@ -497,18 +498,6 @@ private:
 	// layout helpers
 
 public:
-	//--------------------------------------------------------------
-	float getPresetClicker_Width()// get width of bigger group of presets row
-	{
-		float _maxPresets = 0;
-		for (int i = 0; i < groups.size(); i++) {
-			if (getAmountPresetsOfGroup(getAmountGroups() - 1) > _maxPresets) _maxPresets = getAmountPresetsOfGroup(getAmountGroups() - 1);
-		}
-		int _extraButtons = 2;
-		float w = cellSize * (_maxPresets + _extraButtons);
-
-		return w;
-	}
 	//--------------------------------------------------------------
 	float getPresetClicker_BoxSize()
 	{
@@ -524,12 +513,24 @@ public:
 	{
 		return getAmountGroups() * cellSize;
 	}
-	//--------------------------------------------------------------
-	glm::vec2 getPresetClicker_Position()
-	{
-		glm::vec2 p = glm::vec2(clicker_Pos.x, clicker_Pos.y);
-		return p;
-	}
+	////--------------------------------------------------------------
+	//float getPresetClicker_Width()// get width of bigger group of presets row
+	//{
+	//	float _maxPresets = 0;
+	//	for (int i = 0; i < groups.size(); i++) {
+	//		if (getAmountPresetsOfGroup(getAmountGroups() - 1) > _maxPresets) _maxPresets = getAmountPresetsOfGroup(getAmountGroups() - 1);
+	//	}
+	//	int _extraButtons = 2;
+	//	float w = cellSize * (_maxPresets + _extraButtons);
+
+	//	return w;
+	//}
+	////--------------------------------------------------------------
+	//glm::vec2 getPresetClicker_Position()
+	//{
+	//	glm::vec2 p = glm::vec2(clicker_Pos.x, clicker_Pos.y);
+	//	return p;
+	//}
 	////--------------------------------------------------------------
 	//void setPosition_DEBUG(int x, int y);// where to display if we get errors (ie: data files not found) on startup
 
@@ -991,12 +992,12 @@ public:
 		clicker_Pos.y = y;
 		cellSize = _cellSize;
 	}
-	//--------------------------------------------------------------
-	void setPosition_PresetClicker(int x, int y)
-	{
-		clicker_Pos.x = x;
-		clicker_Pos.y = y;
-	}
+	////--------------------------------------------------------------
+	//void setPosition_PresetClicker(int x, int y)
+	//{
+	//	clicker_Pos.x = x;
+	//	clicker_Pos.y = y;
+	//}
 	//--------------------------------------------------------------
 	void setVisible_PresetClicker(bool visible)
 	{
@@ -1490,7 +1491,7 @@ public:
 
 	bool bMouseOverGui;
 	bool isMouseOverGui() {
-		bool b = rectanglePresetClicker.inside(ofGetMouseX(), ofGetMouseY());
+		bool b = rectangle_PresetClicker.inside(ofGetMouseX(), ofGetMouseY());
 		//return bMouseOverGui;
 		return b;
 	}
