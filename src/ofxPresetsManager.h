@@ -15,6 +15,7 @@
 
 //	TODO:
 //	
+// +	create help info floating window	
 // +	fix store box clicker. double click to edit. better letters positione on buttons
 // +	full width of presets boxes responsive
 // +	new edit mode: mark a param and when modifing current preset, save to all the oters and overwrite	
@@ -130,6 +131,7 @@
 #include "ofxSurfingConstants.h" // defines (modes) are here "to share between addons" in one place
 #include "ofxInteractiveRect.h" // engine to move the user clicker buttons panel. TODO: add resize by mouse too.
 #include "ofxSurfingHelpers.h"
+#include "TextBoxWidget.h"
 #include "ofxSurfing_ImGui.h"
 #include "groupRandomizer.h"
 
@@ -210,7 +212,7 @@ public:
 	void exit();
 
 	void ImGui_Draw();
-	void drawHelp(int x, int y);
+	void drawHelp();
 	void clear();
 
 	//--
@@ -473,7 +475,7 @@ private:
 	ofxInteractiveRect rectanglePresetClicker = { "rectanglePresetClicker" };
 	std::string path_RectanglePresetClicker = "_RectanglePresetClicker";
 	ofParameter<bool> MODE_EditPresetClicker;
-	ofParameter<bool> helpPos;
+	//ofParameter<bool> helpPos;
 	ofParameter<float> _rectRatio;
 	ofParameter<bool> SHOW_BackGround_EditPresetClicker;
 	//ofParameter<bool> bResetRects;
@@ -1327,6 +1329,7 @@ private:
 	ofTrueTypeFont myFont;
 	std::string myTTF;// gui font for all gui theme
 	int sizeTTF;
+	TextBoxWidget helpTextBoxWidget;
 
 	//----
 

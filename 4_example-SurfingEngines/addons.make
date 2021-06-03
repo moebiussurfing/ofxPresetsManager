@@ -1,7 +1,8 @@
-ofxAnimatable
 ofxGui
+ofxAnimatable
 ofxHistoryPlot
 ofxImGui
+ofxMSAInteractiveObject
 ofxPresetsManager
 ofxScaleDragRect
 ofxSurfingAnimators

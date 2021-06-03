@@ -373,7 +373,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	MODE_EditPresetClicker.set("EDIT CLICKER", false);
 	MODE_EditPresetClicker.setSerializable(false);
 
-	helpPos.set("HELP POS", false);
+	//helpPos.set("HELP POS", false);
 
 	SHOW_BackGround_EditPresetClicker.set("BOX CLICKER", false);
 
@@ -389,7 +389,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Gui.add(SHOW_ImGui_PresetsParams);
 	params_Gui.add(SHOW_Help);
 	params_Gui.add(MODE_EditPresetClicker);
-	params_Gui.add(helpPos);
+	//params_Gui.add(helpPos);
 	params_Gui.add(SHOW_BackGround_EditPresetClicker);
 
 	params_Control.add(params_Options);
@@ -526,6 +526,11 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	//	//SHOW_Panel_RandomizerParams.makeReferenceTo(groupRandomizers[i].SHOW_Panel_RandomizerParams);
 	//}
 
+	//-
+
+	// help box
+	helpTextBoxWidget.setPath(path_UserKit_Folder);
+	helpTextBoxWidget.setup();
 
 	//----------------
 
@@ -854,7 +859,7 @@ void ofxPresetsManager::draw(ofEventArgs & args)
 
 	if (SHOW_Help && SHOW_ImGui)
 	{
-		drawHelp(-1, -1);
+		drawHelp();
 	}
 
 	//----
@@ -3849,7 +3854,7 @@ void ofxPresetsManager::gui_Advanced()
 			//if (ImGui::CollapsingHeader("LAYOUT"))
 			//ImGuiTreeNodeFlags flagsTree;
 			flagsTree = ImGuiTreeNodeFlags_Framed;
-			if (ImGui::TreeNodeEx("LAYOUT", flagsTree))
+			if (ImGui::TreeNodeEx("PRESET CLICKER", flagsTree))
 			{
 				ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
@@ -3859,7 +3864,7 @@ void ofxPresetsManager::gui_Advanced()
 				{
 					ofxSurfingHelpers::AddBigToggle(MODE_EditPresetClicker, _w100, _h / 2); //ImGui::SameLine();
 					ofxSurfingHelpers::AddBigToggle(SHOW_BackGround_EditPresetClicker, _w100, _h / 2);
-					if (SHOW_Help)ofxImGui::AddParameter(helpPos);
+					//if (SHOW_Help)ofxImGui::AddParameter(helpPos);
 				}
 
 				ImGui::TreePop();
@@ -4951,90 +4956,12 @@ void ofxPresetsManager::Changed_GuiGROUP_Selected_Index(int & index)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::drawHelp(int _x = -1, int _y = -1)
+void ofxPresetsManager::drawHelp()
 {
-	ofPushStyle();
-	ofPushMatrix();
-
-	//--
-
-	if (_x == -1 && _y == -1) ofTranslate(clicker_Pos);
-
-	//--
-
-	//if (rectanglePresetClicker.getY() > (ofGetHeight() * 0.5)) 
-	//else drawHelp(0, ySave + groups.size()*cellSize + 20);
-
-	bool bCenter = true;
-
-	bool bLeftPosition = false;
-	// true = left or false = right. only if helpPos/lateral pos true
-
-	// helpPos 
-	//false = top of clicker
-	//true = bottom
-
-	//--
-
-	{
-		std::string ss = helpInfo;
-		float hh = ofxSurfingHelpers::getHeightBBtextBoxed(myFont, ss);
-
-		int x = 0;
-		int y = 0;
-		int _padx = 0;
-		int _pady = 20;
-
-		//y += _pady;
-
-		if (bCenter)
-		{
-			// A. vertical position below boxes
-
-			if (!helpPos)
-			{
-				x += _padx;
-				y -= hh + _pady;
-			}
-			else
-			{
-				x += _padx;
-				y += _pady;
-				//y += _pady;
-				y += groups.size() * cellSize;
-			}
-		}
-
-		//// B. lateral position right to the boxes
-		//else if (!bCenter)
-		//{
-		//	float _w;
-
-		//	if (!bLeftPosition)// on the right
-		//	{
-		//		_w = getPresetClicker_Width();
-		//		x = _w + _padx + 30;
-		//	}
-		//	else {// on the left
-		//		if (myFont.isLoaded())
-		//		{
-		//			_w = ofxSurfingHelpers::getWidthBBtextBoxed(myFont, ss);
-		//			_w += myFont.getStringBoundingBox(groups[0].getName(), 0, 0).getWidth();
-		//			_w += 70;
-		//		}
-		//		x = -_w;
-		//	}
-		//}
-
-		ofxSurfingHelpers::drawTextBoxed(myFont, ss, x, y, _colorText, _colorBg, true, _colorButton);
-	}
-
-	//--
-
-	ofPopMatrix();
-	ofPopStyle();
+	helpTextBoxWidget.setText(helpInfo);
+	helpTextBoxWidget.setTheme(bThemeDarkOrLight);
+	helpTextBoxWidget.draw();
 }
-
 
 //--------------------------------------------------------------
 void ofxPresetsManager::addExtra(ofParameterGroup &g)
@@ -5045,8 +4972,6 @@ void ofxPresetsManager::addExtra(ofParameterGroup &g)
 	//params_AppSettings.add(params_Internal);
 	params_AppSettings = g;
 }
-
-
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doRectFit()
@@ -5071,11 +4996,9 @@ void ofxPresetsManager::doRectFit()
 	//rectanglePresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
 
 	//fit iniside window
-	float _ymax = ofGetWidth() - _hh - _RectClick_Pad;
+	float _ymax = ofGetHeight() - _hh - _RectClick_Pad;
 	if (rectanglePresetClicker.getY() > _ymax)
 	{
 		rectanglePresetClicker.setY(_ymax);
 	}
 }
-
-
