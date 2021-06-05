@@ -165,11 +165,11 @@ class ofxPresetsManager : public ofBaseApp
 	// SURFING ENGINES
 
 #ifdef INCLUDE_ofxSurfingTween
-//public:
 //private:
 protected:
 	ofxSurfingTween dataTween;
 	ofParameterGroup params_Tween;
+public:
 	float get(ofParameter<float> param) { return dataTween.get(param); }
 	int get(ofParameter<int> param) { return dataTween.get(param); }
 #endif
@@ -177,11 +177,11 @@ protected:
 	//--
 
 #ifdef INCLUDE_ofxSurfingSmooth
-//public:
 //private:
 protected:
 	ofxSurfingSmooth smoother;
 	ofParameterGroup params_Smooth{ "Smooth" };
+public:
 	float get(ofParameter<float> param) { return smoother.get(param); }
 	int get(ofParameter<int> param) { return smoother.get(param); }
 #endif
@@ -197,7 +197,6 @@ protected:
 #endif
 
 	//----
-
 
 private:
 	ofParameter<bool> bLockMouseByImGui{ "Mouse Locked", false };//mouse is over gui
@@ -217,7 +216,7 @@ private:
 	void drawHelp();
 	void clear();
 
-	//--
+	//----
 
 	//----
 	//
@@ -296,6 +295,7 @@ public:
 	std::vector<ofParameter<int>> PRESETS_Selected_Index;// one selector for each group
 
 public:
+	//
 	// API
 	//--------------------------------------------------------------
 	ofParameterGroup getSelectorsGroup()
