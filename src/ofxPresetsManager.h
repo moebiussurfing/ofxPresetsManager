@@ -1,9 +1,9 @@
 
 /// ofxPresetsManager.h 
-///
+//
 // ofxPresetsManager 
 // by moebiusSurfing, 2019. 2020. 2021.
-///
+//
 /// this add-on is based and inspired on the original ofxGuiPresetSelector addon 
 /// by Nicola Pisanti, MIT License, 2016
 /// https://github.com/npisanti/ofxGuiPresetSelector
@@ -18,6 +18,8 @@
 // +	clicker better letters positione on buttons
 // +	full width of presets boxes responsive
 // +	new edit mode: mark a param and when modifing current preset, save to all the oters and overwrite	
+// +		lock (by toggle) params that we want to ignore on changing presets
+//				can be done enabling/disabling serializable for each param with a group of toggles
 // +	lite version with combo list. maybe without any gui
 
 // IDEAS:
@@ -28,9 +30,6 @@
 //	++		add populator engine to create all preset files if it's a new empty project
 //				add setter to enable some params to randomize
 //				call populate. disable debug_display red info
-//	
-//	++		lock (by toggle) params that we want to ignore on changing presets
-//				can be done enabling/disabling serializable for each param with a group of toggles
 //	
 //	++		performance: 
 //				restore-back memory_mode. (use xml objects into memory vs hd files) to extra groups too
@@ -56,7 +55,7 @@
 //	1. SURFING ENGINES
 
 //	Tween/Smooth transitions between presets
-//	We can enable only one of the three!
+//	We can enable only one of the two! (Tween or Smooth)
 //
 //	1.2 TWEEN 
 #define INCLUDE_ofxSurfingTween 
@@ -65,7 +64,7 @@
 //#define INCLUDE_ofxSurfingSmooth 
 //
 //	1.3 RANDOMIZER
-#define INCLUDE_ofxSurfingRandomizer //TODO: not working
+#define INCLUDE_ofxSurfingRandomizer
 
 //-
 
@@ -84,11 +83,11 @@
 //
 //#define USE_JSON	// set the file settings format (xml or json). already defined into ofxSurfingHelpers
 #define NUM_MAX_GROUPS 10
-										   
+
 //-
 
 //	4. DEBUG
-										   
+
 //#define DEBUG_PERFORMANCE_MEASURES			// measure performance ofxTimeMeasurements. not using now. must restore!
 //#define DEBUG_randomTest						// uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
 //#define DEBUG_BLOCK_SAVE_SETTINGS				// disable save settings//enable this bc sometimes there's crashes on exit...
@@ -166,7 +165,9 @@ class ofxPresetsManager : public ofBaseApp
 	// SURFING ENGINES
 
 #ifdef INCLUDE_ofxSurfingTween
-public:
+//public:
+//private:
+protected:
 	ofxSurfingTween dataTween;
 	ofParameterGroup params_Tween;
 	float get(ofParameter<float> param) { return dataTween.get(param); }
@@ -176,8 +177,9 @@ public:
 	//--
 
 #ifdef INCLUDE_ofxSurfingSmooth
-public:
+//public:
 //private:
+protected:
 	ofxSurfingSmooth smoother;
 	ofParameterGroup params_Smooth{ "Smooth" };
 	float get(ofParameter<float> param) { return smoother.get(param); }
@@ -187,9 +189,9 @@ public:
 	//--
 
 #ifdef INCLUDE_ofxSurfingRandomizer
-public:
+//public:
 //private:
-//protected:
+protected:
 	ofxSurfingRandomizer dataRandomizer;
 	ofParameterGroup params_Randomizator;
 #endif
@@ -210,6 +212,7 @@ public:
 	void windowResized(int w, int h);
 	void exit();
 
+private:
 	void ImGui_Draw();
 	void drawHelp();
 	void clear();
@@ -241,6 +244,7 @@ public:
 	void setup(std::string name, bool _buildGroupSelector);
 	void setup(bool _buildGroupSelector);
 
+private:
 	bool bDoneSetup = false;// to ensure all setup process is done and avoid troubles if not after
 
 	void startup();// must be called after setup (who is called after all group adds) to set initial states well
@@ -331,6 +335,7 @@ private:
 	bool bBuildGroupSelector = true;// to allow auto build a group selector to combine all the added groups to the presets manager
 	bool bAllowGroupSelector = true;// to allow disable main group. not allways we need it..
 	int groupLinkSize = 10;// default ammount of presets we want to the group link
+
 public:
 	void setGroupLinkSize(int size) {// customize how many group link presets we want to create. must be called before setup!
 		groupLinkSize = size;
@@ -361,6 +366,7 @@ private:
 	// loaded / saved
 	// to faster ofApp integration 
 	// to check in update() as callback
+
 public:
 	//--------------------------------------------------------------
 	bool isDoneLoad()
@@ -409,6 +415,7 @@ public:
 	// 2. but to the same current loaded preset
 	// 3. no need to reload the file settings
 	// 4. but we want to use the user box click to trig something
+private:
 	bool bMustTrig = false;
 public:
 	//--------------------------------------------------------------
@@ -483,7 +490,7 @@ private:
 	ofColor _colorText;// lines and text color
 	ofColor _colorButton;// bg selected button
 	ofColor _colorBg;// background color
-	
+
 	DoubleClicker doubleClicker;
 
 	//--
@@ -512,6 +519,8 @@ public:
 	{
 		return getAmountGroups() * cellSize;
 	}
+
+	/*
 	////--------------------------------------------------------------
 	//float getPresetClicker_Width()// get width of bigger group of presets row
 	//{
@@ -532,6 +541,7 @@ public:
 	//}
 	////--------------------------------------------------------------
 	//void setPosition_DEBUG(int x, int y);// where to display if we get errors (ie: data files not found) on startup
+	*/
 
 	//----
 
@@ -591,6 +601,7 @@ private:
 
 	// paths for settings
 
+private:
 	// all folder names must go without ending with '/'
 	//std::string path_Root;
 	std::string path_UserKit_Folder;// User-Kit folder for both other subfolders. 
@@ -610,8 +621,8 @@ private:
 	//--
 
 	// app settings for many params
-//private:
-public:
+//public:
+private:
 	void load_AppSettings();// handle group selectors and some settings states
 	void save_ControlSettings();// handle group selectors and some settings states
 
@@ -813,6 +824,8 @@ public:
 
 	//--
 
+	// extra api methods
+
 	// helpers for external layout or other workflow purposes
 
 	//--------------------------------------------------------------
@@ -907,6 +920,7 @@ public:
 
 	// helper tools
 
+public:
 	void doCloneRight(int groupIndex);// clone from selected preset of index group to all others to the right
 	void doCloneAll(int groupIndex);// clone all presets from the current index group
 	void doPopulateFavs(int groupIndex);// fast populate random presets of index group
@@ -937,11 +951,6 @@ public:
 	{
 		SHOW_Help = !SHOW_Help;
 	}
-	////--------------------------------------------------------------
-	//void setPosition_GUI_ImGui(int x, int y)
-	//{
-	//	ImGui_Position = ofVec2f(x, y);
-	//}
 	//--------------------------------------------------------------
 	void setVisible_GUI(bool b)
 	{
@@ -984,18 +993,12 @@ public:
 	{
 		SHOW_Gui_AdvancedControl = !SHOW_Gui_AdvancedControl;
 	}
-	//--------------------------------------------------------------
-	void setPosition_PresetClicker(int x, int y, int _cellSize)
-	{
-		clicker_Pos.x = x;
-		clicker_Pos.y = y;
-		cellSize = _cellSize;
-	}
 	////--------------------------------------------------------------
-	//void setPosition_PresetClicker(int x, int y)
+	//void setPosition_PresetClicker(int x, int y, int _cellSize)
 	//{
 	//	clicker_Pos.x = x;
 	//	clicker_Pos.y = y;
+	//	cellSize = _cellSize;
 	//}
 	//--------------------------------------------------------------
 	void setVisible_PresetClicker(bool visible)
@@ -1084,9 +1087,6 @@ public:
 
 	//----
 
-//public:
-	//ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
-
 private:
 	int PRESET_Selected_IndexMain_PRE = -1;// used as callback
 
@@ -1098,7 +1098,6 @@ private:
 	ofParameter<bool> SHOW_ImGui;
 	ofParameter<bool> SHOW_Panel_Standalones;
 	ofParameter<bool> SHOW_Panel_AllParameters;
-	//ofParameter<bool> SHOW_Panel_AllSelectors;
 	ofParameter<bool> SHOW_Panel_Player;
 	ofParameter<bool> SHOW_Panel_EditPlayer;
 	ofParameter<bool> SHOW_Panel_RandomizerParams;
@@ -1107,6 +1106,8 @@ private:
 	ofParameter<bool> SHOW_Help;
 	ofParameter<bool> SHOW_Panels;
 	ofParameter<bool> SHOW_Gui_AdvancedControl;
+	//ofParameter<bool> SHOW_Panel_AllSelectors;
+
 	ofParameter<bool> ENABLE_Keys;
 	ofParameter<bool> bThemeDarkOrLight{ "THEME DARK", true };
 	ofParameter<glm::vec2> Gui_Internal_Position;
@@ -1130,12 +1131,11 @@ public:
 	void gui_MainPanel();
 	void gui_Panels();
 	void gui_Advanced();
-	//void gui_Selectors();
 	void gui_Standalones();
 	void gui_Parameters();
+	//void gui_Selectors();
 
 public:
-	//void ImGui_Draw_Window();
 	bool ImGui_Draw_Window();
 
 	//-
@@ -1159,11 +1159,6 @@ private:
 	int cellSize = 80;// default box button size
 	ofVec2f clicker_Pos;// default clicker position
 
-//private:
-//	// ImGui 
-//	ofParameter<glm::vec2> ImGui_Position;// ImGui browser panel position. 
-//	ofParameter<glm::vec2> ImGui_Size;// ImGui browser panel position. 
-
 	//--
 
 private:
@@ -1172,35 +1167,19 @@ private:
 	ofParameter<bool> bImGui_mouseOver;
 	bool bImGui_mouseOver_PRE;
 	bool bMouseOver_Changed = false;
-	//public:
-	////--------------------------------------------------------------
-	//bool isMouseOver()
-	//{
-	//	bool b;
-	//	if (!SHOW_ImGui) b = false;
-	//	else b = bImGui_mouseOver;
-	//	return b;
-	//}
-	////--------------------------------------------------------------
-	//bool isMouseOver_Changed()
-	//{
-	//	if (bMouseOver_Changed)
-	//	{
-	//		//bMouseOver_Changed = false;//reset
-	//		return true;
-	//	}
-	//}
 
 	//-----
 
 	// standalone presets browser
 	// located into 'archive/' folder, not from favourites presets folders
+
 private:
 	// multi-group files
 	vector <std::vector<std::string>> standaloneFileNames;// all the group standalone preset names
 	vector <std::vector<ofFile>> standaloneFiles;// all the group standalone preset files
 	vector <int> standaloneFileIndex;// selected standalone preset file of the group
 	vector <std::string> standaloneNamePresetDisplay;
+
 	// engine handler
 	bool bFilesError = false;
 	ofParameter<bool> MODE_StandalonePresets_NEW;
@@ -1225,6 +1204,7 @@ private:
 	ofParameterGroup params_Controls{ "PRESETS MANAGER" };
 
 public:
+
 	// this are usefull parameters to use in our ofAPp/projects/addons gui's
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsControls() {
@@ -1253,10 +1233,12 @@ public:
 
 		return params_Controls;
 	}
+
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsPresetSelectors() {// selectors index to all the added groups
 		return params_GroupsSelectors;
 	}
+
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsRandomizers() {// important settings to handle randomizers
 		ofParameterGroup _g{ "RANDOMIZERS" };
@@ -1307,6 +1289,7 @@ public:
 
 private:
 	bool ENABLE_KeysArrowBrowse = true;// allow browse presets by arrows keys by default
+
 public:
 	//--------------------------------------------------------------
 	void setEnableKeysArrowBrowse(bool b)

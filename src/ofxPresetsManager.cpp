@@ -3261,6 +3261,7 @@ void ofxPresetsManager::gui_Parameters()
 
 		//-
 
+		/*
 		// group selector 
 		// (only when more than one group)
 
@@ -3274,15 +3275,17 @@ void ofxPresetsManager::gui_Parameters()
 
 		//preset selector
 		//ofxImGui::AddStepper(PRESETS_Selected_Index[0]);
-
+		*/
+		
 		//-
 
 		ImGui::Dummy(ImVec2(0, 5));
 
 		// 1. each group parameters
+
 		for (int i = 0; i < groups.size(); i++)
 		{
-			if (groups.size() > 1)
+			if (groups.size() > 1 && i !=0)
 			{
 				ImGui::Separator();
 				ImGui::Dummy(ImVec2(0, 5));
