@@ -1417,9 +1417,10 @@ void groupRandomizer::gui_RandomizersMain()
 		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_EditPlayer, _w99, _h);
 		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_RandomizerParams, _w99, _h);
 
+		//-
 
-		ImGui::Dummy(ImVec2(0, 2));
-		ImGui::Checkbox("Auto-Resize", &auto_resize);
+		//ImGui::Dummy(ImVec2(0, 2));
+		//ImGui::Checkbox("Auto-Resize", &auto_resize);
 	}
 	ofxImGui::EndWindow(settings);
 

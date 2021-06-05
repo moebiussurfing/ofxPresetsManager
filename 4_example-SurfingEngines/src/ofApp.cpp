@@ -38,8 +38,8 @@ void ofApp::setup()
 	// add our ofParameterGroup to the presetManager 
 	// and define key triggers for each preset. 
 	// the amount of keys will be the amount of favourites presets
-	presetsManager.add(params1, { '0', '1', '2', '3', '4' });
-	presetsManager.add(params2, { 'q', 'w', 'e' });
+	presetsManager.add(params1, { 'q', 'w', 'e', 'r' });
+	presetsManager.add(params2, { 'a', 's', 'd' , 'f' });
 
 	presetsManager.setGroupLinkSize(4); // customize GROUP_LINK size
 	presetsManager.setup(); // must call after adding all the ofParameterGroup(s)
@@ -99,7 +99,8 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
 
-	if (key == ' ') { presetsManager.load_Next(0, true); }
+	if (key == ' ') { presetsManager.load_Next(true); }
+	//if (key == ' ') { presetsManager.load_Next(0, true); }
 	if (key == 'g') {}
 	if (key == OF_KEY_RETURN) {}
 }

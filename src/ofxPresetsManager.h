@@ -15,8 +15,7 @@
 
 //	TODO:
 //	
-// +	create help info floating window	
-// +	fix store box clicker. double click to edit. better letters positione on buttons
+// +	clicker better letters positione on buttons
 // +	full width of presets boxes responsive
 // +	new edit mode: mark a param and when modifing current preset, save to all the oters and overwrite	
 // +	lite version with combo list. maybe without any gui
@@ -1099,7 +1098,7 @@ private:
 	ofParameter<bool> SHOW_ImGui;
 	ofParameter<bool> SHOW_Panel_Standalones;
 	ofParameter<bool> SHOW_Panel_AllParameters;
-	ofParameter<bool> SHOW_Panel_AllSelectors;
+	//ofParameter<bool> SHOW_Panel_AllSelectors;
 	ofParameter<bool> SHOW_Panel_Player;
 	ofParameter<bool> SHOW_Panel_EditPlayer;
 	ofParameter<bool> SHOW_Panel_RandomizerParams;
@@ -1131,7 +1130,7 @@ public:
 	void gui_MainPanel();
 	void gui_Panels();
 	void gui_Advanced();
-	void gui_Selectors();
+	//void gui_Selectors();
 	void gui_Standalones();
 	void gui_Parameters();
 
