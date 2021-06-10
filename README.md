@@ -133,9 +133,10 @@ This is useful because in some scenarios could help to improve the performance o
 [VIDEO](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
 
 ## Dependencies
-* [ofxImGui](https://github.com/Daandelange/ofxImGui/tree/jvcleave) [ Fork ]
+* [ofxImGui](https://github.com/Daandelange/ofxImGui/tree/jvcleave) [ FORK ]
 * [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
 * [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)
++ [ofxMSAInteractiveObject](https://github.com/moebiussurfing/ofxMSAInteractiveObject) [ FORK ]
 * [ofxRemoteParameters](https://github.com/c-mendoza/ofxRemoteParameters) [ Only for the examples 3A-3B ]  
 
 Below add-ons are bundled. Already included in **OF_ADDON/libs**.  

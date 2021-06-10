@@ -9,9 +9,7 @@
 //-----
 
 #include "ofxSurfingHelpers.h"
-#include "ofxSurfing_ImGui.h"
-#include "ofxSurfing_ImGuiBundle.h"
-//#include "ofxImGui.h"
+#include "ofxSurfingImGui.h"
 
 //#ifdef INCLUDE_ofxSurfingRandomizer
 //#include "ofxSurfingRandomizer.h"

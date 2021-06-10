@@ -2,6 +2,29 @@
 
 #include "ofMain.h"
 
+/*
+
+	NOTE ABOUT THIS EXAMPLE
+
+	* To run this example you must go to ofxPresetsManager.h and comment/disable all the surfing engines ->
+
+//	1. SURFING ENGINES
+//
+//	Tween/Smooth transitions between presets
+//	We can enable only one of the two! (Tween or Smooth)
+//
+//	1.2 TWEEN
+#define INCLUDE_ofxSurfingTween
+//
+//	1.1 SMOOTH
+//#define INCLUDE_ofxSurfingSmooth
+//
+//	1.3 RANDOMIZER
+#define INCLUDE_ofxSurfingRandomizer
+
+*/
+
+
 #include "ofxPresetsManager.h"
 
 class ofApp : public ofBaseApp

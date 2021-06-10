@@ -8,6 +8,5 @@ ofxScaleDragRect
 ofxSurfingAnimators
 ofxSurfingHelpers
 ofxSurfingRandomizer
-ofxSurfingSmooth
 ofxSurfingTween
 ofxWindowApp

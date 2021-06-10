@@ -15,7 +15,11 @@
 
 //	TODO:
 //	
+// +	add main panel enabler into other panels
+// +	fixe keys workflows
+// +	restore randomzier panel  
 // +	clicker better letters positione on buttons
+//		+ live change cell, text size, add param
 // +	full width of presets boxes responsive
 // +	new edit mode: mark a param and when modifing current preset, save to all the oters and overwrite	
 // +		lock (by toggle) params that we want to ignore on changing presets
@@ -58,13 +62,13 @@
 //	We can enable only one of the two! (Tween or Smooth)
 //
 //	1.2 TWEEN 
-#define INCLUDE_ofxSurfingTween 
+//#define INCLUDE_ofxSurfingTween 
 //
 //	1.1 SMOOTH
 //#define INCLUDE_ofxSurfingSmooth 
 //
 //	1.3 RANDOMIZER
-#define INCLUDE_ofxSurfingRandomizer
+//#define INCLUDE_ofxSurfingRandomizer
 
 //-
 
@@ -126,12 +130,13 @@
 
 //--
 
-#include "ofxSurfingConstants.h" // defines (modes) are here "to share between addons" in one place
-#include "ofxInteractiveRect.h" // engine to move the user clicker buttons panel. TODO: add resize by mouse too.
-#include "ofxSurfingHelpers.h"
-#include "TextBoxWidget.h"
-#include "ofxSurfing_ImGui.h"
 #include "groupRandomizer.h"
+
+#include "ofxInteractiveRect.h" // engine to move the user clicker buttons panel. TODO: add resize by mouse too.
+#include "ofxSurfingConstants.h" // defines (modes) are here "to share between addons" in one place
+#include "ofxSurfingHelpers.h"
+#include "ofxSurfingImGui.h"
+#include "TextBoxWidget.h"
 
 // undo engine
 #ifdef INCLUDE_ofxUndoSimple
@@ -148,9 +153,9 @@
 #define TSGL_STOP
 #endif
 
-#define BUTTON_BIG_HEIGHT 50
-#define PANEL_WIDGETS_WIDTH 225
-#define PANEL_WIDGETS_HEIGHT 100
+//#define BUTTON_BIG_HEIGHT 50
+//#define PANEL_WIDGETS_WIDTH 225
+//#define PANEL_WIDGETS_HEIGHT 100
 
 //TODO:
 #define USE_IM_GUI
@@ -1156,7 +1161,8 @@ public:
 
 private:
 	// preset clicker boxes matrix
-	int cellSize = 80;// default box button size
+	ofParameter<int> cellSize{ "Buttons Size", 80, 45, 120 };// default box button size
+	//int cellSize = 80;// default box button size
 	ofVec2f clicker_Pos;// default clicker position
 
 	//--

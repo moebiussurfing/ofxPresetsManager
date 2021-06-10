@@ -3,18 +3,17 @@
 //--------------------------------------------------------------
 void ofApp::setupScene()
 {
-	params.setName("paramsGroup");// main group 1
+	// main group 1
+	params.setName("paramsGroup");
+	
 	paramsNested1.setName("styleSubGroup");// another nested group
 	paramsNested2.setName("itemSubGroup");// another nested group
-
 	paramsNested1.add(fill.set("fill", true));
 	paramsNested1.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
 	paramsNested1.add(lineWidth.set("lineWidth", 1, 0.1, 10));
-
 	paramsNested2.add(shapeType.set("shapeType", 1, 1, 2));
 	paramsNested2.add(size.set("size", 100, 5, 200));
 	paramsNested2.add(paramsNested1);
-
 	params.add(amount.set("amount", 10, 1, 24));
 	params.add(separation.set("separation", 10, 1, 100));
 	params.add(paramsNested2);
@@ -27,10 +26,11 @@ void ofApp::setup()
 {
 	ofSetFrameRate(60);
 	//ofSetVerticalSync(true);
-	//window shape
-	int _gap = 28;
-	ofSetWindowPosition(1920, _gap);
-	ofSetWindowShape(1920, 1080 - _gap);
+
+	////window shape
+	//int _gap = 28;
+	//ofSetWindowPosition(1920, _gap);
+	//ofSetWindowShape(1920, 1080 - _gap);
 
 	font.load("assets/fonts/telegrama_render.otf", 11, true, true, true);
 	ofSetCircleResolution(200);

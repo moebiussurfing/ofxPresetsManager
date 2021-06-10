@@ -1120,12 +1120,12 @@ void groupRandomizer::gui_RandomizerParams()
 //		float _w33;
 //		float _w25;
 //		float _h;
-//		ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
+//		ofxSurfing::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 //
 //		//--
 ////
 ////#ifdef INCLUDE_ofxSurfingRandomizer
-////		ofxSurfingHelpers::AddBigToggle(randomizer.bGui, _w100, _h);
+////		ofxSurfing::AddBigToggle(randomizer.bGui, _w100, _h);
 ////		
 ////		ImGui::Dummy(ImVec2(0.f, 2.f));
 ////#endif
@@ -1178,7 +1178,7 @@ void groupRandomizer::gui_RandomizersMain()
 		float _w33;
 		float _w25;
 		float _h;
-		ofxSurfingHelpers::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
+		ofxSurfing::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 		
 		_h = _h / 2;
 
@@ -1295,9 +1295,9 @@ void groupRandomizer::gui_RandomizersMain()
 
 		// 1.0.1 play randomizer index
 
-		ofxSurfingHelpers::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
+		ofxSurfing::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
 		//ofxImGui::AddParameter(PLAY_RandomizeTimer);
-		//ofxSurfingHelpers::AddBigToggle(PLAY_RandomizeTimer, 30);
+		//ofxSurfing::AddBigToggle(PLAY_RandomizeTimer, 30);
 
 		//--
 
@@ -1329,7 +1329,7 @@ void groupRandomizer::gui_RandomizersMain()
 
 		ImGui::PushItemWidth(_w50);
 		ofxImGui::AddParameter(randomizeDurationBpm);
-		ofxSurfingHelpers::AddDragFloatSlider(randomizeDurationBpm);
+		ofxSurfing::AddDragFloatSlider(randomizeDurationBpm);
 		ImGui::PopItemWidth();
 
 		//-
