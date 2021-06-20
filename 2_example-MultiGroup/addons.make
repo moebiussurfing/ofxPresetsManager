@@ -1,4 +1,0 @@
-ofxImGui
-ofxPresetsManager
-ofxScaleDragRect
-ofxSurfingHelpers

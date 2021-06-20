@@ -15,6 +15,8 @@
 
 //	TODO:
 //	
+// +	group randomizers are too big, hardcoded to max sizes... brokes ImGui... must simplify
+
 // +	add main panel enabler into other panels
 // +	fixe keys workflows
 // +	restore randomzier panel  
@@ -52,8 +54,7 @@
 //-----------------------------------------------------------------------------------------------------------------
 //
 //	DEFINES
-
-
+//
 //-
 
 //	1. SURFING ENGINES
@@ -62,13 +63,23 @@
 //	We can enable only one of the two! (Tween or Smooth)
 //
 //	1.2 TWEEN 
-//#define INCLUDE_ofxSurfingTween 
+#define INCLUDE_ofxSurfingTween 
 //
 //	1.1 SMOOTH
 //#define INCLUDE_ofxSurfingSmooth 
 //
 //	1.3 RANDOMIZER
-//#define INCLUDE_ofxSurfingRandomizer
+#define INCLUDE_ofxSurfingRandomizer
+
+// GLOBAL
+//#define INCLUDE_SURFING_ENGINES // -> you can comment this line only and will disable too the above surfing engines directives
+//
+#ifndef INCLUDE_SURFING_ENGINES
+#undef INCLUDE_ofxSurfingTween 
+#undef INCLUDE_ofxSurfingSmooth 
+#undef INCLUDE_ofxSurfingRandomizer
+#endif
+
 
 //-
 
@@ -80,7 +91,10 @@
 
 // 3. CUSTOMIZATION
 
-#define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT	// customize ImGui font
+#define USE_PRESETS_MANAGER__IMGUI_LAYOUT 
+//#define USE_PRESETS_MANAGER__IMGUI_INTERNAL
+
+//#define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT	// customize ImGui font
 //#define USE_IMGUI_EXTERNAL	// this is to group all ImGui panels into one unique instance in ofApp
 // currently there's a bug when using more than one single ofxImGui instance!
 // this line is proposed as debugging when adding this feature (multi instance).
@@ -1103,7 +1117,7 @@ private:
 	ofParameter<bool> SHOW_ImGui;
 	ofParameter<bool> SHOW_Panel_Standalones;
 	ofParameter<bool> SHOW_Panel_AllParameters;
-	ofParameter<bool> SHOW_Panel_Player;
+	ofParameter<bool> SHOW_Panel_Players;
 	ofParameter<bool> SHOW_Panel_EditPlayer;
 	ofParameter<bool> SHOW_Panel_RandomizerParams;
 	ofParameter<bool> SHOW_ImGui_PresetsParams;
@@ -1145,7 +1159,7 @@ public:
 
 	//-
 
-#ifndef USE_IMGUI_EXTERNAL
+#ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL
 	ofxImGui::Gui gui_ImGui;
 	void ImGui_Setup();
 	void ImGui_Begin();
@@ -1153,6 +1167,18 @@ public:
 	ImFont* customFont = nullptr;
 	ImGuiStyle *style = nullptr;
 	ofxImGui::Settings settings;
+#endif
+
+#ifdef USE_PRESETS_MANAGER__IMGUI_LAYOUT 
+	ofxSurfing_ImGui_Manager guiManager;
+private:
+	bool bAutoDraw; // must be false when multiple ImGui instances created!
+public:
+	// required to set to true when only one ImGui instance is created. By default is setted to ImGui multi instances
+	//--------------------------------------------------------------
+	void setImGuiAutodraw(bool b) {
+		bAutoDraw = b;
+	}
 #endif
 
 	//-

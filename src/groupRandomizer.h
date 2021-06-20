@@ -4,7 +4,12 @@
 
 //-----
 //
+
+#define USE_RAW_IM_GUI__GROUP_RANDOMIZER
+//#define USE_GUI_MANAGER__GROUP_RANDOMIZER
+
 //#define INCLUDE_ofxSurfingRandomizer // randomizer engine
+
 //
 //-----
 
@@ -15,14 +20,8 @@
 //#include "ofxSurfingRandomizer.h"
 //#endif
 
-//#define BUTTON_BIG_HEIGHT 30
-//#define PANEL_WIDGETS_WIDTH 225
-//#define PANEL_WIDGETS_HEIGHT 100
-
 class groupRandomizer
 {
-
-
 //#ifdef INCLUDE_ofxSurfingRandomizer
 //private:
 ////protected:
@@ -76,13 +75,21 @@ public:
 	void gui_RandomizersMain();
 	void gui_RandomizerIndex();
 	void gui_RandomizerParams();
+
 	//ofParameter<bool> SHOW_Panel_EditPlayer;
 	//ofParameter<bool> SHOW_Panel_RandomizerParams;
 	
 	//-
 
 public:
-	ofxImGui::Settings settings;
+	//ofxImGui::Settings settings;
+
+#ifdef USE_RAW_IM_GUI__GROUP_RANDOMIZER
+#endif
+
+#ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
+	ofxSurfing_ImGui_Manager guiManager;
+#endif
 
 	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
 
@@ -177,8 +184,8 @@ public:
 private:
 	ofParameterGroup params_RandomizerSettings{ "Randomizers" };
 
-public:
 //private:
+public:
 	ofParameter<bool> PLAY_RandomizeTimer; //play randomizer
 	ofParameter<bool> bRandomizeIndex;// trig randomize index
 	ofParameter<float> randomizeDurationBpm; // bpm
@@ -200,6 +207,7 @@ private:
 	float MAX_DURATION_RATIO = 2.0f;
 	int randomize_MAX_DURATION = MAX_DURATION_RATIO * 6000;
 	//int randomize_MAX_DURATION_SHORT = 6000 / 2.f;
+
 	vector<ofParameter<int>> presetsRandomFactor;// probability of every preset
 	vector<ofParameter<bool>> presetsRandomModeShort;// mode short for ebvery preset
 	vector<int> randomFactorsDices;

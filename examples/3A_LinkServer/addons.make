@@ -1,0 +1,7 @@
+ofxGui
+ofxImGui
+ofxOsc
+ofxPresetsManager
+ofxRemoteParameters
+ofxScaleDragRect
+ofxSurfingHelpers

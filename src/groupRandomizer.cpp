@@ -1,7 +1,8 @@
 #include "groupRandomizer.h"
 
 //--------------------------------------------------------------
-groupRandomizer::groupRandomizer() {}
+groupRandomizer::groupRandomizer() {
+}
 
 //--------------------------------------------------------------
 groupRandomizer::~groupRandomizer()
@@ -78,12 +79,17 @@ void groupRandomizer::startup()
 {
 	DISABLE_CALLBACKS = false;
 
+#ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
+	//TODO: crashes
+	//bool bAutoDraw = true;
+	//guiManager.setImGuiAutodraw(bAutoDraw);
+	guiManager.setup(); // this instantiates and configurates ofxImGui inside the class object.
+#endif
+
 	// load randomizers settings
 	ofxSurfingHelpers::loadGroup(params_RandomizerSettings, path_RandomizerSettings);
 
 	doDices();
-
-	settings = ofxImGui::Settings();
 
 	//--
 
@@ -391,7 +397,7 @@ void groupRandomizer::addGroupToRandomizerFiletered(ofParameterGroup& group) {
 			auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
 			if (parameterOfVec2f)
 			{
-				//ofxImGui::AddParameter(*parameterOfVec2f);
+				//ofxImGuiSurfing::AddParameter(*parameterOfVec2f);
 				ofParameter<bool> b{ parameterOfVec2f->getName(), false };
 				randomizersFiltered_TogglesVector.push_back(b);
 				continue;
@@ -399,7 +405,7 @@ void groupRandomizer::addGroupToRandomizerFiletered(ofParameterGroup& group) {
 			auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
 			if (parameterOfVec3f)
 			{
-				//ofxImGui::AddParameter(*parameterOfVec3f);
+				//ofxImGuiSurfing::AddParameter(*parameterOfVec3f);
 				ofParameter<bool> b{ parameterOfVec3f->getName(), false };
 				randomizersFiltered_TogglesVector.push_back(b);
 				continue;
@@ -409,7 +415,7 @@ void groupRandomizer::addGroupToRandomizerFiletered(ofParameterGroup& group) {
 			{
 				ofParameter<bool> b{ parameterOfVec4f->getName(), false };
 				randomizersFiltered_TogglesVector.push_back(b);
-				//ofxImGui::AddParameter(*parameterOfVec4f);
+				//ofxImGuiSurfing::AddParameter(*parameterOfVec4f);
 				continue;
 			}
 			// colors
@@ -433,7 +439,7 @@ void groupRandomizer::addGroupToRandomizerFiletered(ofParameterGroup& group) {
 			{
 				ofParameter<bool> b{ parameterFloat->getName(), false };
 				randomizersFiltered_TogglesVector.push_back(b);
-				//ofxImGui::AddParameter(*parameterFloat);
+				//ofxImGuiSurfing::AddParameter(*parameterFloat);
 				continue;
 			}
 			auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
@@ -1074,7 +1080,13 @@ void groupRandomizer::gui_RandomizerIndex()
 	float hh = 50;
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(ww, hh));
 
-	if (ofxImGui::BeginWindow("EDIT PLAYER", settings, flagsw))
+#ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
+	guiManager.beginWindow("EDIT PLAYER", NULL, flagsw);
+#endif
+
+#ifdef USE_RAW_IM_GUI__GROUP_RANDOMIZER
+	ImGui::Begin("EDIT PLAYER", NULL, flagsw);
+#endif
 	{
 		//float _spcx = ImGui::GetStyle().ItemSpacing.x;
 		//float _spcy = ImGui::GetStyle().ItemSpacing.y;
@@ -1086,14 +1098,20 @@ void groupRandomizer::gui_RandomizerIndex()
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
 		flags |= ImGuiTreeNodeFlags_DefaultOpen;
-		ofxImGui::AddGroup(params_Randomizer, flags);
-		//ofxImGui::AddGroup(params_Randomizer, settings);
+		ofxImGuiSurfing::AddGroup(params_Randomizer, flags);
 
 #ifdef DEBUG_randomTest
 		ImGui::Text("%d/%d", randomizedDice.get(), randomizedDice.getMax());
 #endif
 	}
-	ofxImGui::EndWindow(settings);
+
+#ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
+	guiManager.endWindow();
+#endif
+
+#ifdef USE_RAW_IM_GUI__GROUP_RANDOMIZER
+	ImGui::End();
+#endif
 
 	ImGui::PopStyleVar();
 }
@@ -1101,56 +1119,6 @@ void groupRandomizer::gui_RandomizerIndex()
 //--------------------------------------------------------------
 void groupRandomizer::gui_RandomizerParams()
 {
-//	static bool auto_resize = true;
-//	ImGuiWindowFlags flagsw;
-//	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
-//
-//	float ww = PANEL_WIDGETS_WIDTH;
-//	float hh = 50;
-//	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(ww, hh));
-//
-//	if (ofxImGui::BeginWindow("EDITOR B", settings, flagsw))
-//	{
-//		float _spcx;
-//		float _spcy;
-//		float _w100;
-//		float _h100;
-//		float _w99;
-//		float _w50;
-//		float _w33;
-//		float _w25;
-//		float _h;
-//		ofxSurfing::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
-//
-//		//--
-////
-////#ifdef INCLUDE_ofxSurfingRandomizer
-////		ofxSurfing::AddBigToggle(randomizer.bGui, _w100, _h);
-////		
-////		ImGui::Dummy(ImVec2(0.f, 2.f));
-////#endif
-//
-//		//--
-//
-//		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
-//		flags |= ImGuiTreeNodeFlags_DefaultOpen;
-//		ofxImGui::AddGroup(params_RandomizersFiltered, flags);
-//		//ofxImGui::AddGroup(params_RandomizersFiltered, settings);
-//
-//		//--
-//
-//		//ImGui::Dummy(ImVec2(0.f, 2.f));
-//		//ImGui::Separator();
-//		//ImGui::Dummy(ImVec2(0.f, 2.f));
-//
-//		//--
-//
-//		//ofxImGui::AddGroup(params_RandomizersPowered, settings);
-//
-//	}
-//	ofxImGui::EndWindow(settings);
-//
-//	ImGui::PopStyleVar();
 }
 
 //--------------------------------------------------------------
@@ -1167,7 +1135,14 @@ void groupRandomizer::gui_RandomizersMain()
 	//float hh = PANEL_WIDGETS_HEIGHT;
 	//ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(ww, ofGetHeight() - 100));
 
-	if (ofxImGui::BeginWindow(str.c_str(), settings, flagsw))
+#ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
+	guiManager.beginWindow(str.c_str(), NULL, flagsw);
+#endif
+
+#ifdef USE_RAW_IM_GUI__GROUP_RANDOMIZER
+	ImGui::Begin(str.c_str(), NULL, flagsw);
+#endif
+
 	{
 		float _spcx;
 		float _spcy;
@@ -1178,7 +1153,7 @@ void groupRandomizer::gui_RandomizersMain()
 		float _w33;
 		float _w25;
 		float _h;
-		ofxSurfing::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
+		ofxImGuiSurfing::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 		
 		_h = _h / 2;
 
@@ -1198,7 +1173,7 @@ void groupRandomizer::gui_RandomizersMain()
 		//ImGui::Dummy(ImVec2(0, 5));
 
 		ImGui::PushItemWidth(_w50);
-		ofxImGui::AddParameter(PRESET_Selected_IndexMain);
+		ofxImGuiSurfing::AddParameter(PRESET_Selected_IndexMain);
 		ImGui::PopItemWidth();
 
 		//ImGui::SameLine();
@@ -1295,9 +1270,9 @@ void groupRandomizer::gui_RandomizersMain()
 
 		// 1.0.1 play randomizer index
 
-		ofxSurfing::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
-		//ofxImGui::AddParameter(PLAY_RandomizeTimer);
-		//ofxSurfing::AddBigToggle(PLAY_RandomizeTimer, 30);
+		ofxImGuiSurfing::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
+		//ofxImGuiSurfing::AddParameter(PLAY_RandomizeTimer);
+		//ofxImGuiSurfing::AddBigToggle(PLAY_RandomizeTimer, 30);
 
 		//--
 
@@ -1328,8 +1303,8 @@ void groupRandomizer::gui_RandomizersMain()
 		//}
 
 		ImGui::PushItemWidth(_w50);
-		ofxImGui::AddParameter(randomizeDurationBpm);
-		ofxSurfing::AddDragFloatSlider(randomizeDurationBpm);
+		ofxImGuiSurfing::AddParameter(randomizeDurationBpm);
+		ofxImGuiSurfing::AddDragFloatSlider(randomizeDurationBpm);
 		ImGui::PopItemWidth();
 
 		//-
@@ -1357,7 +1332,7 @@ void groupRandomizer::gui_RandomizersMain()
 			ofxSurfingHelpers::AddBigButton(bRandomizeFiltered, _w99, _h * 2);
 
 			//ofxSurfingHelpers::AddBigButton(bRandomizeFiltered, 2 * _h);
-			//ofxImGui::AddParameter(bRandomizeFiltered);// trig random current preset: will randomize all enabled toggle parameters
+			//ofxImGuiSurfing::AddParameter(bRandomizeFiltered);// trig random current preset: will randomize all enabled toggle parameters
 		}
 		*/
 
@@ -1422,7 +1397,14 @@ void groupRandomizer::gui_RandomizersMain()
 		//ImGui::Dummy(ImVec2(0, 2));
 		//ImGui::Checkbox("Auto-Resize", &auto_resize);
 	}
-	ofxImGui::EndWindow(settings);
+
+#ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
+	guiManager.endWindow();
+#endif
+
+#ifdef USE_RAW_IM_GUI__GROUP_RANDOMIZER
+	ImGui::End();
+#endif
 
 	//ImGui::PopStyleVar();
 }
@@ -1658,153 +1640,4 @@ void groupRandomizer::loadPreset(int p)
 //
 //	//verify if files are created
 //	ofLogNotice(__FUNCTION__) << ofToString(dataDirectory.size()) << " file preset at folder " << _path;
-//}
-
-
-// TODO: alternative pointer target
-////--------------------------------------------------------------
-//void groupRandomizer::setSelectorTARGET(ofParameter<int> &index) {
-//	ofLogNotice(__FUNCTION__) << "target registered: " << index.getName();
-//
-//	// TODO:
-//	//PRESET_Selected_IndexMain.makeReferenceTo(index);// TODO: it brokes saveing well..
-//	//PRESET_Selected_IndexMain.makeReferenceTo(selectorTARGET);
-//
-//	// TODO:
-//	//selectorTARGET = index;
-//}
-////--------------------------------------------------------------
-//void groupRandomizer::setup(ofParameterGroup &g, int _numPresets, ofParameter<int> &index) {
-//	setup(g, _numPresets);
-//	setSelectorTARGET(index);
-//}
-
-////--
-//
-////TODO:
-////randomizer powered
-////better random engine with min- max for the params
-//
-////--------------------------------------------------------------
-//void groupRandomizer::setup_RandomizerPowered()
-//{
-//	params_RandomizersPowered.setName("Powered Randomizer");
-//	params_RandomizersPowered.clear();
-//
-//	randomizersPowered_TogglesVector.clear();
-//	randomizersPowered_Vector.clear();
-//
-//	addGroupToRandomizerPowered(group);
-//}
-//
-////--------------------------------------------------------------
-//void groupRandomizer::addGroupToRandomizerPowered(ofParameterGroup& group) {
-//
-//	for (auto parameter : group)
-//	{
-//		// group
-//		auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
-//		if (parameterGroup)
-//		{
-//			if (!parameterGroup->isSerializable()) return;
-//
-//			addGroupToRandomizerPowered(*parameterGroup);
-//			continue;
-//		}
-//
-//		// exclude params not marked as serializable
-//		if (parameter->isSerializable())
-//		{
-//			// parameter, try everything we know how to handle.
-//
-//			// x,y,z vectors
-//#if OF_VERSION_MINOR >= 10
-//			auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
-//			if (parameterVec2f)
-//			{
-//				ofParameter<bool> b{ parameterVec2f->getName(), false };
-//				params_RandomizersPowered.push_back(b);
-//				continue;
-//			}
-//			auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
-//			if (parameterVec3f)
-//			{
-//				ofParameter<bool> b{ parameterVec3f->getName(), false };
-//				params_RandomizersPowered.push_back(b);
-//				continue;
-//			}
-//			auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
-//			if (parameterVec4f)
-//			{
-//				ofParameter<bool> b{ parameterVec4f->getName(), false };
-//				params_RandomizersPowered.push_back(b);
-//				continue;
-//			}
-//#endif
-//			auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
-//			if (parameterOfVec2f)
-//			{
-//				//ofxImGui::AddParameter(*parameterOfVec2f);
-//				ofParameter<bool> b{ parameterOfVec2f->getName(), false };
-//				params_RandomizersPowered.push_back(b);
-//				continue;
-//			}
-//			auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
-//			if (parameterOfVec3f)
-//			{
-//				//ofxImGui::AddParameter(*parameterOfVec3f);
-//				ofParameter<bool> b{ parameterOfVec3f->getName(), false };
-//				params_RandomizersPowered.push_back(b);
-//				continue;
-//			}
-//			auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
-//			if (parameterOfVec4f)
-//			{
-//				ofParameter<bool> b{ parameterOfVec4f->getName(), false };
-//				params_RandomizersPowered.push_back(b);
-//				//ofxImGui::AddParameter(*parameterOfVec4f);
-//				continue;
-//			}
-//			// colors
-//			auto parameterColor = std::dynamic_pointer_cast<ofParameter<ofColor>>(parameter);
-//			if (parameterColor)
-//			{
-//				ofParameter<bool> b{ parameterColor->getName(), false };
-//				params_RandomizersPowered.push_back(b);
-//				continue;
-//			}
-//			auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
-//			if (parameterFloatColor)
-//			{
-//				ofParameter<bool> b{ parameterFloatColor->getName(), false };
-//				params_RandomizersPowered.push_back(b);
-//				continue;
-//			}
-//			// normal types
-//			auto parameterFloat = std::dynamic_pointer_cast<ofParameter<float>>(parameter);
-//			if (parameterFloat)
-//			{
-//				ofParameter<bool> b{ parameterFloat->getName(), false };
-//				params_RandomizersPowered.push_back(b);
-//				//ofxImGui::AddParameter(*parameterFloat);
-//				continue;
-//			}
-//			auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
-//			if (parameterInt)
-//			{
-//				ofParameter<bool> b{ parameterInt->getName(), false };
-//				params_RandomizersPowered.push_back(b);
-//				continue;
-//			}
-//			auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
-//			if (parameterBool)
-//			{
-//				ofParameter<bool> b{ parameterBool->getName(), false };
-//				params_RandomizersPowered.push_back(b);
-//				continue;
-//			}
-//
-//			ofLogWarning(__FUNCTION__) << "Could not create GUI element for parameter " << parameter->getName();
-//		}
-//	}
 //}
