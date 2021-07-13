@@ -6,8 +6,8 @@
 
 class ofApp : public ofBaseApp
 {
-
 public:
+
 	void setup();
 	void setupPresets();
     void draw();

@@ -39,10 +39,13 @@ void ofApp::setupPresets()
 
 	// optional:
 
+	presetsManager.setImGuiAutodraw(true); // -> required true when using only one ImGui instance inside the add-ons of your ofApp
+
 	// customize user-kit name: 
 	// then will create this named main settings file: 'bin/data/myKit_01.json'
 	// must call setup after adding all ofParameterGroup's
 	std::string name = "myKit_01";
+	
 	presetsManager.setup(name);
 }
 

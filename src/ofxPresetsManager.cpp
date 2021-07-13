@@ -118,7 +118,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//SHOW_Panel_AllSelectors.set("SHOW SELECTORS", false);
 	SHOW_Panel_Standalones.set("SHOW STANDALONES", false);
 	SHOW_Panel_Players.set("SHOW PLAYERS", false);
-	SHOW_Panel_EditPlayer.set("EDIT PLAYER", false);
+	SHOW_Panel_EditPlayer.set("RANDOMiZER PLAYER", false);
 	//SHOW_Panel_RandomizerParams.set("RANDOM PARAMS", false);
 
 	SHOW_Panels.set("SHOW PANELS", true);
@@ -3182,6 +3182,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 				if (ofxImGui::BeginWindow("PLAYER SELECTOR", settings, flagsw))
 				{
 					ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+								_h *= 2;
 
 					std::string str;
 
@@ -3239,7 +3240,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		// handles matrix button selector too
 		//TODO:CRASH
 		gui_Randomizers();
-		
+
 		//-
 
 		// standalone presets browser
@@ -3267,7 +3268,7 @@ void ofxPresetsManager::gui_Parameters()
 	widgetsManager.refreshPanelShape();
 
 	string n = "Parameters";
-	guiManager.beginWindow(n.c_str(), NULL, flagsw);
+	guiManager.beginWindow(n.c_str(), (bool*)&SHOW_Panel_AllParameters.get(), flagsw);
 	{
 		float _spcx;
 		float _spcy;
@@ -3284,6 +3285,7 @@ void ofxPresetsManager::gui_Parameters()
 		_w33 = getWidgetsWidth(3);
 		_w25 = getWidgetsWidth(4);
 		ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+		_h *= 2;
 
 		//-
 
@@ -3439,7 +3441,8 @@ void ofxPresetsManager::gui_Panels()
 	//ofxImGui::Settings settings;
 
 	string n = "PANELS";
-	guiManager.beginWindow(n.c_str(), NULL, flagsw);
+	guiManager.beginWindow(n.c_str(), (bool*)&SHOW_Panels.get(), flagsw);
+	//guiManager.beginWindow(n.c_str(), NULL, flagsw);
 	{
 		//--
 
@@ -3448,6 +3451,7 @@ void ofxPresetsManager::gui_Panels()
 		//if (ImGui::CollapsingHeader("PANELS"))
 		{
 			ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+			_h *= 2;
 			_hh = _h;
 
 			ofxImGuiSurfing::AddBigToggle(SHOW_Panel_Click, _w100, _hh);
@@ -3471,6 +3475,7 @@ void ofxPresetsManager::gui_Panels()
 			if (ImGui::CollapsingHeader("TWEENER", _flagw))
 			{
 				ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+				_h *= 2;
 
 				ofxImGuiSurfing::AddBigToggle(dataTween.bGui, _w100, _hh);
 				//ofxImGuiSurfing::AddBigToggle(dataTween.enableTween, _w100, _hh / 2);
@@ -3488,6 +3493,7 @@ void ofxPresetsManager::gui_Panels()
 			//if (ImGui::CollapsingHeader("PLAYER", _flagw))
 			//{
 			//	ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+			//_h *= 2;
 
 			//	if (groups.size() >= 1)
 			//	{
@@ -3513,6 +3519,15 @@ void ofxPresetsManager::gui_Panels()
 			if (ImGui::CollapsingHeader("RANDOMIZERS", _flagw))
 			{
 				ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+				_h *= 2;
+
+				ofxImGuiSurfing::AddBigToggle(SHOW_Panel_EditPlayer, _w100, _hh ); //ImGui::SameLine();
+				//ofxImGuiSurfing::AddBigToggle(SHOW_Panel_RandomizerParams, _w100, _hh);
+
+				ImGui::Dummy(ImVec2(0.f, 2.f));
+				ofxImGuiSurfing::AddBigToggle(SHOW_Panel_Players, _w100, _h );
+
+				//-
 
 #ifdef INCLUDE_ofxSurfingRandomizer
 				//ImGui::Dummy(ImVec2(0.f, 2.f));
@@ -3536,6 +3551,7 @@ void ofxPresetsManager::gui_Panels()
 			if (ImGui::CollapsingHeader("EXTRA", _flagw))
 			{
 				ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+				_h *= 2;
 
 				//ofxImGuiSurfing::AddBigToggle(SHOW_Panel_AllSelectors, _w100, _h / 2);
 				ofxImGuiSurfing::AddBigToggle(SHOW_Panel_Standalones, _w100, _h / 2);
@@ -3574,6 +3590,7 @@ void ofxPresetsManager::gui_MainPanel()
 		float _w25;
 		float _h;
 		ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+		_h *= 2;
 
 		std::string str;
 
@@ -3612,8 +3629,7 @@ void ofxPresetsManager::gui_MainPanel()
 
 		// 1. EDIT MODE
 
-		ofxImGuiSurfing::AddBigToggleNamed(MODE_Editor, _w100, _h, "EDIT MODE", "LIVE MODE");
-		//ofxImGuiSurfing::AddBigToggle(MODE_Editor, _w100, 2 * _h);
+		ofxImGuiSurfing::AddBigToggleNamed(MODE_Editor, _w100, 2 * _h, "EDIT MODE", "LIVE MODE");
 
 		// SAVE
 		//if (!MODE_Editor)
@@ -3639,13 +3655,13 @@ void ofxPresetsManager::gui_MainPanel()
 
 		ImGui::PushButtonRepeat(true);
 		{
-			if (ImGui::Button("<", ImVec2(_w50, _h / 2)))
+			if (ImGui::Button("<", ImVec2(_w50, _h )))
 			{
 				int ig = GuiGROUP_Selected_Index.get();
 				load_Previous(ig, true);
 			}
 			ImGui::SameLine();
-			if (ImGui::Button(">", ImVec2(_w50, _h / 2)))
+			if (ImGui::Button(">", ImVec2(_w50, _h )))
 			{
 				int ig = GuiGROUP_Selected_Index.get();
 				load_Next(ig, true);
@@ -3677,6 +3693,7 @@ void ofxPresetsManager::gui_MainPanel()
 		if (ImGui::CollapsingHeader(name.c_str()))
 		{
 			ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+			_h *= 2;
 
 			//multi groups ?
 			//if (bBuildGroupSelector) 
@@ -3751,6 +3768,7 @@ void ofxPresetsManager::gui_MainPanel()
 			if (ImGui::CollapsingHeader("TOOLS"))
 			{
 				ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+				_h *= 2;
 
 				//ImGui::Dummy(ImVec2(0, 5));
 
@@ -3790,9 +3808,14 @@ void ofxPresetsManager::gui_MainPanel()
 		if (ImGui::CollapsingHeader("PLAYERS"))
 		{
 			ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+			_h *= 2;
 
 			ofxImGuiSurfing::AddBigToggle(SHOW_Panel_Players, _w100, _h);
-			ofxImGuiSurfing::AddBigToggle(bSHOW_allGroups, _w100, _h / 2);
+
+			if (groups.size() > 1) 
+			{
+				ofxImGuiSurfing::AddBigToggle(bSHOW_allGroups, _w100, _h / 2);
+			}
 
 			ImGui::Dummy(ImVec2(0.0f, 2.0f));
 
@@ -3809,7 +3832,9 @@ void ofxPresetsManager::gui_MainPanel()
 				if (b) a = 1 - tf;
 				else a = 1.0f;
 				if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
-				ofxImGuiSurfing::AddBigToggle(groupRandomizers[i].PLAY_RandomizeTimer, _w100, _h / 2, false);
+				//if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
+				//ofxImGuiSurfing::AddBigToggle(groupRandomizers[i].PLAY_RandomizeTimer, _w100, _h / 2, false);
+				ofxImGuiSurfing::AddBigToggleNamed(groupRandomizers[i].PLAY_RandomizeTimer, _w100, _h/2, "STOP RANDOMIZER", "PLAY RANDOMIZER");
 				if (b) ImGui::PopStyleColor();
 				ImGui::PopID();
 			}
@@ -3825,6 +3850,7 @@ void ofxPresetsManager::gui_MainPanel()
 			if (ImGui::CollapsingHeader("UNDO ENGINE"))
 			{
 				ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+				_h *= 2;
 
 				str = "History: " + ofToString(undoStringsParams[GuiGROUP_Selected_Index].getUndoLength()) + "/";
 				str += ofToString(undoStringsParams[GuiGROUP_Selected_Index].getRedoLength());
@@ -3851,7 +3877,7 @@ void ofxPresetsManager::gui_MainPanel()
 					doRedo();
 				}
 			}
-		}
+	}
 #endif
 
 		//--
@@ -3877,7 +3903,7 @@ void ofxPresetsManager::gui_MainPanel()
 		}
 
 		//--
-	}
+}
 	//ofxImGui::EndWindow(settings);
 	guiManager.endWindow();
 
@@ -3903,6 +3929,7 @@ void ofxPresetsManager::gui_Advanced()
 			float _w25;
 			float _h;
 			ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+			_h *= 2;
 
 			//--
 
@@ -3950,6 +3977,7 @@ void ofxPresetsManager::gui_Advanced()
 					//if (ImGui::CollapsingHeader("USER-KIT"))
 				{
 					ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+			_h *= 2;
 
 					//--
 
@@ -4198,7 +4226,7 @@ void ofxPresetsManager::gui_Standalones()
 		flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
 		string n = "STANDALONES";
-		guiManager.beginWindow(n.c_str(), NULL, flagsw);
+		guiManager.beginWindow(n.c_str(), (bool*)&SHOW_Panel_Standalones.get(), flagsw);
 		{
 			float _w100;
 			float _w50;
@@ -4206,7 +4234,6 @@ void ofxPresetsManager::gui_Standalones()
 			float _w25;
 			float _h;
 			ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
-			_h = _h / 2;
 
 			//--
 
@@ -4268,7 +4295,7 @@ void ofxPresetsManager::gui_Standalones()
 
 				// get/copy all favs presets from favs and send/save to browser folder ("archive")
 
-				if (ImGui::Button("CREATE FROM FAVS", ImVec2(_w100, _h)))
+				if (ImGui::Button("CREATE FROM FAVS", ImVec2(_w100, 2 * _h)))
 				{
 					ofLogNotice(__FUNCTION__) << "CREATE FROM FAVS";
 
@@ -4659,18 +4686,18 @@ void ofxPresetsManager::gui_Randomizers()
 		{
 			for (int i = 0; i < groupRandomizers.size(); i++)
 			{
-				if (SHOW_Panel_Players) groupRandomizers[i].gui_RandomizersMain();
-				if (SHOW_Panel_EditPlayer) groupRandomizers[i].gui_RandomizerIndex();
-				//if (SHOW_Panel_RandomizerParams) groupRandomizers[i].gui_RandomizerParams();
+				if (SHOW_Panel_Players) groupRandomizers[i].drawImGui_RandomizersMain();
+				if (SHOW_Panel_EditPlayer) groupRandomizers[i].drawImGui_RandomizerEditPlayer();
+				//if (SHOW_Panel_RandomizerParams) groupRandomizers[i].drawImGui_RandomizerParams();
 			}
 		}
 
 		// only selected
 		else
 		{
-			if (SHOW_Panel_Players) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizersMain();
-			if (SHOW_Panel_EditPlayer) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizerIndex();
-			//if (SHOW_Panel_RandomizerParams) groupRandomizers[GuiGROUP_Selected_Index.get()].gui_RandomizerParams();
+			if (SHOW_Panel_Players) groupRandomizers[GuiGROUP_Selected_Index.get()].drawImGui_RandomizersMain();
+			if (SHOW_Panel_EditPlayer) groupRandomizers[GuiGROUP_Selected_Index.get()].drawImGui_RandomizerEditPlayer();
+			//if (SHOW_Panel_RandomizerParams) groupRandomizers[GuiGROUP_Selected_Index.get()].drawImGui_RandomizerParams();
 		}
 	}
 }

@@ -144,7 +144,7 @@
 
 //--
 
-#include "groupRandomizer.h"
+#include "SurfingGroupRandomizer.h"
 
 #include "ofxInteractiveRect.h" // engine to move the user clicker buttons panel. TODO: add resize by mouse too.
 #include "ofxSurfingConstants.h" // defines (modes) are here "to share between addons" in one place
@@ -265,8 +265,10 @@ public:
 private:
 	bool bDoneSetup = false;// to ensure all setup process is done and avoid troubles if not after
 
+public:
 	void startup();// must be called after setup (who is called after all group adds) to set initial states well
 
+private:
 	void doCheckPresetsFoldersAreEmpty();// used on startup. check if all favorites preset are present, and creates folders and content if not
 
 	void setupEngines();
@@ -341,7 +343,7 @@ private:
 	ofParameter<int> GuiGROUP_Selected_Index;// only this selected group will be showed on gui to edit
 	ofParameter<bool> bSHOW_allGroups;//enable to show all, each group panels
 	void Changed_GuiGROUP_Selected_Index(int & index);
-	std::vector<groupRandomizer> groupRandomizers;
+	std::vector<SurfingGroupRandomizer> groupRandomizers;
 
 	// selector for last group: is the main group link
 	ofParameterGroup params_GroupMainSelector{ "GROUP_LINK" };
