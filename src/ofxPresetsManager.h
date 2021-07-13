@@ -101,6 +101,7 @@
 //
 //#define USE_JSON	// set the file settings format (xml or json). already defined into ofxSurfingHelpers
 #define NUM_MAX_GROUPS 10
+//TODO: should be better to push to a vector..
 
 //-
 
@@ -117,7 +118,6 @@
 //--
 
 // extra c libs
-
 //#include <iostream>
 //#include <memory>
 
@@ -343,6 +343,7 @@ private:
 	ofParameter<int> GuiGROUP_Selected_Index;// only this selected group will be showed on gui to edit
 	ofParameter<bool> bSHOW_allGroups;//enable to show all, each group panels
 	void Changed_GuiGROUP_Selected_Index(int & index);
+
 	std::vector<SurfingGroupRandomizer> groupRandomizers;
 
 	// selector for last group: is the main group link

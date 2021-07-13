@@ -53,7 +53,6 @@ void ofApp::setupPresets()
 void ofApp::setup()
 {
 	ofSetFrameRate(60);
-	ofSetVerticalSync(true);
 	ofSetCircleResolution(200);
 
 	//--
