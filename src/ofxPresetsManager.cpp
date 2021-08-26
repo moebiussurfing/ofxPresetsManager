@@ -3265,7 +3265,7 @@ void ofxPresetsManager::gui_Parameters()
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
-	widgetsManager.refreshPanelShape();
+	guiManager.refresh();
 
 	string n = "Parameters";
 	guiManager.beginWindow(n.c_str(), (bool*)&SHOW_Panel_AllParameters.get(), flagsw);

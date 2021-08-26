@@ -103,6 +103,8 @@
 #define NUM_MAX_GROUPS 10
 //TODO: should be better to push to a vector..
 
+//#define INCLUDE_ofxUndoSimple
+
 //-
 
 //	4. DEBUG
