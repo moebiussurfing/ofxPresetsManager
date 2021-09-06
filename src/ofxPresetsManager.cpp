@@ -112,20 +112,20 @@ ofxPresetsManager::ofxPresetsManager()
 
 	SHOW_ImGui.set("SHOW ImGui", false);
 	SHOW_ImGui_PresetsParams.set("SHOW PRESET PARAMETERS", false);
-	SHOW_ImGui_Selectors.set("SHOW SELECTORS", false);
-	SHOW_Panel_Click.set("SHOW CLICKER", true);
-	SHOW_Panel_AllParameters.set("SHOW PARAMETERS", false);
+	SHOW_ImGui_Selectors.set("SELECTORS", false);
+	SHOW_Panel_Click.set("CLICKER", true);
+	SHOW_Panel_AllParameters.set("PARAMETERS", false);
 	//SHOW_Panel_AllSelectors.set("SHOW SELECTORS", false);
-	SHOW_Panel_Standalones.set("SHOW STANDALONES", false);
-	SHOW_Panel_Players.set("SHOW PLAYERS", false);
+	SHOW_Panel_Standalones.set("STANDALONES", false);
+	SHOW_Panel_Players.set("PLAYERS", false);
 	SHOW_Panel_EditPlayer.set("RANDOMiZER PLAYER", false);
 	//SHOW_Panel_RandomizerParams.set("RANDOM PARAMS", false);
 
 	SHOW_Panels.set("SHOW PANELS", true);
-	SHOW_Help.set("SHOW HELP", false);
-	SHOW_Gui_AdvancedControl.set("SHOW ADVANCED", false);
+	SHOW_Help.set("HELP", false);
+	SHOW_Gui_AdvancedControl.set("ADVANCED", false);
 	MODE_StandalonePresets_NEW.set("NEW!", false);
-	ENABLE_Keys.set("ENABLE KEYS", true);
+	ENABLE_Keys.set("KEYS", true);
 	ENABLE_Keys.setSerializable(false);
 
 	autoLoad.set("AUTO LOAD", true);

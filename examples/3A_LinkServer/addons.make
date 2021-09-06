@@ -5,3 +5,5 @@ ofxPresetsManager
 ofxRemoteParameters
 ofxScaleDragRect
 ofxSurfingHelpers
+ofxMSAInteractiveObject
+ofxSurfingImGui

@@ -232,10 +232,11 @@ public:
 	void windowResized(int w, int h);
 	void exit();
 
+public:
+	void clear();
 private:
 	void ImGui_Draw();
 	void drawHelp();
-	void clear();
 
 	//----
 
