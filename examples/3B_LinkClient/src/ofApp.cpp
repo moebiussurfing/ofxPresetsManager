@@ -1,5 +1,6 @@
 #include "ofApp.h"
 
+// Remote
 static std::string moduleName = "of_client";
 const static std::string SERVER_IP_ADDRESS = "127.0.0.1";
 
@@ -16,14 +17,8 @@ void ofApp::setup()
 	font.load("assets/fonts/telegrama_render.otf", 11);
 
 	//-
-
-	// Remote
-	paramClient.setup(params, SERVER_IP_ADDRESS, 12000, 12001);
-	modelLoadedEventListener = paramClient.modelLoadedEvent.newListener([this]() {
-		buildGui();
-	});
-
-	buildGui();
+	
+	setupRemote();
 
 	//-
 
@@ -33,8 +28,29 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
-	// gui
+	drawRemote();
+}
 
+//--
+
+// -> Remote
+
+//--------------------------------------------------------------
+void ofApp::setupRemote()
+{
+	// Remote
+	paramClient.setup(params_Remote, SERVER_IP_ADDRESS, 12000, 12001);
+	modelLoadedEventListener = paramClient.modelLoadedEvent.newListener([this]() {
+		buildGui();
+	});
+
+	buildGui();
+}
+
+//--------------------------------------------------------------
+void ofApp::drawRemote()
+{
+	// gui
 	gui.begin();
 	{
 		ofxImGui::Settings s;
@@ -51,7 +67,7 @@ void ofApp::draw()
 				paramClient.connect();
 			}
 
-			ofxImGui::AddGroup(params, s);
+			ofxImGui::AddGroup(params_Remote, s);
 		}
 		ofxImGui::EndWindow(s);
 	}
@@ -63,7 +79,7 @@ void ofApp::buildGui()
 {
 #ifdef USE_PRESETS
 	presetsManager.clear();
-	presetsManager.add(params, { '0', '1', '2', '3', '4', '5' });
+	presetsManager.add(params_Remote, { '0', '1', '2', '3', '4', '5' });
 	presetsManager.setup();
 #endif
 }

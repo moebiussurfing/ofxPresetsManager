@@ -1084,8 +1084,8 @@ void SurfingGroupRandomizer::keyPressed(int key)
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::drawImGui_RandomizerEditPlayer()
 {
-	static bool auto_resize = false;
-	//static bool auto_resize = true;
+	//static bool auto_resize = false;
+	static bool auto_resize = true;
 
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
@@ -1094,7 +1094,7 @@ void SurfingGroupRandomizer::drawImGui_RandomizerEditPlayer()
 	float hh = 50;
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(ww, hh));
 
-	string n = "RANDOMiZER PLAYER | " + group.getName();
+	string n = "EDITOR " + group.getName();
 
 #ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
 	guiManager.beginWindow(n.c_str(), NULL, flagsw);
@@ -1132,26 +1132,22 @@ void SurfingGroupRandomizer::drawImGui_RandomizerEditPlayer()
 	ImGui::PopStyleVar();
 }
 
-//--------------------------------------------------------------
-void SurfingGroupRandomizer::drawImGui_RandomizerParams()
-{
-}
+////--------------------------------------------------------------
+//void SurfingGroupRandomizer::drawImGui_RandomizerParams()
+//{
+//}
 
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 {
 	// 1. randomizers
-	string str = "GROUP | " + group.getName();
+	string str = "PLAYER " + group.getName();
 
-	static bool auto_resize = false;
-	//static bool auto_resize = true;
+	//static bool auto_resize = false;
+	static bool auto_resize = true;
 
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
-
-	//float ww = PANEL_WIDGETS_WIDTH;
-	//float hh = PANEL_WIDGETS_HEIGHT;
-	//ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(ww, ofGetHeight() - 100));
 
 #ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
 	guiManager.beginWindow(str.c_str(), NULL, flagsw);
@@ -1160,53 +1156,292 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 #ifdef USE_RAW_IM_GUI__GROUP_RANDOMIZER
 	ImGui::Begin(str.c_str(), NULL, flagsw);
 #endif
-
 	{
-		float _spcx;
-		float _spcy;
-		float _w100;
-		float _h100;
-		float _w99;
-		float _w50;
-		float _w33;
-		float _w25;
-		float _h;
-		ofxImGuiSurfing::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
-
-		//---
-
-		// preset selector
-
-		ImGui::Dummy(ImVec2(0, 5));
-
-		////string str = "User-Kit: " + displayNameUserKit;
-		//str = "  Group    " + group.getName();
-		//ImGui::Text(str.c_str());
-
-		str = "Preset: " + ofToString(PRESET_Selected_IndexMain.get());
-		ImGui::Text(str.c_str());
-
-		//ImGui::Dummy(ImVec2(0, 5));
-
-		//ImGui::PushItemWidth(_w50);
-		ImGui::PushItemWidth(WIDGET_PARAM_PADDING);
-		ofxImGuiSurfing::AddParameter(PRESET_Selected_IndexMain);
-		ImGui::PopItemWidth();
-
-		//ImGui::SameLine();
-		ImGui::Dummy(ImVec2(0, 2));
-
-		//--
-
-
 		{
-			//widgetsManager.refreshPanelShape();
-			_w100 = getWidgetsWidth(1);
-			_w50 = getWidgetsWidth(2);
+			float _spcx;
+			float _spcy;
+			float _w100;
+			float _h100;
+			float _w99;
+			float _w50;
+			float _w33;
+			float _w25;
+			float _h;
+			ofxImGuiSurfing::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
-			ofxImGuiSurfing::AddMatrixClicker(PRESET_Selected_IndexMain, respBtnsClicker, amntBtnsClicker, true);
+			//---
 
-			//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Editor);
+			// preset selector
+
+			ImGui::Dummy(ImVec2(0, 5));
+
+			////string str = "User-Kit: " + displayNameUserKit;
+			//str = "  Group    " + group.getName();
+			//ImGui::Text(str.c_str());
+
+			str = "Preset: " + ofToString(PRESET_Selected_IndexMain.get());
+			ImGui::Text(str.c_str());
+
+			//ImGui::Dummy(ImVec2(0, 5));
+
+			ImGui::PushItemWidth(_w50);
+			//ImGui::PushItemWidth(WIDGET_PARAM_PADDING);
+			ofxImGuiSurfing::AddParameter(PRESET_Selected_IndexMain);
+			ImGui::PopItemWidth();
+
+			//ImGui::SameLine();
+			ImGui::Dummy(ImVec2(0, 2));
+
+			//--
+
+			{
+				//widgetsManager.refreshPanelShape();
+				_w100 = getWidgetsWidth(1);
+				_w50 = getWidgetsWidth(2);
+
+				ofxImGuiSurfing::AddMatrixClicker(PRESET_Selected_IndexMain, respBtnsClicker, amntBtnsClicker, true);
+
+				//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Editor);
+			}
+
+			// TODO: copy this code to my ImGui hewlpers..
+			/*
+			// preset clicker matrix buttons
+			{
+				//ImGui::Text("PRESET SELECTOR:");
+				// toggle button matrix
+				ImVec2 button_sz(40, 40);
+				// Manually wrapping
+				// (we should eventually provide this as an automatic layout feature, but for now you can do it manually)
+
+				ImGuiStyle& style2 = ImGui::GetStyle();
+				int _amtButtons = amountPresets;
+				float _windowVisible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+
+				ImGuiStyle *style = &ImGui::GetStyle();
+				ImVec4 borderLineColor = style->Colors[ImGuiCol_TextDisabled];
+				//ImVec4 borderLineColor = style->Colors[ImGuiCol_Border];
+				//ImVec4 borderLineColor = style->Colors[ImGuiCol_Separator];
+				float borderLineWidth = 1.0;
+
+				for (int n = 0; n < _amtButtons; n++)
+				{
+					bool bBorder = false;
+					ImGui::PushID(n);
+
+					string name = ofToString((char)(keys[n]));
+
+					// customize colors
+					{
+						if (PRESET_Selected_IndexMain.get() == n)// when selected
+						{
+							bBorder = true;
+
+							const ImVec4 colorActive = style2.Colors[ImGuiCol_ButtonActive];// changes the color
+							//const ImVec4 colorActive = style2.Colors[ImGuiCol_ButtonHovered];// changes the color
+							ImGui::PushStyleColor(ImGuiCol_Button, colorActive);
+						}
+						else {
+							const ImVec4 colorButton = style2.Colors[ImGuiCol_Button];// do not changes the color
+							ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
+						}
+
+						// border
+						if (bBorder)
+						{
+							uint32_t _time = ofGetElapsedTimeMillis();
+							float a = ofMap(_time % randomizeDuration, 0, randomizeDuration, 0.8, 0.4);
+							ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(borderLineColor.x, borderLineColor.y, borderLineColor.z, borderLineColor.w * a));
+							ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, borderLineWidth);
+						}
+
+						// draw button
+						if (ImGui::Button(name.c_str(), button_sz))
+						{
+							loadPreset(n);// trig load preset
+						}
+
+						// border
+						if (bBorder)
+						{
+							ImGui::PopStyleVar(1);
+							ImGui::PopStyleColor();
+						}
+
+						// customize colors
+						ImGui::PopStyleColor();
+
+					}
+					float last_button_x2 = ImGui::GetItemRectMax().x;
+					float next_button_x2 = last_button_x2 + style2.ItemSpacing.x + button_sz.x; // Expected position if next button was on same line
+					if (n + 1 < _amtButtons && next_button_x2 < _windowVisible_x2) ImGui::SameLine();
+
+					ImGui::PopID();
+				}
+			}
+			*/
+
+			//--
+
+			// 1. presets randomizers
+
+			//-
+
+			//ImGui::Dummy(ImVec2(0, 10));
+
+			//str = "RANDOMIZER";
+			//ImGui::Text(str.c_str());
+			ImGui::Dummy(ImVec2(0, 2));
+
+			// 1.0.1 play randomizer index
+
+			//blink by timer
+			float tf = getPlayerPct();
+			bool b = PLAY_RandomizeTimer.get();
+			float a;
+			if (b) a = 1 - tf;
+			else a = 1.0f;
+			if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
+			//if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
+			//ofxImGuiSurfing::AddBigToggle(PLAY_RandomizeTimer, _w100, _h / 2, false);
+			ofxImGuiSurfing::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
+			if (b) ImGui::PopStyleColor();
+
+			//ofxImGuiSurfing::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
+			//ofxImGuiSurfing::AddParameter(PLAY_RandomizeTimer);
+			//ofxImGuiSurfing::AddBigToggle(PLAY_RandomizeTimer, 30);
+
+			//--
+
+			// 1.0.2 draw progress bar for the randomizer timer
+			{
+				ImGuiStyle *style = &ImGui::GetStyle();
+
+				ImGui::PushID("prog");
+				const ImVec4 color = style->Colors[ImGuiCol_ButtonHovered];//we can force change this color on theme... only used here
+				ImGui::PushStyleColor(ImGuiCol_PlotHistogram, color);
+				//ImGui::ProgressBar(randomizerProgress.get());
+				ImGui::ProgressBar(_prog);
+				ImGui::PopStyleColor();
+				ImGui::PopID();
+				//cout << _prog << endl;
+			}
+
+			//-
+
+			// 1.0.1B BPM slider
+
+			//auto parameter = randomizeDurationBpm;
+			//auto tmpRef = randomizeDurationBpm.get();
+			//auto name = ofxImGui::GetUniqueName(randomizeDurationBpm);
+			//if (ImGui::SliderFloat(ofxImGui::GetUniqueName(parameter), (float *)&tmpRef, parameter.getMin(), parameter.getMax()))
+			//{
+			//	parameter.set(tmpRef);
+			//}
+
+			ImGui::PushItemWidth(_w50);
+			ofxImGuiSurfing::AddParameter(randomizeDurationBpm);
+			//ofxImGuiSurfing::AddDragFloatSlider(randomizeDurationBpm);
+			ImGui::PopItemWidth();
+
+			if (ImGui::Button("Half", ImVec2(_w50, _h))) {
+				randomizeDurationBpm = randomizeDurationBpm / 2.0f;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Double", ImVec2(_w50, _h))) {
+				randomizeDurationBpm = randomizeDurationBpm * 2.0f;
+			}
+			if (ImGui::Button("Reset", ImVec2(_w100, _h)))
+			{
+				randomizeDurationBpm = 120;
+			}
+
+			//ImGui::Dummy(ImVec2(0, 2));
+
+			//--
+
+			/*
+			if (MODE_Editor)
+			{
+				// 1.0.3 bang randomize
+
+				ImGui::Dummy(ImVec2(0, 5));
+
+				// random index
+				ofxSurfingHelpers::AddBigButton(bRandomizeIndex, _w99, _h * 2);
+
+				// random filter
+				ofxSurfingHelpers::AddBigButton(bRandomizeFiltered, _w99, _h * 2);
+
+				//ofxSurfingHelpers::AddBigButton(bRandomizeFiltered, 2 * _h);
+				//ofxImGuiSurfing::AddParameter(bRandomizeFiltered);// trig random current preset: will randomize all enabled toggle parameters
+			}
+			*/
+
+			//--
+
+			//// TODO: undo engine
+			//if (MODE_Editor)
+			//{
+			//	float wHalf = 100;
+			//	if (ImGui::Button("UNDO", ImVec2(wHalf, 20)))
+			//	{
+			//		//ofLogNotice(__FUNCTION__) << "UNDO <-";
+			//		//undoStringParams.undo();
+			//		//doRefreshUndoParams();
+			//	}
+			//	ImGui::SameLine();
+			//	if (ImGui::Button("REDO", ImVec2(wHalf, 20)))
+			//	{
+			//		//ofLogNotice(__FUNCTION__) << "REDO ->";
+			//		//undoStringParams.redo();
+			//		//doRefreshUndoParams();
+			//	}
+			//	//string str = "";
+			//	//str += ofToString(undoStringParams.getUndoLength()) + "/";
+			//	//str += ofToString(undoStringParams.getRedoLength());
+			//	//ImGui::Text(str.c_str());
+			//}
+
+			//--
+
+			/*
+			// workflow
+			//if (MODE_Editor)
+			{
+				ImGui::Dummy(ImVec2(0, 5));
+
+				// 1.0 edit folder
+
+				if (ImGui::CollapsingHeader("EDIT"))
+				{
+					// 1.1 randomizer index presets
+
+					//drawImGui_RandomizerEditPlayer();
+					ofxImGui::AddGroup(params_Randomizer, settings);
+
+					//--
+
+					// 1.2 randomizers fillter editor
+
+					//drawImGui_RandomizerParams();
+					ofxImGui::AddGroup(params_RandomizersFiltered, settings);
+				}
+			}
+			*/
+
+			//ImGui::Dummy(ImVec2(0, 5));
+			//ofxSurfingHelpers::AddBigButton(SHOW_Panel_EditPlayer, _w99, _h);
+			//ofxSurfingHelpers::AddBigButton(bGui_RandomizerParams, _w99, _h);
+
+			//-
+
+			//ImGui::Dummy(ImVec2(0, 2));
+			//ImGui::Checkbox("Auto-Resize", &auto_resize);
+
+			//-
+
+			// extra
 
 			ofxImGuiSurfing::AddToggleRoundedButton(bExtraClicker);
 			if (bExtraClicker)
@@ -1218,8 +1453,8 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 				ofxImGuiSurfing::AddToggleRoundedButton(respBtnsClicker);
 				if (respBtnsClicker)
 				{
-					ImGui::PushItemWidth(WIDGET_PARAM_PADDING);
-					//ImGui::PushItemWidth(_w50 - 20);
+					//ImGui::PushItemWidth(WIDGET_PARAM_PADDING);
+					ImGui::PushItemWidth(_w50);
 					ofxImGuiSurfing::AddIntStepped(amntBtnsClicker);
 					//ofxImGuiSurfing::AddParameter(amntBtnsClicker);
 					ImGui::PopItemWidth();
@@ -1229,247 +1464,14 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 			}
 		}
 
-		// TODO: copy this code to my ImGui hewlpers..
-		/*
-		// preset clicker matrix buttons
-		{
-			//ImGui::Text("PRESET SELECTOR:");
-			// toggle button matrix
-			ImVec2 button_sz(40, 40);
-			// Manually wrapping
-			// (we should eventually provide this as an automatic layout feature, but for now you can do it manually)
-
-			ImGuiStyle& style2 = ImGui::GetStyle();
-			int _amtButtons = amountPresets;
-			float _windowVisible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
-
-			ImGuiStyle *style = &ImGui::GetStyle();
-			ImVec4 borderLineColor = style->Colors[ImGuiCol_TextDisabled];
-			//ImVec4 borderLineColor = style->Colors[ImGuiCol_Border];
-			//ImVec4 borderLineColor = style->Colors[ImGuiCol_Separator];
-			float borderLineWidth = 1.0;
-
-			for (int n = 0; n < _amtButtons; n++)
-			{
-				bool bBorder = false;
-				ImGui::PushID(n);
-
-				string name = ofToString((char)(keys[n]));
-
-				// customize colors
-				{
-					if (PRESET_Selected_IndexMain.get() == n)// when selected
-					{
-						bBorder = true;
-
-						const ImVec4 colorActive = style2.Colors[ImGuiCol_ButtonActive];// changes the color
-						//const ImVec4 colorActive = style2.Colors[ImGuiCol_ButtonHovered];// changes the color
-						ImGui::PushStyleColor(ImGuiCol_Button, colorActive);
-					}
-					else {
-						const ImVec4 colorButton = style2.Colors[ImGuiCol_Button];// do not changes the color
-						ImGui::PushStyleColor(ImGuiCol_Button, colorButton);
-					}
-
-					// border
-					if (bBorder)
-					{
-						uint32_t _time = ofGetElapsedTimeMillis();
-						float a = ofMap(_time % randomizeDuration, 0, randomizeDuration, 0.8, 0.4);
-						ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(borderLineColor.x, borderLineColor.y, borderLineColor.z, borderLineColor.w * a));
-						ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, borderLineWidth);
-					}
-
-					// draw button
-					if (ImGui::Button(name.c_str(), button_sz))
-					{
-						loadPreset(n);// trig load preset
-					}
-
-					// border
-					if (bBorder)
-					{
-						ImGui::PopStyleVar(1);
-						ImGui::PopStyleColor();
-					}
-
-					// customize colors
-					ImGui::PopStyleColor();
-
-				}
-				float last_button_x2 = ImGui::GetItemRectMax().x;
-				float next_button_x2 = last_button_x2 + style2.ItemSpacing.x + button_sz.x; // Expected position if next button was on same line
-				if (n + 1 < _amtButtons && next_button_x2 < _windowVisible_x2) ImGui::SameLine();
-
-				ImGui::PopID();
-			}
-		}
-		*/
-
-		//--
-
-		// 1. presets randomizers
-
-		//-
-
-		//ImGui::Dummy(ImVec2(0, 10));
-
-		//str = "RANDOMIZER";
-		//ImGui::Text(str.c_str());
-		ImGui::Dummy(ImVec2(0, 2));
-
-		// 1.0.1 play randomizer index
-
-		//blink by timer
-		float tf = getPlayerPct();
-		bool b = PLAY_RandomizeTimer.get();
-		float a;
-		if (b) a = 1 - tf;
-		else a = 1.0f;
-		if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
-		//if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
-		//ofxImGuiSurfing::AddBigToggle(PLAY_RandomizeTimer, _w100, _h / 2, false);
-		ofxImGuiSurfing::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
-		if (b) ImGui::PopStyleColor();
-
-		//ofxImGuiSurfing::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
-		//ofxImGuiSurfing::AddParameter(PLAY_RandomizeTimer);
-		//ofxImGuiSurfing::AddBigToggle(PLAY_RandomizeTimer, 30);
-
-		//--
-
-		// 1.0.2 draw progress bar for the randomizer timer
-		{
-			ImGuiStyle *style = &ImGui::GetStyle();
-
-			ImGui::PushID("prog");
-			const ImVec4 color = style->Colors[ImGuiCol_ButtonHovered];//we can force change this color on theme... only used here
-			ImGui::PushStyleColor(ImGuiCol_PlotHistogram, color);
-			//ImGui::ProgressBar(randomizerProgress.get());
-			ImGui::ProgressBar(_prog);
-			ImGui::PopStyleColor();
-			ImGui::PopID();
-			//cout << _prog << endl;
-		}
-
-		//-
-
-		// 1.0.1B bpm slider
-
-		//auto parameter = randomizeDurationBpm;
-		//auto tmpRef = randomizeDurationBpm.get();
-		//auto name = ofxImGui::GetUniqueName(randomizeDurationBpm);
-		//if (ImGui::SliderFloat(ofxImGui::GetUniqueName(parameter), (float *)&tmpRef, parameter.getMin(), parameter.getMax()))
-		//{
-		//	parameter.set(tmpRef);
-		//}
-
-		ImGui::PushItemWidth(_w50);
-		ofxImGuiSurfing::AddParameter(randomizeDurationBpm);
-		ofxImGuiSurfing::AddDragFloatSlider(randomizeDurationBpm);
-		ImGui::PopItemWidth();
-
-		//-
-
-		ImGui::Dummy(ImVec2(0, 2));
-
-		if (ImGui::Button("Reset", ImVec2(_w100, _h)))
-		{
-			randomizeDurationBpm = 120;
-		}
-
-		//--
-
-		/*
-		if (MODE_Editor)
-		{
-			// 1.0.3 bang randomize
-
-			ImGui::Dummy(ImVec2(0, 5));
-
-			// random index
-			ofxSurfingHelpers::AddBigButton(bRandomizeIndex, _w99, _h * 2);
-
-			// random filter
-			ofxSurfingHelpers::AddBigButton(bRandomizeFiltered, _w99, _h * 2);
-
-			//ofxSurfingHelpers::AddBigButton(bRandomizeFiltered, 2 * _h);
-			//ofxImGuiSurfing::AddParameter(bRandomizeFiltered);// trig random current preset: will randomize all enabled toggle parameters
-		}
-		*/
-
-		//--
-
-		//// TODO: undo engine
-		//if (MODE_Editor)
-		//{
-		//	float wHalf = 100;
-		//	if (ImGui::Button("UNDO", ImVec2(wHalf, 20)))
-		//	{
-		//		//ofLogNotice(__FUNCTION__) << "UNDO <-";
-		//		//undoStringParams.undo();
-		//		//doRefreshUndoParams();
-		//	}
-		//	ImGui::SameLine();
-		//	if (ImGui::Button("REDO", ImVec2(wHalf, 20)))
-		//	{
-		//		//ofLogNotice(__FUNCTION__) << "REDO ->";
-		//		//undoStringParams.redo();
-		//		//doRefreshUndoParams();
-		//	}
-		//	//string str = "";
-		//	//str += ofToString(undoStringParams.getUndoLength()) + "/";
-		//	//str += ofToString(undoStringParams.getRedoLength());
-		//	//ImGui::Text(str.c_str());
-		//}
-
-		//--
-
-		/*
-		// workflow
-		//if (MODE_Editor)
-		{
-			ImGui::Dummy(ImVec2(0, 5));
-
-			// 1.0 edit folder
-
-			if (ImGui::CollapsingHeader("EDIT"))
-			{
-				// 1.1 randomizer index presets
-
-				//drawImGui_RandomizerEditPlayer();
-				ofxImGui::AddGroup(params_Randomizer, settings);
-
-				//--
-
-				// 1.2 randomizers fillter editor
-
-				//drawImGui_RandomizerParams();
-				ofxImGui::AddGroup(params_RandomizersFiltered, settings);
-			}
-		}
-		*/
-
-		//ImGui::Dummy(ImVec2(0, 5));
-		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_EditPlayer, _w99, _h);
-		//ofxSurfingHelpers::AddBigButton(SHOW_Panel_RandomizerParams, _w99, _h);
-
-		//-
-
-		//ImGui::Dummy(ImVec2(0, 2));
-		//ImGui::Checkbox("Auto-Resize", &auto_resize);
 	}
-
 #ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
 	guiManager.endWindow();
 #endif
-
 #ifdef USE_RAW_IM_GUI__GROUP_RANDOMIZER
 	ImGui::End();
 #endif
-
-	//ImGui::PopStyleVar();
-}
+	}
 
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::Changed_Editor(ofAbstractParameter &e)
@@ -1668,7 +1670,7 @@ void SurfingGroupRandomizer::loadPreset(int p)
 {
 	ofLogNotice(__FUNCTION__) << group.getName() << " : " << p;
 	PRESET_Selected_IndexMain = p;
-	bIsDoneLoad = true;// TODO: workaround bc the done-loading happens out of the class..
+	bIsDoneLoad = true; //TODO: workaround bc the done-loading happens out of the class..
 
 	// TODO:
 	////if (selectorTARGET) 

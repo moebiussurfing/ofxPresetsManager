@@ -17,17 +17,23 @@ public:
 	void setup();
 	void draw();
 	
-	void buildGui();
 	ofxImGui::Gui gui;
 	ofTrueTypeFont font;
-
-	ofParameterGroup params; // parameters group
 
 #ifdef USE_PRESETS
 	ofxPresetsManager presetsManager;
 #endif
 
-	// Remote
+	//--
+
+	// -> Remote
+
+public:
+	// Parameters group
+	ofParameterGroup params_Remote;
+	void setupRemote();
+	void drawRemote();
+	void buildGui();
 	ofxRemoteParameters::Client paramClient;
 	ofEventListener modelLoadedEventListener;
 };

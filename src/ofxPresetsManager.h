@@ -234,6 +234,7 @@ public:
 
 public:
 	void clear();
+
 private:
 	void ImGui_Draw();
 	void drawHelp();
@@ -442,6 +443,7 @@ public:
 	// 4. but we want to use the user box click to trig something
 private:
 	bool bMustTrig = false;
+
 public:
 	//--------------------------------------------------------------
 	bool isMustTrig()// trig on select preset or not. this is useful when preset selected not changed, but we want to retrig current preset settings
@@ -577,6 +579,7 @@ public:
 	{
 		if (ENABLE_Keys != active) {// avoid if state not need to change
 			ENABLE_Keys = active;
+		if (bKeys != active) {// avoid if state not need to change
 		}
 		if (bKeys != active) {// avoid if state not need to change
 			bKeys = active;
@@ -764,9 +767,20 @@ public:
 	void loadPreset(int p, int _indexGroup = -1);// load preset for each group by code from ofApp
 	void savePreset(int p, int _indexGroup = -1);// save preset for each group by code from ofApp
 
+	//--------------------------------------------------------------
+	void doLoad(int p, int _indexGroup = -1) {
+		loadPreset(p, _indexGroup);
+	};
+
 	//--
 
 public:
+	//--------------------------------------------------------------
+	void doSaveCurrent() {
+		saveCurrentPreset(0);
+		//saveCurrentPreset();
+	}
+
 	//--------------------------------------------------------------
 	void saveCurrentPreset(int groupIndex = -1) {
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
@@ -845,6 +859,13 @@ public:
 	void load_Next(bool cycled)
 	{
 		load_Next(GuiGROUP_Selected_Index, cycled);
+	}
+
+	// legacy	
+	//--------------------------------------------------------------
+	void doLoadNext()
+	{
+		load_Next(true);
 	}
 
 	//--
@@ -969,54 +990,54 @@ public:
 	//--------------------------------------------------------------
 	void setVisible_Help(bool b)
 	{
-		SHOW_Help = b;
+		bHelp = b;
 	}
 	//--------------------------------------------------------------
 	void setToggleVisible_Help()
 	{
-		SHOW_Help = !SHOW_Help;
+		bHelp = !bHelp;
 	}
 	//--------------------------------------------------------------
 	void setVisible_GUI(bool b)
 	{
-		SHOW_ImGui = b;
-		SHOW_Panel_Click = b;
+		bGui = b;
+		bGui_Clicker = b;
 	}
 	//--------------------------------------------------------------
 	void setToggleVisible_GUI()
 	{
-		SHOW_ImGui = !SHOW_ImGui;
-		SHOW_Panel_Click = SHOW_ImGui;
+		bGui = !bGui;
+		bGui_Clicker = bGui;
 	}
 	//--------------------------------------------------------------
 	void setVisible_GUI_ImGui(bool b)
 	{
-		SHOW_ImGui = b;
+		bGui = b;
 	}
 	//--------------------------------------------------------------
 	void setToggleVisible_GUI_ImGui()
 	{
-		SHOW_ImGui = !SHOW_ImGui;
+		bGui = !bGui;
 	}
 	//--------------------------------------------------------------
 	bool getVisible_GUI_ImGui()
 	{
-		return SHOW_ImGui;
+		return bGui;
 	}
 	//--------------------------------------------------------------
 	void setVisible_GUI_Internal(bool visible)
 	{
-		SHOW_Gui_AdvancedControl = visible;
+		bGui_AdvancedControl = visible;
 	}
 	//--------------------------------------------------------------
 	bool isVisible_GUI_Internal()
 	{
-		return SHOW_Gui_AdvancedControl;
+		return bGui_AdvancedControl;
 	}
 	//--------------------------------------------------------------
 	void setToggleVisible_GUI_Internal()
 	{
-		SHOW_Gui_AdvancedControl = !SHOW_Gui_AdvancedControl;
+		bGui_AdvancedControl = !bGui_AdvancedControl;
 	}
 	////--------------------------------------------------------------
 	//void setPosition_PresetClicker(int x, int y, int _cellSize)
@@ -1028,22 +1049,22 @@ public:
 	//--------------------------------------------------------------
 	void setVisible_PresetClicker(bool visible)
 	{
-		SHOW_Panel_Click = visible;
+		bGui_Clicker = visible;
 	}
 	//--------------------------------------------------------------
 	void setToggleVisible_PresetClicker()
 	{
-		SHOW_Panel_Click = !SHOW_Panel_Click;
+		bGui_Clicker = !bGui_Clicker;
 	}
 	//--------------------------------------------------------------
 	bool getVisible_PresetClicker()
 	{
-		return SHOW_Panel_Click;
+		return bGui_Clicker;
 	}
 	//--------------------------------------------------------------
 	bool isVisible_PresetClicker()
 	{
-		return SHOW_Panel_Click;
+		return bGui_Clicker;
 	}
 	//--------------------------------------------------------------
 	float getGroupNamesWidth() {
@@ -1092,17 +1113,17 @@ public:
 	//--------------------------------------------------------------
 	void setModeAutoLoad(bool b)
 	{
-		autoLoad = b;
+		bAutoLoad = b;
 	}
 	//--------------------------------------------------------------
 	void setModeAutoSave(bool b)
 	{
-		autoSave = b;
+		bAutoSave = b;
 	}
 	//--------------------------------------------------------------
 	bool getModeAutoSave()
 	{
-		return autoSave;
+		return bAutoSave;
 	}
 	//--------------------------------------------------------------
 	void setModeAutoSaveTimer(bool b)
@@ -1119,22 +1140,27 @@ private:
 
 private:
 	ofParameter<bool> MODE_Editor{ "EDIT MODE", true };// this mode improves performance disabling autosave, undo history..etc
-	ofParameter<bool> SHOW_Panel_Click;// to allow include as toggle parameter into external gui
-	ofParameter<bool> SHOW_ImGui;
-	ofParameter<bool> SHOW_Panel_Standalones;
-	ofParameter<bool> SHOW_Panel_AllParameters;
-	ofParameter<bool> SHOW_Panel_Players;
-	ofParameter<bool> SHOW_Panel_EditPlayer;
-	ofParameter<bool> SHOW_Panel_RandomizerParams;
-	ofParameter<bool> SHOW_ImGui_PresetsParams;
-	ofParameter<bool> SHOW_ImGui_Selectors;
-	ofParameter<bool> SHOW_Help;
-	ofParameter<bool> SHOW_Panels;
-	ofParameter<bool> SHOW_Gui_AdvancedControl;
+	
+public:
+	ofParameter<bool> bGui_Clicker; // to allow include as toggle parameter into external gui
+	ofParameter<bool> bGui;
+	ofParameter<bool> bGui_Main;
+	ofParameter<bool> bGui_Standalones;
+	ofParameter<bool> bGui_Parameters;
+	ofParameter<bool> bGui_Players;
+	ofParameter<bool> bGui_PlayerEditor;
+	ofParameter<bool> bGui_RandomizerParams;
+	ofParameter<bool> bGui_PresetsParams;
+	ofParameter<bool> bGui_Selectors;
+	ofParameter<bool> bGui_Panels;
+	ofParameter<bool> bGui_AdvancedControl;
 	//ofParameter<bool> SHOW_Panel_AllSelectors;
 
-	ofParameter<bool> ENABLE_Keys;
-	ofParameter<bool> bThemeDarkOrLight{ "THEME DARK", true };
+private:
+	ofParameter<bool> bHelp;
+	ofParameter<bool> bKeys;
+	ofParameter<bool> bThemeDarkOrLight{ "Theme B/W", true };
+	ofParameter<bool> bLockClicker{ "Lock Clicker", false};
 	ofParameter<glm::vec2> Gui_Internal_Position;
 
 private:
@@ -1266,7 +1292,7 @@ public:
 		g2 = getParamsRandomizers();
 		params_Controls.add(g2);
 
-		params_Controls.add(SHOW_Panel_Click);
+		params_Controls.add(bGui_Clicker);
 		params_Controls.add(MODE_Editor);
 
 		return params_Controls;
@@ -1308,7 +1334,8 @@ private:
 	void removeMouseListeners();// TODO: fix easy remover..
 
 	vector<vector<int>> keys;// queued trigger keys for each group ? (all presets) (size of)
-	bool bKeys;// enabled keys
+	bool ENABLE_Keys;// enabled keys
+	//bool bKeys;// enabled keys
 	bool keysNotActivated;
 
 	// save keys
@@ -1378,10 +1405,11 @@ private:
 public:
 	ofParameterGroup params_Control;// to use on external gui
 
-private:
-	ofParameter<bool> autoSave;// auto save current preset when user clicks to another preset. almost enabled on edit mode
-	ofParameter<bool> autoLoad;// auto load the user clicked preset. almost always true
+public:
+	ofParameter<bool> bAutoSave;// auto save current preset when user clicks to another preset. almost enabled on edit mode
+	ofParameter<bool> bAutoLoad;// auto load the user clicked preset. almost always true
 
+private:
 	// internal groups
 	ofParameterGroup params_UserKitSettings;
 	ofParameterGroup params_Gui;

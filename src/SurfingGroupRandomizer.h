@@ -34,7 +34,7 @@ public:
 
 		//clicker layout
 private:
-	ofParameter<int> amntBtnsClicker{ "Max Buttons", 1, 1, 1 };
+	ofParameter<int> amntBtnsClicker{ "Max But", 1, 1, 1 };
 	ofParameter<bool> respBtnsClicker{ "Responsive", true };
 	ofParameter<bool> bExtraClicker{ "Extra", false };
 
@@ -88,10 +88,10 @@ public:
 public:
 	void drawImGui_RandomizersMain();
 	void drawImGui_RandomizerEditPlayer();
-	void drawImGui_RandomizerParams();
+	//void drawImGui_RandomizerParams();
 
 	//ofParameter<bool> SHOW_Panel_EditPlayer;
-	//ofParameter<bool> SHOW_Panel_RandomizerParams;
+	//ofParameter<bool> bGui_RandomizerParams;
 
 	//-
 
