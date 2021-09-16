@@ -128,7 +128,6 @@ ofxPresetsManager::ofxPresetsManager()
 	bHelp.set("Help", false);
 	bGui_AdvancedControl.set("Advanced", false);
 	MODE_StandalonePresets_NEW.set("NEW!", false);
-	ENABLE_Keys.set("KEYS", true);
 	//ENABLE_Keys.setSerializable(false);
 	bKeys.set("Keys", true);
 	bKeys.setSerializable(false);

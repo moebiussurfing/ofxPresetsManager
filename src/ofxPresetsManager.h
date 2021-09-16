@@ -577,8 +577,6 @@ public:
 	//--------------------------------------------------------------
 	void setEnableKeys(bool active)
 	{
-		if (ENABLE_Keys != active) {// avoid if state not need to change
-			ENABLE_Keys = active;
 		if (bKeys != active) {// avoid if state not need to change
 		}
 		if (bKeys != active) {// avoid if state not need to change
@@ -767,6 +765,7 @@ public:
 	void loadPreset(int p, int _indexGroup = -1);// load preset for each group by code from ofApp
 	void savePreset(int p, int _indexGroup = -1);// save preset for each group by code from ofApp
 
+	// legacy/to make coimpatible with ofxSurfingPresets
 	//--------------------------------------------------------------
 	void doLoad(int p, int _indexGroup = -1) {
 		loadPreset(p, _indexGroup);
