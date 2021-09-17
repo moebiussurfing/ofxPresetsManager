@@ -211,7 +211,8 @@ ofxPresetsManager::ofxPresetsManager()
 	// gui box clicker font
 	std::string str;
 
-	sizeTTF = 11;
+	sizeTTF = 9;
+	//sizeTTF = 11;
 	str = "telegrama_render.otf";
 
 	//sizeTTF = 10;
