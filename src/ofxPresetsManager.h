@@ -508,7 +508,7 @@ private:
 	ofxInteractiveRect rectangle_PresetClicker = { "rectangle_PresetClicker" };
 	std::string path_RectanglePresetClicker = "_PresetClicker";
 	ofParameter<bool> MODE_EditPresetClicker;
-	ofParameter<bool> SHOW_BackGround_EditPresetClicker;
+	ofParameter<bool> bGui_BgEditPresetClicker;
 	float _RectClick_Pad;
 	//ofParameter<bool> helpPos;
 	//ofParameter<float> _rectRatio;
@@ -857,6 +857,7 @@ public:
 	//--------------------------------------------------------------
 	void load_Next(bool cycled)
 	{
+		ofLogNotice(__FUNCTION__);
 		load_Next(GuiGROUP_Selected_Index, cycled);
 	}
 
@@ -864,6 +865,7 @@ public:
 	//--------------------------------------------------------------
 	void doLoadNext()
 	{
+		ofLogNotice(__FUNCTION__);
 		load_Next(true);
 	}
 
@@ -1147,7 +1149,7 @@ public:
 	ofParameter<bool> bGui_Standalones;
 	ofParameter<bool> bGui_Parameters;
 	ofParameter<bool> bGui_Players;
-	ofParameter<bool> bGui_PlayerEditor;
+	//ofParameter<bool> bGui_PlayerEditor;
 	ofParameter<bool> bGui_RandomizerParams;
 	ofParameter<bool> bGui_PresetsParams;
 	ofParameter<bool> bGui_Selectors;
@@ -1178,7 +1180,7 @@ private:
 
 public:
 	void gui_Randomizers();
-	void gui_MainPanel();
+	void gui_Main();
 	void gui_Panels();
 	void gui_Advanced();
 	void gui_Standalones();

@@ -37,6 +37,7 @@ private:
 	ofParameter<int> amntBtnsClicker{ "Max But", 1, 1, 1 };
 	ofParameter<bool> respBtnsClicker{ "Responsive", true };
 	ofParameter<bool> bExtraClicker{ "Extra", false };
+	ofParameter<bool> bGui_PlayerEditor;
 
 public:
 	ofParameterGroup params_FloatClicker;
@@ -86,7 +87,10 @@ public:
 	}
 
 public:
+	void drawImGui();
 	void drawImGui_RandomizersMain();
+
+private:
 	void drawImGui_RandomizerEditPlayer();
 	//void drawImGui_RandomizerParams();
 

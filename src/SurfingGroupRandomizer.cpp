@@ -51,12 +51,16 @@ void SurfingGroupRandomizer::setup(ofParameterGroup &_group, int _numPresets) {
 	// to store settings
 	params_RandomizerSettings.add(params_Randomizer);
 	params_RandomizerSettings.add(params_RandomizersFiltered);
+	params_RandomizerSettings.add(bGui_PlayerEditor);
 
 	//-
 
 	bCloneRight.set("CLONE >", false);
 	bCloneAll.set("CLONE ALL", false);
 	bPopulateAll.set("POPULATE ALL", false);
+	
+	bGui_PlayerEditor.set("Editor", false);
+	//bGui_PlayerEditor.setSerializable(false);
 
 	params_HelperTools.setName("HELPER TOOLS");
 	params_HelperTools.add(bCloneRight);
@@ -134,7 +138,6 @@ void SurfingGroupRandomizer::doCheckRandomReady()
 	//	ofLogNotice(__FUNCTION__) << "All are disabled. Force set all randomizer params enable!";
 	//}
 
-
 	// workflow
 	bool bSomeTrue = false;
 	for (auto &p : randomizersFiltered_TogglesVector)
@@ -163,12 +166,12 @@ int SurfingGroupRandomizer::doRandomIndexChanged()
 
 	if (MODE_DicesProbs)
 	{
-		// 1. dice randomize
+		// 1. Dice randomize
 
 #ifndef DEBUG_randomTest
 		{
-			// get a random between all possible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
-			// each preset has many dices: more dices means more probality to be selected by the randomizer
+			// Get a random between all possible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
+			// Each preset has many dices: more dices means more probality to be selected by the randomizer
 			randomizedDice = ofRandom(0, dicesTotalAmount);
 
 			ofLogVerbose(__FUNCTION__) << "random: " << randomizedDice.get() << "/" << dicesTotalAmount;
@@ -177,7 +180,7 @@ int SurfingGroupRandomizer::doRandomIndexChanged()
 
 		//-
 
-		// 2. define limits for range dices associated to any preset
+		// 2. Define limits for range dices associated to any preset
 
 		//randomFactorsDices[0] = 0;
 		for (int i = 0; i < presetsRandomFactor.size(); i++) {
@@ -190,12 +193,12 @@ int SurfingGroupRandomizer::doRandomIndexChanged()
 
 		//-
 
-		// 3. check if dice is inside both ranges. to select preset (_rr) associated to dice 
+		// 3. Check if dice is inside both ranges. to select preset (_rr) associated to dice 
 
 		int _rr = 0;
 		for (int i = 0; i <= presetsRandomFactor.size(); i++) {
 
-			// define upper/lower limits for each dices/preset
+			// Define upper/lower limits for each dices/preset
 			int start;
 			int end;
 
@@ -232,7 +235,7 @@ int SurfingGroupRandomizer::doRandomIndexChanged()
 		_r = _rr;
 		//_r = _rr + 1;
 
-		// debug
+		// Debug
 		ofLogVerbose(__FUNCTION__) << "DEBUG";
 		for (int i = 0; i < presetsRandomFactor.size(); i++) {
 #ifdef DEBUG_randomTest
@@ -241,7 +244,7 @@ int SurfingGroupRandomizer::doRandomIndexChanged()
 #endif
 		}
 
-		// last
+		// Last
 #ifdef DEBUG_randomTest
 		ofLogNotice(__FUNCTION__) << "randomFactorsDices: [" << presetsRandomFactor.size() << "] " << dicesTotalAmount;
 #endif
@@ -259,7 +262,8 @@ int SurfingGroupRandomizer::doRandomIndexChanged()
 		//}
 	}
 
-	//else {
+	//else 
+	//{
 	//	int numTryes = 0;
 	//	//avoid jump to same current preset
 	//	while (PRESET_Selected_IndexMain == _r)//if not changed
@@ -284,7 +288,8 @@ void SurfingGroupRandomizer::doRandomIndex()
 	ofLogNotice(__FUNCTION__) << "---------------------------------------------------";
 #endif
 
-	// we avoid that the random is the same previous preset (TODO:improve). we want force change, not stay in the same. 
+	// We avoid that the random is the same previous preset (TODO:improve). 
+	// we want force change, not stay in the same. 
 	// bc sometimes the random gets the same current preset.
 
 	int _PRESET_selected_PRE = PRESET_Selected_IndexMain;
@@ -296,7 +301,7 @@ void SurfingGroupRandomizer::doRandomIndex()
 #endif
 
 	// TODO:
-	// if there's only one posible dice.. cant avoid repetition. so force avoid toggle to false
+	// If there's only one posible dice.. cant avoid repetition. so force avoid toggle to false
 	if (MODE_AvoidRandomRepeat && dicesTotalAmount < 2) MODE_AvoidRandomRepeat = false;
 
 	if (MODE_AvoidRandomRepeat)
@@ -305,7 +310,8 @@ void SurfingGroupRandomizer::doRandomIndex()
 		ofLogVerbose(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes);
 		ofLogVerbose(__FUNCTION__) << "PRESET : " << ofToString(r);
 
-		while (r == _PRESET_selected_PRE && dicesTotalAmount > 1 && numTryes < 5) //while preset index not changed. TODO: avoid make more than 5 randoms..
+		// While preset index not changed. TODO: avoid make more than 5 randoms..
+		while (r == _PRESET_selected_PRE && dicesTotalAmount > 1 && numTryes < 5) 
 		{
 			r = doRandomIndexChanged();
 			ofLogVerbose(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes) << " NOT changed!";
@@ -320,13 +326,13 @@ void SurfingGroupRandomizer::doRandomIndex()
 
 	//--
 
-	// 4. apply preset selection
+	// 4. Apply preset selection
 
 	loadPreset(r);
 
 	//--
 
-	// 5. start timer again
+	// 5. Start timer again
 
 	if (PLAY_RandomizeTimer)
 	{
@@ -352,7 +358,7 @@ void SurfingGroupRandomizer::doResetDices()
 	randomizeDuration = 1000;
 	randomizeDurationShort = randomizeDuration * randomizeDurationShortRatio;
 
-	//rest all to long
+	//reset all to long
 	for (auto &p : presetsRandomModeShort) {
 		p.set(false);
 	}
@@ -810,11 +816,11 @@ void SurfingGroupRandomizer::setup_RandomizerFiletered()
 {
 	params_randomizer.setName("RANDOMIZERS");
 	randomizersFiltered_TogglesVector.clear();
-	addGroupToRandomizerFiletered(group);// enqueue all content params and create a toggle for each one
-	//this is to allow filter (by enabling toggles) each param or not.
+	addGroupToRandomizerFiletered(group); // Enqueue all content params and create a toggle for each one
+	// This is to allow filter (by enabling toggles) each param or not.
 
 
-	// add to group
+	// Add to group
 	bRandomizeFiltered.set("RANDOM PARAMS", false);
 	bRandomizeFiltered_PopulateFavs.set("POPULATE FAVS!", false);
 	bRandomizeFiltered_All.set("ALL", false);
@@ -835,7 +841,7 @@ void SurfingGroupRandomizer::setup_RandomizerFiletered()
 	}
 	params_RandomizersFiltered.add(params_Filtered_Toggles);
 
-	// exclude
+	// Exclude
 	bRandomizeFiltered.setSerializable(false);
 	bRandomizeFiltered_PopulateFavs.setSerializable(false);
 	bRandomizeFiltered_All.setSerializable(false);
@@ -843,7 +849,7 @@ void SurfingGroupRandomizer::setup_RandomizerFiletered()
 
 	//--
 
-	// callback
+	// Callback
 	ofAddListener(params_RandomizersFiltered.parameterChangedE(), this, &SurfingGroupRandomizer::Changed_Editor);
 
 	//--
@@ -855,17 +861,17 @@ void SurfingGroupRandomizer::setup_RandomizerFiletered()
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::buildRandomizers()
 {
-	// radomizer
+	// Radomizer
 	setup_RandomizerIndexes();
 
-	// preset editor tools
+	// Preset editor tools
 	setup_RandomizerFiletered();
 }
 
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::exit()
 {
-	// save randomizers settings
+	// Save randomizers settings
 	ofxSurfingHelpers::saveGroup(params_RandomizerSettings, path_RandomizerSettings);
 
 	ofRemoveListener(params_Control.parameterChangedE(), this, &SurfingGroupRandomizer::Changed_Control);
@@ -878,14 +884,14 @@ void SurfingGroupRandomizer::update()
 {
 	//----
 
-	// randomizer timer mode latch
+	// Randomizer timer mode latch
 
 	// TODO:
-	// on this mode: when we click to some presets, we load the preset, but after duration, 
-	// we jump back to preset index 0
+	// On this mode: when we click to some presets, we load the preset, but after duration, 
+	// We jump back to preset index 0
 
-	// easy callback
-	// latch mode
+	// Easy callback
+	// Latch mode
 	if (bIsDoneLoad && MODE_LatchTrig && !PLAY_RandomizeTimer)
 	{
 		bIsDoneLoad = false;
@@ -903,43 +909,51 @@ void SurfingGroupRandomizer::update()
 
 	//----
 
-	if (PLAY_RandomizeTimer || MODE_LatchTrig)// ?
+	if (PLAY_RandomizeTimer || MODE_LatchTrig) // ?
 	{
 		uint32_t _time = ofGetElapsedTimeMillis();
-		timerRandomizer = _time - randomizerTimer;
+		timerRandomizer = _time - randomizerTimer;//elapsed now from last trig
 
 		//ofLogNotice(__FUNCTION__) << " : " << timerRandomizer;
 
 		if (PRESET_Selected_IndexMain < presetsRandomModeShort.size()) {// avoid out of range
 
-			// A. long mode
+			// A. Long mode
+
 			if (presetsRandomModeShort[PRESET_Selected_IndexMain] == false)// get if it's marked as shor or long by default (false)
 			{
 				timerPlayerPct = ofMap(timerRandomizer, 0, randomizeDuration, 0, 1, true);
 
 				if (timerRandomizer >= randomizeDuration)
 				{
-					if (MODE_LatchTrig) {
-						if (bLatchRun) {
+					if (MODE_LatchTrig) // latch mode trigs the preset and then trigs back to first presets
+					{
+						if (bLatchRun) 
+						{
 							loadPreset(0);
 						}
 					}
-					else {
-						bRandomizeIndex = true;// TODO: can be improved calling directly the method! bc this flag will be readed on update()..
+					else
+					{
+						//TODO: can be improved calling directly the method! bc this flag will be readed on update()..
+						//bRandomizeIndex = true;
+						doRandomIndex();
 					}
 				}
 			}
 
-			//-
+			//--
 
-			// B. short mode
+			// B. Short mode
+
 			else
 			{
 				timerPlayerPct = ofMap(timerRandomizer, 0, randomizeDurationShort, 0, 1, true);
 
 				if (timerRandomizer >= randomizeDurationShort)
 				{
-					if (MODE_LatchTrig) {
+					if (MODE_LatchTrig)
+					{
 						if (bLatchRun) loadPreset(0);
 					}
 					else bRandomizeIndex = true;
@@ -947,17 +961,19 @@ void SurfingGroupRandomizer::update()
 			}
 		}
 	}
-	else {
+	else 
+	{
 		timerPlayerPct = 0;
 	}
 
-	//--
+	//----
 
-	// 1.0.2 draw progress bar for the randomizer timer
+	// 1.0.2 Draw progress bar for the randomizer timer
 
-	//// long mode
+	//// Long mode
 	//if (presetsRandomModeShort[PRESET_Selected_IndexMain - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
-	//// short mode
+	
+	//// Short mode
 	//else _prog = timerRandomizer / (float)randomizeDurationShort;
 	// bar relative only to long
 
@@ -980,6 +996,7 @@ void SurfingGroupRandomizer::update()
 	{
 		randomizerProgress = 0;
 	}
+
 	_prog = MIN(100, randomizerProgress / 100.f);
 }
 
@@ -994,13 +1011,13 @@ void SurfingGroupRandomizer::setup_RandomizerIndexes()
 	MODE_AvoidRandomRepeat.set("MODE AVOID REPEAT", true);
 	randomizeDuration.set("t DURATION", 1000, 10, randomize_MAX_DURATION);
 	randomizeDurationShortRatio.set("t RATIO", 0.25, 0.005, 1);
-	randomizeDurationShort.set("t SHORT", 250, 10, randomize_MAX_DURATION);// locked
+	randomizeDurationShort.set("t SHORT", 250, 10, randomize_MAX_DURATION); // locked
 	randomizeDurationBpm.set("t BPM", 120, 10, 400);
 	randomizedDice.set("DICE", 0, 0, amountPresets - 1);
 	bResetDices.set("RESET PROBS", false);
 
 	// exclude
-	randomizeDurationShort.setSerializable(false);// lock
+	randomizeDurationShort.setSerializable(false); // lock
 	bRandomizeIndex.setSerializable(false);
 	bResetDices.setSerializable(false);
 
@@ -1042,11 +1059,11 @@ void SurfingGroupRandomizer::setup_RandomizerIndexes()
 	params_Randomizer.add(randomizeDurationBpm);
 	params_Randomizer.add(randomizeDuration);
 	params_Randomizer.add(randomizeDurationShortRatio);
-	params_Randomizer.add(randomizeDurationShort);// locked
+	params_Randomizer.add(randomizeDurationShort); // locked
 	params_Randomizer.add(MODE_LatchTrig);
 	params_Randomizer.add(MODE_AvoidRandomRepeat);
-	params_Randomizer.add(params_PresetsProbs);// probs
-	params_Randomizer.add(params_PresetDurations);// toggles
+	params_Randomizer.add(params_PresetsProbs); // probs
+	params_Randomizer.add(params_PresetDurations); // toggles
 	params_Randomizer.add(bResetDices);
 #ifdef DEBUG_randomTest
 	params_Randomizer.add(randomizedDice);
@@ -1136,6 +1153,13 @@ void SurfingGroupRandomizer::drawImGui_RandomizerEditPlayer()
 //void SurfingGroupRandomizer::drawImGui_RandomizerParams()
 //{
 //}
+
+//--------------------------------------------------------------
+void SurfingGroupRandomizer::drawImGui()
+{
+	drawImGui_RandomizersMain();
+	if (bGui_PlayerEditor) drawImGui_RandomizerEditPlayer();
+}
 
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::drawImGui_RandomizersMain()
@@ -1344,6 +1368,10 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 
 			//ImGui::Dummy(ImVec2(0, 2));
 			//ImGui::Checkbox("Auto-Resize", &auto_resize);
+
+			//-
+
+			ofxImGuiSurfing::AddToggleRoundedButton(bGui_PlayerEditor);
 
 			//-
 
@@ -1576,7 +1604,11 @@ void SurfingGroupRandomizer::loadPreset(int p)
 {
 	ofLogNotice(__FUNCTION__) << group.getName() << " : " << p;
 	PRESET_Selected_IndexMain = p;
-	bIsDoneLoad = true; //TODO: workaround bc the done-loading happens out of the class..
+	
+	//TODO: 
+	// workaround
+	//bc the done-loading happens out of the class...
+	bIsDoneLoad = true; 
 
 	// TODO:
 	////if (selectorTARGET) 
