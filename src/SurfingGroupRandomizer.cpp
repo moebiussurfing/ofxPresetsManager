@@ -1197,7 +1197,7 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 
 			// Preset Selector
 
-			ImGui::Dummy(ImVec2(0, 5));
+			ImGui::Spacing();
 
 			////string str = "User-Kit: " + displayNameUserKit;
 			//str = "  Group    " + group.getName();
@@ -1206,15 +1206,12 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 			str = "Preset: " + ofToString(PRESET_Selected_IndexMain.get());
 			ImGui::Text(str.c_str());
 
-			//ImGui::Dummy(ImVec2(0, 5));
-
-			ImGui::PushItemWidth(_w50);
-			//ImGui::PushItemWidth(WIDGET_PARAM_PADDING);
+			ImGui::PushItemWidth(_w33);
 			ofxImGuiSurfing::AddParameter(PRESET_Selected_IndexMain);
 			ImGui::PopItemWidth();
 
 			//ImGui::SameLine();
-			ImGui::Dummy(ImVec2(0, 2));
+			ImGui::Spacing();
 
 			//--
 
@@ -1229,11 +1226,9 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 
 			//-
 
-			//ImGui::Dummy(ImVec2(0, 10));
-
 			//str = "RANDOMIZER";
 			//ImGui::Text(str.c_str());
-			ImGui::Dummy(ImVec2(0, 2));
+			ImGui::Spacing();
 
 			// 1.0.1 play randomizer index
 
@@ -1286,7 +1281,7 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 				randomizeDurationBpm = 120;
 			}
 
-			//ImGui::Dummy(ImVec2(0, 2));
+			//ImGui::Spacing();
 
 			//--
 
@@ -1295,7 +1290,7 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 			{
 				// 1.0.3 bang randomize
 
-				ImGui::Dummy(ImVec2(0, 5));
+				ImGui::Spacing();
 
 				// random index
 				ofxSurfingHelpers::AddBigButton(bRandomizeIndex, _w99, _h * 2);
@@ -1339,7 +1334,7 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 			// workflow
 			//if (MODE_Editor)
 			{
-				ImGui::Dummy(ImVec2(0, 5));
+				ImGui::Spacing();
 
 				// 1.0 edit folder
 
@@ -1360,13 +1355,13 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 			}
 			*/
 
-			//ImGui::Dummy(ImVec2(0, 5));
+			//ImGui::Spacing();
 			//ofxSurfingHelpers::AddBigButton(SHOW_Panel_EditPlayer, _w99, _h);
 			//ofxSurfingHelpers::AddBigButton(bGui_RandomizerParams, _w99, _h);
 
 			//-
 
-			//ImGui::Dummy(ImVec2(0, 2));
+			//ImGui::Spacing();
 			//ImGui::Checkbox("Auto-Resize", &auto_resize);
 
 			//-

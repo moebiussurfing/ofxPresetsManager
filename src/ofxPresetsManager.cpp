@@ -3238,7 +3238,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 					std::string str;
 
-					//ImGui::Dummy(ImVec2(0, 5));
+					//ImGui::Spacing();
 
 					// 1. selected group
 					str = "Group:";
@@ -3255,7 +3255,7 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 					//-
 
-					ImGui::Dummy(ImVec2(0, 5));
+					ImGui::Spacing();
 
 					// 2. main group link selector
 
@@ -3356,7 +3356,7 @@ void ofxPresetsManager::gui_Parameters()
 		//-
 
 		//ImGui::Separator();
-		ImGui::Dummy(ImVec2(0, 5));
+		ImGui::Spacing();
 
 		// 1. Each group parameters
 
@@ -3364,10 +3364,10 @@ void ofxPresetsManager::gui_Parameters()
 		{
 			if (groups.size() > 1)
 			{
-				//if (i != 0) 
+				if (i != 0)
 				{
 					ImGui::Separator();
-					ImGui::Dummy(ImVec2(0, 5));
+					ImGui::Spacing();
 				}
 			}
 
@@ -3379,9 +3379,7 @@ void ofxPresetsManager::gui_Parameters()
 			}
 
 			if (bLast) {
-				//ImGui::Separator();
-				//ImGui::Dummy(ImVec2(0, 5));
-				ImGui::PushItemWidth(_w50);
+				ImGui::PushItemWidth(_w33);
 			}
 
 			//ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
@@ -3399,14 +3397,14 @@ void ofxPresetsManager::gui_Parameters()
 				ImGui::PopItemWidth();
 			}
 
-			if (!bLast) ImGui::Dummy(ImVec2(0, 5));
+			if (!bLast) ImGui::Spacing();
 		}
 
 		//--
 
 		/*
 
-		ImGui::Dummy(ImVec2(0, 5));
+		ImGui::Spacing();
 
 		// 2. Tools
 		// random and reset tools
@@ -3586,7 +3584,8 @@ void ofxPresetsManager::gui_Panels()
 			if (ImGui::CollapsingHeader("EXTRA", _flagw))
 			{
 				ofxImGuiSurfing::AddToggleRoundedButton(bGui_Standalones);
-				if (MODE_Editor) ofxImGuiSurfing::AddToggleRoundedButton(bGui_AdvancedControl);
+				ofxImGuiSurfing::AddToggleRoundedButton(bGui_AdvancedControl);
+				//if (MODE_Editor) ofxImGuiSurfing::AddToggleRoundedButton(bGui_AdvancedControl);
 				ofxImGuiSurfing::AddToggleRoundedButton(bHelp);
 			}
 			ImGui::Unindent();
@@ -3622,7 +3621,7 @@ void ofxPresetsManager::gui_Main()
 
 		// 0. labels
 
-		ImGui::Dummy(ImVec2(0, 5));
+		ImGui::Spacing();
 
 		// label for User-Kit folder
 		str = "USER-KIT:";
@@ -3702,7 +3701,7 @@ void ofxPresetsManager::gui_Main()
 //		//ofxImGuiSurfing::AddBigToggle(dataRandomizer.bGui, _w100, _h);
 //		ImGui::Dummy(ImVec2(0.f, 2.f));
 //#endif
-		
+
 		ImGui::Spacing();
 
 		//--
@@ -3731,7 +3730,7 @@ void ofxPresetsManager::gui_Main()
 				// 1. selected group
 				str = "Group:";
 				ImGui::Text(str.c_str());
-				if (bBuildGroupSelector) 
+				if (bBuildGroupSelector)
 				{
 					ImGui::PushItemWidth(_w33);
 					ofxImGuiSurfing::AddParameter(GuiGROUP_Selected_Index); // user selected wich group to edit
@@ -3799,39 +3798,39 @@ void ofxPresetsManager::gui_Main()
 		//--
 
 		// 3. tools / helpers
-
-		if (MODE_Editor)
-		{
-			if (ImGui::CollapsingHeader("TOOLS"))
+		if (bGui_AdvancedControl)
+			if (MODE_Editor)
 			{
-				ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
-				_h *= 2;
-
-				//TODO: select which added group
-				int i = 0;
-				//int ii = PRESETS_Selected_Index[i];
-
-				if (ImGui::Button("CLONE ALL", ImVec2(_w50, _h / 2)))
+				if (ImGui::CollapsingHeader("TOOLS"))
 				{
-					doCloneAll(i);
+					ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+					_h *= 2;
+
+					//TODO: select which added group
+					int i = 0;
+					//int ii = PRESETS_Selected_Index[i];
+
+					if (ImGui::Button("CLONE ALL", ImVec2(_w100, _h / 2)))
+					{
+						doCloneAll(i);
+					}
+					//ImGui::SameLine();
+					if (ImGui::Button("CLONE >", ImVec2(_w100, _h / 2)))
+					{
+						doCloneRight(i);
+					}
 				}
-				ImGui::SameLine();
-				if (ImGui::Button("CLONE >", ImVec2(_w50, _h / 2)))
-				{
-					doCloneRight(i);
-				}
+
+				//-
+
+				////TODO:
+				////create all presets randomized
+				////if (ImGui::Button("POPULATE", ImVec2(_w99, _h / 2)))
+				////{
+				////	int ig = GuiGROUP_Selected_Index.get();
+				////	doPopulateFavs(ig);
+				////}
 			}
-
-			//-
-
-			////TODO:
-			////create all presets randomized
-			////if (ImGui::Button("POPULATE", ImVec2(_w99, _h / 2)))
-			////{
-			////	int ig = GuiGROUP_Selected_Index.get();
-			////	doPopulateFavs(ig);
-			////}
-		}
 
 		//--
 
@@ -3869,8 +3868,8 @@ void ofxPresetsManager::gui_Main()
 				{
 					doRedo();
 				}
+			}
 		}
-	}
 #endif
 
 		//--
@@ -3878,7 +3877,7 @@ void ofxPresetsManager::gui_Main()
 		// 6. Advanced
 
 		// workflow: force hide when live mode
-		if (bGui_AdvancedControl && MODE_Editor) gui_Advanced();
+		if (bGui_AdvancedControl/* && MODE_Editor*/) gui_Advanced();
 
 		//-
 
@@ -3894,7 +3893,7 @@ void ofxPresetsManager::gui_Main()
 		}
 
 		//--
-}
+	}
 	guiManager.endWindow();
 
 	//crash
@@ -3944,7 +3943,11 @@ void ofxPresetsManager::gui_Advanced()
 						ofxImGuiSurfing::AddBigToggle(MODE_EditPresetClicker, _w100, _h);
 					}
 					ofxImGuiSurfing::AddBigToggle(bGui_BgEditPresetClicker, _w100, _h);
+
+					ImGui::PushItemWidth(_w33);
 					ofxImGuiSurfing::AddStepper(cellSize);
+					ImGui::PopItemWidth();
+
 					//if (bHelp)ofxImGuiSurfing::AddParameter(helpPos);
 				}
 
@@ -3985,7 +3988,7 @@ void ofxPresetsManager::gui_Advanced()
 					}
 
 					ImGui::Spacing();
-					//ImGui::Dummy(ImVec2(0, 5));
+					//ImGui::Spacing();
 
 					// monitor custom state
 					//ofxImGuiSurfing::AddParameter(bPathDirCustom);
@@ -4227,7 +4230,7 @@ void ofxPresetsManager::gui_Standalones()
 
 			//---
 
-			ImGui::Dummy(ImVec2(0, 5));
+			ImGui::Spacing();
 
 			// label for User-Kit folder
 			str = "USER-KIT:";
@@ -4238,7 +4241,7 @@ void ofxPresetsManager::gui_Standalones()
 			str += "/";
 			ImGui::Text(str.c_str());
 
-			ImGui::Dummy(ImVec2(0, 5));
+			ImGui::Spacing();
 
 			//--
 
@@ -4247,7 +4250,7 @@ void ofxPresetsManager::gui_Standalones()
 			if (bBuildGroupSelector) ofxImGuiSurfing::AddParameter(GuiGROUP_Selected_Index);
 			ImGui::PopItemWidth();
 
-			//ImGui::Dummy(ImVec2(0, 5));
+			//ImGui::Spacing();
 
 			//--
 
@@ -4257,7 +4260,7 @@ void ofxPresetsManager::gui_Standalones()
 			str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
 			ImGui::Text(str.c_str());
 
-			ImGui::Dummy(ImVec2(0, 5));
+			ImGui::Spacing();
 
 			//--
 
@@ -4265,14 +4268,14 @@ void ofxPresetsManager::gui_Standalones()
 			{
 				//---
 
-				ImGui::Dummy(ImVec2(0, 5));
+				ImGui::Spacing();
 
 				//// label presets folder
 				////str = "User-Kit";
 				////ImGui::Text(str.c_str());
 				//str = "/" + path_PresetsStandalone + "/" + groups[groupIndex].getName();// append group name
 				//ImGui::Text(str.c_str());
-				//ImGui::Dummy(ImVec2(0, 5));
+				//ImGui::Spacing();
 
 				//-
 
@@ -4302,7 +4305,7 @@ void ofxPresetsManager::gui_Standalones()
 				//	save(PRESETS_Selected_Index[groupIndex], groupIndex);
 				//}
 
-				ImGui::Dummy(ImVec2(0, 5));
+				ImGui::Spacing();
 
 				//-
 
@@ -4422,7 +4425,7 @@ void ofxPresetsManager::gui_Standalones()
 				{
 					// 4.2 update
 
-					ImGui::Dummy(ImVec2(0, 5));
+					ImGui::Spacing();
 
 					if (ImGui::Button("UPDATE", ImVec2(_w50, _h)))
 					{

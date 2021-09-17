@@ -1220,7 +1220,7 @@ public:
 
 private:
 	// preset clicker boxes matrix
-	ofParameter<int> cellSize{ "Buttons Size", 80, 45, 120 };// default box button size
+	ofParameter<int> cellSize{ "ButSize", 80, 45, 120 };// default box button size
 	//int cellSize = 80;// default box button size
 	ofVec2f clicker_Pos;// default clicker position
 
