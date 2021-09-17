@@ -27,7 +27,7 @@ void SurfingGroupRandomizer::setup(ofParameterGroup &_group, int _numPresets) {
 	// update control gui panel params
 	amountPresets = _numPresets;
 
-	PRESET_Selected_IndexMain.set(_group.getName(), 0, 0, amountPresets - 1);
+	guiPresetSelectedIndex.set(_group.getName(), 0, 0, amountPresets - 1);
 
 	// clicker
 	if (amountPresets != 0)
@@ -58,7 +58,7 @@ void SurfingGroupRandomizer::setup(ofParameterGroup &_group, int _numPresets) {
 	bCloneRight.set("CLONE >", false);
 	bCloneAll.set("CLONE ALL", false);
 	bPopulateAll.set("POPULATE ALL", false);
-	
+
 	bGui_PlayerEditor.set("Editor", false);
 	//bGui_PlayerEditor.setSerializable(false);
 
@@ -69,7 +69,7 @@ void SurfingGroupRandomizer::setup(ofParameterGroup &_group, int _numPresets) {
 
 	params_Control.setName("SurfingGroupRandomizer");
 	params_Control.add(params_HelperTools);
-	params_Control.add(PRESET_Selected_IndexMain);
+	params_Control.add(guiPresetSelectedIndex);
 
 	ofAddListener(params_Control.parameterChangedE(), this, &SurfingGroupRandomizer::Changed_Control);
 	ofAddListener(params_Randomizer.parameterChangedE(), this, &SurfingGroupRandomizer::Changed_Control);
@@ -90,7 +90,7 @@ void SurfingGroupRandomizer::setup(ofParameterGroup &_group, int _numPresets) {
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::startup()
 {
-	DISABLE_CALLBACKS = false;
+	bDisabledCallbacks = false;
 
 #ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
 	//TODO: crashes
@@ -162,7 +162,7 @@ int SurfingGroupRandomizer::doRandomIndexChanged()
 
 	//-
 
-	int _r = PRESET_Selected_IndexMain;
+	int _r = guiPresetSelectedIndex;
 
 	if (MODE_DicesProbs)
 	{
@@ -266,12 +266,12 @@ int SurfingGroupRandomizer::doRandomIndexChanged()
 	//{
 	//	int numTryes = 0;
 	//	//avoid jump to same current preset
-	//	while (PRESET_Selected_IndexMain == _r)//if not changed
+	//	while (guiPresetSelectedIndex == _r)//if not changed
 	//	{
 	//		ofLogWarning(__FUNCTION__) << "Randomize not changed! Try #" << ofToString(++numTryes);
 	//		ofLogNotice(__FUNCTION__) << "PRESET Previous was : " << ofToString(_r);
-	//		ofLogNotice(__FUNCTION__) << "PRESET New Random is: " << ofToString(PRESET_Selected_IndexMain);
-	//		PRESET_Selected_IndexMain = (int)ofRandom(0, mainGroupMemoryFilesPresets.size());
+	//		ofLogNotice(__FUNCTION__) << "PRESET New Random is: " << ofToString(guiPresetSelectedIndex);
+	//		guiPresetSelectedIndex = (int)ofRandom(0, mainGroupMemoryFilesPresets.size());
 	//		
 	//		//if (MODE_MemoryLive) _r = (int)ofRandom(0, mainGroupMemoryFilesPresets.size());
 	//		//_r = (int)ofRandom(1, mainGroupMemoryFilesPresets.size() + 1);
@@ -292,7 +292,7 @@ void SurfingGroupRandomizer::doRandomIndex()
 	// we want force change, not stay in the same. 
 	// bc sometimes the random gets the same current preset.
 
-	int _PRESET_selected_PRE = PRESET_Selected_IndexMain;
+	int _indexPRE = guiPresetSelectedIndex;
 
 	int r = doRandomIndexChanged();
 
@@ -311,11 +311,11 @@ void SurfingGroupRandomizer::doRandomIndex()
 		ofLogVerbose(__FUNCTION__) << "PRESET : " << ofToString(r);
 
 		// While preset index not changed. TODO: avoid make more than 5 randoms..
-		while (r == _PRESET_selected_PRE && dicesTotalAmount > 1 && numTryes < 5) 
+		while (r == _indexPRE && dicesTotalAmount > 1 && numTryes < 5)
 		{
 			r = doRandomIndexChanged();
 			ofLogVerbose(__FUNCTION__) << "Randomize Try #" << ofToString(++numTryes) << " NOT changed!";
-			ofLogVerbose(__FUNCTION__) << "PRESET Previous was : " << ofToString(_PRESET_selected_PRE);
+			ofLogVerbose(__FUNCTION__) << "PRESET Previous was : " << ofToString(_indexPRE);
 			ofLogVerbose(__FUNCTION__) << "PRESET New Random is: " << ofToString(r);
 			ofLogVerbose(__FUNCTION__) << "RETRY !";
 		}
@@ -326,18 +326,17 @@ void SurfingGroupRandomizer::doRandomIndex()
 
 	//--
 
-	// 4. Apply preset selection
-
-	loadPreset(r);
-
-	//--
-
 	// 5. Start timer again
 
 	if (PLAY_RandomizeTimer)
 	{
 		randomizerTimer = ofGetElapsedTimeMillis();
 	}
+
+	//--
+
+	// 4. Apply preset selection
+	loadPreset(r);
 }
 
 //--------------------------------------------------------------
@@ -892,35 +891,38 @@ void SurfingGroupRandomizer::update()
 
 	// Easy callback
 	// Latch mode
-	if (bIsDoneLoad && MODE_LatchTrig && !PLAY_RandomizeTimer)
-	{
-		bIsDoneLoad = false;
-		randomizerTimer = ofGetElapsedTimeMillis();
+	if (MODE_LatchTrig)
+		if (bIsDoneLoad && !PLAY_RandomizeTimer)
+		{
+			bIsDoneLoad = false;
 
-		if (PRESET_Selected_IndexMain != 0)
-		{
-			bLatchRun = true;
+			randomizerTimer = ofGetElapsedTimeMillis();
+
+			if (guiPresetSelectedIndex != 0)
+			{
+				bLatchRun = true;
+			}
+			else
+			{
+				bLatchRun = false;
+			}
 		}
-		else
-		{
-			bLatchRun = false;
-		}
-	}
 
 	//----
 
-	if (PLAY_RandomizeTimer || MODE_LatchTrig) // ?
+	//if (PLAY_RandomizeTimer || MODE_LatchTrig) // ?
+	if (PLAY_RandomizeTimer) // ?
 	{
 		uint32_t _time = ofGetElapsedTimeMillis();
 		timerRandomizer = _time - randomizerTimer;//elapsed now from last trig
 
 		//ofLogNotice(__FUNCTION__) << " : " << timerRandomizer;
 
-		if (PRESET_Selected_IndexMain < presetsRandomModeShort.size()) {// avoid out of range
+		if (guiPresetSelectedIndex < presetsRandomModeShort.size()) {// avoid out of range
 
 			// A. Long mode
 
-			if (presetsRandomModeShort[PRESET_Selected_IndexMain] == false)// get if it's marked as shor or long by default (false)
+			if (presetsRandomModeShort[guiPresetSelectedIndex] == false)// get if it's marked as shor or long by default (false)
 			{
 				timerPlayerPct = ofMap(timerRandomizer, 0, randomizeDuration, 0, 1, true);
 
@@ -928,10 +930,7 @@ void SurfingGroupRandomizer::update()
 				{
 					if (MODE_LatchTrig) // latch mode trigs the preset and then trigs back to first presets
 					{
-						if (bLatchRun) 
-						{
-							loadPreset(0);
-						}
+						if (bLatchRun) loadPreset(0);
 					}
 					else
 					{
@@ -956,12 +955,17 @@ void SurfingGroupRandomizer::update()
 					{
 						if (bLatchRun) loadPreset(0);
 					}
-					else bRandomizeIndex = true;
+					else 
+					{
+						//TODO: can be improved calling directly the method! bc this flag will be readed on update()..
+						//bRandomizeIndex = true;
+						doRandomIndex();
+					}
 				}
 			}
 		}
 	}
-	else 
+	else
 	{
 		timerPlayerPct = 0;
 	}
@@ -971,8 +975,8 @@ void SurfingGroupRandomizer::update()
 	// 1.0.2 Draw progress bar for the randomizer timer
 
 	//// Long mode
-	//if (presetsRandomModeShort[PRESET_Selected_IndexMain - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
-	
+	//if (presetsRandomModeShort[guiPresetSelectedIndex - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
+
 	//// Short mode
 	//else _prog = timerRandomizer / (float)randomizeDurationShort;
 	// bar relative only to long
@@ -1147,7 +1151,7 @@ void SurfingGroupRandomizer::drawImGui_RandomizerEditPlayer()
 #endif
 
 	ImGui::PopStyleVar();
-}
+	}
 
 ////--------------------------------------------------------------
 //void SurfingGroupRandomizer::drawImGui_RandomizerParams()
@@ -1203,14 +1207,13 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 			//str = "  Group    " + group.getName();
 			//ImGui::Text(str.c_str());
 
-			str = "Preset: " + ofToString(PRESET_Selected_IndexMain.get());
+			str = "Preset: " + ofToString(guiPresetSelectedIndex.get());
 			ImGui::Text(str.c_str());
 
 			ImGui::PushItemWidth(_w33);
-			ofxImGuiSurfing::AddParameter(PRESET_Selected_IndexMain);
+			ofxImGuiSurfing::AddParameter(guiPresetSelectedIndex);
 			ImGui::PopItemWidth();
 
-			//ImGui::SameLine();
 			ImGui::Spacing();
 
 			//--
@@ -1218,7 +1221,7 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 			_w100 = getWidgetsWidth(1);
 			_w50 = getWidgetsWidth(2);
 			float _hm = getWidgetsHeightUnit() * 2;
-			ofxImGuiSurfing::AddMatrixClicker(PRESET_Selected_IndexMain, respBtnsClicker, amntBtnsClicker, true, _hm);
+			ofxImGuiSurfing::AddMatrixClicker(guiPresetSelectedIndex, respBtnsClicker, amntBtnsClicker, true, _hm);
 
 			//--
 
@@ -1405,7 +1408,7 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::Changed_Editor(ofAbstractParameter &e)
 {
-	if (!DISABLE_CALLBACKS)
+	if (!bDisabledCallbacks)
 	{
 		string name = e.getName();
 
@@ -1459,7 +1462,7 @@ void SurfingGroupRandomizer::doDices()// calculate all probabilities for all pre
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter &e)
 {
-	if (!DISABLE_CALLBACKS)
+	if (!bDisabledCallbacks)
 	{
 		string name = e.getName();
 
@@ -1476,22 +1479,23 @@ void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter &e)
 		//----
 
 		// index preset selector
-		else if (name == PRESET_Selected_IndexMain.getName())
+		else if (name == guiPresetSelectedIndex.getName())
 		{
-			ofLogNotice(__FUNCTION__) << group.getName() << " index: " << PRESET_Selected_IndexMain.get();
+			ofLogNotice(__FUNCTION__) << group.getName() << " index: " << guiPresetSelectedIndex.get();
 
 			// TODO:
-			//selectorTARGET = PRESET_Selected_IndexMain;
-	}
+			//selectorTARGET = guiPresetSelectedIndex;
+		}
 
 		//--
 
+		/*
 		// helper tools
 		else if (name == "CLONE >" && bCloneRight)
 		{
 			ofLogNotice(__FUNCTION__) << group.getName() << "CLONE >: " << e;
 			//bCloneRight = false;
-			//doCloneRight(PRESET_Selected_IndexMain);
+			//doCloneRight(guiPresetSelectedIndex);
 		}
 		else if (name == "CLONE ALL" && bCloneAll)
 		{
@@ -1505,6 +1509,7 @@ void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter &e)
 			//bCloneAll = false;
 			//doCloneAll();
 		}
+		*/
 
 		//--
 
@@ -1577,7 +1582,8 @@ void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter &e)
 
 		//--
 
-		// all other widgets/params that are populate on the thw fly, not hardcoded
+		// workaround
+		// all other widgets/params that are populate on the the fly, not hardcoded
 		else
 		{
 			// check if changed prob sliders
@@ -1591,24 +1597,24 @@ void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter &e)
 			}
 			if (_doDices) doDices();
 		}
-}
+	}
 }
 
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::loadPreset(int p)
 {
 	ofLogNotice(__FUNCTION__) << group.getName() << " : " << p;
-	PRESET_Selected_IndexMain = p;
-	
+	guiPresetSelectedIndex = p;
+
 	//TODO: 
 	// workaround
 	//bc the done-loading happens out of the class...
-	bIsDoneLoad = true; 
+	bIsDoneLoad = true;
 
 	// TODO:
 	////if (selectorTARGET) 
 	//{
-	//selectorTARGET = PRESET_Selected_IndexMain;
+	//selectorTARGET = guiPresetSelectedIndex;
 	//}
 }
 

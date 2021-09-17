@@ -21,7 +21,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	//-
 
-	DISABLE_CALLBACKS = true;
+	bDisabledCallbacks = true;
 
 	//-
 
@@ -94,7 +94,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	groups.reserve(NUM_MAX_GROUPS);
 	keys.reserve(NUM_MAX_GROUPS);
-	PRESETS_Selected_Index.reserve(NUM_MAX_GROUPS);
+	guiPresetSelectedIndex.reserve(NUM_MAX_GROUPS);
 	groupRandomizers.reserve(NUM_MAX_GROUPS);
 
 	//--
@@ -279,13 +279,13 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 {
 	ofLogNotice(__FUNCTION__) << "create group selector: " << (_buildGroupSelector ? "TRUE" : "FALSE");
 
-	DISABLE_CALLBACKS = true;
+	bDisabledCallbacks = true;
 
 	//--
 
 	// create main GROUP selector only when we have added more than one group. 
 	// if not, we don't have nothing to group!
-	if (PRESETS_Selected_Index.size() > 1 && groups.size() > 1)
+	if (guiPresetSelectedIndex.size() > 1 && groups.size() > 1)
 		bBuildGroupSelector = _buildGroupSelector;
 	else
 	{
@@ -303,9 +303,9 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		//#define NUM_MAIN_SELECTOR_PRESETS 8
 		//mainSelector.setMax(NUM_MAIN_SELECTOR_PRESETS);
 
-		for (int i = 0; i < PRESETS_Selected_Index.size(); i++)
+		for (int i = 0; i < guiPresetSelectedIndex.size(); i++)
 		{
-			params_GroupMainSelector.add(PRESETS_Selected_Index[i]);
+			params_GroupMainSelector.add(guiPresetSelectedIndex[i]);
 		}
 
 		// TODO: should allow customize keys to avoid coollide with 0,1,2.. and customize amount too
@@ -336,8 +336,8 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		// store the main group link slector only!
 		int _last = groups.size() - 1;
 
-		GROUP_LINK_Selected_Index.setMax(groupsSizes[_last] - 1);
-		GROUP_LINK_Selected_Index.makeReferenceTo(PRESETS_Selected_Index[_last]);// TODO: link
+		GROUP_LINK_SelectedIndex.setMax(groupsSizes[_last] - 1);
+		GROUP_LINK_SelectedIndex.makeReferenceTo(guiPresetSelectedIndex[_last]);// TODO: link
 
 		// excludes all selectors except the main one. the other will be saved as preset
 		params_GroupsSelectors.setSerializable(false);
@@ -345,10 +345,10 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	//--
 
-	PRESETS_Selected_Index_PRE.resize(PRESETS_Selected_Index.size());
-	for (int i = 0; i < PRESETS_Selected_Index_PRE.size(); i++)
+	guiPresetSelectedIndex_PRE.resize(guiPresetSelectedIndex.size());
+	for (int i = 0; i < guiPresetSelectedIndex_PRE.size(); i++)
 	{
-		PRESETS_Selected_Index_PRE[i] = -1;
+		guiPresetSelectedIndex_PRE[i] = -1;
 	}
 
 	//----
@@ -412,7 +412,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Control.add(bThemeDarkOrLight);
 	params_Control.add(cellSize);
 
-	params_Control.add(bSHOW_allGroups);
+	params_Control.add(bGui_ShowAllGroups);
 	params_Control.add(bGui_Panels);
 
 #ifdef INCLUDE_ofxSurfingRandomizer
@@ -435,25 +435,25 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	// this is to know if no groups has been added before call setup! 
 	if (_last >= 0) {
 
-		GROUP_LINK_Selected_Index.set("GROUP_LINK", 0, 0, groupsSizes[_last] - 1);
-		params_UserKitSettings.add(GROUP_LINK_Selected_Index);
+		GROUP_LINK_SelectedIndex.set("GROUP_LINK", 0, 0, groupsSizes[_last] - 1);
+		params_UserKitSettings.add(GROUP_LINK_SelectedIndex);
 
 		//----
 
 		// user gui selector
-		bSHOW_allGroups.set("Show All", false);
+		bGui_ShowAllGroups.set("Show All", false);
 
-		//bSHOW_allGroups.setSerializable(false);
+		//bGui_ShowAllGroups.setSerializable(false);
 
-		GuiGROUP_Selected_Index.set("GROUP SELECT", 0, 0, groups.size() - 1);
-		GuiGROUP_Selected_Index.addListener(this, &ofxPresetsManager::Changed_GuiGROUP_Selected_Index);
+		guiGroupSelectedIndex.set("GROUP SELECT", 0, 0, groups.size() - 1);
+		guiGroupSelectedIndex.addListener(this, &ofxPresetsManager::Changed_GuiGroupSelectedIndex);
 
 		groupRandomizers.resize(groups.size());
 
 		for (int i = 0; i < groups.size(); i++)
 		{
 			// link selectors from class to group randomizer
-			groupRandomizers[i].PRESET_Selected_IndexMain.makeReferenceTo(PRESETS_Selected_Index[i]);// TODO: link
+			groupRandomizers[i].guiPresetSelectedIndex.makeReferenceTo(guiPresetSelectedIndex[i]);// TODO: link
 
 			//-
 
@@ -480,10 +480,10 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 			//-
 
 			ofParameterGroup _g{ groups[i].getName() };
-			_g.add(PRESETS_Selected_Index[i]);// selector
-			//_g.add(groupRandomizers[i].getParamsRandomizers());// all params
+			_g.add(guiPresetSelectedIndex[i]);// selector
 			_g.add(groupRandomizers[i].PLAY_RandomizeTimer);// play
 			_g.add(groupRandomizers[i].randomizeDurationBpm);// bpm
+			//_g.add(groupRandomizers[i].getParamsRandomizers());// all params
 			//_g.add(groupRandomizers[i].bRandomizeIndex);// random index
 			params_GroupsSelectors.add(_g);
 
@@ -509,7 +509,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		//----
 	}
 
-	params_UserKitSettings.add(GuiGROUP_Selected_Index);
+	params_UserKitSettings.add(guiGroupSelectedIndex);
 
 	//----
 
@@ -630,7 +630,7 @@ void ofxPresetsManager::startup()
 {
 	ofLogNotice(__FUNCTION__);
 
-	DISABLE_CALLBACKS = false;// enable callbacks after setup
+	bDisabledCallbacks = false;// enable callbacks after setup
 
 	//--
 
@@ -697,11 +697,11 @@ void ofxPresetsManager::startup()
 	//if (bBuildGroupSelector)
 	//{
 	//	int _last = groups.size() - 1;
-	//	cout << "PRESETS_Selected_Index[_last] : " << PRESETS_Selected_Index[_last] << endl;
-	//	PRESETS_Selected_Index[_last] = groupsSizes[_last];
-	//	cout << "PRESETS_Selected_Index[_last] : " << PRESETS_Selected_Index[_last] << endl;
-	//	PRESETS_Selected_Index[_last] = GROUP_LINK_Selected_Index.get();
-	//	cout << "PRESETS_Selected_Index[_last] : " << PRESETS_Selected_Index[_last] << endl;
+	//	cout << "guiPresetSelectedIndex[_last] : " << guiPresetSelectedIndex[_last] << endl;
+	//	guiPresetSelectedIndex[_last] = groupsSizes[_last];
+	//	cout << "guiPresetSelectedIndex[_last] : " << guiPresetSelectedIndex[_last] << endl;
+	//	guiPresetSelectedIndex[_last] = GROUP_LINK_SelectedIndex.get();
+	//	cout << "guiPresetSelectedIndex[_last] : " << guiPresetSelectedIndex[_last] << endl;
 	//}
 
 	//--
@@ -746,7 +746,7 @@ void ofxPresetsManager::update(ofEventArgs & args)
 	//	cout << "bImGui_mouseOver_PRE " << bImGui_mouseOver_PRE<< endl;
 	//	cout << "bDoneSetup " << bDoneSetup << endl;
 
-	if (!DISABLE_CALLBACKS)
+	if (!bDisabledCallbacks)
 	{
 		//-
 
@@ -1018,7 +1018,7 @@ void ofxPresetsManager::drawPresetClicker()
 
 				// 2. Inner box. double mark current selected preset
 
-				if (PRESETS_Selected_Index[i] == k) // it is selected
+				if (guiPresetSelectedIndex[i] == k) // it is selected
 				{
 					ofPushStyle();
 
@@ -1165,13 +1165,13 @@ void ofxPresetsManager::drawPresetClicker()
 				bool bLast = (i == groups.size() - 1);
 				if (!bLast) {
 					info += "\n";
-					if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1 && bKeys.get())
+					if (i == guiGroupSelectedIndex.get() && groups.size() > 1 && bKeys.get())
 						info += ">";
 					info += "#" + ofToString(i);
 				}
 				else
 				{
-					if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1 && bKeys.get())
+					if (i == guiGroupSelectedIndex.get() && groups.size() > 1 && bKeys.get())
 						info = ">" + info;
 				}
 
@@ -1221,10 +1221,10 @@ void ofxPresetsManager::clear() {
 	groups.clear();
 	keys.clear();
 	groupsSizes.clear();
-	PRESETS_Selected_Index.clear();
+	guiPresetSelectedIndex.clear();
 	params_GroupMainSelector.clear();
 	params_GroupsSelectors.clear();
-	PRESETS_Selected_Index_PRE.clear();
+	guiPresetSelectedIndex_PRE.clear();
 
 	//params_Options.clear();
 	//params_Gui.clear();
@@ -1249,8 +1249,8 @@ void ofxPresetsManager::add(ofParameterGroup _params, int _amountPresets)
 	// preset selectors
 	ofParameter<int> p{ groups[_size].getName(), 0, 0,  _amountPresets - 1 };
 	//p.setSerializable(false);// exclude saving all slectors except last one, that will be enalbed at setup
-	PRESETS_Selected_Index.push_back(p);
-	//params_GroupsSelectors.add(PRESETS_Selected_Index[_size]);// add this new param (lastone)
+	guiPresetSelectedIndex.push_back(p);
+	//params_GroupsSelectors.add(guiPresetSelectedIndex[_size]);// add this new param (lastone)
 
 	//-
 
@@ -1542,7 +1542,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 
 		// TODO: already marked
 		// mark selected
-		PRESETS_Selected_Index[guiIndex] = presetIndex;
+		guiPresetSelectedIndex[guiIndex] = presetIndex;
 
 		//-
 
@@ -1551,7 +1551,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 		ofLogVerbose(__FUNCTION__) << "DONE_load";
 		DONE_load = true;
 
-		//simple callback
+		// simple callback
 		bIsDoneLoad = true;
 	}
 
@@ -1593,7 +1593,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	//		//-
 
 	//		//mark selected
-	//		PRESETS_Selected_Index[guiIndex] = presetIndex;
+	//		guiPresetSelectedIndex[guiIndex] = presetIndex;
 
 	//		//-
 
@@ -1620,7 +1620,7 @@ void ofxPresetsManager::load(int presetIndex, int guiIndex)
 	//		}
 
 	//		//mark selected
-	//		PRESETS_Selected_Index[guiIndex] = presetIndex;
+	//		guiPresetSelectedIndex[guiIndex] = presetIndex;
 	//	}
 	//}
 
@@ -1656,7 +1656,7 @@ void ofxPresetsManager::load(int presetIndex, std::string gName)
 
 		// TODO: already marked
 		// mark selected
-		PRESETS_Selected_Index[guiIndex] = presetIndex;
+		guiPresetSelectedIndex[guiIndex] = presetIndex;
 
 		//-
 
@@ -1665,7 +1665,7 @@ void ofxPresetsManager::load(int presetIndex, std::string gName)
 		ofLogVerbose(__FUNCTION__) << "DONE_load";
 		DONE_load = true;
 
-		//simple callback
+		// simple callback
 		bIsDoneLoad = true;
 	}
 
@@ -1704,7 +1704,7 @@ void ofxPresetsManager::load(int presetIndex, std::string gName)
 	//		//-
 
 	//		//mark selected
-	//		PRESETS_Selected_Index[guiIndex] = presetIndex;
+	//		guiPresetSelectedIndex[guiIndex] = presetIndex;
 
 	//		//-
 
@@ -1730,7 +1730,7 @@ void ofxPresetsManager::load(int presetIndex, std::string gName)
 	//		}
 
 	//		//mark selected
-	//		PRESETS_Selected_Index[guiIndex] = presetIndex;
+	//		guiPresetSelectedIndex[guiIndex] = presetIndex;
 	//		//TODO: take car bc this will re-trig the callback too (if load it's "called from the callback")
 	//	}
 	//}
@@ -1774,7 +1774,7 @@ int ofxPresetsManager::getPresetIndex(int guiIndex) const
 {
 	if (guiIndex >= 0 && guiIndex < (int)groups.size())
 	{
-		return PRESETS_Selected_Index[guiIndex];
+		return guiPresetSelectedIndex[guiIndex];
 	}
 	else
 	{
@@ -1789,7 +1789,7 @@ int ofxPresetsManager::getPresetIndex(std::string gName) const
 
 	if (guiIndex >= 0 && guiIndex < (int)groups.size())
 	{
-		return PRESETS_Selected_Index[guiIndex];
+		return guiPresetSelectedIndex[guiIndex];
 	}
 	else
 	{
@@ -1974,13 +1974,13 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			// using a probability and a shorter mode for some presets.
 			else if ((mod_CONTROL && !mod_ALT) && key == ' ')
 			{
-				setTogglePlayRandomizerPreset(GuiGROUP_Selected_Index);
+				setTogglePlayRandomizerPreset(guiGroupSelectedIndex);
 			}
 
 			// randomize enable parameters (look into randomizers panel) to the current selected preset
 			else if ((mod_CONTROL && !mod_ALT) && (key == 'R' || key == 18))
 			{
-				doRandomizePresetSelected(GuiGROUP_Selected_Index);
+				doRandomizePresetSelected(guiGroupSelectedIndex);
 
 				// worfklow
 				// store current point to undo history
@@ -1997,7 +1997,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 			//if (key == 'R')
 			//{
 			//	setTogglePlayRandomizerPreset();
-			//		//doRandomIndex(GuiGROUP_Selected_Index);
+			//		//doRandomIndex(guiGroupSelectedIndex);
 			//}
 			//			else if (key == 'E')
 			//			{
@@ -2038,32 +2038,32 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				// browse groups
 				if (key == OF_KEY_UP)
 				{
-					GuiGROUP_Selected_Index--;
+					guiGroupSelectedIndex--;
 				}
 
 				else if (key == OF_KEY_DOWN)
 				{
-					GuiGROUP_Selected_Index++;
+					guiGroupSelectedIndex++;
 				}
 
 				else if (key == OF_KEY_LEFT)
 				{
-					DISABLE_CALLBACKS = true;
-					int sel = GuiGROUP_Selected_Index.get();
-					int i = PRESETS_Selected_Index[sel];
+					bDisabledCallbacks = true;
+					int sel = guiGroupSelectedIndex.get();
+					int i = guiPresetSelectedIndex[sel];
 					i--;
-					DISABLE_CALLBACKS = false;
-					PRESETS_Selected_Index[sel] = (int)ofClamp(i, 0, PRESETS_Selected_Index[sel].getMax());
+					bDisabledCallbacks = false;
+					guiPresetSelectedIndex[sel] = (int)ofClamp(i, 0, guiPresetSelectedIndex[sel].getMax());
 				}
 
 				else if (key == OF_KEY_RIGHT)
 				{
-					DISABLE_CALLBACKS = true;
-					int sel = GuiGROUP_Selected_Index.get();
-					int i = PRESETS_Selected_Index[sel];
+					bDisabledCallbacks = true;
+					int sel = guiGroupSelectedIndex.get();
+					int i = guiPresetSelectedIndex[sel];
 					i++;
-					DISABLE_CALLBACKS = false;
-					PRESETS_Selected_Index[sel] = (int)ofClamp(i, 0, PRESETS_Selected_Index[sel].getMax());
+					bDisabledCallbacks = false;
+					guiPresetSelectedIndex[sel] = (int)ofClamp(i, 0, guiPresetSelectedIndex[sel].getMax());
 				}
 			}
 
@@ -2088,7 +2088,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 							{
 								ofLogNotice(__FUNCTION__) << groups[g].getName() << " group: " << g << " preset: " << k;
 
-								if (g < PRESETS_Selected_Index.size()) PRESETS_Selected_Index[g] = k;
+								if (g < guiPresetSelectedIndex.size()) guiPresetSelectedIndex[g] = k;
 							}
 
 							return;
@@ -2103,7 +2103,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//// randomizers
 		//if (MODE_Editor.get())
 		//{
-		groupRandomizers[GuiGROUP_Selected_Index].keyPressed(key);
+		groupRandomizers[guiGroupSelectedIndex].keyPressed(key);
 		//}
 
 		//--
@@ -2207,9 +2207,9 @@ void ofxPresetsManager::mousePressed(int x, int y)
 					save(xIndex, yIndex);
 
 					// will auto load and set the already clicked preset button
-					if (yIndex < PRESETS_Selected_Index.size())
+					if (yIndex < guiPresetSelectedIndex.size())
 					{
-						PRESETS_Selected_Index[yIndex] = xIndex;
+						guiPresetSelectedIndex[yIndex] = xIndex;
 					}
 				}
 
@@ -2221,18 +2221,18 @@ void ofxPresetsManager::mousePressed(int x, int y)
 				{
 					//ofLogNotice(__FUNCTION__) << "SWAP";
 
-					if (yIndex < PRESETS_Selected_Index.size())// a valid group index
+					if (yIndex < guiPresetSelectedIndex.size())// a valid group index
 					{
 						//// autosave first from same clicked group
 						//if (bAutoSave)
 						//{
 						//	ofLogNotice(__FUNCTION__) << "Autosave first";
-						//	save(PRESETS_Selected_Index[yIndex], yIndex);
-						//	//save(PRESETS_Selected_Index_PRE[yIndex], yIndex);
+						//	save(guiPresetSelectedIndex[yIndex], yIndex);
+						//	//save(guiPresetSelectedIndex_PRE[yIndex], yIndex);
 						//}
 
 						// swap
-						doSwap(yIndex, PRESETS_Selected_Index[yIndex], xIndex);// group index, from, to
+						doSwap(yIndex, guiPresetSelectedIndex[yIndex], xIndex);// group index, from, to
 					}
 				}
 
@@ -2244,8 +2244,8 @@ void ofxPresetsManager::mousePressed(int x, int y)
 				{
 					ofLogNotice(__FUNCTION__) << "LOAD";
 
-					if (yIndex < PRESETS_Selected_Index.size())
-						PRESETS_Selected_Index[yIndex] = xIndex;
+					if (yIndex < guiPresetSelectedIndex.size())
+						guiPresetSelectedIndex[yIndex] = xIndex;
 				}
 			}
 
@@ -2259,7 +2259,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 				{
 					ofLogNotice(__FUNCTION__) << "saveButton group:" << yIndex;
 
-					save(PRESETS_Selected_Index[yIndex], yIndex);
+					save(guiPresetSelectedIndex[yIndex], yIndex);
 				}
 			}
 		}
@@ -2295,7 +2295,7 @@ void ofxPresetsManager::mousePressed(int x, int y)
 //--------------------------------------------------------------
 void ofxPresetsManager::doCloneRight(int gIndex)
 {
-	int pIndex = PRESETS_Selected_Index[gIndex];
+	int pIndex = guiPresetSelectedIndex[gIndex];
 
 	//auto save current preset
 	//if (bAutoSave)
@@ -2323,8 +2323,8 @@ void ofxPresetsManager::doCloneAll(int gIndex)
 	//auto save current preset
 	//if (bAutoSave)
 	{
-		ofLogVerbose(__FUNCTION__) << "autosave preset: " << PRESETS_Selected_Index[gIndex];
-		save(PRESETS_Selected_Index[gIndex], gIndex);
+		ofLogVerbose(__FUNCTION__) << "autosave preset: " << guiPresetSelectedIndex[gIndex];
+		save(guiPresetSelectedIndex[gIndex], gIndex);
 	}
 
 	//clone all
@@ -2356,8 +2356,8 @@ void ofxPresetsManager::doPopulateFavsALL()
 //{
 //	ofLogNotice(__FUNCTION__);
 //
-//	int ig = GuiGROUP_Selected_Index.get();
-//	int ip = PRESETS_Selected_Index[ig];
+//	int ig = guiGroupSelectedIndex.get();
+//	int ip = guiPresetSelectedIndex[ig];
 //
 //	if (ig < groups.size()) groupRandomizers[ig].doResetGroup(groups[ig]);
 //
@@ -2387,7 +2387,7 @@ void ofxPresetsManager::doPopulateFavs(int groupIndex)
 	//CheckAllFolders();//? required
 
 	//// 2. erase
-	//int ig = GuiGROUP_Selected_Index.get();
+	//int ig = guiGroupSelectedIndex.get();
 	//doCloneAll(ig);
 
 	//// 3. randomize
@@ -2425,7 +2425,7 @@ void ofxPresetsManager::doSwap(int groupIndex, int _srcIndex, int _destIndex)
 	_settings.save(_path_Dst);
 
 	// 2. load dest (now is already src)
-	PRESETS_Selected_Index[groupIndex] = _destIndex;
+	guiPresetSelectedIndex[groupIndex] = _destIndex;
 	loadPreset(_destIndex, groupIndex);
 
 	// 3. restore TEMP (dst) to src
@@ -2441,7 +2441,7 @@ void ofxPresetsManager::setToggleKeysControl(bool active)
 //--------------------------------------------------------------
 void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 {
-	if (!DISABLE_CALLBACKS)
+	if (!bDisabledCallbacks)
 	{
 		std::string name = e.getName();
 
@@ -2460,7 +2460,7 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 		//{
 		//	ofLogNotice(__FUNCTION__) << "bPathDirCustom: " << (bPathDirCustom.get() ? "TRUE" : "FALSE");
 
-		//	//--
+		//--
 
 		//	if (bPathDirCustom.get())
 		//	{
@@ -2484,7 +2484,7 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 			{
 				for (int p = 0; p < groupsSizes[g]; p++)// iterate each preset on each group
 				{
-					if (name == PRESETS_Selected_Index[g].getName() && PRESETS_Selected_Index[g].get() == p)
+					if (name == guiPresetSelectedIndex[g].getName() && guiPresetSelectedIndex[g].get() == p)
 					{
 						// some preset of any group changed
 
@@ -2494,7 +2494,7 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 
 						// 1. group selected preset NOT CHANGED
 
-						if (PRESETS_Selected_Index[g] == PRESETS_Selected_Index_PRE[g])
+						if (guiPresetSelectedIndex[g] == guiPresetSelectedIndex_PRE[g])
 						{
 							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " not changed";
 
@@ -2503,7 +2503,7 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 							//{
 							//	if (bAutoLoad)
 							//	{
-							//		load(PRESET_Selected_IndexMain, g);
+							//		load(guiPresetSelectedIndex, g);
 							//	}
 							//}
 							//bMustTrig = true;
@@ -2513,7 +2513,7 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 
 						// 2. group selected preset CHANGED
 
-						else if (PRESETS_Selected_Index[g] != PRESETS_Selected_Index_PRE[g])
+						else if (guiPresetSelectedIndex[g] != guiPresetSelectedIndex_PRE[g])
 						{
 							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " changed";
 
@@ -2525,20 +2525,20 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 							if (bAutoSave)
 							{
 								// workflow: 
-								//disable autosave when randomizer player enabled
-								//no matters edit mode
-								bool b = groupRandomizers[GuiGROUP_Selected_Index.get()].PLAY_RandomizeTimer.get();
-								if (!b) save(PRESETS_Selected_Index_PRE[g], g);
+								// disable autosave when randomizer player enabled
+								// no matters edit mode
+								bool b = groupRandomizers[guiGroupSelectedIndex.get()].PLAY_RandomizeTimer.get();
+								if (!b) save(guiPresetSelectedIndex_PRE[g], g);
 							}
 
 							//-
 
 							// remember this PRE state to know if changed or not on the next time..
-							PRESETS_Selected_Index_PRE[g] = PRESETS_Selected_Index[g];
+							guiPresetSelectedIndex_PRE[g] = guiPresetSelectedIndex[g];
 
 							//-
 
-							if (bAutoLoad) load(PRESETS_Selected_Index[g], g);
+							if (bAutoLoad) load(guiPresetSelectedIndex[g], g);
 						}
 					}
 				}
@@ -2550,7 +2550,7 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 //--------------------------------------------------------------
 void ofxPresetsManager::Changed_Randomizers(bool &b)
 {
-	if (!DISABLE_CALLBACKS && groupRandomizers.size() > 0)
+	if (!bDisabledCallbacks && groupRandomizers.size() > 0)
 	{
 		ofLogNotice(__FUNCTION__);
 
@@ -2567,7 +2567,7 @@ void ofxPresetsManager::Changed_Randomizers(bool &b)
 //--------------------------------------------------------------
 void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
 {
-	if (!DISABLE_CALLBACKS)
+	if (!bDisabledCallbacks)
 	{
 		std::string name = e.getName();
 
@@ -2771,7 +2771,7 @@ void ofxPresetsManager::load_AppSettings()
 
 	// TODO:
 	// testing to enable here to avoid create empty xml settings on global root?
-	DISABLE_CALLBACKS = false;
+	bDisabledCallbacks = false;
 
 	std::string path3 = filenameMainSettings;
 
@@ -2783,11 +2783,11 @@ void ofxPresetsManager::load_AppSettings()
 	//--
 
 	// TODO: update selectors
-	for (int i = 0; i < PRESETS_Selected_Index.size(); i++)
+	for (int i = 0; i < guiPresetSelectedIndex.size(); i++)
 	{
-		if (i < PRESETS_Selected_Index_PRE.size())
-			PRESETS_Selected_Index_PRE[i] = PRESETS_Selected_Index[i];
-		else ofLogError(__FUNCTION__) << "Out of Range: PRESETS_Selected_Index_PRE '" << i << "'!";
+		if (i < guiPresetSelectedIndex_PRE.size())
+			guiPresetSelectedIndex_PRE[i] = guiPresetSelectedIndex[i];
+		else ofLogError(__FUNCTION__) << "Out of Range: guiPresetSelectedIndex_PRE '" << i << "'!";
 	}
 }
 
@@ -2796,7 +2796,7 @@ void ofxPresetsManager::save_ControlSettings()
 {
 #ifndef DEBUG_BLOCK_SAVE_SETTINGS
 
-	DISABLE_CALLBACKS = true;
+	bDisabledCallbacks = true;
 
 	//---
 
@@ -2834,7 +2834,7 @@ void ofxPresetsManager::save_ControlSettings()
 
 	//----
 
-	DISABLE_CALLBACKS = false;
+	bDisabledCallbacks = false;
 #else
 	ofLogNotice(__FUNCTION__) << "[DEBUG] BLOCKED save_ControlSettings()";
 #endif
@@ -3020,7 +3020,7 @@ void ofxPresetsManager::exit()
 {
 	ofLogVerbose(__FUNCTION__);
 
-	DISABLE_CALLBACKS = true;
+	bDisabledCallbacks = true;
 
 	// destroy callbacks
 	removeKeysListeners();
@@ -3034,7 +3034,7 @@ void ofxPresetsManager::exit()
 	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
 	ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
 
-	GuiGROUP_Selected_Index.removeListener(this, &ofxPresetsManager::Changed_GuiGROUP_Selected_Index);
+	guiGroupSelectedIndex.removeListener(this, &ofxPresetsManager::Changed_GuiGroupSelectedIndex);
 
 	//--
 
@@ -3057,7 +3057,7 @@ void ofxPresetsManager::exit()
 		// save selected presets
 		for (int g = 0; g < groups.size(); g++)// iterate each group
 		{
-			save(PRESETS_Selected_Index[g], g);
+			save(guiPresetSelectedIndex[g], g);
 		}
 	}
 
@@ -3239,19 +3239,17 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 					std::string str;
 
-					//ImGui::Spacing();
-
 					// 1. selected group
 					str = "Group:";
 					ImGui::Text(str.c_str());
 					if (bBuildGroupSelector) {
 						ImGui::PushItemWidth(_w50);
-						ofxImGuiSurfing::AddParameter(GuiGROUP_Selected_Index);// user selected wich group to edit
+						ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex);// user selected wich group to edit
 						ImGui::PopItemWidth();
 					}
 					//str = "Group Name:";
 					//ImGui::Text(str.c_str());
-					str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
+					str = guiPresetSelectedIndex[guiGroupSelectedIndex].getName();
 					ImGui::Text(str.c_str());
 
 					//-
@@ -3264,15 +3262,15 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 					//ImGui::Text(str.c_str());
 					if (bBuildGroupSelector) {
 						ImGui::PushItemWidth(_w50);
-						ofxImGuiSurfing::AddParameter(PRESETS_Selected_Index[groups.size() - 1]);// last group is the main link group
+						ofxImGuiSurfing::AddParameter(guiPresetSelectedIndex[groups.size() - 1]);// last group is the main link group
 						ImGui::PopItemWidth();
 					}
 
 					ImGui::Dummy(ImVec2(0, 2));
 
 					// selector to show their randomizers
-					//ofxImGuiSurfing::AddParameter(bSHOW_allGroups);
-					ofxImGuiSurfing::AddBigToggle(bSHOW_allGroups, _w100, _h / 2);
+					//ofxImGuiSurfing::AddParameter(bGui_ShowAllGroups);
+					ofxImGuiSurfing::AddBigToggle(bGui_ShowAllGroups, _w100, _h / 2);
 				}
 				ofxImGui::EndWindow(settings);
 			}
@@ -3343,15 +3341,15 @@ void ofxPresetsManager::gui_Parameters()
 		// (only when more than one group)
 
 		if (groups.size() > 1) {
-			ofxImGuiSurfing::AddStepper(GuiGROUP_Selected_Index);
+			ofxImGuiSurfing::AddStepper(guiGroupSelectedIndex);
 
 			// name of selected group
-			std::string str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
+			std::string str = guiPresetSelectedIndex[guiGroupSelectedIndex].getName();
 			ImGui::Text(str.c_str());
 		}
 
 		//preset selector
-		//ofxImGuiSurfing::AddStepper(PRESETS_Selected_Index[0]);
+		//ofxImGuiSurfing::AddStepper(guiPresetSelectedIndex[0]);
 		*/
 
 		//-
@@ -3380,6 +3378,7 @@ void ofxPresetsManager::gui_Parameters()
 			}
 
 			if (bLast) {
+				ImGui::Spacing();
 				ImGui::PushItemWidth(_w33);
 			}
 
@@ -3547,7 +3546,7 @@ void ofxPresetsManager::gui_Panels()
 			//	//ImGui::Dummy(ImVec2(0.f, 2.f));
 			//	//ofxImGuiSurfing::AddBigToggle(bGui_Players, _w100, _h / 2);
 			//	// selector to show their randomizers
-			//	ofxImGuiSurfing::AddBigToggle(bSHOW_allGroups, _w100, _h / 2);
+			//	ofxImGuiSurfing::AddBigToggle(bGui_ShowAllGroups, _w100, _h / 2);
 			//}
 			//ImGui::Unindent();
 
@@ -3559,7 +3558,7 @@ void ofxPresetsManager::gui_Panels()
 			if (ImGui::CollapsingHeader("RANDOMIZERS", _flagw))
 			{
 				ImGui::PushItemWidth(_w33);
-				ofxImGuiSurfing::AddParameter(GuiGROUP_Selected_Index); // user selected wich group to edit
+				ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
 				ImGui::PopItemWidth();
 
 				ofxImGuiSurfing::AddToggleRoundedButton(bGui_Players);
@@ -3626,7 +3625,6 @@ void ofxPresetsManager::gui_Main()
 
 		// label for User-Kit folder
 		str = "USER-KIT:";
-		//str = "User-Kit:";
 		ImGui::Text(str.c_str());
 		str = path_UserKit_Folder;
 		ofStringReplace(str, "/", "/\n");//split in lines to reduce panel width
@@ -3636,18 +3634,17 @@ void ofxPresetsManager::gui_Main()
 		ImGui::Dummy(ImVec2(0, 2));
 
 		// aliases
-		int ig = GuiGROUP_Selected_Index.get();
-		int ip = PRESETS_Selected_Index[ig];
+		int ig = guiGroupSelectedIndex.get();
+		int ip = guiPresetSelectedIndex[ig];
 
 		// name of selected group
-		str = PRESETS_Selected_Index[ig].getName();
+		str = guiPresetSelectedIndex[ig].getName();
 		ImGui::Text(str.c_str());
 
 		if (groups.size() > 1) {
 			str = "Group #" + ofToString(ig) + "/" + ofToString(groups.size() - 1);
 			ImGui::Text(str.c_str());
 		}
-		//ImGui::SameLine();
 
 		str = "Preset " + ofToString(ip) + "/" + ofToString(keys[ig].size() - 1);
 		ImGui::Text(str.c_str());
@@ -3665,12 +3662,12 @@ void ofxPresetsManager::gui_Main()
 		{
 			if (ImGui::Button("RELOAD", ImVec2(_w50, _h)))
 			{
-				loadPreset(PRESETS_Selected_Index[GuiGROUP_Selected_Index], GuiGROUP_Selected_Index);
+				loadPreset(guiPresetSelectedIndex[guiGroupSelectedIndex], guiGroupSelectedIndex);
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("SAVE", ImVec2(_w50, _h)))
 			{
-				savePreset(PRESETS_Selected_Index[GuiGROUP_Selected_Index], GuiGROUP_Selected_Index);
+				savePreset(guiPresetSelectedIndex[guiGroupSelectedIndex], guiGroupSelectedIndex);
 			}
 		}
 
@@ -3682,13 +3679,13 @@ void ofxPresetsManager::gui_Main()
 		{
 			if (ImGui::Button("<", ImVec2(_w50, _h)))
 			{
-				int ig = GuiGROUP_Selected_Index.get();
+				int ig = guiGroupSelectedIndex.get();
 				load_Previous(ig, true);
 			}
 			ImGui::SameLine();
 			if (ImGui::Button(">", ImVec2(_w50, _h)))
 			{
-				int ig = GuiGROUP_Selected_Index.get();
+				int ig = guiGroupSelectedIndex.get();
 				load_Next(ig, true);
 			}
 		}
@@ -3723,7 +3720,7 @@ void ofxPresetsManager::gui_Main()
 			{
 				//str = "Group Name:";
 				//ImGui::Text(str.c_str());
-				str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
+				str = guiPresetSelectedIndex[guiGroupSelectedIndex].getName();
 				ImGui::Text(str.c_str());
 
 				//-
@@ -3734,7 +3731,7 @@ void ofxPresetsManager::gui_Main()
 				if (bBuildGroupSelector)
 				{
 					ImGui::PushItemWidth(_w33);
-					ofxImGuiSurfing::AddParameter(GuiGROUP_Selected_Index); // user selected wich group to edit
+					ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
 					ImGui::PopItemWidth();
 				}
 
@@ -3742,13 +3739,12 @@ void ofxPresetsManager::gui_Main()
 
 				ImGui::Text("Preset:");
 				ImGui::PushItemWidth(_w33);
-				ofxImGuiSurfing::AddParameter(PRESETS_Selected_Index[GuiGROUP_Selected_Index]);
+				ofxImGuiSurfing::AddParameter(guiPresetSelectedIndex[guiGroupSelectedIndex]);
 				ImGui::PopItemWidth();
 
 				//ofxImGuiSurfing::AddBigToggle(bGui_Players, _w100, _h / 2);
-
 				//// selector to show their randomizers
-				//ofxImGuiSurfing::AddBigToggle(bSHOW_allGroups, _w100, _h / 2);
+				//ofxImGuiSurfing::AddBigToggle(bGui_ShowAllGroups, _w100, _h / 2);
 
 				//----
 
@@ -3778,7 +3774,7 @@ void ofxPresetsManager::gui_Main()
 
 			if (groups.size() > 1)
 			{
-				ofxImGuiSurfing::AddToggleRoundedButton(bSHOW_allGroups);
+				ofxImGuiSurfing::AddToggleRoundedButton(bGui_ShowAllGroups);
 			}
 
 			ImGui::Dummy(ImVec2(0.0f, 2.0f));
@@ -3809,13 +3805,12 @@ void ofxPresetsManager::gui_Main()
 
 					//TODO: select which added group
 					int i = 0;
-					//int ii = PRESETS_Selected_Index[i];
+					//int ii = guiPresetSelectedIndex[i];
 
 					if (ImGui::Button("CLONE ALL", ImVec2(_w100, _h / 2)))
 					{
 						doCloneAll(i);
 					}
-					//ImGui::SameLine();
 					if (ImGui::Button("CLONE >", ImVec2(_w100, _h / 2)))
 					{
 						doCloneRight(i);
@@ -3828,7 +3823,7 @@ void ofxPresetsManager::gui_Main()
 				////create all presets randomized
 				////if (ImGui::Button("POPULATE", ImVec2(_w99, _h / 2)))
 				////{
-				////	int ig = GuiGROUP_Selected_Index.get();
+				////	int ig = guiGroupSelectedIndex.get();
 				////	doPopulateFavs(ig);
 				////}
 			}
@@ -3845,8 +3840,8 @@ void ofxPresetsManager::gui_Main()
 				ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
 				_h *= 2;
 
-				str = "History: " + ofToString(undoStringsParams[GuiGROUP_Selected_Index].getUndoLength()) + "/";
-				str += ofToString(undoStringsParams[GuiGROUP_Selected_Index].getRedoLength());
+				str = "History: " + ofToString(undoStringsParams[guiGroupSelectedIndex].getUndoLength()) + "/";
+				str += ofToString(undoStringsParams[guiGroupSelectedIndex].getRedoLength());
 				ImGui::Text(str.c_str());
 
 				if (ImGui::Button("Store", ImVec2(_w50, _h / 2)))
@@ -3878,7 +3873,7 @@ void ofxPresetsManager::gui_Main()
 		// 6. Advanced
 
 		// workflow: force hide when live mode
-		if (bGui_AdvancedControl/* && MODE_Editor*/) gui_Advanced();
+		if (bGui_AdvancedControl) gui_Advanced();
 
 		//-
 
@@ -3989,7 +3984,6 @@ void ofxPresetsManager::gui_Advanced()
 					}
 
 					ImGui::Spacing();
-					//ImGui::Spacing();
 
 					// monitor custom state
 					//ofxImGuiSurfing::AddParameter(bPathDirCustom);
@@ -4155,7 +4149,7 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 		// save selected presets
 		for (int g = 0; g < groups.size(); g++)//iterate each group
 		{
-			save(PRESETS_Selected_Index[g], g);
+			save(guiPresetSelectedIndex[g], g);
 		}
 	}
 
@@ -4170,9 +4164,9 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 
 	//--
 
-	DISABLE_CALLBACKS = true;//TODO:
+	bDisabledCallbacks = true;//TODO:
 	bPathDirCustom = true;
-	DISABLE_CALLBACKS = false;
+	bDisabledCallbacks = false;
 
 	pathDirCustom = openFileResult.getPath();
 
@@ -4191,14 +4185,14 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 
 		// set selected first preset o last/main group
 		int _last = groups.size() - 1;
-		PRESETS_Selected_Index[_last] = 0;
-		load(PRESETS_Selected_Index[_last], _last);
+		guiPresetSelectedIndex[_last] = 0;
+		load(guiPresetSelectedIndex[_last], _last);
 		bAutoSave = bPre;
 
 		//// load all group selected presets
 		//for (int g = 0; g < groups.size(); g++)//iterate each group
 		//{
-		//	load(PRESETS_Selected_Index[g], g);
+		//	load(guiPresetSelectedIndex[g], g);
 		//}
 	}
 }
@@ -4223,7 +4217,7 @@ void ofxPresetsManager::gui_Standalones()
 
 			//--
 
-			int groupIndex = GuiGROUP_Selected_Index.get();
+			int groupIndex = guiGroupSelectedIndex.get();
 			int _numfiles = standaloneFileNames[groupIndex].size();
 
 			std::string _name;
@@ -4248,17 +4242,15 @@ void ofxPresetsManager::gui_Standalones()
 
 			// user selected wich group to edit
 			ImGui::PushItemWidth(_w50);
-			if (bBuildGroupSelector) ofxImGuiSurfing::AddParameter(GuiGROUP_Selected_Index);
+			if (bBuildGroupSelector) ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex);
 			ImGui::PopItemWidth();
-
-			//ImGui::Spacing();
 
 			//--
 
 			// name of selected group
 			str = "Group Name:";
 			ImGui::Text(str.c_str());
-			str = PRESETS_Selected_Index[GuiGROUP_Selected_Index].getName();
+			str = guiPresetSelectedIndex[guiGroupSelectedIndex].getName();
 			ImGui::Text(str.c_str());
 
 			ImGui::Spacing();
@@ -4276,7 +4268,6 @@ void ofxPresetsManager::gui_Standalones()
 				////ImGui::Text(str.c_str());
 				//str = "/" + path_PresetsStandalone + "/" + groups[groupIndex].getName();// append group name
 				//ImGui::Text(str.c_str());
-				//ImGui::Spacing();
 
 				//-
 
@@ -4300,10 +4291,10 @@ void ofxPresetsManager::gui_Standalones()
 				//if (ImGui::Button("TO FAVS"))
 				//{
 				//	ofLogNotice(__FUNCTION__) << "TO FAVS: SAVE STANDALONE PRESET: " << standaloneNamePresetDisplay[groupIndex];
-				//	//if (MODE_StandalonePresets_NEW) save(PRESETS_Selected_Index[groupIndex], groupIndex);
+				//	//if (MODE_StandalonePresets_NEW) save(guiPresetSelectedIndex[groupIndex], groupIndex);
 				//	
 				//	// save current to favourites
-				//	save(PRESETS_Selected_Index[groupIndex], groupIndex);
+				//	save(guiPresetSelectedIndex[groupIndex], groupIndex);
 				//}
 
 				ImGui::Spacing();
@@ -4321,7 +4312,7 @@ void ofxPresetsManager::gui_Standalones()
 					ImGui::Text("FILES NOT FOUND!");
 
 					std::string _path = path_UserKit_Folder + "/" + path_PresetsStandalone + "/";
-					_path += PRESETS_Selected_Index[groupIndex].getName();// group name
+					_path += guiPresetSelectedIndex[groupIndex].getName();// group name
 					ofStringReplace(_path, "/", "/\n");//split in lines to reduce panel width
 					const char *array = _path.c_str();
 
@@ -4654,54 +4645,37 @@ void ofxPresetsManager::gui_Standalones()
 //--------------------------------------------------------------
 void ofxPresetsManager::gui_Randomizers()
 {
-	if (!bGui_RandomizerParams && !bGui_Players) { return; }
-	//if (!bGui_PlayerEditor && !bGui_RandomizerParams && !bGui_Players) { return; }
+	// This panel will show the settings for the selected by user group (guiGroupSelectedIndex)
 
 	//--
 
-	// this panel will show the settings for the selected by user group (GuiGROUP_Selected_Index)
+	if (!bGui_RandomizerParams && !bGui_Players) { return; }
+	
+	if (guiGroupSelectedIndex > groupRandomizers.size() - 1) { return; }
 
-	//if (bGui_Players)
+	//-
+
+	// Show randomizers of user selected group
+
+	// All the groups
+	if (bGui_ShowAllGroups)
 	{
-		if (GuiGROUP_Selected_Index > groupRandomizers.size() - 1) {
-			return;
-		}
-
-		//-
-
-		// show randomizers of user selected group
-
-		//TODO:
-		// should merge both toggles inside the group class...
-
-		// all
-		if (bSHOW_allGroups)
+		for (int i = 0; i < groupRandomizers.size(); i++)
 		{
-			for (int i = 0; i < groupRandomizers.size(); i++)
-			{
-				if (bGui_Players) groupRandomizers[i].drawImGui();
-
-				//if (bGui_Players) groupRandomizers[i].drawImGui_RandomizersMain();
-				//if (bGui_PlayerEditor) groupRandomizers[i].drawImGui_RandomizerEditPlayer();
-				////if (bGui_RandomizerParams) groupRandomizers[i].drawImGui_RandomizerParams();
-			}
+			if (bGui_Players) groupRandomizers[i].drawImGui();
 		}
+	}
 
-		// only selected
-		else
-		{
-			if (bGui_Players) groupRandomizers[GuiGROUP_Selected_Index.get()].drawImGui();
-
-			//if (bGui_Players) groupRandomizers[GuiGROUP_Selected_Index.get()].drawImGui_RandomizersMain();
-			//if (bGui_PlayerEditor) groupRandomizers[GuiGROUP_Selected_Index.get()].drawImGui_RandomizerEditPlayer();
-			//if (bGui_RandomizerParams) groupRandomizers[GuiGROUP_Selected_Index.get()].drawImGui_RandomizerParams();
-		}
+	// Only the selected group
+	else
+	{
+		if (bGui_Players) groupRandomizers[guiGroupSelectedIndex.get()].drawImGui();
 	}
 }
 
 //----
 
-// standalone presets browser engine
+// Standalone presets browser engine
 
 //--------------------------------------------------------------
 bool ofxPresetsManager::doStandalonePresetsRefresh(int groupIndex)
@@ -4738,11 +4712,11 @@ bool ofxPresetsManager::doStandalonePresetsRefresh(int groupIndex)
 
 	if (groupIndex < groups.size())
 	{
-		// clear files and filenames vectors
+		// Clear files and filenames vectors
 		standaloneFiles[groupIndex].clear();
 		standaloneFileNames[groupIndex].clear();
 
-		// load all folder files in one call
+		// Load all folder files in one call
 		int _size = _dataDir.getFiles().size();// amount of (standalone presets) files for this group
 
 		standaloneFiles[groupIndex].resize(_size);
@@ -4971,7 +4945,7 @@ void ofxPresetsManager::doCheckPresetsFoldersAreEmpty()
 //--------------------------------------------------------------
 void ofxPresetsManager::doStoreUndo() {
 	// the current selected only
-	int i = GuiGROUP_Selected_Index.get();
+	int i = guiGroupSelectedIndex.get();
 	//for (int i = 0; i < groups.size(); i++)// all together
 	{
 		undoXmlsParams[i].clear();
@@ -4995,30 +4969,30 @@ void ofxPresetsManager::doStoreUndo() {
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doClearUndoHistory() {
-	ofLogNotice(__FUNCTION__) << "UNDO CLEAR : " << GuiGROUP_Selected_Index;
-	undoStringsParams[GuiGROUP_Selected_Index].clear();
+	ofLogNotice(__FUNCTION__) << "UNDO CLEAR : " << guiGroupSelectedIndex;
+	undoStringsParams[guiGroupSelectedIndex].clear();
 	//undoStringParams.clear();
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doUndo() {
-	ofLogNotice(__FUNCTION__) << "UNDO < Group #" << GuiGROUP_Selected_Index << " " << groups[GuiGROUP_Selected_Index].getName();
-	undoStringsParams[GuiGROUP_Selected_Index].undo();
+	ofLogNotice(__FUNCTION__) << "UNDO < Group #" << guiGroupSelectedIndex << " " << groups[guiGroupSelectedIndex].getName();
+	undoStringsParams[guiGroupSelectedIndex].undo();
 	//undoStringParams.undo();
 	doRefreshUndoParams();
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doRedo() {
-	ofLogNotice(__FUNCTION__) << "REDO < Group #" << GuiGROUP_Selected_Index << " " << groups[GuiGROUP_Selected_Index].getName();
-	undoStringsParams[GuiGROUP_Selected_Index].redo();
+	ofLogNotice(__FUNCTION__) << "REDO < Group #" << guiGroupSelectedIndex << " " << groups[guiGroupSelectedIndex].getName();
+	undoStringsParams[guiGroupSelectedIndex].redo();
 	//undoStringParams.redo();
 	doRefreshUndoParams();
 }
 
 //--------------------------------------------------------------
 void ofxPresetsManager::doRefreshUndoParams() {
-	int i = GuiGROUP_Selected_Index.get();
+	int i = guiGroupSelectedIndex.get();
 	//for (int i = 0; i < groups.size(); i++)
 	{
 		undoXmlsParams[i].clear();
@@ -5043,10 +5017,10 @@ void ofxPresetsManager::doRefreshUndoParams() {
 //----
 
 //--------------------------------------------------------------
-void ofxPresetsManager::Changed_GuiGROUP_Selected_Index(int & index)
+void ofxPresetsManager::Changed_GuiGroupSelectedIndex(int & index)
 {
-	GuiGROUP_Selected_Index = (int)ofClamp(GuiGROUP_Selected_Index.get(), 0, GuiGROUP_Selected_Index.getMax());
-	ofLogWarning(__FUNCTION__) << GuiGROUP_Selected_Index;
+	guiGroupSelectedIndex = (int)ofClamp(guiGroupSelectedIndex.get(), 0, guiGroupSelectedIndex.getMax());
+	ofLogWarning(__FUNCTION__) << guiGroupSelectedIndex;
 }
 
 //--------------------------------------------------------------

@@ -317,7 +317,7 @@ private:
 
 public:
 	// exposed to allow external callbacks
-	std::vector<ofParameter<int>> PRESETS_Selected_Index;// one selector for each group
+	std::vector<ofParameter<int>> guiPresetSelectedIndex;// one selector for each group
 
 public:
 	//
@@ -329,7 +329,7 @@ public:
 		// could use a customized control group with importante parameters...
 		//ofParameterGroup g{ "SelectorsGroup" };
 		//for (int i = 0; i < groups.size(); i++) {
-		//	g.add(PRESETS_Selected_Index[i]);
+		//	g.add(guiPresetSelectedIndex[i]);
 		//}
 		//return g;
 
@@ -337,16 +337,16 @@ public:
 	}
 
 private:
-	std::vector<int> PRESETS_Selected_Index_PRE;// remember previous selector to reduce callbakcs
+	std::vector<int> guiPresetSelectedIndex_PRE;// remember previous selector to reduce callbakcs
 	ofParameterGroup params_GroupsSelectors{ "PRESET SELECTORS" };// group all group selectors indexes
 
 	//--
 
 	// select active group 
 	// to show on randomize editor panel
-	ofParameter<int> GuiGROUP_Selected_Index;// only this selected group will be showed on gui to edit
-	ofParameter<bool> bSHOW_allGroups;//enable to show all, each group panels
-	void Changed_GuiGROUP_Selected_Index(int & index);
+	ofParameter<int> guiGroupSelectedIndex;// only this selected group will be showed on gui to edit
+	ofParameter<bool> bGui_ShowAllGroups;//enable to show all, each group panels
+	void Changed_GuiGroupSelectedIndex(int & index);
 
 	std::vector<SurfingGroupRandomizer> groupRandomizers;
 
@@ -355,7 +355,7 @@ private:
 
 	//--
 
-	ofParameter<int> GROUP_LINK_Selected_Index;// global group selector. this selector will control all linked groups
+	ofParameter<int> GROUP_LINK_SelectedIndex;// global group selector. this selector will control all linked groups
 
 	// group main selector
 	bool bBuildGroupSelector = true;// to allow auto build a group selector to combine all the added groups to the presets manager
@@ -472,7 +472,7 @@ public:
 	//// setup()
 	//{
 	//	// create callbacks
-	//	for (int i = 0; i < presetsManager.PRESETS_Selected_Index.size(); i++)
+	//	for (int i = 0; i < presetsManager.guiPresetSelectedIndex.size(); i++)
 	//	{
 	//		ofAddListener(presetsManager.getSelectorsGroup().parameterChangedE(), this, &ofApp::Changed_PresetsManagerSelectors);
 	//	}
@@ -784,8 +784,8 @@ public:
 	void saveCurrentPreset(int groupIndex = -1) {
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 
-		ofLogNotice(__FUNCTION__) << "SAVE PRESET  group: " << groupIndex << " preset: " << PRESETS_Selected_Index[groupIndex].get();
-		save(PRESETS_Selected_Index[groupIndex].get(), groupIndex);
+		ofLogNotice(__FUNCTION__) << "SAVE PRESET  group: " << groupIndex << " preset: " << guiPresetSelectedIndex[groupIndex].get();
+		save(guiPresetSelectedIndex[groupIndex].get(), groupIndex);
 	}
 
 public:
@@ -796,8 +796,8 @@ public:
 			if (groups[i].getName() == groupName) _groupIndex = i;
 		}
 		if (_groupIndex != -1) {
-			ofLogNotice(__FUNCTION__) << "SAVE PRESET from group: " << groupName << " #" << _groupIndex << " preset: " << PRESETS_Selected_Index[_groupIndex].get();
-			save(PRESETS_Selected_Index[_groupIndex].get(), _groupIndex);
+			ofLogNotice(__FUNCTION__) << "SAVE PRESET from group: " << groupName << " #" << _groupIndex << " preset: " << guiPresetSelectedIndex[_groupIndex].get();
+			save(guiPresetSelectedIndex[_groupIndex].get(), _groupIndex);
 		}
 		else {
 			ofLogError(__FUNCTION__) << "Can't found any group named: " << groupName << ". Save command failed!";
@@ -811,7 +811,7 @@ public:
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		groupIndex = (int)ofClamp(groupIndex, 0, groups.size() - 1);
 
-		int _curr = PRESETS_Selected_Index[groupIndex];
+		int _curr = guiPresetSelectedIndex[groupIndex];
 
 
 		if (!cycled)//limited
@@ -824,7 +824,7 @@ public:
 			else _curr--;
 		}
 
-		PRESETS_Selected_Index[groupIndex] = _curr;
+		guiPresetSelectedIndex[groupIndex] = _curr;
 	}
 
 	//--------------------------------------------------------------
@@ -833,7 +833,7 @@ public:
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		groupIndex = (int)ofClamp(groupIndex, 0, groups.size() - 1);
 
-		int _curr = PRESETS_Selected_Index[groupIndex];
+		int _curr = guiPresetSelectedIndex[groupIndex];
 
 		if (!cycled)//limited
 		{
@@ -845,20 +845,20 @@ public:
 			else _curr++;
 		}
 
-		PRESETS_Selected_Index[groupIndex] = _curr;
+		guiPresetSelectedIndex[groupIndex] = _curr;
 	}
 
 	//--------------------------------------------------------------
 	void load_Previous(bool cycled)
 	{
-		load_Previous(GuiGROUP_Selected_Index, cycled);
+		load_Previous(guiGroupSelectedIndex, cycled);
 	}
 
 	//--------------------------------------------------------------
 	void load_Next(bool cycled)
 	{
 		ofLogNotice(__FUNCTION__);
-		load_Next(GuiGROUP_Selected_Index, cycled);
+		load_Next(guiGroupSelectedIndex, cycled);
 	}
 
 	// legacy	
@@ -879,7 +879,7 @@ public:
 	int getCurrentPreset(int _group)// get index of selected preset on the group
 	{
 		int _presetIndex = -1;
-		if (_group < groups.size()) _presetIndex = PRESETS_Selected_Index[_group];
+		if (_group < groups.size()) _presetIndex = guiPresetSelectedIndex[_group];
 		return _presetIndex;
 	}
 
@@ -1396,7 +1396,7 @@ private:
 
 private:
 	bool DISABLE_CALLBACKS_SELECTORS = false;// to avoid multiple calls on multiple presets selector engine
-	bool DISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
+	bool bDisabledCallbacks = true;// to avoid startup crashes and objects are not initialized properly
 	// updating some params before save will trigs also the group callbacks
 	// so we disable this callbacks just in case params updatings are required
 
@@ -1504,25 +1504,25 @@ public:
 	// tools
 
 	void doResetFull() {//reset all params to min
-		int ig = GuiGROUP_Selected_Index.get();
+		int ig = guiGroupSelectedIndex.get();
 		if (ig < groups.size())
 			groupRandomizers[ig].doResetGroup(groups[ig], true);
 	}
 
 	void doResetFiltered() {//reset filter enabled params to random min/max
-		int ig = GuiGROUP_Selected_Index.get();
+		int ig = guiGroupSelectedIndex.get();
 		if (ig < groups.size())
 			groupRandomizers[ig].doResetGroup(groups[ig], false);
 	}
 
 	void doRandomFull() {//random all params to min
-		int ig = GuiGROUP_Selected_Index.get();
+		int ig = guiGroupSelectedIndex.get();
 		if (ig < groups.size())
 			groupRandomizers[ig].doRandomGroupFull(groups[ig]);
 	}
 
 	void doRandomFiltered() {//random filter enabled params to random min/max
-		int ig = GuiGROUP_Selected_Index.get();
+		int ig = guiGroupSelectedIndex.get();
 		if (ig < groups.size())
 			groupRandomizers[ig].doRandomPreset();
 	}
@@ -1654,7 +1654,7 @@ if (presetsManager.isDoneLoad())
 // B. better callbacks system for all selectors, to know when a group selector changed:
 // Which group and which presets index selector changed.
 // ofApp::setup()
-for (int i = 0; i < presetsManager.PRESETS_Selected_Index.size(); i++)
+for (int i = 0; i < presetsManager.guiPresetSelectedIndex.size(); i++)
 {
 	ofAddListener(presetsManager.getSelectorsGroup().parameterChangedE(),
 		this, &ofApp::Changed_PresetsManagerSelectors);

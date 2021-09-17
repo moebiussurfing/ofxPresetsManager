@@ -108,7 +108,7 @@ public:
 	ofxSurfing_ImGui_Manager guiManager;
 #endif
 
-	ofParameter<int> PRESET_Selected_IndexMain;// main group preset selector (current)
+	ofParameter<int> guiPresetSelectedIndex;// main group preset selector (current)
 
 	//----
 
@@ -314,7 +314,7 @@ public:
 	}
 
 private:
-	bool DISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
+	bool bDisabledCallbacks = true;// to avoid startup crashes and objects are not initialized properly
 
 	//---
 
