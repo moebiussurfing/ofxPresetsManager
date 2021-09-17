@@ -5,10 +5,10 @@ ofxPresetsManager::ofxPresetsManager()
 {
 	//-
 
-#ifdef DEBUG_randomTest
-	ofSetLogLevel("ofxPresetsManager", OF_LOG_VERBOSE);
-#endif
-
+//#ifdef DEBUG_randomTest
+//	ofSetLogLevel("ofxPresetsManager", OF_LOG_VERBOSE);
+//#endif
+//
 	//-
 
 #ifdef USE_XML
@@ -3486,7 +3486,7 @@ void ofxPresetsManager::gui_Panels()
 	float _h;
 	float _hh;
 
-	string n = "PANELS";
+	string n = "PRESETS PANELS";
 
 	guiManager.beginWindow(n.c_str(), (bool*)&bGui_Panels.get(), flagsw);
 	{
@@ -3596,7 +3596,7 @@ void ofxPresetsManager::gui_MainPanel()
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
-	string n = "MAIN";
+	string n = "PRESETS MAIN";
 
 	guiManager.beginWindow(n.c_str(), NULL, flagsw);
 	{
@@ -3624,7 +3624,7 @@ void ofxPresetsManager::gui_MainPanel()
 
 		ImGui::Dummy(ImVec2(0, 2));
 
-		//TODO: //aliases
+		// aliases
 		int ig = GuiGROUP_Selected_Index.get();
 		int ip = PRESETS_Selected_Index[ig];
 
@@ -3645,11 +3645,11 @@ void ofxPresetsManager::gui_MainPanel()
 
 		//--
 
-		// 1. EDIT MODE
+		// 1. Edit Mode
 
 		ofxImGuiSurfing::AddBigToggleNamed(MODE_Editor, _w100, 2 * _h, "EDIT MODE", "LIVE MODE", true);
 
-		// SAVE
+		// Save
 		//if (!MODE_Editor)
 		{
 			if (ImGui::Button("RELOAD", ImVec2(_w50, _h)))
@@ -3669,7 +3669,7 @@ void ofxPresetsManager::gui_MainPanel()
 
 		//ImGui::Dummy(ImVec2(0, 2));
 
-		// 1.2 next / previous
+		// 1.2 Next / Previous
 
 		ImGui::PushButtonRepeat(true);
 		{
@@ -3703,7 +3703,7 @@ void ofxPresetsManager::gui_MainPanel()
 
 		//--
 
-		// 2. selectors sliders
+		// 2. Selectors Sliders
 
 		std::string name;
 		if (groups.size() <= 1) name = "SELECTOR";
@@ -3788,14 +3788,11 @@ void ofxPresetsManager::gui_MainPanel()
 		if (ImGui::CollapsingHeader("PLAYERS"))
 		{
 			ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
-			_h *= 2;
 
-			//ofxImGuiSurfing::AddBigToggle(bGui_Players, _w100, _h);
 			ofxImGuiSurfing::AddToggleRoundedButton(bGui_Players);
 
 			if (groups.size() > 1)
 			{
-				//ofxImGuiSurfing::AddBigToggle(bSHOW_allGroups, _w100, _h / 2);
 				ofxImGuiSurfing::AddToggleRoundedButton(bSHOW_allGroups);
 			}
 
@@ -3807,17 +3804,10 @@ void ofxPresetsManager::gui_MainPanel()
 				string s = groups[i].getName();
 				ImGui::Text(s.c_str());
 
-				//blink by timer
-				float tf = groupRandomizers[i].getPlayerPct();
-				bool b = groupRandomizers[i].PLAY_RandomizeTimer.get();
-				float a;
-				if (b) a = 1 - tf;
-				else a = 1.0f;
-				if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
-				//if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
-				//ofxImGuiSurfing::AddBigToggle(groupRandomizers[i].PLAY_RandomizeTimer, _w100, _h / 2, false);
-				ofxImGuiSurfing::AddBigToggleNamed(groupRandomizers[i].PLAY_RandomizeTimer, _w100, _h / 2, "STOP RANDOMIZER", "PLAY RANDOMIZER");
-				if (b) ImGui::PopStyleColor();
+				// blink by timer
+
+				ofxImGuiSurfing::AddBigToggleNamed(groupRandomizers[i].PLAY_RandomizeTimer, _w100, _h, "PLAYING", "PLAY", true, groupRandomizers[i].getPlayerPct());
+
 				ImGui::PopID();
 			}
 		}

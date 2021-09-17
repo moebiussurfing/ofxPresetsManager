@@ -1213,18 +1213,21 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 
 			// 1.0.1 play randomizer index
 
-			//blink by timer
-			float tf = getPlayerPct();
-			bool b = PLAY_RandomizeTimer.get();
-			float a;
-			if (b) a = 1 - tf;
-			else a = 1.0f;
-			if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
-			//if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
-			//ofxImGuiSurfing::AddBigToggle(PLAY_RandomizeTimer, _w100, _h / 2, false);
-			ofxImGuiSurfing::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
-			if (b) ImGui::PopStyleColor();
+			// blink by timer
 
+			//float tf = getPlayerPct();
+			//bool b = PLAY_RandomizeTimer.get();
+			//float a;
+			//if (b) a = 1 - tf;
+			//else a = 1.0f;
+			//if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
+			////if (b) ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.5f, 0.0f, 1.0f, 0.5 * a));
+			////ofxImGuiSurfing::AddBigToggle(PLAY_RandomizeTimer, _w100, _h / 2, false);
+			//ofxImGuiSurfing::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
+			//if (b) ImGui::PopStyleColor();
+
+			ofxImGuiSurfing::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER", true, getPlayerPct());
+			
 			//ofxImGuiSurfing::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "STOP RANDOMIZER", "PLAY RANDOMIZER");
 			//ofxImGuiSurfing::AddParameter(PLAY_RandomizeTimer);
 			//ofxImGuiSurfing::AddBigToggle(PLAY_RandomizeTimer, 30);
