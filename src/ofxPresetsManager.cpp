@@ -120,8 +120,8 @@ ofxPresetsManager::ofxPresetsManager()
 	bGui_Parameters.set("Parameters", false);
 	//SHOW_Panel_AllSelectors.set("SHOW SELECTORS", false);
 	bGui_Standalones.set("Standalones", false);
-	bGui_Players.set("Player", false);
-	bGui_PlayerEditor.set("Editor", false);
+	bGui_Players.set("Players", false);
+	bGui_PlayerEditor.set("Editors", false);
 	//bGui_RandomizerParams.set("RANDOM PARAMS", false);
 
 	bGui_Panels.set("Panels", true);
