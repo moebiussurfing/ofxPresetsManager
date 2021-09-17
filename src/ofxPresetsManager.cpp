@@ -120,7 +120,7 @@ ofxPresetsManager::ofxPresetsManager()
 	bGui_Parameters.set("Parameters", false);
 	//SHOW_Panel_AllSelectors.set("SHOW SELECTORS", false);
 	bGui_Standalones.set("Standalones", false);
-	bGui_Players.set("Players", false);
+	bGui_Players.set("Player", false);
 	bGui_PlayerEditor.set("Editor", false);
 	//bGui_RandomizerParams.set("RANDOM PARAMS", false);
 
@@ -1156,17 +1156,25 @@ void ofxPresetsManager::drawPresetClicker()
 		{
 			std::string info = groups[i].getName();
 
-			// mark selected group. useful to navigate with arrow keys
-			if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1 && bKeys.get())
-				info = ">" + info;
-			//info = "* " + info;
+			//// mark selected group. useful to navigate with arrow keys
+			//if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1 && bKeys.get())
+			//	info = "> " + info;
+			////info = "* " + info;
 
 			bool bLast = (i == groups.size() - 1);
-			if (!bLast)
-				info += "\n#" + ofToString(i);
+			if (!bLast) {
+				info += "\n";
+				if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1 && bKeys.get())
+					info += ">";
+				info += "#" + ofToString(i);
+			}
+			else
+			{
+				if (i == GuiGROUP_Selected_Index.get() && groups.size() > 1 && bKeys.get())
+					info = ">" + info;
+			}
 
 			// double font to improve different background colors
-			//int gap = 0;
 			int gap = 1;
 
 			float strW = 50;
@@ -2018,7 +2026,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 				{
 					doStoreUndo();
 				}
-			}
+		}
 #endif
 
 			//----
@@ -2087,7 +2095,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 					}
 				}
 			}
-		}
+	}
 
 		//--
 
@@ -2103,7 +2111,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 		//	if (key == 'R')
 		//		doStoreUndo();
 		//}
-	}
+}
 }
 
 //--------------------------------------------------------------
@@ -2917,7 +2925,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 #endif
 #endif
 		}
-	}
+}
 }
 
 //--------------------------------------------------------------
@@ -2979,8 +2987,8 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 			else {
 				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
-		}
 	}
+}
 
 	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
@@ -3323,8 +3331,7 @@ void ofxPresetsManager::gui_Parameters()
 		_w50 = getWidgetsWidth(2);
 		_w33 = getWidgetsWidth(3);
 		_w25 = getWidgetsWidth(4);
-		_h = getWidgetsHeightUnit();
-		_h *= 2;
+		_h = getWidgetsHeightUnit() * 2;
 
 		//-
 
@@ -3346,16 +3353,20 @@ void ofxPresetsManager::gui_Parameters()
 
 		//-
 
+		//ImGui::Separator();
 		ImGui::Dummy(ImVec2(0, 5));
 
 		// 1. each group parameters
 
 		for (int i = 0; i < groups.size(); i++)
 		{
-			if (groups.size() > 1 && i != 0)
+			if (groups.size() > 1)
 			{
-				ImGui::Separator();
-				ImGui::Dummy(ImVec2(0, 5));
+				//if (i != 0) 
+				{
+					ImGui::Separator();
+					ImGui::Dummy(ImVec2(0, 5));
+				}
 			}
 
 			bool bLast = (i == groups.size() - 1);
@@ -3370,12 +3381,16 @@ void ofxPresetsManager::gui_Parameters()
 			if (!bLast || groups.size() >= 1) flags |= ImGuiTreeNodeFlags_DefaultOpen;
 			if (bLast) {
 				//ImGui::Separator();
-				ImGui::Dummy(ImVec2(0, 5));
+				//ImGui::Dummy(ImVec2(0, 5));
+				ImGui::PushItemWidth(_w50);
 			}
 
 			ofxImGuiSurfing::AddGroup(groups[i], flags);
-			
 			//guiManager.AddGroup(groups[i]); // -> fails
+
+			if (bLast) {
+				ImGui::PopItemWidth();
+			}
 
 			if (!bLast) ImGui::Dummy(ImVec2(0, 5));
 		}
@@ -3470,12 +3485,13 @@ void ofxPresetsManager::gui_Panels()
 	float _w25;
 	float _h;
 	float _hh;
-	ofxImGuiSurfing::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
 	string n = "PANELS";
 
 	guiManager.beginWindow(n.c_str(), (bool*)&bGui_Panels.get(), flagsw);
 	{
+		ofxImGuiSurfing::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
+
 		//--
 
 		// 4. Panels
@@ -3880,8 +3896,8 @@ void ofxPresetsManager::gui_MainPanel()
 				if (ImGui::Button("Redo", ImVec2(_w50, _h / 2)))
 				{
 					doRedo();
-				}
-			}
+	}
+}
 		}
 #endif
 
@@ -5050,7 +5066,7 @@ void ofxPresetsManager::doRefreshUndoParams() {
 		//str += undoStringParams.getUndoStateDescriptor() + "\n";
 
 		ofLogNotice(__FUNCTION__) << str;
-	}
+}
 }
 
 #endif
