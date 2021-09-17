@@ -1313,7 +1313,6 @@ public:
 			ofParameterGroup g;
 			g = groupRandomizers[i].getParamsRandomizers();
 			_g.add(g);
-
 		}
 		return _g;
 	}
