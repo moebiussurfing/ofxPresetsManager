@@ -3318,6 +3318,8 @@ void ofxPresetsManager::gui_Parameters()
 
 	string n = "PRESETS PARAMETERS";
 
+	IMGUI_SUGAR__WINDOWS_CONSTRAINTS;
+
 	guiManager.beginWindow(n.c_str(), (bool*)&bGui_Parameters.get(), flagsw);
 	{
 		float _w100;
@@ -3386,12 +3388,14 @@ void ofxPresetsManager::gui_Parameters()
 			//flags |= ImGuiTreeNodeFlags_Framed;
 			//if (!bLast || groups.size() >= 1) flags |= ImGuiTreeNodeFlags_DefaultOpen;
 
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
-			if (!bLast) flags |= ImGuiTreeNodeFlags_Framed;
+			//ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
+			//if (!bLast) flags |= ImGuiTreeNodeFlags_Framed;
 
 			// Group
-			ofxImGuiSurfing::AddGroup(groups[i], flags);
+			//ofxImGuiSurfing::AddGroup(groups[i], flags);
 			//guiManager.AddGroup(groups[i]); // -> fails
+
+			ofxImGuiSurfing::AddGroup(groups[i]);
 
 			if (bLast) {
 				ImGui::PopItemWidth();
@@ -3989,8 +3993,7 @@ void ofxPresetsManager::gui_Advanced()
 					//ofxImGuiSurfing::AddParameter(bPathDirCustom);
 
 #ifdef USE_PRESETS_MANAGER__IMGUI_LAYOUT 
-					ofxImGuiSurfing::AddToggleRoundedButton(guiManager.bAdvanced);
-					if (guiManager.bExtra) guiManager.drawAdvancedSubPanel();
+					if (guiManager.bExtra) guiManager.drawAdvanced();
 #endif
 					ImGui::TreePop();
 				}

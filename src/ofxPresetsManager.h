@@ -209,6 +209,15 @@ public:
 
 	//--
 
+	// Fix API getters to use when no smooth/tween modes enabled.
+#if !defined INCLUDE_ofxSurfingSmooth && !defined INCLUDE_ofxSurfingTween
+public:
+	float get(ofParameter<float> param) { return param.get(); }
+	int get(ofParameter<int> param) { return param.get(); }
+#endif
+	
+	//--
+
 #ifdef INCLUDE_ofxSurfingRandomizer
 //public:
 //private:
