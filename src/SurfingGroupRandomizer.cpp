@@ -34,8 +34,16 @@ void SurfingGroupRandomizer::setup(ofParameterGroup &_group, int _numPresets) {
 	{
 		//amntBtnsClicker.setMax(amountPresets - 1);
 		//amntBtnsClicker.set(amountPresets - 1);
-		amntBtnsClicker.setMax(amountPresets);
-		amntBtnsClicker.set(amountPresets);
+
+		if (amountPresets < 5)
+		{
+			amntBtnsClicker.setMax(amountPresets);
+			amntBtnsClicker.set(amountPresets);
+		}
+		else {
+			amntBtnsClicker.setMax(3);
+			amntBtnsClicker.set(3);
+		}
 	}
 
 	// list keys
@@ -955,7 +963,7 @@ void SurfingGroupRandomizer::update()
 					{
 						if (bLatchRun) loadPreset(0);
 					}
-					else 
+					else
 					{
 						//TODO: can be improved calling directly the method! bc this flag will be readed on update()..
 						//bRandomizeIndex = true;
@@ -1370,6 +1378,7 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 			//-
 
 			ofxImGuiSurfing::AddToggleRoundedButton(bGui_PlayerEditor);
+			//ofxImGuiSurfing::Add(bGui_PlayerEditor, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 
 			//-
 
@@ -1403,7 +1412,7 @@ void SurfingGroupRandomizer::drawImGui_RandomizersMain()
 #ifdef USE_RAW_IM_GUI__GROUP_RANDOMIZER
 	ImGui::End();
 #endif
-}
+	}
 
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::Changed_Editor(ofAbstractParameter &e)

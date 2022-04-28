@@ -112,15 +112,13 @@ ofxPresetsManager::ofxPresetsManager()
 
 	bGui.set("ofxPresetsManager", false);
 	bGui_Main.set("Main", false);
-	//bGui_Main.set("Main Presets", false);
-	//bGui.set("SHOW ImGui", false);
 	bGui_PresetsParams.set("Preset Parameters", false);
 	bGui_Selectors.set("Selectors", false);
 	bGui_Clicker.set("Clicker", true);
 	bGui_Parameters.set("Parameters", false);
-	//SHOW_Panel_AllSelectors.set("SHOW SELECTORS", false);
 	bGui_Standalones.set("Standalones", false);
 	bGui_Players.set("Players", false);
+	//SHOW_Panel_AllSelectors.set("SHOW SELECTORS", false);
 	//bGui_PlayerEditor.set("Editors", false);
 	//bGui_RandomizerParams.set("RANDOM PARAMS", false);
 
@@ -3506,9 +3504,13 @@ void ofxPresetsManager::gui_Panels()
 
 		// 4. Panels
 		{
-			ofxImGuiSurfing::AddToggleRoundedButton(bGui_Main);
-			ofxImGuiSurfing::AddToggleRoundedButton(bGui_Clicker);
-			ofxImGuiSurfing::AddToggleRoundedButton(bGui_Parameters);
+			guiManager.Add(bGui_Main, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+			guiManager.Add(bGui_Clicker, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+			guiManager.Add(bGui_Parameters, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+
+			//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Main);
+			//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Clicker);
+			//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Parameters);
 
 			//-
 
@@ -3561,12 +3563,15 @@ void ofxPresetsManager::gui_Panels()
 			_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
 			if (ImGui::CollapsingHeader("RANDOMIZERS", _flagw))
 			{
-				ImGui::PushItemWidth(_w33);
-				ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
-				ImGui::PopItemWidth();
+				if (groups.size() > 1)
+				{
+					ImGui::PushItemWidth(_w33);
+					ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
+					ImGui::PopItemWidth();
+				}
 
-				ofxImGuiSurfing::AddToggleRoundedButton(bGui_Players);
-				//ofxImGuiSurfing::AddToggleRoundedButton(bGui_PlayerEditor);
+				guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+				//guiManager.Add(bGui_PlayerEditor, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
 
 				//-
 
@@ -3587,10 +3592,13 @@ void ofxPresetsManager::gui_Panels()
 
 			if (ImGui::CollapsingHeader("EXTRA", _flagw))
 			{
-				ofxImGuiSurfing::AddToggleRoundedButton(bGui_Standalones);
-				ofxImGuiSurfing::AddToggleRoundedButton(bGui_AdvancedControl);
-				//if (MODE_Editor) ofxImGuiSurfing::AddToggleRoundedButton(bGui_AdvancedControl);
-				ofxImGuiSurfing::AddToggleRoundedButton(bHelp);
+				guiManager.Add(bGui_Standalones, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+				guiManager.Add(bHelp, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+				guiManager.Add(bGui_AdvancedControl, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+
+				//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Standalones);
+				//ofxImGuiSurfing::AddToggleRoundedButton(bHelp);
+				//ofxImGuiSurfing::AddToggleRoundedButton(bGui_AdvancedControl);
 			}
 			ImGui::Unindent();
 		}
@@ -3624,36 +3632,37 @@ void ofxPresetsManager::gui_Main()
 		//---
 
 		// 0. labels
+		{
+			ImGui::Spacing();
 
-		ImGui::Spacing();
-
-		// label for User-Kit folder
-		str = "USER-KIT:";
-		ImGui::Text(str.c_str());
-		str = path_UserKit_Folder;
-		ofStringReplace(str, "/", "/\n");//split in lines to reduce panel width
-		str += "/";
-		ImGui::Text(str.c_str());
-
-		ImGui::Dummy(ImVec2(0, 2));
-
-		// aliases
-		int ig = guiGroupSelectedIndex.get();
-		int ip = guiPresetSelectedIndex[ig];
-
-		// name of selected group
-		str = guiPresetSelectedIndex[ig].getName();
-		ImGui::Text(str.c_str());
-
-		if (groups.size() > 1) {
-			str = "Group #" + ofToString(ig) + "/" + ofToString(groups.size() - 1);
+			// label for User-Kit folder
+			str = "USER-KIT:";
 			ImGui::Text(str.c_str());
+			str = path_UserKit_Folder;
+			ofStringReplace(str, "/", "/\n");//split in lines to reduce panel width
+			str += "/";
+			ImGui::Text(str.c_str());
+
+			ImGui::Dummy(ImVec2(0, 2));
+
+			// aliases
+			int ig = guiGroupSelectedIndex.get();
+			int ip = guiPresetSelectedIndex[ig];
+
+			// name of selected group
+			str = guiPresetSelectedIndex[ig].getName();
+			ImGui::Text(str.c_str());
+
+			if (groups.size() > 1) {
+				str = "Group #" + ofToString(ig) + "/" + ofToString(groups.size() - 1);
+				ImGui::Text(str.c_str());
+			}
+
+			str = "Preset " + ofToString(ip) + "/" + ofToString(keys[ig].size() - 1);
+			ImGui::Text(str.c_str());
+
+			ImGui::Spacing();
 		}
-
-		str = "Preset " + ofToString(ip) + "/" + ofToString(keys[ig].size() - 1);
-		ImGui::Text(str.c_str());
-
-		ImGui::Spacing();
 
 		//--
 
@@ -3695,7 +3704,8 @@ void ofxPresetsManager::gui_Main()
 		}
 		ImGui::PopButtonRepeat();
 
-		ofxImGuiSurfing::AddToggleRoundedButton(bGui_Panels);
+		//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Panels);
+		guiManager.Add(bGui_Panels, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 
 		//--
 
@@ -3774,7 +3784,8 @@ void ofxPresetsManager::gui_Main()
 		{
 			ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
 
-			ofxImGuiSurfing::AddToggleRoundedButton(bGui_Players);
+			//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Players);
+			guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 
 			if (groups.size() > 1)
 			{
@@ -3867,8 +3878,8 @@ void ofxPresetsManager::gui_Main()
 				if (ImGui::Button("Redo", ImVec2(_w50, _h / 2)))
 				{
 					doRedo();
-				}
-			}
+	}
+}
 		}
 #endif
 
@@ -4653,7 +4664,7 @@ void ofxPresetsManager::gui_Randomizers()
 	//--
 
 	if (!bGui_RandomizerParams && !bGui_Players) { return; }
-	
+
 	if (guiGroupSelectedIndex > groupRandomizers.size() - 1) { return; }
 
 	//-

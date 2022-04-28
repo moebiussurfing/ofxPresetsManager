@@ -3,7 +3,7 @@ ofxPresetsManager
 
 # Overview
 
-An **openFrameworks** addon to handle presets of several `ofParameter`'s nested into single or multiple `ofParameterGroup` containers.  
+An **openFrameworks** add-on to handle presets of several `ofParameter`'s nested into single or multiple `ofParameterGroup` containers.  
 
 Also *empowered* with a *nice GUI* and many *helpers* and customizations.
 
@@ -45,7 +45,7 @@ Archived and named presets that we can load into and from favorites.
 
 1. **Edit Mode**:  
 Auto-saves parameters changes when switching between presets.  
-Used to allow fast edititon of the parameters.  
+Used to allow fast edition of the parameters.  
 
 2. **Live Mode**:  
 Disables auto-save and hides some GUI sections to simplify and improve performance.  
@@ -135,18 +135,18 @@ This is useful because in some scenarios could help to improve the performance o
 ## Dependencies
 * [ofxImGui](https://github.com/Daandelange/ofxImGui/tree/jvcleave) [ FORK ]
 * [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
-* [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)
-+ [ofxMSAInteractiveObject](https://github.com/moebiussurfing/ofxMSAInteractiveObject) [ FORK ]
 * [ofxRemoteParameters](https://github.com/c-mendoza/ofxRemoteParameters) [ Only for the examples 3A-3B ]  
 
-Below add-ons are bundled. Already included in **OF_ADDON/libs**.  
-Do not require to manually include in **Project Generator**:  
+The below add-ons are already packed into **OF_ADDON/libs/**.  
+No need to add them manually with the **OF PROJECT GENERATOR**:  
+* [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)
++ [ofxMSAInteractiveObject](https://github.com/moebiussurfing/ofxMSAInteractiveObject) [ FORK ]
 * [ofxUndo](https://github.com/nariakiiwatani/ofxUndo)
 
 ## Thanks
-*Thanks to all the above addons coders!*  
+*Thanks to all the above add-ons coders!*  
 *Special Thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector  
-which inspired this addon a lot. Some of his code is also used here.*  
+which inspired this add-on a lot. Some of his code is also used here.*  
 *Special Thanks 2 goes to **@Daandelange** for his work to the DEFINITIVE **ofxImGui** repository. Thanks **Daan**!*
 
 ## Tested Systems
