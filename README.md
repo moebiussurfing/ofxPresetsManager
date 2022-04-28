@@ -7,8 +7,8 @@ An **openFrameworks** add-on to handle presets of several `ofParameter`'s nested
 
 Also *empowered* with a *nice GUI* and many *helpers* and customizations.
 
-#### NOTE:
-I recommend to use my simpler add-on [ofxSurfingPresets](https://github.com/moebiussurfing/ofxSurfingPresets)  
+**NOTE**  
+I recommend to use my simpler add-on [ofxSurfingPresets](https://github.com/moebiussurfing/ofxSurfingPresets).  
  
 ## Screenshot
 
