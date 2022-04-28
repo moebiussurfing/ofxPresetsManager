@@ -2,9 +2,7 @@ ofxGui
 ofxAnimatable
 ofxHistoryPlot
 ofxImGui
-ofxMSAInteractiveObject
 ofxPresetsManager
-ofxScaleDragRect
 ofxSurfingAnimators
 ofxSurfingHelpers
 ofxSurfingImGui
