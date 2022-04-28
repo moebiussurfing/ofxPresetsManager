@@ -140,7 +140,7 @@ This is useful because in some scenarios could help to improve the performance o
 * [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
 * [ofxRemoteParameters](https://github.com/c-mendoza/ofxRemoteParameters) [ Only for the examples 3A-3B ]  
 
-The below add-ons are already packed into **OF_ADDON/libs/**m or into **ofxSurfingHelpers**.  
+The below add-ons are already packed into **OF_ADDON/libs/** or into **ofxSurfingHelpers**.  
 No need to add them manually with the **OF PROJECT GENERATOR**:  
 * [ofxUndo](https://github.com/nariakiiwatani/ofxUndo)
 * [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)
