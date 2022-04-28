@@ -140,11 +140,11 @@ This is useful because in some scenarios could help to improve the performance o
 * [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
 * [ofxRemoteParameters](https://github.com/c-mendoza/ofxRemoteParameters) [ Only for the examples 3A-3B ]  
 
-The below add-ons are already packed into **OF_ADDON/libs/**.  
+The below add-ons are already packed into **OF_ADDON/libs/**m or into **ofxSurfingHelpers**.  
 No need to add them manually with the **OF PROJECT GENERATOR**:  
+* [ofxUndo](https://github.com/nariakiiwatani/ofxUndo)
 * [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)
 + [ofxMSAInteractiveObject](https://github.com/moebiussurfing/ofxMSAInteractiveObject) [ FORK ]
-* [ofxUndo](https://github.com/nariakiiwatani/ofxUndo)
 
 ## Thanks
 *Thanks to all the above add-ons coders!*  
@@ -154,7 +154,6 @@ which inspired this add-on a lot. Some of his code is also used here.*
 
 ## Tested Systems
 - **Windows10** / **VS2017** / **OF ~0.11**
-- **macOS. High Sierra** / **Xcode9** & **Xcode10** / **OF ~0.11**
 
 ## History of Changes
 **v2.0**
