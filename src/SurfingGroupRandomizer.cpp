@@ -1219,7 +1219,7 @@ void SurfingGroupRandomizer::drawImGui_PlayerRandomizersMain()
 
 			ofxImGuiSurfing::AddToggleRoundedButton(bMinimize);
 			ImGui::Spacing();
-			ImGui::Spacing();
+			//ImGui::Spacing();
 
 			if (!bMinimize)
 			{

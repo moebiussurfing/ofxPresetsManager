@@ -15,15 +15,19 @@
 
 //	TODO:
 //	
-// ++	fix copy&swap clickers!
-//
-// +	group randomizers are too big, hardcoded to max sizes... brokes ImGui... must simplify
-// +	fix keys workflows
-// +	new edit mode: 
+//	++	group keys start a 1 not 0
+//  ++	fix copy & swap clickers!
+//	++	make clicker columns to save more space 
+//	++	add play toggle on clicker
+//	++	add retrig when reclick without index change
+//	
+//  +	fix keys workflows
+//  +	group randomizers are too big, hardcoded to max sizes... brokes ImGui... must simplify
+//  +	new edit mode: 
 //			mark a param and when modifing current preset, save to all the oters and overwrite	
-// +		lock (by toggle) params that we want to ignore on changing presets
+//  +		lock (by toggle) params that we want to ignore on changing presets
 //			can be done enabling/disabling serializable for each param with a group of toggles
-// +	super-lite version with combo list. maybe without any gui at all.
+//  +	super-lite version with combo list. maybe without any gui at all.
 
 
 //	IDEAS:
@@ -375,14 +379,23 @@ private:
 	int groupLinkSize = 10;// default ammount of presets we want to the group link
 
 public:
+
+	void setGroupLinkAmountPresets(int size) {// customize how many group link presets we want to create. must be called before setup!
+		groupLinkSize = size;
+	}
+
 	void setGroupLinkSize(int size) {// customize how many group link presets we want to create. must be called before setup!
 		groupLinkSize = size;
 	}
 	void setEnableGroupLinkSelector(bool b) {// disable the use of main group selector. must call before setup. enabled by default
 		bAllowGroupSelector = b;
 	}
+	void setDisableGroupLinkSelector() {// disable the use of main group selector. must call before setup. enabled by default
+		bAllowGroupSelector = false;
+	}
 
 private:
+
 	ofParameter<bool> bSplitGroupFolders{ "MODE SPLIT FOLDERS", true };//on this mode we split every group on his own sub folder
 	// finally, we will use all this mode allways, allways enabled
 	// TODO: should remove this variable and use always splitted
@@ -591,8 +604,8 @@ public:
 	//--------------------------------------------------------------
 	void setEnableKeys(bool active)
 	{
-		if (bKeys != active) {// avoid if state not need to change
-		}
+		//if (bKeys != active) {// avoid if state not need to change
+		//}
 		if (bKeys != active) {// avoid if state not need to change
 			bKeys = active;
 		}
@@ -614,7 +627,7 @@ public:
 
 	//--------------------------------------------------------------
 	void setModeEditorOrLive(bool b) {
-		MODE_Editor = b;
+		bMODE_EditLive = b;
 	}
 
 	//----
@@ -1016,30 +1029,30 @@ public:
 	void setVisible_GUI(bool b)
 	{
 		bGui = b;
-		bGui_All = b;
+		bGui_PanelsAll = b;
 		bGui_Clicker = b;
 	}
 	//--------------------------------------------------------------
 	void setToggleVisible_GUI()
 	{
 		bGui = !bGui;
-		bGui_All = !bGui_All;
-		bGui_Clicker = bGui_All;
+		bGui_PanelsAll = !bGui_PanelsAll;
+		bGui_Clicker = bGui_PanelsAll;
 	}
 	//--------------------------------------------------------------
 	void setVisible_GUI_ImGui(bool b)
 	{
-		bGui_All = b;
+		bGui_PanelsAll = b;
 	}
 	//--------------------------------------------------------------
 	void setToggleVisible_GUI_ImGui()
 	{
-		bGui_All = !bGui_All;
+		bGui_PanelsAll = !bGui_PanelsAll;
 	}
 	//--------------------------------------------------------------
 	bool getVisible_GUI_ImGui()
 	{
-		return bGui_All;
+		return bGui_PanelsAll;
 	}
 	//--------------------------------------------------------------
 	void setVisible_GUI_Internal(bool visible)
@@ -1156,12 +1169,12 @@ private:
 	//----
 
 private:
-	ofParameter<bool> MODE_Editor{ "EDIT MODE", true };// this mode improves performance disabling autosave, undo history..etc
+	ofParameter<bool> bMODE_EditLive{ "EDIT MODE", true };// this mode improves performance disabling autosave, undo history..etc
 
 public:
 	ofParameter<bool> bGui;//TODO:
 	ofParameter<bool> bGui_Clicker; // to allow include as toggle parameter into external gui
-	ofParameter<bool> bGui_All;//all the windows enablers except the clicker
+	ofParameter<bool> bGui_PanelsAll;//all the windows enablers except the clicker
 	ofParameter<bool> bGui_Main;
 	ofParameter<bool> bGui_Standalones;
 	ofParameter<bool> bGui_Parameters;
@@ -1313,7 +1326,7 @@ public:
 		params_Controls.add(g2);
 
 		params_Controls.add(bGui_Clicker);
-		params_Controls.add(MODE_Editor);
+		params_Controls.add(bMODE_EditLive);
 
 		return params_Controls;
 	}
