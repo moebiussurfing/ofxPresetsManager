@@ -2,7 +2,7 @@
 /// ofxPresetsManager.h 
 //
 // ofxPresetsManager 
-// by moebiusSurfing, 2019. 2020. 2021.
+// by moebiusSurfing, 2019 - 2022.
 //
 /// this add-on is based and inspired on the original ofxGuiPresetSelector addon 
 /// by Nicola Pisanti, MIT License, 2016
@@ -15,20 +15,18 @@
 
 //	TODO:
 //	
+// ++	fix copy&swap clickers!
+//
 // +	group randomizers are too big, hardcoded to max sizes... brokes ImGui... must simplify
-
-// +	add main panel enabler into other panels
-// +	fixe keys workflows
-// +	restore randomzier panel  
-// +	clicker better letters positione on buttons
-//		+ live change cell, text size, add param
-// +	full width of presets boxes responsive
-// +	new edit mode: mark a param and when modifing current preset, save to all the oters and overwrite	
+// +	fix keys workflows
+// +	new edit mode: 
+//			mark a param and when modifing current preset, save to all the oters and overwrite	
 // +		lock (by toggle) params that we want to ignore on changing presets
-//				can be done enabling/disabling serializable for each param with a group of toggles
-// +	lite version with combo list. maybe without any gui
+//			can be done enabling/disabling serializable for each param with a group of toggles
+// +	super-lite version with combo list. maybe without any gui at all.
 
-// IDEAS:
+
+//	IDEAS:
 //	
 //	+++		open/save dialog to project User-Kit session in a single file.
 //				or allowed to all the groups?
@@ -40,7 +38,7 @@
 //	++		performance: 
 //				restore-back memory_mode. (use xml objects into memory vs hd files) to extra groups too
 //	
-//	+		fix autosave timer. exclude log
+//	+		fix autosave timer. exclude log.
 
 ///------
 
@@ -48,7 +46,6 @@
 #pragma once
 
 #include "ofMain.h"
-
 
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -72,7 +69,9 @@
 #define INCLUDE_ofxSurfingRandomizer
 
 // GLOBAL BYPASS
-//#define INCLUDE_SURFING_ENGINES // -> you can comment this line only and will disable too the above surfing engines directives
+// 
+// -> You can comment this line only and will disable too the above surfing engines directives
+//#define INCLUDE_SURFING_ENGINES 
 
 #ifndef INCLUDE_SURFING_ENGINES
 #undef INCLUDE_ofxSurfingTween 
@@ -105,7 +104,11 @@
 
 //#define INCLUDE_ofxUndoSimple
 
-//-
+//--
+
+//#define USE__PRESETS_MANAGER__NATIVE_CLICKER // -> Legacy clicker. Now we use the ImGui toggles matrix!
+
+//--
 
 //	4. DEBUG
 
@@ -215,7 +218,7 @@ public:
 	float get(ofParameter<float> param) { return param.get(); }
 	int get(ofParameter<int> param) { return param.get(); }
 #endif
-	
+
 	//--
 
 #ifdef INCLUDE_ofxSurfingRandomizer
@@ -235,8 +238,8 @@ public:
 	ofxPresetsManager();
 	~ofxPresetsManager();
 
-	void update(ofEventArgs & args);
-	void draw(ofEventArgs & args);
+	void update(ofEventArgs& args);
+	void draw(ofEventArgs& args);
 
 	void windowResized(int w, int h);
 	void exit();
@@ -246,7 +249,7 @@ public:
 
 private:
 	void ImGui_Draw();
-	void drawHelp();
+	void draw_Help();
 
 	//----
 
@@ -347,7 +350,7 @@ public:
 
 private:
 	std::vector<int> guiPresetSelectedIndex_PRE;// remember previous selector to reduce callbakcs
-	ofParameterGroup params_GroupsSelectors{ "PRESET SELECTORS" };// group all group selectors indexes
+	ofParameterGroup params_GroupsSelectors{ "SELECTORS" };// group all group selectors indexes
 
 	//--
 
@@ -355,7 +358,7 @@ private:
 	// to show on randomize editor panel
 	ofParameter<int> guiGroupSelectedIndex;// only this selected group will be showed on gui to edit
 	ofParameter<bool> bGui_ShowAllGroups;//enable to show all, each group panels
-	void Changed_GuiGroupSelectedIndex(int & index);
+	void Changed_GuiGroupSelectedIndex(int& index);
 
 	std::vector<SurfingGroupRandomizer> groupRandomizers;
 
@@ -508,15 +511,17 @@ public:
 
 	//--
 
+#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
 private:
-	void drawPresetClicker();// user clickeable box panel preset selector
+	void draw_Gui_ClickerPresets_Native();// user clickeable box panel preset selector
+#endif
 
 private:
 	// mini preview rectangles positions and sizes
 	void doRectFit();
 	ofxInteractiveRect rectangle_PresetClicker = { "rectangle_PresetClicker" };
 	std::string path_RectanglePresetClicker = "_PresetClicker";
-	ofParameter<bool> MODE_EditPresetClicker;
+	ofParameter<bool> bMODE_EditPresetClicker;
 	ofParameter<bool> bGui_BgEditPresetClicker;
 	float _RectClick_Pad;
 	//ofParameter<bool> helpPos;
@@ -969,7 +974,7 @@ public:
 	//--------------------------------------------------------------
 	void setVisible_GroupName(bool b)// disabler for minimal design
 	{
-		SHOW_GroupName = b;
+		bShow_GroupName = b;
 	}
 
 	//----
@@ -1011,28 +1016,30 @@ public:
 	void setVisible_GUI(bool b)
 	{
 		bGui = b;
+		bGui_All = b;
 		bGui_Clicker = b;
 	}
 	//--------------------------------------------------------------
 	void setToggleVisible_GUI()
 	{
 		bGui = !bGui;
-		bGui_Clicker = bGui;
+		bGui_All = !bGui_All;
+		bGui_Clicker = bGui_All;
 	}
 	//--------------------------------------------------------------
 	void setVisible_GUI_ImGui(bool b)
 	{
-		bGui = b;
+		bGui_All = b;
 	}
 	//--------------------------------------------------------------
 	void setToggleVisible_GUI_ImGui()
 	{
-		bGui = !bGui;
+		bGui_All = !bGui_All;
 	}
 	//--------------------------------------------------------------
 	bool getVisible_GUI_ImGui()
 	{
-		return bGui;
+		return bGui_All;
 	}
 	//--------------------------------------------------------------
 	void setVisible_GUI_Internal(bool visible)
@@ -1150,10 +1157,11 @@ private:
 
 private:
 	ofParameter<bool> MODE_Editor{ "EDIT MODE", true };// this mode improves performance disabling autosave, undo history..etc
-	
+
 public:
+	ofParameter<bool> bGui;//TODO:
 	ofParameter<bool> bGui_Clicker; // to allow include as toggle parameter into external gui
-	ofParameter<bool> bGui;
+	ofParameter<bool> bGui_All;//all the windows enablers except the clicker
 	ofParameter<bool> bGui_Main;
 	ofParameter<bool> bGui_Standalones;
 	ofParameter<bool> bGui_Parameters;
@@ -1162,7 +1170,7 @@ public:
 	ofParameter<bool> bGui_RandomizerParams;
 	ofParameter<bool> bGui_PresetsParams;
 	ofParameter<bool> bGui_Selectors;
-	ofParameter<bool> bGui_Panels;
+	//ofParameter<bool> bGui_Panels;
 	ofParameter<bool> bGui_AdvancedControl;
 	//ofParameter<bool> SHOW_Panel_AllSelectors;
 
@@ -1170,11 +1178,11 @@ private:
 	ofParameter<bool> bHelp;
 	ofParameter<bool> bKeys;
 	ofParameter<bool> bThemeDarkOrLight{ "Theme B/W", true };
-	ofParameter<bool> bLockClicker{ "Lock Clicker", false};
+	ofParameter<bool> bMODE_LockClicker{ "Lock Clicker", false };
 	ofParameter<glm::vec2> Gui_Internal_Position;
 
 private:
-	bool SHOW_GroupName = true;// draws group name into clicker boxes panel
+	bool bShow_GroupName = true;// draws group name into clicker boxes panel
 	bool bShowClickerInfo = true;
 
 	//--
@@ -1194,6 +1202,7 @@ public:
 	void draw_Gui_Advanced();
 	void draw_Gui_Standalones();
 	void draw_Gui_Parameters();
+	void draw_Gui_ClickerPresets_ImGui();
 	//void gui_Selectors();
 
 public:
@@ -1207,7 +1216,7 @@ public:
 	void ImGui_Begin();
 	void ImGui_End();
 	ImFont* customFont = nullptr;
-	ImGuiStyle *style = nullptr;
+	ImGuiStyle* style = nullptr;
 	ofxImGui::Settings settings;
 #endif
 
@@ -1334,16 +1343,17 @@ public:
 	// keys
 
 public:
-	void keyPressed(ofKeyEventArgs &eventArgs);
-	void keyReleased(ofKeyEventArgs &eventArgs);
+	void keyPressed(ofKeyEventArgs& eventArgs);
+	void keyReleased(ofKeyEventArgs& eventArgs);
 
 private:
 	void addKeysListeners();
 	void removeKeysListeners();
 
-	void removeMouseListeners();// TODO: fix easy remover..
+	//void removeMouseListeners();// TODO: fix easy remover..
 
 	vector<vector<int>> keys;// queued trigger keys for each group ? (all presets) (size of)
+	vector<vector<string>> labels;//converted to strings
 	bool ENABLE_Keys;// enabled keys
 	//bool bKeys;// enabled keys
 	bool keysNotActivated;
@@ -1377,8 +1387,11 @@ public:
 	// mouse
 
 private:
+
+#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
 	void mousePressed(int x, int y);
-	bool lastMouseButtonState;
+	bool lastMouseButtonState = false;
+#endif
 
 	//----
 
@@ -1394,13 +1407,13 @@ private:
 	// callbacks
 
 private:
-	void Changed_Control(ofAbstractParameter &e);
-	void Changed_UserKit(ofAbstractParameter &e);
+	void Changed_Control(ofAbstractParameter& e);
+	void Changed_UserKit(ofAbstractParameter& e);
 
 private:
 	//ofEventListeners listeners;
 	//void Changed_Randomizers(ofAbstractParameter &e);
-	void Changed_Randomizers(bool &b);
+	void Changed_Randomizers(bool& b);
 
 	//-
 
@@ -1507,7 +1520,7 @@ private:
 	bool bAppStateParams = false;
 
 public:
-	void addExtra(ofParameterGroup &g);
+	void addExtra(ofParameterGroup& g);
 
 	//--
 

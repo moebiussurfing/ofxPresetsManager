@@ -3,20 +3,18 @@
 //--------------------------------------------------------------
 void ofApp::setupPresets()
 {
-	// optional: 
-
+	// optional
+	  
 	// some API extra tweak controls:
-
-	//presetsManager.setEnableGroupLinkSelector(false);// disbale main group link selector
-	//presetsManager.setGroupLinkSize(5);// set amount of presets for link group
-
+	//presetsManager.setEnableGroupLinkSelector(false);// disable main group link selector.
+	//presetsManager.setGroupLinkSize(5);// set amount of presets for link group.
 	//presetsManager.setEnableKeysArrowBrowse(true);
 	//presetsManager.setEnableKeys(true);
-	presetsManager.setSizeBox_PresetClicker(50);// clicker size
+	//presetsManager.setSizeBox_PresetClicker(50);// clicker size.
 
 	//--
 
-	// main initializer
+	// initiate
 
 	// build your presets manager:
 	// add our ofParameterGroup to the preset manager. 
@@ -26,25 +24,28 @@ void ofApp::setupPresets()
 	// group 0
 	presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' });
 
-	// group 1
-	presetsManager.add(params1, { 'a', 's', 'd', 'f' });
+	//// group 1
+	//presetsManager.add(params1, { 'a', 's', 'd', 'f' });
 
-	// group 2
-	presetsManager.add(params2, { 'z', 'x', 'c' });
+	//// group 2
+	//presetsManager.add(params2, { 'z', 'x', 'c' });
 
-	// group 3
-	presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
+	//// group 3
+	//presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
 
 	//--
 
-	// optional:
+	presetsManager.setup();
 
-	// customize user-kit name: 
-	// then will create this named main settings file: 'bin/data/myKit_01.json'
-	// must call setup after adding all ofParameterGroup's
-	std::string name = "myKit_01";
+	//--
+	 
+	// optional
 	
-	presetsManager.setup(name);
+	//// customize user-kit name: 
+	//// then will create this named main settings file: 'bin/data/myKit_01.json'
+	//// must call setup after adding all ofParameterGroup's
+	//std::string name = "myKit_01";
+	//presetsManager.setup(name);
 }
 
 //--------------------------------------------------------------

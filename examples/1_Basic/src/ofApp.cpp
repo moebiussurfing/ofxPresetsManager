@@ -77,4 +77,6 @@ void ofApp::draw()
 void ofApp::keyPressed(int key) {
 
 	if (key == ' ') presetsManager.load_Next(0, true);
+
+	//if (key == 'G') presetsManager.setVisible_GUI(true);
 }

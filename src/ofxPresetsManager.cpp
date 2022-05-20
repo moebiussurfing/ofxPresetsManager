@@ -86,7 +86,6 @@ ofxPresetsManager::ofxPresetsManager()
 	bModKeySave = false;
 	bModKeySwap = false;
 	keysNotActivated = true;
-	lastMouseButtonState = false;
 
 	//--
 
@@ -110,19 +109,20 @@ ofxPresetsManager::ofxPresetsManager()
 
 	// control parameters
 
-	bGui.set("ofxPresetsManager", false);
-	bGui_Main.set("Main", false);
-	bGui_PresetsParams.set("Preset Parameters", false);
-	bGui_Selectors.set("Selectors", false);
-	bGui_Clicker.set("Clicker", true);
-	bGui_Parameters.set("Parameters", false);
-	bGui_Standalones.set("Standalones", false);
-	bGui_Players.set("Players", false);
+	bGui.set("ofxPresetsManager", true);
+	bGui_All.set("PANELS", true);
+	bGui_Main.set("MAIN", true);
+	bGui_PresetsParams.set("PRESET PARAMETERS", false);
+	bGui_Selectors.set("SELECTORS", false);
+	bGui_Clicker.set("CLICKER", true);
+	bGui_Parameters.set("PARAMETERS", false);
+	bGui_Standalones.set("STANDALONES", false);
+	bGui_Players.set("PLAYERS", false);
 	//SHOW_Panel_AllSelectors.set("SHOW SELECTORS", false);
 	//bGui_PlayerEditor.set("Editors", false);
 	//bGui_RandomizerParams.set("RANDOM PARAMS", false);
 
-	bGui_Panels.set("Panels", true);
+	//bGui_Panels.set("PANELS", true);
 	bHelp.set("Help", false);
 	bGui_AdvancedControl.set("Advanced", false);
 	MODE_StandalonePresets_NEW.set("NEW!", false);
@@ -182,15 +182,16 @@ ofxPresetsManager::ofxPresetsManager()
 	params_Gui.setName("GUI");
 	params_Gui.add(bGui_AdvancedControl);
 	params_Gui.add(bGui_Parameters);
-	//params_Gui.add(SHOW_Panel_AllSelectors);
 	params_Gui.add(bGui_Clicker);
 	params_Gui.add(bGui_Standalones);
 	params_Gui.add(bGui_Players);
-	//params_Gui.add(bGui_PlayerEditor);
-	//params_Gui.add(bGui_RandomizerParams);
 	params_Gui.add(bGui);
+	params_Gui.add(bGui_All);
 	params_Gui.add(bGui_Main);
 	params_Gui.add(bGui_PresetsParams);
+	//params_Gui.add(bGui_PlayerEditor);
+	//params_Gui.add(bGui_RandomizerParams);
+	//params_Gui.add(SHOW_Panel_AllSelectors);
 	params_Gui.add(bKeys);
 
 	// layout
@@ -382,8 +383,8 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	//--
 
-	MODE_EditPresetClicker.set("Edit Clicker", false);
-	MODE_EditPresetClicker.setSerializable(false);
+	bMODE_EditPresetClicker.set("Edit Clicker", false);
+	bMODE_EditPresetClicker.setSerializable(false);
 
 	//helpPos.set("HELP POS", false);
 
@@ -400,19 +401,19 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Gui.add(bGui_Selectors);
 	params_Gui.add(bGui_PresetsParams);
 	params_Gui.add(bHelp);
-	params_Gui.add(MODE_EditPresetClicker);
+	params_Gui.add(bMODE_EditPresetClicker);
 	//params_Gui.add(helpPos);
 	params_Gui.add(bGui_BgEditPresetClicker);
 
 	params_Control.add(params_Options);
 	params_Control.add(params_Gui);
 
-	params_Control.add(MODE_EditPresetClicker);
+	params_Control.add(bMODE_EditPresetClicker);
 	params_Control.add(bThemeDarkOrLight);
 	params_Control.add(cellSize);
 
 	params_Control.add(bGui_ShowAllGroups);
-	params_Control.add(bGui_Panels);
+	//params_Control.add(bGui_Panels);
 
 #ifdef INCLUDE_ofxSurfingRandomizer
 #ifdef INCLUDE_ofxSurfingTween
@@ -706,6 +707,21 @@ void ofxPresetsManager::startup()
 	//	cout << "guiPresetSelectedIndex[_last] : " << guiPresetSelectedIndex[_last] << endl;
 	//}
 
+
+
+	// ImGui Clicker labels
+	labels.clear();
+	for (size_t i = 0; i < keys.size(); ++i)
+	{
+		vector<string> _labels;
+		for (auto& kk : keys[i])
+		{
+			string s = ofToString(char(kk));
+			_labels.push_back(s);
+		}
+		labels.push_back(_labels);
+	}
+
 	//--
 
 	// TODO:
@@ -715,7 +731,7 @@ void ofxPresetsManager::startup()
 	//--
 
 	// workaround
-	//MODE_EditPresetClicker = MODE_EditPresetClicker.get();
+	//bMODE_EditPresetClicker = bMODE_EditPresetClicker.get();
 	//required when no xml settings yet
 	bThemeDarkOrLight = bThemeDarkOrLight.get();
 
@@ -845,27 +861,31 @@ void ofxPresetsManager::ImGui_Draw()
 //---------------------------------------------------------------------
 void ofxPresetsManager::draw(ofEventArgs& args)
 {
+	if (!bGui) return;
+
 	//----
 
-	// user clicker boxes preset selector 
+	// Clicker boxes preset selector native
 
+#ifdef DISABLE__PRESETS_MANAGER__NATIVE_CLICKER
 	if (bGui_Clicker)
 	{
-		drawPresetClicker();
+		draw_Gui_ClickerPresets_Native();
 	}
+#endif
 
 	// help info text: 
 
-	if (bHelp && bGui)
+	if (bHelp)
 	{
-		drawHelp();
+		draw_Help();
 	}
 
 	//----
 
 	// ImGui
 
-	if (!bGui) return;
+	if (!bGui_All && !bGui_Clicker) return;
 
 #ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL	
 	ImGui_Draw();
@@ -873,7 +893,12 @@ void ofxPresetsManager::draw(ofEventArgs& args)
 
 #ifdef USE_PRESETS_MANAGER__IMGUI_LAYOUT 
 	guiManager.begin();
-	ImGui_Draw_Window();
+	{
+		if (bGui_All) ImGui_Draw_Window();
+
+		// ImGui Clicker
+		if (bGui_Clicker) draw_Gui_ClickerPresets_ImGui();
+	}
 	guiManager.end();
 #endif
 
@@ -886,8 +911,9 @@ void ofxPresetsManager::windowResized(int w, int h)
 	ofLogVerbose(__FUNCTION__) << w << "," << h;
 }
 
+#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
 //--------------------------------------------------------------
-void ofxPresetsManager::drawPresetClicker()
+void ofxPresetsManager::draw_Gui_ClickerPresets_Native()
 {
 	// User trigger button boxes. 
 	// A clickable selector and a save button.
@@ -944,7 +970,7 @@ void ofxPresetsManager::drawPresetClicker()
 			}
 
 			// get clicker position from being edited rectangle
-			//if (MODE_EditPresetClicker)
+			//if (bMODE_EditPresetClicker)
 			{
 				doRectFit();
 
@@ -958,11 +984,11 @@ void ofxPresetsManager::drawPresetClicker()
 
 			// doubleClick
 			{
-				if (!bLockClicker)
+				if (!bMODE_LockClicker)
 				{
 					// double click swap edit mode
 					if (doubleClicker.isMouseDoubleClick()) {
-						MODE_EditPresetClicker = !MODE_EditPresetClicker;
+						bMODE_EditPresetClicker = !bMODE_EditPresetClicker;
 					}
 					// triple clicks swap layout mode
 					if (doubleClicker.isMouseTripleClick()) {
@@ -1122,7 +1148,7 @@ void ofxPresetsManager::drawPresetClicker()
 				_label = "GUI";
 
 				// mark if gui visible
-				if (bGui)
+				if (bGui_All)
 				{
 					// filled
 					ofSetColor(_colorButton);
@@ -1158,7 +1184,7 @@ void ofxPresetsManager::drawPresetClicker()
 
 			// 7. Label paramGroup names to the left of clicker
 
-			if (SHOW_GroupName)
+			if (bShow_GroupName)
 			{
 				std::string info = groups[i].getName();
 
@@ -1176,6 +1202,8 @@ void ofxPresetsManager::drawPresetClicker()
 					if (i == guiGroupSelectedIndex.get() && groups.size() > 1 && bKeys.get())
 						info = ">" + info;
 				}
+
+				//--
 
 				// double font to improve different background colors
 				int gap = 1;
@@ -1206,6 +1234,7 @@ void ofxPresetsManager::drawPresetClicker()
 	}
 	ofPopStyle();
 }
+#endif
 
 //--------------------------------------------------------------
 ofxPresetsManager::~ofxPresetsManager()
@@ -1891,9 +1920,8 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 		bool mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
 		bool mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
 
-		//bool bDebug = false;
-		bool bDebug = true;
-		if (bDebug)
+		//Debug
+		if (0)
 		{
 			ofLogNotice(__FUNCTION__)
 				<< "key: " << (char)key
@@ -1905,7 +1933,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 
 		//--
 
-		// tweener
+		// Tweener
 #ifdef INCLUDE_ofxSurfingTween
 		//dataTween.keyPressed(key);
 #endif
@@ -1922,7 +1950,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 			bKeys = !bKeys;
 		}
 
-		else if (bKeys && bKeys && !bImGui_mouseOver_PRE)// disable keys when mouse over gui
+		else if (bKeys /*&& bKeys */ && !bImGui_mouseOver_PRE)// disable keys when mouse over gui
 		{
 			//-
 
@@ -1993,7 +2021,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 
 			//else if ((mod_CONTROL && !mod_ALT)  && key == 'e')
 			//{
-			//	MODE_EditPresetClicker = !MODE_EditPresetClicker;
+			//	bMODE_EditPresetClicker = !bMODE_EditPresetClicker;
 			//}
 			//// timer to randomize and choice a random preset from the kit
 			//if (key == 'R')
@@ -2144,6 +2172,7 @@ void ofxPresetsManager::addKeysListeners()
 {
 	ofAddListener(ofEvents().keyPressed, this, &ofxPresetsManager::keyPressed);
 	ofAddListener(ofEvents().keyReleased, this, &ofxPresetsManager::keyReleased);
+
 	keysNotActivated = false;
 	bKeys = true;
 }
@@ -2155,17 +2184,19 @@ void ofxPresetsManager::removeKeysListeners()
 	ofRemoveListener(ofEvents().keyReleased, this, &ofxPresetsManager::keyReleased);
 }
 
-//--------------------------------------------------------------
-void ofxPresetsManager::removeMouseListeners()
-{
-	//ofRemoveListener(ofEvents().mousePressed, this, &ofxPresetsManager::mousePressed);
-}
+////--------------------------------------------------------------
+//void ofxPresetsManager::removeMouseListeners()
+//{
+//	//ofRemoveListener(ofEvents().mousePressed, this, &ofxPresetsManager::mousePressed);
+//}
 
 //----
 
+#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
 //-----------------------------------------------------
 void ofxPresetsManager::mousePressed(int x, int y)
 {
+
 	if (bDoneSetup)
 	{
 		//bMouseOverGui = false;
@@ -2282,13 +2313,15 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 			if ((yIndex == groups.size() - 1) && (xIndex == groupsSizes[_i] + _offset))
 			{
-				bGui = !bGui;
+				bGui_All = !bGui_All;
 
-				ofLogNotice(__FUNCTION__) << "bGui : " << (bGui ? "TRUE" : "FALSE");
+				ofLogNotice(__FUNCTION__) << "bGui_All : " << (bGui_All ? "TRUE" : "FALSE");
 			}
 		}
 	}
+
 }
+#endif
 
 //----
 
@@ -2619,7 +2652,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 				groupRandomizers[i].setModeEditor(MODE_Editor);
 			}
 
-			if (!MODE_Editor) MODE_EditPresetClicker = false;
+			if (!MODE_Editor) bMODE_EditPresetClicker = false;
 
 			//-
 
@@ -2632,10 +2665,10 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 
 		//-
 
-		if (name == bLockClicker.getName())
+		if (name == bMODE_LockClicker.getName())
 		{
-			if (bLockClicker.get()) {
-				MODE_EditPresetClicker = false;
+			if (bMODE_LockClicker.get()) {
+				bMODE_EditPresetClicker = false;
 				rectangle_PresetClicker.disableEdit();
 				//doubleClicker.set
 			}
@@ -2660,11 +2693,11 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 			}
 		}
 
-		if (name == MODE_EditPresetClicker.getName())
+		if (name == bMODE_EditPresetClicker.getName())
 		{
-			if (MODE_EditPresetClicker.get())
+			if (bMODE_EditPresetClicker.get())
 			{
-				if (!bLockClicker)
+				if (!bMODE_LockClicker)
 					rectangle_PresetClicker.enableEdit();
 
 				//// workflow
@@ -3198,7 +3231,7 @@ void ofxPresetsManager::ImGui_End()
 //--------------------------------------------------------------
 bool ofxPresetsManager::ImGui_Draw_Window()
 {
-	if (bGui)
+	if (bGui_All)
 	{
 		static bool auto_resize = true;
 		ImGuiWindowFlags flagsw;
@@ -3218,7 +3251,11 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		if (bGui_Main) draw_Gui_Main(); // main control + extra
 
 		// panels
-		if (bGui_Panels) draw_Gui_Panels();
+		//if (bGui_Panels) draw_Gui_Panels();
+
+		////TODO:
+		////Clicker
+		//if (bGui_Clicker) draw_Gui_ClickerPresets_ImGui();
 
 		//-
 
@@ -3489,155 +3526,247 @@ void ofxPresetsManager::draw_Gui_Parameters()
 //	ofxImGui::EndWindow(settings);
 //}
 
+////--------------------------------------------------------------
+//void ofxPresetsManager::draw_Gui_Panels()
+//{
+//	static bool auto_resize = true;
+//	ImGuiWindowFlags flagsw;
+//	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
+//	bool bOpen;
+//	ImGuiWindowFlags _flagw;
+//
+//	float _spcx;
+//	float _spcy;
+//	float _w100;
+//	float _h100;
+//	float _w99;
+//	float _w50;
+//	float _w33;
+//	float _w25;
+//	float _h;
+//	float _hh;
+//
+//	string n = "PRESETS PANELS";
+//
+//	guiManager.beginWindow(n.c_str(), (bool*)&bGui_Panels.get(), flagsw);
+//	{
+//		ofxImGuiSurfing::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
+//
+//		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+//		ImGui::Spacing();
+//
+//		//--
+//
+//		// 4. Panels
+//		{
+//			guiManager.Add(bGui_Main, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+//			guiManager.Add(bGui_Clicker, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+//			guiManager.Add(bGui_Parameters, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+//
+//			//-
+//
+//			// Surfing Engines
+//
+//#ifdef INCLUDE_ofxSurfingSmooth
+//			ofxImGuiSurfing::AddToggleRoundedButton(smoother.bGui);
+//#endif
+//
+//			//-
+//
+//#ifdef INCLUDE_ofxSurfingTween
+//			ImGui::Indent();
+//			bOpen = true;
+//			_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
+//			if (ImGui::CollapsingHeader("TWEENER", _flagw))
+//			{
+//				ofxImGuiSurfing::AddToggleRoundedButton(dataTween.bGui);
+//			}
+//			ImGui::Unindent();
+//#endif
+//
+//			//-
+//
+//			//ImGui::Indent();
+//			//bOpen = true;
+//			//_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
+//			//if (ImGui::CollapsingHeader("PLAYER", _flagw))
+//			//{
+//			//	ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+//			//_h *= 2;
+//			//	if (groups.size() >= 1)
+//			//	{
+//			//		ImGui::Dummy(ImVec2(0, 2));
+//			//		ofxImGuiSurfing::AddBigToggle(bGui_Players, _w100, _hh);
+//			//	}
+//			//	//ofxImGuiSurfing::AddBigToggle(bGui_PlayerEditor, _w100, _hh / 2); //ImGui::SameLine();
+//			//	////ofxImGuiSurfing::AddBigToggle(bGui_RandomizerParams, _w100, _hh);
+//			//	//ImGui::Dummy(ImVec2(0.f, 2.f));
+//			//	//ofxImGuiSurfing::AddBigToggle(bGui_Players, _w100, _h / 2);
+//			//	// selector to show their randomizers
+//			//	ofxImGuiSurfing::AddBigToggle(bGui_ShowAllGroups, _w100, _h / 2);
+//			//}
+//			//ImGui::Unindent();
+//
+//			//-
+//
+//			//ImGui::Indent();
+//			//bOpen = true;
+//			//_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
+//			//bool b = true;
+//			//b = (ImGui::CollapsingHeader("RANDOMIZERS", _flagw));
+//			//if (b)
+//
+//			{
+//				guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+//				if (bGui_Players)
+//				{
+//					guiManager.Indent();
+//
+//					guiManager.Add(bGui_ShowAllGroups, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);
+//					//guiManager.Add(bGui_PlayerEditor, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+//
+//					if (!bGui_ShowAllGroups)
+//						if (groups.size() > 1)
+//						{
+//							ImGui::PushItemWidth(_w33);
+//							ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
+//							ImGui::PopItemWidth();
+//						}
+//
+//					guiManager.Unindent();
+//				}
+//
+//				//--
+//
+//#ifdef INCLUDE_ofxSurfingRandomizer
+//				ofxImGuiSurfing::AddToggleRoundedButton(dataRandomizer.bGui);
+//				//ofxImGuiSurfing::AddToggleRoundedButton(dataRandomizer.bEditor);
+//#endif
+//			}
+//
+//			//ImGui::Unindent();
+//
+//			//--
+//
+//			// 4.2 Extra
+//
+//			if (!guiManager.bMinimize)
+//			{
+//				ImGui::Indent();
+//				bOpen = false;
+//				_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
+//
+//				if (ImGui::CollapsingHeader("EXTRA", _flagw))
+//				{
+//					guiManager.Add(bGui_Standalones, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+//					guiManager.Add(bHelp, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+//					guiManager.Add(bGui_AdvancedControl, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+//
+//					//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Standalones);
+//					//ofxImGuiSurfing::AddToggleRoundedButton(bHelp);
+//					//ofxImGuiSurfing::AddToggleRoundedButton(bGui_AdvancedControl);
+//				}
+//				ImGui::Unindent();
+//			}
+//		}
+//	}
+//
+//	//--
+//
+//	guiManager.endWindow();
+//}
+
 //--------------------------------------------------------------
-void ofxPresetsManager::draw_Gui_Panels()
+void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 {
-	static bool auto_resize = true;
-	ImGuiWindowFlags flagsw;
-	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
-	bool bOpen;
-	ImGuiWindowFlags _flagw;
+	IMGUI_SUGAR__WINDOWS_CONSTRAINTS_BIG;
 
-	float _spcx;
-	float _spcy;
-	float _w100;
-	float _h100;
-	float _w99;
-	float _w50;
-	float _w33;
-	float _w25;
-	float _h;
-	float _hh;
-
-	string n = "PRESETS PANELS";
-
-	guiManager.beginWindow(n.c_str(), (bool*)&bGui_Panels.get(), flagsw);
+	if (guiManager.beginWindow(bGui_Clicker))
 	{
-		ofxImGuiSurfing::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
+		static ofParameter<bool> bResponsive{ "Responsive", true };//not works
 
-		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
-		ImGui::Spacing();
-
-		//--
-
-		// 4. Panels
+		// one row per group. set the max
+		int max = 3;
+		for (size_t i = 0; i < keys.size(); ++i)
 		{
-			guiManager.Add(bGui_Main, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-			guiManager.Add(bGui_Clicker, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-			guiManager.Add(bGui_Parameters, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+			int sz = keys[i].size();
+			if (sz > max) max = sz;
+		}
 
-			//-
+		for (size_t i = 0; i < keys.size(); ++i)
+		{
+			bool bLast = (i == groups.size() - 1);
+			bool b = groups.size() > 1 && bKeys.get();
 
-			// Surfing Engines
-
-#ifdef INCLUDE_ofxSurfingSmooth
-			ofxImGuiSurfing::AddToggleRoundedButton(smoother.bGui);
-#endif
-
-			//-
-
-#ifdef INCLUDE_ofxSurfingTween
-			ImGui::Indent();
-			bOpen = true;
-			_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
-			if (ImGui::CollapsingHeader("TWEENER", _flagw))
+			// Labels info
+			if (!guiManager.bMinimize)
 			{
-				ofxImGuiSurfing::AddToggleRoundedButton(dataTween.bGui);
-			}
-			ImGui::Unindent();
-#endif
+				std::string info;
 
-			//-
-
-			//ImGui::Indent();
-			//bOpen = true;
-			//_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
-			//if (ImGui::CollapsingHeader("PLAYER", _flagw))
-			//{
-			//	ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
-			//_h *= 2;
-			//	if (groups.size() >= 1)
-			//	{
-			//		ImGui::Dummy(ImVec2(0, 2));
-			//		ofxImGuiSurfing::AddBigToggle(bGui_Players, _w100, _hh);
-			//	}
-			//	//ofxImGuiSurfing::AddBigToggle(bGui_PlayerEditor, _w100, _hh / 2); //ImGui::SameLine();
-			//	////ofxImGuiSurfing::AddBigToggle(bGui_RandomizerParams, _w100, _hh);
-			//	//ImGui::Dummy(ImVec2(0.f, 2.f));
-			//	//ofxImGuiSurfing::AddBigToggle(bGui_Players, _w100, _h / 2);
-			//	// selector to show their randomizers
-			//	ofxImGuiSurfing::AddBigToggle(bGui_ShowAllGroups, _w100, _h / 2);
-			//}
-			//ImGui::Unindent();
-
-			//-
-
-			//ImGui::Indent();
-			//bOpen = true;
-			//_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
-			//bool b = true;
-			//b = (ImGui::CollapsingHeader("RANDOMIZERS", _flagw));
-			//if (b)
-
-			{
-				guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-				if (bGui_Players)
+				if (!bLast)
 				{
-					guiManager.Indent();
+					info = "  #" + ofToString(i);
+					ImGui::Text(info.c_str());
 
-					guiManager.Add(bGui_ShowAllGroups, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);
-					//guiManager.Add(bGui_PlayerEditor, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+					if (i == guiGroupSelectedIndex.get() && b)
+						info = "> ";
+					else
+						info = "  ";
 
-					if (!bGui_ShowAllGroups)
-						if (groups.size() > 1)
-						{
-							ImGui::PushItemWidth(_w33);
-							ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
-							ImGui::PopItemWidth();
-						}
+					info += groups[i].getName();
+					ImGui::Text(info.c_str());
 
-					guiManager.Unindent();
+				}
+				else//last. the groups merge selector
+				{
+					if (groups.size() > 1) {
+						guiManager.AddSpacingBigSeparated();
+					}
+					guiManager.AddSpacing();
+
+					if (i == guiGroupSelectedIndex.get() && b)
+						info = "> ";
+					else
+						info = "  ";
+
+					info += groups[i].getName();
+					ImGui::Text(info.c_str());
+				}
+			}
+			else //name only
+			{
+				if (bLast) {
+					if (groups.size() > 1) {
+						guiManager.AddSpacingBigSeparated();
+					}
+					guiManager.AddSpacing();
 				}
 
-				//--
-
-#ifdef INCLUDE_ofxSurfingRandomizer
-				ofxImGuiSurfing::AddToggleRoundedButton(dataRandomizer.bGui);
-				//ofxImGuiSurfing::AddToggleRoundedButton(dataRandomizer.bEditor);
-#endif
+				string info = ((guiGroupSelectedIndex.get() == i && b) ? "> " : "  ") + groups[i].getName();
+				ImGui::Text(info.c_str());
 			}
-
-			//ImGui::Unindent();
 
 			//--
 
-			// 4.2 Extra
-
-			if (!guiManager.bMinimize)
-			{
-				ImGui::Indent();
-				bOpen = false;
-				_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
-
-				if (ImGui::CollapsingHeader("EXTRA", _flagw))
-				{
-					guiManager.Add(bGui_Standalones, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-					guiManager.Add(bHelp, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-					guiManager.Add(bGui_AdvancedControl, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
-
-					//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Standalones);
-					//ofxImGuiSurfing::AddToggleRoundedButton(bHelp);
-					//ofxImGuiSurfing::AddToggleRoundedButton(bGui_AdvancedControl);
-				}
-				ImGui::Unindent();
-			}
+			// Clicker fot each Group!
+			ofxImGuiSurfing::AddMatrixClickerLabelsStrings(guiPresetSelectedIndex[i], labels[i], bResponsive.get(), max);
 		}
+
+		guiManager.AddSpacingSeparated();
+
+		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+		if (!guiManager.bMinimize) {
+			guiManager.Add(bKeys, OFX_IM_TOGGLE_BUTTON_ROUNDED);
+			guiManager.Add(guiManager.bAutoResize, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);
+			//guiManager.Add(bResponsive, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);//not works
+		}
+		guiManager.AddSpacing();
+
+		guiManager.Add(bGui_All, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 	}
-
-	//--
-
 	guiManager.endWindow();
 }
+
 
 //--------------------------------------------------------------
 void ofxPresetsManager::draw_Gui_Main()
@@ -3665,7 +3794,9 @@ void ofxPresetsManager::draw_Gui_Main()
 
 		ImGui::Spacing();
 
-		guiManager.Add(bGui_Panels, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+		guiManager.Add(bGui_Clicker, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+		//guiManager.Add(bGui_Panels, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+		guiManager.Add(bGui_Parameters, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 		guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 		if (bGui_Players)
 		{
@@ -3674,64 +3805,18 @@ void ofxPresetsManager::draw_Gui_Main()
 			guiManager.Add(bGui_ShowAllGroups, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);
 			//guiManager.Add(bGui_PlayerEditor, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
 
-			if (!bGui_ShowAllGroups)
-				if (groups.size() > 1)
-				{
-					ImGui::PushItemWidth(_w33);
-					ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
-					ImGui::PopItemWidth();
-				}
+			//if (!bGui_ShowAllGroups)
+			//	if (groups.size() > 1)
+			//	{
+			//		ImGui::PushItemWidth(_w33);
+			//		ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
+			//		ImGui::PopItemWidth();
+			//	}
 
 			guiManager.Unindent();
 		}
 
 		ImGui::Spacing();
-
-		//--
-
-		// 0. labels
-		{
-			ImGui::Spacing();
-
-			if (!guiManager.bMinimize)
-			{
-				// label for User-Kit folder
-				str = "USER-KIT";
-				//ImGui::Text(str.c_str());
-				guiManager.AddLabelBig(str, true, true);
-			}
-
-			str = path_UserKit_Folder;
-			ofStringReplace(str, "/", "/\n");//split in lines to reduce panel width
-			str += "/";
-			//ImGui::Text(str.c_str());
-			guiManager.AddLabel(str, false, true);
-
-			//--
-
-			if (!guiManager.bMinimize)
-			{
-				ImGui::Dummy(ImVec2(0, 2));
-
-				// aliases
-				int ig = guiGroupSelectedIndex.get();
-				int ip = guiPresetSelectedIndex[ig];
-
-				// name of selected group
-				str = guiPresetSelectedIndex[ig].getName();
-				ImGui::Text(str.c_str());
-
-				if (groups.size() > 1) {
-					str = "Group #" + ofToString(ig) + "/" + ofToString(groups.size() - 1);
-					ImGui::Text(str.c_str());
-				}
-
-				str = "Preset " + ofToString(ip) + "/" + ofToString(keys[ig].size() - 1);
-				ImGui::Text(str.c_str());
-			}
-
-			ImGui::Spacing();
-		}
 
 		//--
 
@@ -3782,46 +3867,51 @@ void ofxPresetsManager::draw_Gui_Main()
 
 		if (guiManager.bMinimize)
 		{
-//			// 0. Name Group
-////str = "Group Name:";
-////ImGui::Text(str.c_str());
-//			str = guiPresetSelectedIndex[guiGroupSelectedIndex].getName();
-//			ImGui::Text(str.c_str());
+			//			// 0. Name Group
+			////str = "Group Name:";
+			////ImGui::Text(str.c_str());
+			//			str = guiPresetSelectedIndex[guiGroupSelectedIndex].getName();
+			//			ImGui::Text(str.c_str());
+
+			//-
+
+			// 2. Selected Preset 
+
+			ImGui::Text("Preset");
+			ImGui::PushItemWidth(_w33);
+			ofxImGuiSurfing::AddParameter(guiPresetSelectedIndex[guiGroupSelectedIndex]);
+			ImGui::PopItemWidth();
 
 			//-
 
 			// 1. Selected Group
 
-			str = "Group:";
-			ImGui::Text(str.c_str());
+			if (groups.size() > 1) {
+				str = "Group";
+				ImGui::Text(str.c_str());
+
 			if (bBuildGroupSelector)
 			{
 				ImGui::PushItemWidth(_w33);
 				ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
 				ImGui::PopItemWidth();
 			}
-
-			//-
-
-			// 2. Selected Preset 
-
-			ImGui::Text("Preset:");
-			ImGui::PushItemWidth(_w33);
-			ofxImGuiSurfing::AddParameter(guiPresetSelectedIndex[guiGroupSelectedIndex]);
-			ImGui::PopItemWidth();
+			}
 		}
 
+		//--
 
 		if (!guiManager.bMinimize)
 		{
 			//--
 
 	//#ifdef INCLUDE_ofxSurfingRandomizer
-	//		//ofxImGuiSurfing::AddBigToggle(dataRandomizer.bGui, _w100, _h);
+	//		//ofxImGuiSurfing::AddBigToggle(dataRandomizer.bGui_All, _w100, _h);
 	//		ImGui::Dummy(ImVec2(0.f, 2.f));
 	//#endif
 
-			ImGui::Spacing();
+
+			guiManager.AddSpacingSeparated();
 
 			//--
 
@@ -3830,7 +3920,6 @@ void ofxPresetsManager::draw_Gui_Main()
 			std::string name;
 			if (groups.size() <= 1) name = "SELECTOR";
 			else name = "SELECTORS";
-
 			if (ImGui::CollapsingHeader(name.c_str()))
 			{
 				ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
@@ -3844,25 +3933,27 @@ void ofxPresetsManager::draw_Gui_Main()
 					//ImGui::Text(str.c_str());
 					str = guiPresetSelectedIndex[guiGroupSelectedIndex].getName();
 					ImGui::Text(str.c_str());
+					ImGui::Spacing();
 
 					//-
 
 					// 1. Selected Group
-
-					str = "Group:";
-					ImGui::Text(str.c_str());
-					if (bBuildGroupSelector)
-					{
-						ImGui::PushItemWidth(_w33);
-						ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
-						ImGui::PopItemWidth();
+					if (groups.size() > 1) {
+						str = "Group";
+						ImGui::Text(str.c_str());
+						if (bBuildGroupSelector)
+						{
+							ImGui::PushItemWidth(_w33);
+							ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
+							ImGui::PopItemWidth();
+						}
 					}
 
 					//-
 
 					// 2. Selected Preset 
 
-					ImGui::Text("Preset:");
+					ImGui::Text("Preset");
 					ImGui::PushItemWidth(_w33);
 					ofxImGuiSurfing::AddParameter(guiPresetSelectedIndex[guiGroupSelectedIndex]);
 					ImGui::PopItemWidth();
@@ -3875,13 +3966,13 @@ void ofxPresetsManager::draw_Gui_Main()
 
 					// Presets Selectors
 
-					//ImGui::Indent();
 					ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
 					//flags |= ImGuiTreeNodeFlags_DefaultOpen;
+					guiManager.Indent();
 					ImGui::PushItemWidth(_w33);
 					ofxImGuiSurfing::AddGroup(params_GroupsSelectors, flags);
 					ImGui::PopItemWidth();
-					//ImGui::Unindent();
+					guiManager.Unindent();
 				}
 			}
 
@@ -3890,13 +3981,15 @@ void ofxPresetsManager::draw_Gui_Main()
 				//--
 
 				// 3. Play buttons
-
-				if (ImGui::CollapsingHeader("PLAYERS"))
+				std::string name;
+				if (groups.size() <= 1) name = "PLAYER";
+				else name = "PLAYERS";
+				if (ImGui::CollapsingHeader(name.c_str()))
 				{
 					ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
 
 					//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Players);
-					guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+					//guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 
 					if (groups.size() > 1)
 					{
@@ -3918,41 +4011,46 @@ void ofxPresetsManager::draw_Gui_Main()
 					}
 				}
 
+				ImGui::Spacing();
+				guiManager.AddSpacingSeparated();
+
+				if (!guiManager.bMinimize) guiManager.Add(bGui_AdvancedControl, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);
+
 				//--
 
-				// 3. tools / helpers
+				// 3. Tools / helpers
 				if (bGui_AdvancedControl)
-					if (MODE_Editor)
+					//if (MODE_Editor)
+				{
+					if (ImGui::CollapsingHeader("TOOLS"))
 					{
-						if (ImGui::CollapsingHeader("TOOLS"))
+						ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+						_h *= 2;
+
+						//TODO: select which added group
+						int i = 0;
+						//int ii = guiPresetSelectedIndex[i];
+
+						if (ImGui::Button("CLONE ALL", ImVec2(_w100, _h / 2)))
 						{
-							ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
-							_h *= 2;
-
-							//TODO: select which added group
-							int i = 0;
-							//int ii = guiPresetSelectedIndex[i];
-
-							if (ImGui::Button("CLONE ALL", ImVec2(_w100, _h / 2)))
-							{
-								doCloneAll(i);
-							}
-							if (ImGui::Button("CLONE >", ImVec2(_w100, _h / 2)))
-							{
-								doCloneRight(i);
-							}
+							doCloneAll(i);
 						}
-
-						//-
-
-						////TODO:
-						////create all presets randomized
-						////if (ImGui::Button("POPULATE", ImVec2(_w99, _h / 2)))
-						////{
-						////	int ig = guiGroupSelectedIndex.get();
-						////	doPopulateFavs(ig);
-						////}
+						if (ImGui::Button("CLONE >", ImVec2(_w100, _h / 2)))
+						{
+							doCloneRight(i);
+						}
 					}
+
+					//-
+
+					////TODO:
+					////create all presets randomized
+					////if (ImGui::Button("POPULATE", ImVec2(_w99, _h / 2)))
+					////{
+					////	int ig = guiGroupSelectedIndex.get();
+					////	doPopulateFavs(ig);
+					////}
+				}
 
 				//--
 
@@ -3989,9 +4087,9 @@ void ofxPresetsManager::draw_Gui_Main()
 						if (ImGui::Button("Redo", ImVec2(_w50, _h / 2)))
 						{
 							doRedo();
-			}
-		}
-	}
+						}
+					}
+				}
 #endif
 
 				//--
@@ -4013,9 +4111,59 @@ void ofxPresetsManager::draw_Gui_Main()
 					bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 					// must be insisde some window
 				}
-}
+			}
 		}
+
+
 		//--
+
+		// 0. labels
+		{
+			if (!guiManager.bMinimize)
+			{
+				guiManager.AddSpacingSeparated();
+				guiManager.AddSpacingBig();
+
+				// label for User-Kit folder
+				str = "USER-KIT";
+				//ImGui::Text(str.c_str());
+				guiManager.AddLabelBig(str, true, true);
+
+				str = path_UserKit_Folder;
+				ofStringReplace(str, "/", "/\n");//split in lines to reduce panel width
+				str += "/";
+				//ImGui::Text(str.c_str());
+				guiManager.AddLabel(str, false, true);
+			}
+
+			//--
+
+			if (!guiManager.bMinimize)
+			{
+				ImGui::Dummy(ImVec2(0, 2));
+
+				// aliases
+				int ig = guiGroupSelectedIndex.get();
+				int ip = guiPresetSelectedIndex[ig];
+
+				// name of selected group
+				str = guiPresetSelectedIndex[ig].getName();
+				ImGui::Text(str.c_str());
+
+				if (groups.size() > 1) {
+					str = "Group #" + ofToString(ig) + "/" + ofToString(groups.size() - 1);
+					ImGui::Text(str.c_str());
+				}
+
+				str = "Preset " + ofToString(ip) + "/" + ofToString(keys[ig].size() - 1);
+				ImGui::Text(str.c_str());
+			}
+
+			ImGui::Spacing();
+		}
+
+		//--
+
 	}
 	guiManager.endWindow();
 
@@ -4032,7 +4180,7 @@ void ofxPresetsManager::draw_Gui_Advanced()
 		ImGuiTreeNodeFlags flagsTree;
 		flagsTree = ImGuiTreeNodeFlags_Framed;
 
-		if (ImGui::TreeNodeEx("ADVANCED", flagsTree))
+		if (ImGui::TreeNodeEx("INTERNAL", flagsTree))
 		{
 			float _w100;
 			float _w50;
@@ -4050,9 +4198,10 @@ void ofxPresetsManager::draw_Gui_Advanced()
 			// TODO: 
 			//faster memory mode vs xml files not implemented yet
 			//ofxImGuiSurfing::AddParameter(MODE_MemoryLive);//ImGui::SameLine();
-			//ofxImGuiSurfing::AddParameter(MODE_EditPresetClicker);
+			//ofxImGuiSurfing::AddParameter(bMODE_EditPresetClicker);
 			//ofxImGuiSurfing::AddParameter(bHelp);//ImGui::SameLine();
 
+#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
 			if (ImGui::TreeNodeEx("PRESET CLICKER", flagsTree))
 			{
 				ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
@@ -4061,9 +4210,9 @@ void ofxPresetsManager::draw_Gui_Advanced()
 
 				if (MODE_Editor)
 				{
-					ofxImGuiSurfing::AddToggleRoundedButton(bLockClicker);
-					if (!bLockClicker) {
-						ofxImGuiSurfing::AddBigToggle(MODE_EditPresetClicker, _w100, _h);
+					ofxImGuiSurfing::AddToggleRoundedButton(bMODE_LockClicker);
+					if (!bMODE_LockClicker) {
+						ofxImGuiSurfing::AddBigToggle(bMODE_EditPresetClicker, _w100, _h);
 					}
 					ofxImGuiSurfing::AddBigToggle(bGui_BgEditPresetClicker, _w100, _h);
 
@@ -4076,10 +4225,10 @@ void ofxPresetsManager::draw_Gui_Advanced()
 
 				ImGui::TreePop();
 			}
-
+#endif
 			//--
 
-			if (MODE_Editor)
+			//if (MODE_Editor)
 			{
 				if (ImGui::TreeNodeEx("USER-KIT", flagsTree))
 				{
@@ -5150,7 +5299,7 @@ void ofxPresetsManager::Changed_GuiGroupSelectedIndex(int& index)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::drawHelp()
+void ofxPresetsManager::draw_Help()
 {
 	helpTextBoxWidget.setText(helpInfo);
 	helpTextBoxWidget.setTheme(bThemeDarkOrLight);

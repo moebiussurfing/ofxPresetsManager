@@ -1259,7 +1259,7 @@ void SurfingGroupRandomizer::drawImGui_PlayerRandomizersMain()
 
 			//str = "RANDOMIZER";
 			//ImGui::Text(str.c_str());
-			ImGui::Spacing();
+			//ImGui::Spacing();
 
 			// 1.0.1 play randomizer index
 
