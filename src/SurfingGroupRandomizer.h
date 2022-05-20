@@ -85,10 +85,11 @@ public:
 
 		path_RandomizerSettings = folder;
 	}
+	ofParameter<bool>bMinimize{ "-1",false };
 
 public:
 	void drawImGui();
-	void drawImGui_RandomizersMain();
+	void drawImGui_PlayerRandomizersMain();
 
 private:
 	void drawImGui_RandomizerEditPlayer();
@@ -124,6 +125,7 @@ private:
 	void loadPreset(int p);
 	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
 	vector<int> keys;// queued trigger keys for each group ? (all presets) (size of)
+	vector<string> labels;//converted to strings
 
 	//--
 

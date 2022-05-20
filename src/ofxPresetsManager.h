@@ -71,9 +71,9 @@
 //	1.3 RANDOMIZER
 #define INCLUDE_ofxSurfingRandomizer
 
-// GLOBAL
+// GLOBAL BYPASS
 //#define INCLUDE_SURFING_ENGINES // -> you can comment this line only and will disable too the above surfing engines directives
-//
+
 #ifndef INCLUDE_SURFING_ENGINES
 #undef INCLUDE_ofxSurfingTween 
 #undef INCLUDE_ofxSurfingSmooth 
@@ -91,8 +91,8 @@
 
 // 3. CUSTOMIZATION
 
-#define USE_PRESETS_MANAGER__IMGUI_LAYOUT 
-//#define USE_PRESETS_MANAGER__IMGUI_INTERNAL
+#define USE_PRESETS_MANAGER__IMGUI_LAYOUT // -> Instantiated and using my addon ofxSurfingImGui
+//#define USE_PRESETS_MANAGER__IMGUI_INTERNAL // -> LEgacy without my addon. Using legacy ofxImGui
 
 //#define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT	// customize ImGui font
 //#define USE_IMGUI_EXTERNAL	// this is to group all ImGui panels into one unique instance in ofApp
@@ -1188,12 +1188,12 @@ private:
 	// ImGui
 
 public:
-	void gui_Randomizers();
-	void gui_Main();
-	void gui_Panels();
-	void gui_Advanced();
-	void gui_Standalones();
-	void gui_Parameters();
+	void draw_Gui_PlayersRandomizers();
+	void draw_Gui_Main();
+	void draw_Gui_Panels();
+	void draw_Gui_Advanced();
+	void draw_Gui_Standalones();
+	void draw_Gui_Parameters();
 	//void gui_Selectors();
 
 public:
@@ -1213,6 +1213,7 @@ public:
 
 #ifdef USE_PRESETS_MANAGER__IMGUI_LAYOUT 
 	ofxSurfing_ImGui_Manager guiManager;
+	void setupGuiStyles();
 private:
 	bool bAutoDraw; // must be false when multiple ImGui instances created!
 public:

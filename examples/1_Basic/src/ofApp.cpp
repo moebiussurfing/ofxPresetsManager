@@ -1,36 +1,18 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setupScene()
-{
-	// main group 1
-	params.setName("paramsGroup");
-	
-	paramsNested1.setName("styleSubGroup");// another nested group
-	paramsNested2.setName("itemSubGroup");// another nested group
-	paramsNested1.add(fill.set("fill", true));
-	paramsNested1.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
-	paramsNested1.add(lineWidth.set("lineWidth", 1, 0.1, 10));
-	paramsNested2.add(shapeType.set("shapeType", 1, 1, 2));
-	paramsNested2.add(size.set("size", 100, 5, 200));
-	paramsNested2.add(paramsNested1);
-	params.add(amount.set("amount", 10, 1, 24));
-	params.add(separation.set("separation", 10, 1, 100));
-	params.add(paramsNested2);
-
-	// the group container is ready to be added to presetsManager!
-}
-
-//--------------------------------------------------------------
 void ofApp::setup()
 {
-	ofSetFrameRate(60);
-	//ofSetVerticalSync(true);
+	if(1)
+	{
+		ofSetFrameRate(60);
+		ofSetVerticalSync(true);
 
-	////window shape
-	//int _gap = 28;
-	//ofSetWindowPosition(1920, _gap);
-	//ofSetWindowShape(1920, 1080 - _gap);
+		//window shape
+		int _gap = 28;
+		ofSetWindowPosition(-1920, _gap);
+		ofSetWindowShape(1920, 1080 - _gap);
+	}
 
 	font.load("assets/fonts/telegrama_render.otf", 11, true, true, true);
 	ofSetCircleResolution(200);
@@ -44,8 +26,28 @@ void ofApp::setup()
 	// the amount of keys will be the amount of favourites presets
 	presetsManager.add(params, { '0', '1', '2', '3', '4', '5' });
 
-	presetsManager.setImGuiAutodraw(true); // -> required true when using only one ImGui instance inside the add-ons of your ofApp
 	presetsManager.setup();// must call after adding all the ofParameterGroup(s)
+}
+
+//--------------------------------------------------------------
+void ofApp::setupScene()
+{
+	// main group 1
+	params.setName("myGroup1");
+
+	paramsNested1.setName("mySubGroup1");// another nested group
+	paramsNested2.setName("mySubGroup2");// another nested group
+	paramsNested1.add(fill.set("fill", true));
+	paramsNested1.add(color.set("color", ofColor(0, 255), ofColor(0, 0), ofColor(255, 255)));
+	paramsNested1.add(lineWidth.set("lineWidth", 1, 0.1, 10));
+	paramsNested2.add(shapeType.set("shapeType", 1, 1, 2));
+	paramsNested2.add(size.set("size", 100, 5, 200));
+	paramsNested2.add(paramsNested1);
+	params.add(amount.set("amount", 10, 1, 24));
+	params.add(separation.set("separation", 10, 1, 100));
+	params.add(paramsNested2);
+
+	// the group container is ready to be added to presetsManager!
 }
 
 //--------------------------------------------------------------

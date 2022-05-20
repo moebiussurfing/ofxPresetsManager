@@ -39,8 +39,6 @@ void ofApp::setupPresets()
 
 	// optional:
 
-	presetsManager.setImGuiAutodraw(true); // -> required true when using only one ImGui instance inside the add-ons of your ofApp
-
 	// customize user-kit name: 
 	// then will create this named main settings file: 'bin/data/myKit_01.json'
 	// must call setup after adding all ofParameterGroup's
@@ -53,9 +51,11 @@ void ofApp::setupPresets()
 void ofApp::setup()
 {
 	ofSetFrameRate(60);
-	ofSetCircleResolution(200);
-
+	ofSetWindowPosition(-1920, 25);
+	
 	//--
+
+	ofSetCircleResolution(200);
 
 	// setup your parameters groups before add to the addon!
 	setupParameters();

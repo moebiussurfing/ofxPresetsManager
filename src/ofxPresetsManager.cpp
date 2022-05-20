@@ -144,7 +144,7 @@ ofxPresetsManager::ofxPresetsManager()
 	// layout
 
 	Gui_Internal_Position.set("GUI INTERNAL POSITION",
-		glm::vec2(ofGetWidth() * 0.5, ofGetHeight()* 0.5),
+		glm::vec2(ofGetWidth() * 0.5, ofGetHeight() * 0.5),
 		glm::vec2(0, 0),
 		glm::vec2(ofGetWidth(), ofGetHeight())
 	);
@@ -357,8 +357,9 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 #endif
 
 #ifdef USE_PRESETS_MANAGER__IMGUI_LAYOUT 
-	guiManager.setImGuiAutodraw(bAutoDraw);
+	//guiManager.setImGuiAutodraw(bAutoDraw);
 	guiManager.setup(); // this instantiates and configurates ofxImGui inside the class object.
+	setupGuiStyles();
 #endif
 
 	//--
@@ -452,6 +453,9 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		{
 			// link selectors from class to group randomizer
 			groupRandomizers[i].guiPresetSelectedIndex.makeReferenceTo(guiPresetSelectedIndex[i]);// TODO: link
+
+			// link minimized
+			groupRandomizers[i].bMinimize.makeReferenceTo(guiManager.bMinimize);
 
 			//-
 
@@ -738,7 +742,7 @@ void ofxPresetsManager::startup()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::update(ofEventArgs & args)
+void ofxPresetsManager::update(ofEventArgs& args)
 {
 	//	cout << "bImGui_mouseOver " << bImGui_mouseOver.get() << endl;
 	//	cout << "bImGui_mouseOver_PRE " << bImGui_mouseOver_PRE<< endl;
@@ -839,7 +843,7 @@ void ofxPresetsManager::ImGui_Draw()
 #endif
 
 //---------------------------------------------------------------------
-void ofxPresetsManager::draw(ofEventArgs & args)
+void ofxPresetsManager::draw(ofEventArgs& args)
 {
 	//----
 
@@ -1045,7 +1049,7 @@ void ofxPresetsManager::drawPresetClicker()
 				if (!myFont.isLoaded()) // without ttf font
 				{
 					ofDrawBitmapString(ofToString((char)keys[i][k]),
-						cellSize*k + 8, cellSize*i + 18);
+						cellSize * k + 8, cellSize * i + 18);
 				}
 				else // custom font 
 				{
@@ -1079,7 +1083,7 @@ void ofxPresetsManager::drawPresetClicker()
 				_label = "SAVE";
 				if (!myFont.isLoaded()) // without ttf font
 				{
-					ofDrawBitmapString(_label, cellSize*k + 8, cellSize*i + 18);
+					ofDrawBitmapString(_label, cellSize * k + 8, cellSize * i + 18);
 				}
 				else // Custom font 
 				{
@@ -1266,7 +1270,7 @@ void ofxPresetsManager::add(ofParameterGroup _params, vector<int> _keysList)
 	int i = groups.size() - 1;
 	keys[i].reserve(_keysList.size());
 
-	for (const int &key : _keysList)
+	for (const int& key : _keysList)
 	{
 		keys[i].push_back(key);
 	}
@@ -1285,7 +1289,7 @@ void ofxPresetsManager::add(ofParameterGroup _params, initializer_list<int> _key
 	int i = groups.size() - 1;
 	keys[i].reserve(_keysList.size());
 
-	for (const int &key : _keysList)
+	for (const int& key : _keysList)
 	{
 		keys[i].push_back(key);
 	}
@@ -1874,7 +1878,7 @@ void ofxPresetsManager::setModeKeySwap(int key)
 }
 
 //----------------------------------------------------------------
-void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
+void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 {
 	if (!bDoneSetup) return;
 
@@ -2115,7 +2119,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs &eventArgs)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::keyReleased(ofKeyEventArgs &eventArgs)
+void ofxPresetsManager::keyReleased(ofKeyEventArgs& eventArgs)
 {
 	if (!bDoneSetup) return;
 
@@ -2437,7 +2441,7 @@ void ofxPresetsManager::setToggleKeysControl(bool active)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
+void ofxPresetsManager::Changed_UserKit(ofAbstractParameter& e)
 {
 	if (!bDisabledCallbacks)
 	{
@@ -2546,7 +2550,7 @@ void ofxPresetsManager::Changed_UserKit(ofAbstractParameter &e)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::Changed_Randomizers(bool &b)
+void ofxPresetsManager::Changed_Randomizers(bool& b)
 {
 	if (!bDisabledCallbacks && groupRandomizers.size() > 0)
 	{
@@ -2563,7 +2567,7 @@ void ofxPresetsManager::Changed_Randomizers(bool &b)
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::Changed_Control(ofAbstractParameter &e)
+void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 {
 	if (!bDisabledCallbacks)
 	{
@@ -3125,7 +3129,7 @@ void ofxPresetsManager::ImGui_Setup()
 	//--	
 
 	//TODO:
-	auto &io = ImGui::GetIO();
+	auto& io = ImGui::GetIO();
 	io.ConfigDockingWithShift = true;
 	io.ConfigWindowsResizeFromEdges = false;//?
 
@@ -3211,10 +3215,10 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		float _h;
 
 		// main panel
-		if (bGui_Main) gui_Main(); // main control + extra
+		if (bGui_Main) draw_Gui_Main(); // main control + extra
 
 		// panels
-		if (bGui_Panels) gui_Panels();
+		if (bGui_Panels) draw_Gui_Panels();
 
 		//-
 
@@ -3281,19 +3285,19 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 		//if (SHOW_Panel_AllSelectors) gui_Selectors();
 
 		// all parameters from all groups
-		if (bGui_Parameters) gui_Parameters();
+		if (bGui_Parameters) draw_Gui_Parameters();
 
 		//-
 
 		// selected randomizers for selected group
 		// handles matrix button selector too
 		//TODO:CRASH
-		gui_Randomizers();
+		draw_Gui_PlayersRandomizers();
 
 		//-
 
 		// standalone presets browser
-		if (bGui_Standalones) gui_Standalones();
+		if (bGui_Standalones) draw_Gui_Standalones();
 
 		//--
 
@@ -3308,7 +3312,16 @@ bool ofxPresetsManager::ImGui_Draw_Window()
 
 // ImGui
 //--------------------------------------------------------------
-void ofxPresetsManager::gui_Parameters()
+void ofxPresetsManager::setupGuiStyles()
+{
+	guiManager.ClearStyles();
+
+	guiManager.AddStyleGroup(params_GroupsSelectors, OFX_IM_GROUP_HIDDEN_HEADER);
+
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::draw_Gui_Parameters()
 {
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
@@ -3379,7 +3392,8 @@ void ofxPresetsManager::gui_Parameters()
 
 			if (bLast) {
 				ImGui::Spacing();
-				ImGui::PushItemWidth(_w33);
+				//ImGui::PushItemWidth(_w50);
+				//ImGui::PushItemWidth(_w33);
 			}
 
 			//ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
@@ -3393,10 +3407,11 @@ void ofxPresetsManager::gui_Parameters()
 			//ofxImGuiSurfing::AddGroup(groups[i], flags);
 			//guiManager.AddGroup(groups[i]); // -> fails
 
-			ofxImGuiSurfing::AddGroup(groups[i]);
+			guiManager.AddGroup(groups[i]);
+			//ofxImGuiSurfing::AddGroup(groups[i]);
 
 			if (bLast) {
-				ImGui::PopItemWidth();
+				//ImGui::PopItemWidth();
 			}
 
 			if (!bLast) ImGui::Spacing();
@@ -3475,7 +3490,7 @@ void ofxPresetsManager::gui_Parameters()
 //}
 
 //--------------------------------------------------------------
-void ofxPresetsManager::gui_Panels()
+void ofxPresetsManager::draw_Gui_Panels()
 {
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
@@ -3500,6 +3515,9 @@ void ofxPresetsManager::gui_Panels()
 	{
 		ofxImGuiSurfing::refreshImGui_WidgetsSizes(_spcx, _spcy, _w100, _h100, _w99, _w50, _w33, _w25, _h);
 
+		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+		ImGui::Spacing();
+
 		//--
 
 		// 4. Panels
@@ -3507,10 +3525,6 @@ void ofxPresetsManager::gui_Panels()
 			guiManager.Add(bGui_Main, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 			guiManager.Add(bGui_Clicker, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 			guiManager.Add(bGui_Parameters, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-
-			//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Main);
-			//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Clicker);
-			//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Parameters);
 
 			//-
 
@@ -3558,49 +3572,65 @@ void ofxPresetsManager::gui_Panels()
 
 			//-
 
-			ImGui::Indent();
-			bOpen = true;
-			_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
-			if (ImGui::CollapsingHeader("RANDOMIZERS", _flagw))
+			//ImGui::Indent();
+			//bOpen = true;
+			//_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
+			//bool b = true;
+			//b = (ImGui::CollapsingHeader("RANDOMIZERS", _flagw));
+			//if (b)
+
 			{
-				if (groups.size() > 1)
+				guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+				if (bGui_Players)
 				{
-					ImGui::PushItemWidth(_w33);
-					ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
-					ImGui::PopItemWidth();
+					guiManager.Indent();
+
+					guiManager.Add(bGui_ShowAllGroups, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);
+					//guiManager.Add(bGui_PlayerEditor, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+
+					if (!bGui_ShowAllGroups)
+						if (groups.size() > 1)
+						{
+							ImGui::PushItemWidth(_w33);
+							ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
+							ImGui::PopItemWidth();
+						}
+
+					guiManager.Unindent();
 				}
 
-				guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-				//guiManager.Add(bGui_PlayerEditor, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
-
-				//-
+				//--
 
 #ifdef INCLUDE_ofxSurfingRandomizer
 				ofxImGuiSurfing::AddToggleRoundedButton(dataRandomizer.bGui);
 				//ofxImGuiSurfing::AddToggleRoundedButton(dataRandomizer.bEditor);
 #endif
 			}
-			ImGui::Unindent();
 
-			//-
+			//ImGui::Unindent();
+
+			//--
 
 			// 4.2 Extra
 
-			ImGui::Indent();
-			bOpen = false;
-			_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
-
-			if (ImGui::CollapsingHeader("EXTRA", _flagw))
+			if (!guiManager.bMinimize)
 			{
-				guiManager.Add(bGui_Standalones, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-				guiManager.Add(bHelp, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-				guiManager.Add(bGui_AdvancedControl, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+				ImGui::Indent();
+				bOpen = false;
+				_flagw = (bOpen ? ImGuiWindowFlags_NoCollapse : ImGuiWindowFlags_None);
 
-				//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Standalones);
-				//ofxImGuiSurfing::AddToggleRoundedButton(bHelp);
-				//ofxImGuiSurfing::AddToggleRoundedButton(bGui_AdvancedControl);
+				if (ImGui::CollapsingHeader("EXTRA", _flagw))
+				{
+					guiManager.Add(bGui_Standalones, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+					guiManager.Add(bHelp, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+					guiManager.Add(bGui_AdvancedControl, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+
+					//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Standalones);
+					//ofxImGuiSurfing::AddToggleRoundedButton(bHelp);
+					//ofxImGuiSurfing::AddToggleRoundedButton(bGui_AdvancedControl);
+				}
+				ImGui::Unindent();
 			}
-			ImGui::Unindent();
 		}
 	}
 
@@ -3610,7 +3640,7 @@ void ofxPresetsManager::gui_Panels()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::gui_Main()
+void ofxPresetsManager::draw_Gui_Main()
 {
 	static bool auto_resize = true;
 	ImGuiWindowFlags flagsw;
@@ -3631,35 +3661,74 @@ void ofxPresetsManager::gui_Main()
 
 		//---
 
+		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+
+		ImGui::Spacing();
+
+		guiManager.Add(bGui_Panels, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+		guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+		if (bGui_Players)
+		{
+			guiManager.Indent();
+
+			guiManager.Add(bGui_ShowAllGroups, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);
+			//guiManager.Add(bGui_PlayerEditor, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+
+			if (!bGui_ShowAllGroups)
+				if (groups.size() > 1)
+				{
+					ImGui::PushItemWidth(_w33);
+					ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
+					ImGui::PopItemWidth();
+				}
+
+			guiManager.Unindent();
+		}
+
+		ImGui::Spacing();
+
+		//--
+
 		// 0. labels
 		{
 			ImGui::Spacing();
 
-			// label for User-Kit folder
-			str = "USER-KIT:";
-			ImGui::Text(str.c_str());
+			if (!guiManager.bMinimize)
+			{
+				// label for User-Kit folder
+				str = "USER-KIT";
+				//ImGui::Text(str.c_str());
+				guiManager.AddLabelBig(str, true, true);
+			}
+
 			str = path_UserKit_Folder;
 			ofStringReplace(str, "/", "/\n");//split in lines to reduce panel width
 			str += "/";
-			ImGui::Text(str.c_str());
+			//ImGui::Text(str.c_str());
+			guiManager.AddLabel(str, false, true);
 
-			ImGui::Dummy(ImVec2(0, 2));
+			//--
 
-			// aliases
-			int ig = guiGroupSelectedIndex.get();
-			int ip = guiPresetSelectedIndex[ig];
+			if (!guiManager.bMinimize)
+			{
+				ImGui::Dummy(ImVec2(0, 2));
 
-			// name of selected group
-			str = guiPresetSelectedIndex[ig].getName();
-			ImGui::Text(str.c_str());
+				// aliases
+				int ig = guiGroupSelectedIndex.get();
+				int ip = guiPresetSelectedIndex[ig];
 
-			if (groups.size() > 1) {
-				str = "Group #" + ofToString(ig) + "/" + ofToString(groups.size() - 1);
+				// name of selected group
+				str = guiPresetSelectedIndex[ig].getName();
+				ImGui::Text(str.c_str());
+
+				if (groups.size() > 1) {
+					str = "Group #" + ofToString(ig) + "/" + ofToString(groups.size() - 1);
+					ImGui::Text(str.c_str());
+				}
+
+				str = "Preset " + ofToString(ip) + "/" + ofToString(keys[ig].size() - 1);
 				ImGui::Text(str.c_str());
 			}
-
-			str = "Preset " + ofToString(ip) + "/" + ofToString(keys[ig].size() - 1);
-			ImGui::Text(str.c_str());
 
 			ImGui::Spacing();
 		}
@@ -3672,6 +3741,7 @@ void ofxPresetsManager::gui_Main()
 
 		// Save
 		//if (!MODE_Editor)
+		if (!guiManager.bMinimize)
 		{
 			if (ImGui::Button("RELOAD", ImVec2(_w50, _h)))
 			{
@@ -3704,205 +3774,247 @@ void ofxPresetsManager::gui_Main()
 		}
 		ImGui::PopButtonRepeat();
 
+		guiManager.AddSpacing();
+
 		//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Panels);
-		guiManager.Add(bGui_Panels, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+		// 
+		//guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 
-		//--
-
-//#ifdef INCLUDE_ofxSurfingRandomizer
-//		//ofxImGuiSurfing::AddBigToggle(dataRandomizer.bGui, _w100, _h);
-//		ImGui::Dummy(ImVec2(0.f, 2.f));
-//#endif
-
-		ImGui::Spacing();
-
-		//--
-
-		// 2. Selectors Sliders
-
-		std::string name;
-		if (groups.size() <= 1) name = "SELECTOR";
-		else name = "SELECTORS";
-
-		if (ImGui::CollapsingHeader(name.c_str()))
+		if (guiManager.bMinimize)
 		{
-			ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
-			_h *= 2;
+//			// 0. Name Group
+////str = "Group Name:";
+////ImGui::Text(str.c_str());
+//			str = guiPresetSelectedIndex[guiGroupSelectedIndex].getName();
+//			ImGui::Text(str.c_str());
 
-			// multi groups ?
-			//if (bBuildGroupSelector) 
+			//-
+
+			// 1. Selected Group
+
+			str = "Group:";
+			ImGui::Text(str.c_str());
+			if (bBuildGroupSelector)
 			{
-				//str = "Group Name:";
-				//ImGui::Text(str.c_str());
-				str = guiPresetSelectedIndex[guiGroupSelectedIndex].getName();
-				ImGui::Text(str.c_str());
-
-				//-
-
-				// 1. selected group
-				str = "Group:";
-				ImGui::Text(str.c_str());
-				if (bBuildGroupSelector)
-				{
-					ImGui::PushItemWidth(_w33);
-					ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
-					ImGui::PopItemWidth();
-				}
-
-				//-
-
-				ImGui::Text("Preset:");
 				ImGui::PushItemWidth(_w33);
-				ofxImGuiSurfing::AddParameter(guiPresetSelectedIndex[guiGroupSelectedIndex]);
+				ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
 				ImGui::PopItemWidth();
-
-				//ofxImGuiSurfing::AddBigToggle(bGui_Players, _w100, _h / 2);
-				//// selector to show their randomizers
-				//ofxImGuiSurfing::AddBigToggle(bGui_ShowAllGroups, _w100, _h / 2);
-
-				//----
-
-				// Presets Selectors
-
-				//ImGui::Indent();
-				ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
-				//flags |= ImGuiTreeNodeFlags_DefaultOpen;
-				ImGui::PushItemWidth(_w33);
-				ofxImGuiSurfing::AddGroup(params_GroupsSelectors, flags);
-				ImGui::PopItemWidth();
-				//ImGui::Unindent();
 			}
+
+			//-
+
+			// 2. Selected Preset 
+
+			ImGui::Text("Preset:");
+			ImGui::PushItemWidth(_w33);
+			ofxImGuiSurfing::AddParameter(guiPresetSelectedIndex[guiGroupSelectedIndex]);
+			ImGui::PopItemWidth();
 		}
 
-		ImGui::Spacing();
 
-		//--
-
-		// 3. Play buttons
-
-		if (ImGui::CollapsingHeader("PLAYERS"))
+		if (!guiManager.bMinimize)
 		{
-			ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+			//--
 
-			//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Players);
-			guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+	//#ifdef INCLUDE_ofxSurfingRandomizer
+	//		//ofxImGuiSurfing::AddBigToggle(dataRandomizer.bGui, _w100, _h);
+	//		ImGui::Dummy(ImVec2(0.f, 2.f));
+	//#endif
 
-			if (groups.size() > 1)
-			{
-				ofxImGuiSurfing::AddToggleRoundedButton(bGui_ShowAllGroups);
-			}
+			ImGui::Spacing();
 
-			ImGui::Dummy(ImVec2(0.0f, 2.0f));
+			//--
 
-			for (int i = 0; i < groupRandomizers.size(); i++)
-			{
-				ImGui::PushID(i);
-				string s = groups[i].getName();
-				ImGui::Text(s.c_str());
+			// 2. Selectors Sliders
 
-				// Blink by timer
-				ofxImGuiSurfing::AddBigToggleNamed(groupRandomizers[i].PLAY_RandomizeTimer, _w100, _h, "PLAYING", "PLAY", true, groupRandomizers[i].getPlayerPct());
+			std::string name;
+			if (groups.size() <= 1) name = "SELECTOR";
+			else name = "SELECTORS";
 
-				ImGui::PopID();
-			}
-		}
-
-		//--
-
-		// 3. tools / helpers
-		if (bGui_AdvancedControl)
-			if (MODE_Editor)
-			{
-				if (ImGui::CollapsingHeader("TOOLS"))
-				{
-					ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
-					_h *= 2;
-
-					//TODO: select which added group
-					int i = 0;
-					//int ii = guiPresetSelectedIndex[i];
-
-					if (ImGui::Button("CLONE ALL", ImVec2(_w100, _h / 2)))
-					{
-						doCloneAll(i);
-					}
-					if (ImGui::Button("CLONE >", ImVec2(_w100, _h / 2)))
-					{
-						doCloneRight(i);
-					}
-				}
-
-				//-
-
-				////TODO:
-				////create all presets randomized
-				////if (ImGui::Button("POPULATE", ImVec2(_w99, _h / 2)))
-				////{
-				////	int ig = guiGroupSelectedIndex.get();
-				////	doPopulateFavs(ig);
-				////}
-			}
-
-		//--
-
-		// 5. Undo Engine
-
-#ifdef INCLUDE_ofxUndoSimple
-		if (MODE_Editor.get())
-		{
-			if (ImGui::CollapsingHeader("UNDO ENGINE"))
+			if (ImGui::CollapsingHeader(name.c_str()))
 			{
 				ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
 				_h *= 2;
 
-				str = "History: " + ofToString(undoStringsParams[guiGroupSelectedIndex].getUndoLength()) + "/";
-				str += ofToString(undoStringsParams[guiGroupSelectedIndex].getRedoLength());
-				ImGui::Text(str.c_str());
+				// multi groups ?
+				//if (bBuildGroupSelector) 
+				{
+					// 0. Name Group
+					//str = "Group Name:";
+					//ImGui::Text(str.c_str());
+					str = guiPresetSelectedIndex[guiGroupSelectedIndex].getName();
+					ImGui::Text(str.c_str());
 
-				if (ImGui::Button("Store", ImVec2(_w50, _h / 2)))
-				{
-					doStoreUndo();
-				}
-				ImGui::SameLine();
-				if (ImGui::Button("Clear", ImVec2(_w50, _h / 2)))
-				{
-					doClearUndoHistory();
-				}
-				//ImGui::SameLine();
+					//-
 
-				if (ImGui::Button("Undo", ImVec2(_w50, _h / 2)))
-				{
-					doUndo();
+					// 1. Selected Group
+
+					str = "Group:";
+					ImGui::Text(str.c_str());
+					if (bBuildGroupSelector)
+					{
+						ImGui::PushItemWidth(_w33);
+						ofxImGuiSurfing::AddParameter(guiGroupSelectedIndex); // user selected wich group to edit
+						ImGui::PopItemWidth();
+					}
+
+					//-
+
+					// 2. Selected Preset 
+
+					ImGui::Text("Preset:");
+					ImGui::PushItemWidth(_w33);
+					ofxImGuiSurfing::AddParameter(guiPresetSelectedIndex[guiGroupSelectedIndex]);
+					ImGui::PopItemWidth();
+
+					//ofxImGuiSurfing::AddBigToggle(bGui_Players, _w100, _h / 2);
+					//// selector to show their randomizers
+					//ofxImGuiSurfing::AddBigToggle(bGui_ShowAllGroups, _w100, _h / 2);
+
+					//----
+
+					// Presets Selectors
+
+					//ImGui::Indent();
+					ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
+					//flags |= ImGuiTreeNodeFlags_DefaultOpen;
+					ImGui::PushItemWidth(_w33);
+					ofxImGuiSurfing::AddGroup(params_GroupsSelectors, flags);
+					ImGui::PopItemWidth();
+					//ImGui::Unindent();
 				}
-				ImGui::SameLine();
-				if (ImGui::Button("Redo", ImVec2(_w50, _h / 2)))
+			}
+
+			ImGui::Spacing();
+			{
+				//--
+
+				// 3. Play buttons
+
+				if (ImGui::CollapsingHeader("PLAYERS"))
 				{
-					doRedo();
-	}
-}
+					ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+
+					//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Players);
+					guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+
+					if (groups.size() > 1)
+					{
+						ofxImGuiSurfing::AddToggleRoundedButton(bGui_ShowAllGroups);
+					}
+
+					ImGui::Dummy(ImVec2(0.0f, 2.0f));
+
+					for (int i = 0; i < groupRandomizers.size(); i++)
+					{
+						ImGui::PushID(i);
+						string s = groups[i].getName();
+						ImGui::Text(s.c_str());
+
+						// Blink by timer
+						ofxImGuiSurfing::AddBigToggleNamed(groupRandomizers[i].PLAY_RandomizeTimer, _w100, _h, "PLAYING", "PLAY", true, groupRandomizers[i].getPlayerPct());
+
+						ImGui::PopID();
+					}
+				}
+
+				//--
+
+				// 3. tools / helpers
+				if (bGui_AdvancedControl)
+					if (MODE_Editor)
+					{
+						if (ImGui::CollapsingHeader("TOOLS"))
+						{
+							ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+							_h *= 2;
+
+							//TODO: select which added group
+							int i = 0;
+							//int ii = guiPresetSelectedIndex[i];
+
+							if (ImGui::Button("CLONE ALL", ImVec2(_w100, _h / 2)))
+							{
+								doCloneAll(i);
+							}
+							if (ImGui::Button("CLONE >", ImVec2(_w100, _h / 2)))
+							{
+								doCloneRight(i);
+							}
+						}
+
+						//-
+
+						////TODO:
+						////create all presets randomized
+						////if (ImGui::Button("POPULATE", ImVec2(_w99, _h / 2)))
+						////{
+						////	int ig = guiGroupSelectedIndex.get();
+						////	doPopulateFavs(ig);
+						////}
+					}
+
+				//--
+
+				// 5. Undo Engine
+
+#ifdef INCLUDE_ofxUndoSimple
+				if (MODE_Editor.get())
+				{
+					if (ImGui::CollapsingHeader("UNDO ENGINE"))
+					{
+						ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+						_h *= 2;
+
+						str = "History: " + ofToString(undoStringsParams[guiGroupSelectedIndex].getUndoLength()) + "/";
+						str += ofToString(undoStringsParams[guiGroupSelectedIndex].getRedoLength());
+						ImGui::Text(str.c_str());
+
+						if (ImGui::Button("Store", ImVec2(_w50, _h / 2)))
+						{
+							doStoreUndo();
+						}
+						ImGui::SameLine();
+						if (ImGui::Button("Clear", ImVec2(_w50, _h / 2)))
+						{
+							doClearUndoHistory();
+						}
+						//ImGui::SameLine();
+
+						if (ImGui::Button("Undo", ImVec2(_w50, _h / 2)))
+						{
+							doUndo();
+						}
+						ImGui::SameLine();
+						if (ImGui::Button("Redo", ImVec2(_w50, _h / 2)))
+						{
+							doRedo();
+			}
 		}
+	}
 #endif
 
-		//--
+				//--
 
-		// 6. Advanced
+				// 6. Advanced
 
-		// workflow: force hide when live mode
-		if (bGui_AdvancedControl) gui_Advanced();
+				// workflow: force hide when live mode
+				if (bGui_AdvancedControl) draw_Gui_Advanced();
 
-		//-
+				//-
 
-		// 7. Mouse over gui
+				// 7. Mouse over gui
 
-		static bool bAutoLocKeysOnMouseHoverGui = false;
-		bLockMouseByImGui = false;
-		if (bAutoLocKeysOnMouseHoverGui) {
-			bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
-			bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
-			bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
-			// must be insisde some window
+				static bool bAutoLocKeysOnMouseHoverGui = false;
+				bLockMouseByImGui = false;
+				if (bAutoLocKeysOnMouseHoverGui) {
+					bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
+					bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
+					bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+					// must be insisde some window
+				}
+}
 		}
-
 		//--
 	}
 	guiManager.endWindow();
@@ -3913,7 +4025,7 @@ void ofxPresetsManager::gui_Main()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::gui_Advanced()
+void ofxPresetsManager::draw_Gui_Advanced()
 {
 	//if (ImGui::CollapsingHeader("EXTRA"))
 	{
@@ -4212,7 +4324,7 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::gui_Standalones()
+void ofxPresetsManager::draw_Gui_Standalones()
 {
 	{
 		static bool auto_resize = true;
@@ -4328,7 +4440,7 @@ void ofxPresetsManager::gui_Standalones()
 					std::string _path = path_UserKit_Folder + "/" + path_PresetsStandalone + "/";
 					_path += guiPresetSelectedIndex[groupIndex].getName();// group name
 					ofStringReplace(_path, "/", "/\n");//split in lines to reduce panel width
-					const char *array = _path.c_str();
+					const char* array = _path.c_str();
 
 					ImGui::Text(array);
 					ImGui::PopStyleColor(1);
@@ -4657,7 +4769,7 @@ void ofxPresetsManager::gui_Standalones()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::gui_Randomizers()
+void ofxPresetsManager::draw_Gui_PlayersRandomizers()
 {
 	// This panel will show the settings for the selected by user group (guiGroupSelectedIndex)
 
@@ -5031,7 +5143,7 @@ void ofxPresetsManager::doRefreshUndoParams() {
 //----
 
 //--------------------------------------------------------------
-void ofxPresetsManager::Changed_GuiGroupSelectedIndex(int & index)
+void ofxPresetsManager::Changed_GuiGroupSelectedIndex(int& index)
 {
 	guiGroupSelectedIndex = (int)ofClamp(guiGroupSelectedIndex.get(), 0, guiGroupSelectedIndex.getMax());
 	ofLogWarning(__FUNCTION__) << guiGroupSelectedIndex;
@@ -5046,7 +5158,7 @@ void ofxPresetsManager::drawHelp()
 }
 
 //--------------------------------------------------------------
-void ofxPresetsManager::addExtra(ofParameterGroup &g)
+void ofxPresetsManager::addExtra(ofParameterGroup& g)
 {
 	bool bAppStateParams = true;
 
