@@ -83,30 +83,31 @@
 #undef INCLUDE_ofxSurfingRandomizer
 #endif
 
-
-//-
+//-'
 
 //	2. EXTRA FEATURES
 
 //#define INCLUDE_ofxUndoSimple	// undo engine to store after randomize a preset or manually (to browse history states)
 
-//-
-
-// 3. CUSTOMIZATION
-
-#define USE_PRESETS_MANAGER__IMGUI_LAYOUT // -> Instantiated and using my addon ofxSurfingImGui
-//#define USE_PRESETS_MANAGER__IMGUI_INTERNAL // -> LEgacy without my addon. Using legacy ofxImGui
-
-//#define INCLUDE_IMGUI_CUSTOM_THEME_AND_FONT	// customize ImGui font
-//#define USE_IMGUI_EXTERNAL	// this is to group all ImGui panels into one unique instance in ofApp
-// currently there's a bug when using more than one single ofxImGui instance!
-// this line is proposed as debugging when adding this feature (multi instance).
-//
 //#define USE_JSON	// set the file settings format (xml or json). already defined into ofxSurfingHelpers
 #define NUM_MAX_GROUPS 10
 //TODO: should be better to push to a vector..
 
 //#define INCLUDE_ofxUndoSimple
+ 
+//-'
+
+// 3. CUSTOMIZATION
+
+#define USE_PRESETS_MANAGER__IMGUI_LAYOUT // -> Instantiated and using my addon ofxSurfingImGui
+//#define USE_PRESETS_MANAGER__IMGUI_INTERNAL // -> Legacy ImGui without my ofxSurfingImGui addon.
+
+//-'
+ 
+//#define USE_IMGUI_EXTERNAL // this is to group all ImGui panels into one unique instance in ofApp
+// currently there's a bug when using more than one single ofxImGui instance!
+// this line is proposed as debugging when adding this feature (multi instance).
+//
 
 //--
 
@@ -126,18 +127,12 @@
 
 //--
 
-// extra c libs
-//#include <iostream>
-//#include <memory>
-
-//--
-
 #include "ofxImGui.h"
 #include "imgui_internal.h" // some imgui internals
 
 //--
 
-// SURFING ENGINES
+// EXTRA SURFING ENGINES
 
 #ifdef INCLUDE_ofxSurfingSmooth
 #include "ofxSurfingSmooth.h"
@@ -176,10 +171,6 @@
 #define TSGL_STOP
 #endif
 
-//#define BUTTON_BIG_HEIGHT 50
-//#define PANEL_WIDGETS_WIDTH 225
-//#define PANEL_WIDGETS_HEIGHT 100
-
 //TODO:
 #define USE_IM_GUI
 #define USE_JSON //uncomment to use default xml instead json for ofParameterGroup de/serializers
@@ -188,6 +179,72 @@
 
 class ofxPresetsManager : public ofBaseApp
 {
+	//----
+
+public:
+
+	ofxPresetsManager();
+	~ofxPresetsManager();
+
+	void update(ofEventArgs& args);
+	void draw(ofEventArgs& args);
+
+	void windowResized(int w, int h);
+	void exit();
+
+	//--
+
+public:
+
+	void clear();
+
+private:
+
+	void ImGui_Draw();
+	void draw_Help();
+
+	//----
+	//
+	// API
+	//
+	//----
+
+public:
+
+	// TODO: should use &reference? it's better?
+	void add(ofParameterGroup params, initializer_list<int> keysList);// adds and define keys to trig presets too
+	void add(ofParameterGroup params, vector<int> keysList);// adds and define keys to trig presets too
+
+private:
+
+	// TODO: BUG:
+	// not working if called from ofApp... must use above 'add' methods
+	void add(ofParameterGroup params, int numPresets = 8);// add a param group for preset saving and how many presets on favs
+	// could add a correlative keys list {q,w,e,r...}
+
+	//--
+
+public:
+
+	void setup();// must be called after params groups has been added! (above add methods)
+	void setup(std::string name);// TODO: should use char array to avoid collapse with bool..?
+	void setup(std::string name, bool _buildGroupSelector);
+	void setup(bool _buildGroupSelector);
+
+private:
+
+	bool bDoneSetup = false;// to ensure all setup process is done and avoid troubles if not after
+
+public:
+
+	void startup();// must be called after setup (who is called after all group adds) to set initial states well
+
+private:
+
+	void doCheckPresetsFoldersAreEmpty();// used on startup. check if all favorites preset are present, and creates folders and content if not
+
+	void setupEngines();
+
 	//----
 
 	// SURFING ENGINES
@@ -238,61 +295,6 @@ protected:
 private:
 	ofParameter<bool> bLockMouseByImGui{ "Mouse Locked", false };//mouse is over gui
 
-public:
-	ofxPresetsManager();
-	~ofxPresetsManager();
-
-	void update(ofEventArgs& args);
-	void draw(ofEventArgs& args);
-
-	void windowResized(int w, int h);
-	void exit();
-
-public:
-	void clear();
-
-private:
-	void ImGui_Draw();
-	void draw_Help();
-
-	//----
-
-	//----
-	//
-	// API
-	//
-	//----
-
-public:
-	// TODO: should use &reference? it's better?
-	void add(ofParameterGroup params, initializer_list<int> keysList);// adds and define keys to trig presets too
-	void add(ofParameterGroup params, vector<int> keysList);// adds and define keys to trig presets too
-
-private:
-	// TODO: BUG:
-	// not working if called from ofApp... must use above 'add' methods
-	void add(ofParameterGroup params, int numPresets = 8);// add a param group for preset saving and how many presets on favs
-	// could add a correlative keys list {q,w,e,r...}
-
-	//--
-
-public:
-	void setup();// must be called after params groups has been added! (above add methods)
-	void setup(std::string name);// TODO: should use char array to avoid collapse with bool..?
-	void setup(std::string name, bool _buildGroupSelector);
-	void setup(bool _buildGroupSelector);
-
-private:
-	bool bDoneSetup = false;// to ensure all setup process is done and avoid troubles if not after
-
-public:
-	void startup();// must be called after setup (who is called after all group adds) to set initial states well
-
-private:
-	void doCheckPresetsFoldersAreEmpty();// used on startup. check if all favorites preset are present, and creates folders and content if not
-
-	void setupEngines();
-
 	//--
 
 	// core engine
@@ -333,7 +335,7 @@ private:
 
 public:
 	// exposed to allow external callbacks
-	std::vector<ofParameter<int>> guiPresetSelectedIndex;// one selector for each group
+	std::vector<ofParameter<int>> index_PresetSelected;// one selector for each group
 
 public:
 	//
@@ -345,33 +347,33 @@ public:
 		// could use a customized control group with importante parameters...
 		//ofParameterGroup g{ "SelectorsGroup" };
 		//for (int i = 0; i < groups.size(); i++) {
-		//	g.add(guiPresetSelectedIndex[i]);
+		//	g.add(index_PresetSelected[i]);
 		//}
 		//return g;
 
-		return params_GroupsSelectors;
+		return params_Index_GroupsSelectors;
 	}
 
 private:
-	std::vector<int> guiPresetSelectedIndex_PRE;// remember previous selector to reduce callbakcs
-	ofParameterGroup params_GroupsSelectors{ "SELECTORS" };// group all group selectors indexes
+	std::vector<int> index_PresetSelected_PRE;// remember previous selector to reduce callbakcs
+	ofParameterGroup params_Index_GroupsSelectors{ "SELECTORS" };// group all group selectors indexes
 
 	//--
 
 	// select active group 
 	// to show on randomize editor panel
-	ofParameter<int> guiGroupSelectedIndex;// only this selected group will be showed on gui to edit
+	ofParameter<int> index_GroupSelected;// only this selected group will be showed on gui to edit
 	ofParameter<bool> bGui_ShowAllGroups;//enable to show all, each group panels
-	void Changed_GuiGroupSelectedIndex(int& index);
+	void Changed_Index_GroupSelected(int& index);
 
 	std::vector<SurfingGroupRandomizer> groupRandomizers;
 
 	// selector for last group: is the main group link
-	ofParameterGroup params_GroupMainSelector{ "GROUP_LINK" };
+	ofParameterGroup params_Index_GroupSelectorMain{ "GROUP_LINK" };
 
 	//--
 
-	ofParameter<int> GROUP_LINK_SelectedIndex;// global group selector. this selector will control all linked groups
+	ofParameter<int> index_GROUP_LINK;// global group selector. this selector will control all linked groups
 
 	// group main selector
 	bool bBuildGroupSelector = true;// to allow auto build a group selector to combine all the added groups to the presets manager
@@ -497,7 +499,7 @@ public:
 	//// setup()
 	//{
 	//	// create callbacks
-	//	for (int i = 0; i < presetsManager.guiPresetSelectedIndex.size(); i++)
+	//	for (int i = 0; i < presetsManager.index_PresetSelected.size(); i++)
 	//	{
 	//		ofAddListener(presetsManager.getSelectorsGroup().parameterChangedE(), this, &ofApp::Changed_PresetsManagerSelectors);
 	//	}
@@ -525,8 +527,10 @@ public:
 	//--
 
 #ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
+
 private:
 	void draw_Gui_ClickerPresets_Native();// user clickeable box panel preset selector
+
 private:
 	// mini preview rectangles positions and sizes
 	void doRectFit();
@@ -548,7 +552,23 @@ private:
 	ofParameter<bool> bThemeDarkOrLight{ "Theme B/W", true };
 	ofParameter<bool> bMODE_LockClicker{ "Lock Clicker", false };
 
+	private:
+		// preset clicker boxes matrix
+		ofParameter<int> cellSize{ "ButSize", 80, 45, 120 };// default box button size
+		//int cellSize = 80;// default box button size
+		ofVec2f clicker_Pos;// default clicker position
+
+	//--
+	 
+	// mouse
+
+private:
+
+#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
+	void mousePressed(int x, int y);
+	bool lastMouseButtonState = false;
 #endif
+
 
 	//--
 
@@ -600,6 +620,8 @@ public:
 	//void setPosition_DEBUG(int x, int y);// where to display if we get errors (ie: data files not found) on startup
 	*/
 
+#endif
+
 	//----
 
 	// keys
@@ -616,13 +638,16 @@ public:
 	//--------------------------------------------------------------
 	void setToggleEnableKeys()
 	{
-		ENABLE_Keys = !ENABLE_Keys;
-		bKeys = ENABLE_Keys;
+		bKeys = !bKeys;
+
+		//ENABLE_Keys = !ENABLE_Keys;
+		//bKeys = ENABLE_Keys;
 	}
 	//--------------------------------------------------------------
 	bool isKeysEnabled()
 	{
-		return ENABLE_Keys;
+		return bKeys;
+		//return ENABLE_Keys;
 	}
 	//--------------------------------------------------------------
 	void setModeKeySave(int key);// setup the key you have to hold for saving, default is OF_KEY_CONTROL
@@ -636,6 +661,7 @@ public:
 	//----
 
 	// undo engine
+
 #ifdef INCLUDE_ofxUndoSimple
 	// you can manually store all the parameters states to store points
 	// only works on edit mode
@@ -677,7 +703,7 @@ private:
 	//--
 
 	// app settings for many params
-//public:
+
 private:
 	void load_AppSettings();// handle group selectors and some settings states
 	void save_ControlSettings();// handle group selectors and some settings states
@@ -814,8 +840,8 @@ public:
 	void saveCurrentPreset(int groupIndex = -1) {
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 
-		ofLogNotice(__FUNCTION__) << "SAVE PRESET  group: " << groupIndex << " preset: " << guiPresetSelectedIndex[groupIndex].get();
-		save(guiPresetSelectedIndex[groupIndex].get(), groupIndex);
+		ofLogNotice(__FUNCTION__) << "SAVE PRESET  group: " << groupIndex << " preset: " << index_PresetSelected[groupIndex].get();
+		save(index_PresetSelected[groupIndex].get(), groupIndex);
 	}
 
 public:
@@ -826,8 +852,8 @@ public:
 			if (groups[i].getName() == groupName) _groupIndex = i;
 		}
 		if (_groupIndex != -1) {
-			ofLogNotice(__FUNCTION__) << "SAVE PRESET from group: " << groupName << " #" << _groupIndex << " preset: " << guiPresetSelectedIndex[_groupIndex].get();
-			save(guiPresetSelectedIndex[_groupIndex].get(), _groupIndex);
+			ofLogNotice(__FUNCTION__) << "SAVE PRESET from group: " << groupName << " #" << _groupIndex << " preset: " << index_PresetSelected[_groupIndex].get();
+			save(index_PresetSelected[_groupIndex].get(), _groupIndex);
 		}
 		else {
 			ofLogError(__FUNCTION__) << "Can't found any group named: " << groupName << ". Save command failed!";
@@ -841,7 +867,7 @@ public:
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		groupIndex = (int)ofClamp(groupIndex, 0, groups.size() - 1);
 
-		int _curr = guiPresetSelectedIndex[groupIndex];
+		int _curr = index_PresetSelected[groupIndex];
 
 
 		if (!cycled)//limited
@@ -854,7 +880,7 @@ public:
 			else _curr--;
 		}
 
-		guiPresetSelectedIndex[groupIndex] = _curr;
+		index_PresetSelected[groupIndex] = _curr;
 	}
 
 	//--------------------------------------------------------------
@@ -863,7 +889,7 @@ public:
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		groupIndex = (int)ofClamp(groupIndex, 0, groups.size() - 1);
 
-		int _curr = guiPresetSelectedIndex[groupIndex];
+		int _curr = index_PresetSelected[groupIndex];
 
 		if (!cycled)//limited
 		{
@@ -875,20 +901,20 @@ public:
 			else _curr++;
 		}
 
-		guiPresetSelectedIndex[groupIndex] = _curr;
+		index_PresetSelected[groupIndex] = _curr;
 	}
 
 	//--------------------------------------------------------------
 	void load_Previous(bool cycled)
 	{
-		load_Previous(guiGroupSelectedIndex, cycled);
+		load_Previous(index_GroupSelected, cycled);
 	}
 
 	//--------------------------------------------------------------
 	void load_Next(bool cycled)
 	{
 		ofLogNotice(__FUNCTION__);
-		load_Next(guiGroupSelectedIndex, cycled);
+		load_Next(index_GroupSelected, cycled);
 	}
 
 	// legacy	
@@ -909,7 +935,7 @@ public:
 	int getCurrentPreset(int _group)// get index of selected preset on the group
 	{
 		int _presetIndex = -1;
-		if (_group < groups.size()) _presetIndex = guiPresetSelectedIndex[_group];
+		if (_group < groups.size()) _presetIndex = index_PresetSelected[_group];
 		return _presetIndex;
 	}
 
@@ -1175,6 +1201,7 @@ private:
 	ofParameter<bool> bMODE_EditLive{ "EDIT MODE", true };// this mode improves performance disabling autosave, undo history..etc
 
 public:
+	ofParameter<bool> bGui_Global;//TODO:
 	ofParameter<bool> bGui;//TODO:
 	ofParameter<bool> bGui_Clicker; // to allow include as toggle parameter into external gui
 	ofParameter<bool> bGui_PanelsAll;//all the windows enablers except the clicker
@@ -1182,13 +1209,13 @@ public:
 	ofParameter<bool> bGui_Standalones;
 	ofParameter<bool> bGui_Parameters;
 	ofParameter<bool> bGui_Players;
-	//ofParameter<bool> bGui_PlayerEditor;
 	ofParameter<bool> bGui_RandomizerParams;
 	ofParameter<bool> bGui_PresetsParams;
 	ofParameter<bool> bGui_Selectors;
-	//ofParameter<bool> bGui_Panels;
 	ofParameter<bool> bGui_AdvancedControl;
-	//ofParameter<bool> SHOW_Panel_AllSelectors;
+	//ofParameter<bool> bGui_PlayerEditor;
+	//ofParameter<bool> bGui_Panels;
+	//ofParameter<bool> bGui_AllSelectors;
 
 private:
 	ofParameter<bool> bHelp;
@@ -1213,12 +1240,14 @@ private:
 public:
 	void draw_Gui_PlayersRandomizers();
 	void draw_Gui_Main();
-	void draw_Gui_Panels();
 	void draw_Gui_Advanced();
 	void draw_Gui_Standalones();
 	void draw_Gui_Parameters();
+
 	void draw_Gui_ClickerPresets_ImGui();
-	//void gui_Selectors();
+
+	//void draw_Gui_Panels();
+	//void draw_Gui_Selectors();
 
 public:
 	bool ImGui_Draw_Window();
@@ -1238,29 +1267,24 @@ public:
 #ifdef USE_PRESETS_MANAGER__IMGUI_LAYOUT 
 	ofxSurfing_ImGui_Manager guiManager;
 	void setupGuiStyles();
-private:
-	bool bAutoDraw; // must be false when multiple ImGui instances created!
-public:
-	// required to set to true when only one ImGui instance is created. By default is setted to ImGui multi instances
-	//--------------------------------------------------------------
-	void setImGuiAutodraw(bool b) {
-		bAutoDraw = b;
-	}
+
+//private:
+//	bool bAutoDraw; // must be false when multiple ImGui instances created!
+//public:
+//	// required to set to true when only one ImGui instance is created. By default is setted to ImGui multi instances
+//	//--------------------------------------------------------------
+//	void setImGuiAutodraw(bool b) {
+//		bAutoDraw = b;
+//	}
+
+	//----
+
 #endif
-
-	//-
-
-	// layout
-
-private:
-	// preset clicker boxes matrix
-	ofParameter<int> cellSize{ "ButSize", 80, 45, 120 };// default box button size
-	//int cellSize = 80;// default box button size
-	ofVec2f clicker_Pos;// default clicker position
 
 	//--
 
 private:
+
 	// mouse over gui handler
 	// detects mouse interaction on ImGui to block other mouse actions like: easy camera... 
 	ofParameter<bool> bImGui_mouseOver;
@@ -1273,6 +1297,7 @@ private:
 	// located into 'archive/' folder, not from favourites presets folders
 
 private:
+
 	// multi-group files
 	vector <std::vector<std::string>> standaloneFileNames;// all the group standalone preset names
 	vector <std::vector<ofFile>> standaloneFiles;// all the group standalone preset files
@@ -1286,6 +1311,7 @@ private:
 	//std::string inputText_TEMP = "";
 
 private:
+
 	void doStandalonePresetsBuild(int groupIndex = -1);// standalone presets splitted from favourites presets
 	void doStandalonePresetLoad(std::string name, int groupIndex = -1);
 	void doStandalonePresetSave(std::string name, int groupIndex = -1);
@@ -1299,6 +1325,7 @@ private:
 	// helpers to easy integrate importane controls into external gui's
 
 private:
+
 	// to expose basic controls to allow use on external gui
 	ofParameterGroup params_Controls{ "PRESETS MANAGER" };
 
@@ -1335,7 +1362,7 @@ public:
 
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsPresetSelectors() {// selectors index to all the added groups
-		return params_GroupsSelectors;
+		return params_Index_GroupsSelectors;
 	}
 
 	//--------------------------------------------------------------
@@ -1369,7 +1396,7 @@ private:
 
 	vector<vector<int>> keys;// queued trigger keys for each group ? (all presets) (size of)
 	vector<vector<string>> labels;//converted to strings
-	bool ENABLE_Keys;// enabled keys
+	//bool ENABLE_Keys;// enabled keys
 	//bool bKeys;// enabled keys
 	bool keysNotActivated;
 
@@ -1388,25 +1415,14 @@ public:
 	//--
 
 private:
-	bool ENABLE_KeysArrowBrowse = true;// allow browse presets by arrows keys by default
+	bool bKeys_ArrowBrowse = true;// allow browse presets by arrows keys by default
 
 public:
 	//--------------------------------------------------------------
 	void setEnableKeysArrowBrowse(bool b)
 	{
-		ENABLE_KeysArrowBrowse = b;
+		bKeys_ArrowBrowse = b;
 	}
-
-	//----
-
-	// mouse
-
-private:
-
-#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
-	void mousePressed(int x, int y);
-	bool lastMouseButtonState = false;
-#endif
 
 	//----
 
@@ -1423,7 +1439,7 @@ private:
 
 private:
 	void Changed_Control(ofAbstractParameter& e);
-	void Changed_UserKit(ofAbstractParameter& e);
+	void Changed_User(ofAbstractParameter& e);
 
 private:
 	//ofEventListeners listeners;
@@ -1433,8 +1449,8 @@ private:
 	//-
 
 private:
-	bool DISABLE_CALLBACKS_SELECTORS = false;// to avoid multiple calls on multiple presets selector engine
-	bool bDisabledCallbacks = true;// to avoid startup crashes and objects are not initialized properly
+	bool bDISABLE_CALLBACKS_Selectors = false;// to avoid multiple calls on multiple presets selector engine
+	bool bDISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
 	// updating some params before save will trigs also the group callbacks
 	// so we disable this callbacks just in case params updatings are required
 
@@ -1449,7 +1465,7 @@ public:
 
 private:
 	// internal groups
-	ofParameterGroup params_UserKitSettings;
+	ofParameterGroup params_User;
 	ofParameterGroup params_Gui;
 	ofParameterGroup params_Options;
 	ofParameterGroup params_Randomizer;
@@ -1506,8 +1522,8 @@ private:
 		_path = path_UserKit_Folder + "/" + path_PresetsStandalone;// current kit-presets standalone presets folder
 		CheckFolder(_path);
 
-		_path = path_UserKit_Folder + "/" + path_ControlSettings;// for randomizer settings (into his own kit-preset folder)
-		CheckFolder(_path);
+		//_path = path_UserKit_Folder + "/" + path_ControlSettings;// for randomizer settings (into his own kit-preset folder)
+		//CheckFolder(_path);
 
 		_path = path_UserKit_Folder + "/" + path_ControlSettings;// app settings (shared from all kit-presets)
 		CheckFolder(_path);
@@ -1542,25 +1558,25 @@ public:
 	// tools
 
 	void doResetFull() {//reset all params to min
-		int ig = guiGroupSelectedIndex.get();
+		int ig = index_GroupSelected.get();
 		if (ig < groups.size())
 			groupRandomizers[ig].doResetGroup(groups[ig], true);
 	}
 
 	void doResetFiltered() {//reset filter enabled params to random min/max
-		int ig = guiGroupSelectedIndex.get();
+		int ig = index_GroupSelected.get();
 		if (ig < groups.size())
 			groupRandomizers[ig].doResetGroup(groups[ig], false);
 	}
 
 	void doRandomFull() {//random all params to min
-		int ig = guiGroupSelectedIndex.get();
+		int ig = index_GroupSelected.get();
 		if (ig < groups.size())
 			groupRandomizers[ig].doRandomGroupFull(groups[ig]);
 	}
 
 	void doRandomFiltered() {//random filter enabled params to random min/max
-		int ig = guiGroupSelectedIndex.get();
+		int ig = index_GroupSelected.get();
 		if (ig < groups.size())
 			groupRandomizers[ig].doRandomPreset();
 	}
@@ -1694,7 +1710,7 @@ if (presetsManager.isDoneLoad())
 // B. better callbacks system for all selectors, to know when a group selector changed:
 // Which group and which presets index selector changed.
 // ofApp::setup()
-for (int i = 0; i < presetsManager.guiPresetSelectedIndex.size(); i++)
+for (int i = 0; i < presetsManager.index_PresetSelected.size(); i++)
 {
 	ofAddListener(presetsManager.getSelectorsGroup().parameterChangedE(),
 		this, &ofApp::Changed_PresetsManagerSelectors);

@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setupPresets()
 {
-	// Optional
+	// 1. Optional
 	  
 	// Some API extra tweak controls:
 	//presetsManager.setEnableKeysArrowBrowse(true);
@@ -12,7 +12,7 @@ void ofApp::setupPresets()
 
 	//--
 
-	// Initiate
+	// 2. Initiate
 
 	// build your presets manager:
 	// add our ofParameterGroup to the preset manager. 
@@ -33,11 +33,13 @@ void ofApp::setupPresets()
 
 	//--
 
-	presetsManager.setup();
+	// 3. Setup
+	
+	presetsManager.setup(); // call after adding groups!
 
 	//--
 	 
-	// Optional
+	// 4. Optional
 	
 	//// customize user-kit name: 
 	//// then will create this named main settings file: 'bin/data/myKit_01.json'

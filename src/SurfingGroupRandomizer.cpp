@@ -35,7 +35,7 @@ void SurfingGroupRandomizer::setup(ofParameterGroup& _group, int _numPresets) {
 	// update control gui panel params
 	amountPresets = _numPresets;
 
-	guiPresetSelectedIndex.set(_group.getName(), 0, 0, amountPresets - 1);
+	index_PresetSelected.set(_group.getName(), 0, 0, amountPresets - 1);
 
 	// clicker
 	if (amountPresets != 0)
@@ -85,7 +85,7 @@ void SurfingGroupRandomizer::setup(ofParameterGroup& _group, int _numPresets) {
 
 	params_Control.setName("SurfingGroupRandomizer");
 	params_Control.add(params_HelperTools);
-	params_Control.add(guiPresetSelectedIndex);
+	params_Control.add(index_PresetSelected);
 
 	ofAddListener(params_Control.parameterChangedE(), this, &SurfingGroupRandomizer::Changed_Control);
 	ofAddListener(params_Randomizer.parameterChangedE(), this, &SurfingGroupRandomizer::Changed_Control);
@@ -106,7 +106,7 @@ void SurfingGroupRandomizer::setup(ofParameterGroup& _group, int _numPresets) {
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::startup()
 {
-	bDisabledCallbacks = false;
+	bDISABLE_CALLBACKS = false;
 
 #ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
 	//TODO: crashes
@@ -178,7 +178,7 @@ int SurfingGroupRandomizer::doRandomIndexChanged()
 
 	//-
 
-	int _r = guiPresetSelectedIndex;
+	int _r = index_PresetSelected;
 
 	if (MODE_DicesProbs)
 	{
@@ -282,12 +282,12 @@ int SurfingGroupRandomizer::doRandomIndexChanged()
 	//{
 	//	int numTryes = 0;
 	//	//avoid jump to same current preset
-	//	while (guiPresetSelectedIndex == _r)//if not changed
+	//	while (index_PresetSelected == _r)//if not changed
 	//	{
 	//		ofLogWarning(__FUNCTION__) << "Randomize not changed! Try #" << ofToString(++numTryes);
 	//		ofLogNotice(__FUNCTION__) << "PRESET Previous was : " << ofToString(_r);
-	//		ofLogNotice(__FUNCTION__) << "PRESET New Random is: " << ofToString(guiPresetSelectedIndex);
-	//		guiPresetSelectedIndex = (int)ofRandom(0, mainGroupMemoryFilesPresets.size());
+	//		ofLogNotice(__FUNCTION__) << "PRESET New Random is: " << ofToString(index_PresetSelected);
+	//		index_PresetSelected = (int)ofRandom(0, mainGroupMemoryFilesPresets.size());
 	//		
 	//		//if (MODE_MemoryLive) _r = (int)ofRandom(0, mainGroupMemoryFilesPresets.size());
 	//		//_r = (int)ofRandom(1, mainGroupMemoryFilesPresets.size() + 1);
@@ -308,7 +308,7 @@ void SurfingGroupRandomizer::doRandomIndex()
 	// we want force change, not stay in the same. 
 	// bc sometimes the random gets the same current preset.
 
-	int _indexPRE = guiPresetSelectedIndex;
+	int _indexPRE = index_PresetSelected;
 
 	int r = doRandomIndexChanged();
 
@@ -914,7 +914,7 @@ void SurfingGroupRandomizer::update()
 
 			randomizerTimer = ofGetElapsedTimeMillis();
 
-			if (guiPresetSelectedIndex != 0)
+			if (index_PresetSelected != 0)
 			{
 				bLatchRun = true;
 			}
@@ -934,11 +934,11 @@ void SurfingGroupRandomizer::update()
 
 		//ofLogNotice(__FUNCTION__) << " : " << timerRandomizer;
 
-		if (guiPresetSelectedIndex < presetsRandomModeShort.size()) {// avoid out of range
+		if (index_PresetSelected < presetsRandomModeShort.size()) {// avoid out of range
 
 			// A. Long mode
 
-			if (presetsRandomModeShort[guiPresetSelectedIndex] == false)// get if it's marked as shor or long by default (false)
+			if (presetsRandomModeShort[index_PresetSelected] == false)// get if it's marked as shor or long by default (false)
 			{
 				timerPlayerPct = ofMap(timerRandomizer, 0, randomizeDuration, 0, 1, true);
 
@@ -991,7 +991,7 @@ void SurfingGroupRandomizer::update()
 	// 1.0.2 Draw progress bar for the randomizer timer
 
 	//// Long mode
-	//if (presetsRandomModeShort[guiPresetSelectedIndex - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
+	//if (presetsRandomModeShort[index_PresetSelected - 1] == false) _prog = timerRandomizer / (float)randomizeDuration;
 
 	//// Short mode
 	//else _prog = timerRandomizer / (float)randomizeDurationShort;
@@ -1229,14 +1229,14 @@ void SurfingGroupRandomizer::drawImGui_PlayerRandomizersMain()
 
 				// label
 
-				str = "Preset " + ofToString(guiPresetSelectedIndex.get());
+				str = "Preset " + ofToString(index_PresetSelected.get());
 				ImGui::Text(str.c_str());
 				ImGui::Spacing();
 
 				// index
 
 				ImGui::PushItemWidth(_w33);
-				ofxImGuiSurfing::AddParameter(guiPresetSelectedIndex);
+				ofxImGuiSurfing::AddParameter(index_PresetSelected);
 				ImGui::PopItemWidth();
 
 				ImGui::Spacing();
@@ -1248,8 +1248,8 @@ void SurfingGroupRandomizer::drawImGui_PlayerRandomizersMain()
 			_w50 = getWidgetsWidth(2);
 			float _hm = getWidgetsHeightUnit() * 2;
 
-			if (keys.size() == 0) ofxImGuiSurfing::AddMatrixClicker(guiPresetSelectedIndex, respBtnsClicker, amntBtnsClicker, true, _hm);
-			else ofxImGuiSurfing::AddMatrixClickerLabelsStrings(guiPresetSelectedIndex, labels, true, 3, true, -1);
+			if (keys.size() == 0) ofxImGuiSurfing::AddMatrixClicker(index_PresetSelected, respBtnsClicker, amntBtnsClicker, true, _hm);
+			else ofxImGuiSurfing::AddMatrixClickerLabelsStrings(index_PresetSelected, labels, true, 3, true, -1);
 
 			//--
 
@@ -1451,7 +1451,7 @@ void SurfingGroupRandomizer::drawImGui_PlayerRandomizersMain()
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::Changed_Editor(ofAbstractParameter& e)
 {
-	if (!bDisabledCallbacks)
+	if (!bDISABLE_CALLBACKS)
 	{
 		string name = e.getName();
 
@@ -1505,7 +1505,7 @@ void SurfingGroupRandomizer::doDices()// calculate all probabilities for all pre
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter& e)
 {
-	if (!bDisabledCallbacks)
+	if (!bDISABLE_CALLBACKS)
 	{
 		string name = e.getName();
 
@@ -1522,12 +1522,12 @@ void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter& e)
 		//----
 
 		// index preset selector
-		else if (name == guiPresetSelectedIndex.getName())
+		else if (name == index_PresetSelected.getName())
 		{
-			ofLogNotice(__FUNCTION__) << group.getName() << " index: " << guiPresetSelectedIndex.get();
+			ofLogNotice(__FUNCTION__) << group.getName() << " index: " << index_PresetSelected.get();
 
 			// TODO:
-			//selectorTARGET = guiPresetSelectedIndex;
+			//selectorTARGET = index_PresetSelected;
 		}
 
 		//--
@@ -1538,7 +1538,7 @@ void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter& e)
 		{
 			ofLogNotice(__FUNCTION__) << group.getName() << "CLONE >: " << e;
 			//bCloneRight = false;
-			//doCloneRight(guiPresetSelectedIndex);
+			//doCloneRight(index_PresetSelected);
 		}
 		else if (name == "CLONE ALL" && bCloneAll)
 		{
@@ -1647,7 +1647,7 @@ void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter& e)
 void SurfingGroupRandomizer::loadPreset(int p)
 {
 	ofLogNotice(__FUNCTION__) << group.getName() << " : " << p;
-	guiPresetSelectedIndex = p;
+	index_PresetSelected = p;
 
 	//TODO: 
 	// workaround
@@ -1657,7 +1657,7 @@ void SurfingGroupRandomizer::loadPreset(int p)
 	// TODO:
 	////if (selectorTARGET) 
 	//{
-	//selectorTARGET = guiPresetSelectedIndex;
+	//selectorTARGET = index_PresetSelected;
 	//}
 }
 
