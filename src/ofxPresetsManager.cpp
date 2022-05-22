@@ -316,21 +316,29 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		// TODO: should allow customize keys to avoid coollide with 0,1,2.. and customize amount too
 		// create the extra main selector
 		vector<int> _keys;
-		for (int i = 0; i < groupLinkSize; i++) {
-			switch (i)
-			{
-			case 0: _keys.push_back('0'); break;
-			case 1: _keys.push_back('1'); break;
-			case 2: _keys.push_back('2'); break;
-			case 3: _keys.push_back('3'); break;
-			case 4: _keys.push_back('4'); break;
-			case 5: _keys.push_back('5'); break;
-			case 6: _keys.push_back('6'); break;
-			case 7: _keys.push_back('7'); break;
-			case 8: _keys.push_back('8'); break;
-			case 9: _keys.push_back('9'); break;
-			default: break;
-			}
+		char _charFirst = '1';
+		for (int i = 0; i < groupLinkSize; i++)
+		{
+			_keys.push_back(_charFirst++);
+			//if(_charFirst==0) _charFirst=
+
+			//TODO: could make a char list
+			// qwerty...asdfg...
+
+			//switch (i)
+			//{
+			//case 0: _keys.push_back('0'); break;
+			//case 1: _keys.push_back('1'); break;
+			//case 2: _keys.push_back('2'); break;
+			//case 3: _keys.push_back('3'); break;
+			//case 4: _keys.push_back('4'); break;
+			//case 5: _keys.push_back('5'); break;
+			//case 6: _keys.push_back('6'); break;
+			//case 7: _keys.push_back('7'); break;
+			//case 8: _keys.push_back('8'); break;
+			//case 9: _keys.push_back('9'); break;
+			//default: break;
+			//}
 		}
 		add(params_GroupMainSelector, _keys);
 		//add(params_GroupMainSelector, { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
@@ -389,12 +397,12 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	//--
 
+
+#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
 	bMODE_EditPresetClicker.set("Edit Clicker", false);
 	bMODE_EditPresetClicker.setSerializable(false);
-
-	//helpPos.set("HELP POS", false);
-
 	bGui_BgEditPresetClicker.set("Box Clicker", false);
+#endif
 
 	//----
 
@@ -403,19 +411,23 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Options.add(bMODE_EditLive);
 	params_Options.add(bSplitGroupFolders);
 
-	params_Gui.add(bThemeDarkOrLight);
 	params_Gui.add(bGui_Selectors);
 	params_Gui.add(bGui_PresetsParams);
 	params_Gui.add(bHelp);
+
+//#ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL
+#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
+	params_Gui.add(bThemeDarkOrLight);
 	params_Gui.add(bMODE_EditPresetClicker);
-	//params_Gui.add(helpPos);
 	params_Gui.add(bGui_BgEditPresetClicker);
+
+	params_Control.add(bMODE_EditPresetClicker);
+	params_Control.add(bThemeDarkOrLight);
+#endif
 
 	params_Control.add(params_Options);
 	params_Control.add(params_Gui);
 
-	params_Control.add(bMODE_EditPresetClicker);
-	params_Control.add(bThemeDarkOrLight);
 	params_Control.add(cellSize);
 
 	params_Control.add(bGui_ShowAllGroups);
@@ -564,8 +576,10 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	helpTextBoxWidget.setup();
 
 	// preset clicker
+#ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL
 	doubleClicker.set(0, 0, ofGetWidth(), ofGetHeight());//full screen
 	doubleClicker.setDebug(false);
+#endif
 
 	//----------------
 
@@ -671,10 +685,12 @@ void ofxPresetsManager::startup()
 
 	// preset clicker
 
+#ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL
 	rectangle_PresetClicker.setLockResize(true);
 	// load settings
 	//doRectFit();
 	rectangle_PresetClicker.loadSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
+#endif
 
 	//--
 
@@ -736,10 +752,12 @@ void ofxPresetsManager::startup()
 
 	//--
 
+#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
 	// workaround
 	//bMODE_EditPresetClicker = bMODE_EditPresetClicker.get();
 	//required when no xml settings yet
 	bThemeDarkOrLight = bThemeDarkOrLight.get();
+#endif
 
 	//-------
 
@@ -2025,22 +2043,6 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 #endif
 			}
 
-			//else if ((mod_CONTROL && !mod_ALT)  && key == 'e')
-			//{
-			//	bMODE_EditPresetClicker = !bMODE_EditPresetClicker;
-			//}
-			//// timer to randomize and choice a random preset from the kit
-			//if (key == 'R')
-			//{
-			//	setTogglePlayRandomizerPreset();
-			//		//doRandomIndex(guiGroupSelectedIndex);
-			//}
-			//			else if (key == 'E')
-			//			{
-			//				doRandomPreset();
-			//			}
-			//		}
-
 			//----
 
 			// TODO: not working on windows.. We need to add int code
@@ -2643,7 +2645,8 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 #endif
 		//--
 
-		// mode edit
+		// Mode Edit
+		// 
 		//when false, we disabled autosave to allow faster performance ! 
 
 		else if (name == bMODE_EditLive.getName())
@@ -2658,7 +2661,10 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 				groupRandomizers[i].setModeEditor(bMODE_EditLive);
 			}
 
+
+#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
 			if (!bMODE_EditLive) bMODE_EditPresetClicker = false;
+#endif
 
 			//-
 
@@ -2671,6 +2677,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 
 		//-
 
+#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
 		if (name == bMODE_LockClicker.getName())
 		{
 			if (bMODE_LockClicker.get()) {
@@ -2721,6 +2728,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 				//rectangle_PresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
 			}
 		}
+#endif
 
 		//----
 
@@ -3115,7 +3123,10 @@ void ofxPresetsManager::exit()
 
 	// all app settings
 	save_ControlSettings();
+
+#ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL
 	rectangle_PresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
+#endif
 
 	//--
 
@@ -3691,89 +3702,138 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 	{
 		static ofParameter<bool> bResponsive{ "Responsive", true };//not works
 
+		// keys, minimize panels
+
 		guiManager.AddSpacing();
-		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+		guiManager.Add(bKeys, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 		//guiManager.Add(bMODE_EditLive, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-		float _w1 = ImGui::GetContentRegionAvail().x;
-		float _h = 2 * getWidgetsHeightRelative();
-		ofxImGuiSurfing::AddBigToggleNamed(bMODE_EditLive, _w1, _h, "EDIT MODE", "LIVE MODE", true);
 
 		if (!guiManager.bMinimize)
 		{
-
 			guiManager.Add(bGui_PanelsAll, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+		}
 
-			guiManager.Add(bKeys, OFX_IM_TOGGLE_BUTTON_ROUNDED);
+		float _h = (guiManager.bMinimize ? 1.4f : 2) * guiManager.getWidgetsHeight();
+		float _w100 = ImGui::GetContentRegionAvail().x;
+		float _w50 = guiManager.getWidgetsWidth(2);
+
+		// Edit
+		ofxImGuiSurfing::AddBigToggleNamed(bMODE_EditLive, _w100, _h, "EDIT MODE", "LIVE MODE", true);
+
+		// Reload/Save
+		//if (!bMODE_EditLive)
+		//if (!guiManager.bMinimize)
+		{
+			if (ImGui::Button("SAVE", ImVec2(_w50, _h)))
+			{
+				savePreset(guiPresetSelectedIndex[guiGroupSelectedIndex], guiGroupSelectedIndex);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("LOAD", ImVec2(_w50, _h)))
+			{
+				loadPreset(guiPresetSelectedIndex[guiGroupSelectedIndex], guiGroupSelectedIndex);
+			}
 		}
 
 		guiManager.AddSpacingBigSeparated();
 
 		//--
 
-		// one row per group. set the max
-		int max = 3;
-		for (size_t i = 0; i < keys.size(); ++i)
-		{
-			int sz = keys[i].size();
-			if (sz > max) max = sz;
-		}
+		// one row per group. get and set the max.
+		int maxSz1 = 3;
+		int maxSz2 = 3;
+		ImVec2 sz2;
 
 		for (size_t i = 0; i < keys.size(); ++i)
 		{
+			int sz1 = keys[i].size();
+			if (sz1 > maxSz1) maxSz1 = sz1;
+
+			sz2 = ImGui::CalcTextSize(groups[i].getName().c_str());
+		}
+
+		// iterate groups
+		for (size_t i = 0; i < keys.size(); ++i)
+		{
+			ImGui::Columns(2, nullptr, false);
+			ImGui::SetColumnWidth(0, sz2.x + 40);
+			//ImGui::SetColumnWidth(0, 103);
+			//ImGui::SetColumnWidth(0, 60);
+
 			bool bLast = (i == groups.size() - 1);
 			bool b = groups.size() > 1 && bKeys.get();
 
-			if (!bAllowGroupSelector) bLast = false;// main merged group, no need to treat different of last group!
+			if (!bAllowGroupSelector) bLast = false;
+			// main merged group, no need to treat different of last group!
+			// last is true if it's the groups merge selector,
+			// named GOROUP_LINK by default!
+
+			if (bLast && groups.size() > 1)
+			{
+				ImGui::Separator();
+				//ImGui::Spacing();//not works. colliding with dummy?
+			}
+
+			//--
 
 			// Labels info
-			if (!guiManager.bMinimize)
-			{
-				std::string info;
 
-				if (!bLast)
+			std::string info;
+
+			if (!guiManager.bMinimize) // not minimized
+			{
+
+				ImGui::Dummy(ImVec2(0, 2));//offset
+
+				if (!bLast) // not last
 				{
 					info = "  #" + ofToString(i);
 					ImGui::Text(info.c_str());
 
 					if (i == guiGroupSelectedIndex.get() && b) info = "> ";
 					else info = "  ";
-
-					info += groups[i].getName();
-					ImGui::Text(info.c_str());
-
 				}
-				else//last. the groups merge selector
+
+				else // last. 
 				{
-					if (groups.size() > 1) {
-						guiManager.AddSpacingBigSeparated();
-					}
-					guiManager.AddSpacing();
+					//guiManager.AddSpacing();
 
 					if (i == guiGroupSelectedIndex.get() && b) info = "> ";
 					else info = "  ";
 
-					info += groups[i].getName();
-					ImGui::Text(info.c_str());
-				}
-			}
-			else //name only
-			{
-				if (bLast)
-				{
-					if (groups.size() > 1) {
-						guiManager.AddSpacingBigSeparated();
-					}
-					guiManager.AddSpacing();
+					ImGui::Dummy(ImVec2(0, 3));//offset
 				}
 
-				string info = ((guiGroupSelectedIndex.get() == i && b) ? "> " : "  ") + groups[i].getName();
-				ImGui::Text(info.c_str());
+				info += groups[i].getName();
 			}
+			else // minimized. name only
+			{
+				if (!bLast) // not last
+				{
+				}
+				else // last
+				{
+					//guiManager.AddSpacing();
+				}
+
+				ImGui::Dummy(ImVec2(0, 10));//offset
+
+				info = ((guiGroupSelectedIndex.get() == i && b) ? "> " : "  ") + groups[i].getName();
+			}
+
+			ImGui::Text(info.c_str());
 
 			//--
 
-			// Clicker fot each Group!
-			ofxImGuiSurfing::AddMatrixClickerLabelsStrings(guiPresetSelectedIndex[i], labels[i], bResponsive.get(), max);
+			ImGui::NextColumn();
+
+			// Matrix Clicker fot each Group!
+			ofxImGuiSurfing::AddMatrixClickerLabelsStrings(
+				guiPresetSelectedIndex[i], labels[i],
+				bResponsive.get(), maxSz1, true, -1, false);
+
+			ImGui::Columns(1);
 		}
 
 		//guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
@@ -3810,8 +3870,9 @@ void ofxPresetsManager::draw_Gui_Main()
 		float _w33;
 		float _w25;
 		float _h;
-		ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
-		_h *= 2;
+		guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
+		//ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+		//_h *= 2;
 
 		std::string str;
 
@@ -3821,10 +3882,12 @@ void ofxPresetsManager::draw_Gui_Main()
 
 		ImGui::Spacing();
 
-		guiManager.Add(bGui_Clicker, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-		//guiManager.Add(bGui_Panels, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-		guiManager.Add(bGui_Parameters, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-		guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+		SurfingImGuiTypes s = OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM;
+
+		guiManager.Add(bGui_Clicker, s);
+		//guiManager.Add(bGui_Panels, s);
+		guiManager.Add(bGui_Parameters, s);
+		guiManager.Add(bGui_Players, s);
 		if (bGui_Players)
 		{
 			guiManager.Indent();
@@ -3847,22 +3910,25 @@ void ofxPresetsManager::draw_Gui_Main()
 
 		//--
 
+		_h = (guiManager.bMinimize ? 1.4f : 2) * _h;
+		//if (guiManager.bMinimize) _h *= 0.7f;
+
 		// 1. Edit Mode
 
 		ofxImGuiSurfing::AddBigToggleNamed(bMODE_EditLive, _w100, 2 * _h, "EDIT MODE", "LIVE MODE", true);
 
-		// Save
+		// Reload/Save
 		//if (!bMODE_EditLive)
-		if (!guiManager.bMinimize)
+		//if (!guiManager.bMinimize)
 		{
-			if (ImGui::Button("RELOAD", ImVec2(_w50, _h)))
-			{
-				loadPreset(guiPresetSelectedIndex[guiGroupSelectedIndex], guiGroupSelectedIndex);
-			}
-			ImGui::SameLine();
 			if (ImGui::Button("SAVE", ImVec2(_w50, _h)))
 			{
 				savePreset(guiPresetSelectedIndex[guiGroupSelectedIndex], guiGroupSelectedIndex);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("LOAD", ImVec2(_w50, _h)))
+			{
+				loadPreset(guiPresetSelectedIndex[guiGroupSelectedIndex], guiGroupSelectedIndex);
 			}
 		}
 
@@ -3937,7 +4003,6 @@ void ofxPresetsManager::draw_Gui_Main()
 	//		ImGui::Dummy(ImVec2(0.f, 2.f));
 	//#endif
 
-
 			guiManager.AddSpacingSeparated();
 
 			//--
@@ -3949,7 +4014,7 @@ void ofxPresetsManager::draw_Gui_Main()
 			else name = "SELECTORS";
 			if (ImGui::CollapsingHeader(name.c_str()))
 			{
-				ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+				guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
 				_h *= 2;
 
 				// multi groups ?
@@ -4013,7 +4078,7 @@ void ofxPresetsManager::draw_Gui_Main()
 				else name = "PLAYERS";
 				if (ImGui::CollapsingHeader(name.c_str()))
 				{
-					ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+					guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
 
 					//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Players);
 					//guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
@@ -4051,7 +4116,7 @@ void ofxPresetsManager::draw_Gui_Main()
 				{
 					if (ImGui::CollapsingHeader("TOOLS"))
 					{
-						ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+						guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
 						_h *= 2;
 
 						//TODO: select which added group
@@ -4088,7 +4153,7 @@ void ofxPresetsManager::draw_Gui_Main()
 				{
 					if (ImGui::CollapsingHeader("UNDO ENGINE"))
 					{
-						ofxImGuiSurfing::refreshImGui_WidgetsSizes(_w100, _w50, _w33, _w25, _h);
+						guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
 						_h *= 2;
 
 						str = "History: " + ofToString(undoStringsParams[guiGroupSelectedIndex].getUndoLength()) + "/";
@@ -4115,8 +4180,8 @@ void ofxPresetsManager::draw_Gui_Main()
 						{
 							doRedo();
 						}
-					}
-				}
+			}
+		}
 #endif
 
 				//--
@@ -4138,8 +4203,8 @@ void ofxPresetsManager::draw_Gui_Main()
 					bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 					// must be insisde some window
 				}
-			}
-		}
+	}
+}
 
 
 		//--
@@ -4225,8 +4290,6 @@ void ofxPresetsManager::draw_Gui_Advanced()
 			// TODO: 
 			//faster memory mode vs xml files not implemented yet
 			//ofxImGuiSurfing::AddParameter(MODE_MemoryLive);//ImGui::SameLine();
-			//ofxImGuiSurfing::AddParameter(bMODE_EditPresetClicker);
-			//ofxImGuiSurfing::AddParameter(bHelp);//ImGui::SameLine();
 
 #ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
 			if (ImGui::TreeNodeEx("PRESET CLICKER", flagsTree))
@@ -4251,7 +4314,7 @@ void ofxPresetsManager::draw_Gui_Advanced()
 				}
 
 				ImGui::TreePop();
-			}
+		}
 #endif
 			//--
 
@@ -4299,8 +4362,8 @@ void ofxPresetsManager::draw_Gui_Advanced()
 			}
 
 			ImGui::TreePop();
-		}
 	}
+}
 }
 
 //--
@@ -5329,7 +5392,9 @@ void ofxPresetsManager::Changed_GuiGroupSelectedIndex(int& index)
 void ofxPresetsManager::draw_Help()
 {
 	helpTextBoxWidget.setText(helpInfo);
+#ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL
 	helpTextBoxWidget.setTheme(bThemeDarkOrLight);
+#endif
 	helpTextBoxWidget.draw();
 }
 
@@ -5343,6 +5408,7 @@ void ofxPresetsManager::addExtra(ofParameterGroup& g)
 	params_AppSettings = g;
 }
 
+#ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL
 //--------------------------------------------------------------
 void ofxPresetsManager::doRectFit()
 {
@@ -5413,3 +5479,4 @@ void ofxPresetsManager::doRectFit()
 	int _h = rectangle_PresetClicker.getHeight();
 	doubleClicker.set(_x, _y, _w, _h);
 }
+#endif

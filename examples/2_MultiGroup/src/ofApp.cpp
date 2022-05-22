@@ -3,18 +3,16 @@
 //--------------------------------------------------------------
 void ofApp::setupPresets()
 {
-	// optional
+	// Optional
 	  
-	// some API extra tweak controls:
-	//presetsManager.setEnableGroupLinkSelector(false);// disable main group link selector.
-	//presetsManager.setGroupLinkSize(5);// set amount of presets for link group.
+	// Some API extra tweak controls:
 	//presetsManager.setEnableKeysArrowBrowse(true);
-	//presetsManager.setEnableKeys(true);
-	//presetsManager.setSizeBox_PresetClicker(50);// clicker size.
+	//presetsManager.setEnableGroupLinkSelector(false);// disable autocreation of the GROUP_LINK selector.
+	presetsManager.setGroupLinkAmountPresets(3);// set amount of presets for the autocreated GROUP_LINK selector (the lastone).
 
 	//--
 
-	// initiate
+	// Initiate
 
 	// build your presets manager:
 	// add our ofParameterGroup to the preset manager. 
@@ -24,8 +22,8 @@ void ofApp::setupPresets()
 	// group 0
 	presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' });
 
-	//// group 1
-	//presetsManager.add(params1, { 'a', 's', 'd', 'f' });
+	// group 1
+	presetsManager.add(params1, { 'a', 's', 'd', 'f' });
 
 	//// group 2
 	//presetsManager.add(params2, { 'z', 'x', 'c' });
@@ -39,7 +37,7 @@ void ofApp::setupPresets()
 
 	//--
 	 
-	// optional
+	// Optional
 	
 	//// customize user-kit name: 
 	//// then will create this named main settings file: 'bin/data/myKit_01.json'

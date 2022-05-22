@@ -60,6 +60,11 @@
 
 //	1. SURFING ENGINES
 
+// GLOBAL BYPASS
+// 
+// -> You can comment this line only and will disable too the above surfing engines directives
+//#define INCLUDE_SURFING_ENGINES 
+
 //	Tween/Smooth transitions between presets
 //	We can enable only one of the two! (Tween or Smooth)
 //
@@ -71,11 +76,6 @@
 //
 //	1.3 RANDOMIZER
 #define INCLUDE_ofxSurfingRandomizer
-
-// GLOBAL BYPASS
-// 
-// -> You can comment this line only and will disable too the above surfing engines directives
-//#define INCLUDE_SURFING_ENGINES 
 
 #ifndef INCLUDE_SURFING_ENGINES
 #undef INCLUDE_ofxSurfingTween 
@@ -527,8 +527,6 @@ public:
 #ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
 private:
 	void draw_Gui_ClickerPresets_Native();// user clickeable box panel preset selector
-#endif
-
 private:
 	// mini preview rectangles positions and sizes
 	void doRectFit();
@@ -546,6 +544,11 @@ private:
 	ofColor _colorBg;// background color
 
 	DoubleClicker doubleClicker;
+
+	ofParameter<bool> bThemeDarkOrLight{ "Theme B/W", true };
+	ofParameter<bool> bMODE_LockClicker{ "Lock Clicker", false };
+
+#endif
 
 	//--
 
@@ -1190,8 +1193,7 @@ public:
 private:
 	ofParameter<bool> bHelp;
 	ofParameter<bool> bKeys;
-	ofParameter<bool> bThemeDarkOrLight{ "Theme B/W", true };
-	ofParameter<bool> bMODE_LockClicker{ "Lock Clicker", false };
+
 	ofParameter<glm::vec2> Gui_Internal_Position;
 
 private:
@@ -1565,12 +1567,13 @@ public:
 
 	//--
 
-	void setThemeDarkOrLight(bool b) {
-		bThemeDarkOrLight = b;
-	}
-
 	ofParameter<bool> getPlayToggle() {
 		return groupRandomizers[0].PLAY_RandomizeTimer;
+	}
+
+#ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL
+	void setThemeDarkOrLight(bool b) {
+		bThemeDarkOrLight = b;
 	}
 
 	bool bMouseOverGui;
@@ -1579,6 +1582,7 @@ public:
 		//return bMouseOverGui;
 		return b;
 	}
+#endif
 };
 
 
