@@ -1631,16 +1631,16 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 		// TODO: TEST: to force disable engine
 		//bImGui_mouseOver = false;
 
-		// always listening to K to avoid can be blocked
-		// restore keys control
-		if (key == 'K' && !bImGui_mouseOver_PRE)
-		{
-			bKeys = !bKeys;
-		}
+		//// always listening to K to avoid can be blocked
+		//// restore keys control
+		//if (key == 'K' && !bImGui_mouseOver_PRE)
+		//{
+		//	bKeys = !bKeys;
+		//}
 
 		if (!bKeys) return;
 
-		if (!bImGui_mouseOver_PRE)// disable keys when mouse over gui
+		//if (!bImGui_mouseOver_PRE)// disable keys when mouse over gui
 		{
 			//-
 
@@ -1649,7 +1649,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 			{
 				bModKeySave = true;
 				ofLogNotice(__FUNCTION__) << "modKey Save TRUE";
-				//return;
+				return;
 			}
 
 			// mode key for swap with mouse or trigger keys
@@ -1657,17 +1657,18 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 			{
 				bModKeySwap = true;
 				ofLogNotice(__FUNCTION__) << "modKey Swap TRUE";
-				//return;
+				return;
 			}
 
 			//--
 
-			if (false) {}
+			//if (false) {}
 
 			// hide/show control gui
 			else if ((key == 'G') && (!mod_CONTROL && !mod_ALT && !mod_SHIFT))
 			{
 				bGui = !bGui;
+				return;
 
 				//bGui_AdvancedControl = !bGui_AdvancedControl;
 				//setVisible_GUI_Internal(bGui_AdvancedControl);
@@ -1677,14 +1678,17 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 			else if (key == 'H')
 			{
 				bHelp = !bHelp;
+				return;
 			}
 			else if (key == 'E')
 			{
 				bMODE_EditLive = !bMODE_EditLive;
+				return;
 			}
 			else if (key == 'P')
 			{
 				setToggleVisible_PresetClicker();
+				return;
 			}
 
 			//----
@@ -1697,6 +1701,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 			else if ((mod_CONTROL && !mod_ALT) && key == ' ')
 			{
 				setTogglePlayRandomizerPreset(index_GroupSelected);
+				return;
 			}
 
 			// randomize enable parameters (look into randomizers panel) to the current selected preset
@@ -1709,6 +1714,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 #ifdef INCLUDE_ofxUndoSimple
 				doStoreUndo();
 #endif
+				return;
 			}
 
 			//----
@@ -1745,11 +1751,13 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 				if (key == OF_KEY_UP)
 				{
 					index_GroupSelected--;
+					return;
 				}
 
 				else if (key == OF_KEY_DOWN)
 				{
 					index_GroupSelected++;
+					return;
 				}
 
 				else if (key == OF_KEY_LEFT)
@@ -1760,6 +1768,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 					i--;
 					bDISABLE_CALLBACKS = false;
 					index_PresetSelected[sel] = (int)ofClamp(i, 0, index_PresetSelected[sel].getMax());
+					return;
 				}
 
 				else if (key == OF_KEY_RIGHT)
@@ -1770,12 +1779,14 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 					i++;
 					bDISABLE_CALLBACKS = false;
 					index_PresetSelected[sel] = (int)ofClamp(i, 0, index_PresetSelected[sel].getMax());
+					return;
 				}
 			}
 
 			//----
 
 			// presets selectors
+			 
 			//if (!mod_CONTROL && !mod_SHIFT && !mod_ALT)// exclude controls do not works bc blocks the mod keys to copy/swap presets...
 			{
 				for (int g = 0; g < keys.size(); g++)
@@ -1796,6 +1807,11 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 
 								if (g < index_PresetSelected.size()) index_PresetSelected[g] = k;
 							}
+
+							//--
+							 
+							// workflow
+							if (index_GroupSelected != g) index_GroupSelected = g;
 
 							return;
 						}
@@ -2021,7 +2037,7 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 			ofLogNotice(__FUNCTION__) << name << " : " << e;
 		}
 
-		if (0) {}
+		//if (0) {}
 
 		//--
 
@@ -2098,6 +2114,8 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 							{
 								ofLogNotice(__FUNCTION__) << "SAVE";
 
+								if (bAutoSave) save(index_PresetSelected_PRE[g], g);
+
 								save(index_PresetSelected[g], g);
 
 								index_PresetSelected_PRE[g] = index_PresetSelected[g];
@@ -2110,6 +2128,8 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 							else if (bModKeySwap)
 							{
 								ofLogNotice(__FUNCTION__) << "SWAP";
+
+								if (bAutoSave) save(index_PresetSelected_PRE[g], g);
 
 								// save pre
 								save(index_PresetSelected_PRE[g], g);
@@ -2151,7 +2171,8 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 
 								// Load
 
-								if (bAutoLoad) load(index_PresetSelected[g], g);
+								load(index_PresetSelected[g], g);
+								//if (bAutoLoad) load(index_PresetSelected[g], g);
 							}
 						}
 					}
@@ -3246,9 +3267,8 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 		// keys, minimize panels
 
 		guiManager.AddSpacing();
-		guiManager.Add(bKeys, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-		//guiManager.Add(bMODE_EditLive, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+		guiManager.Add(bKeys, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
 
 		if (!guiManager.bMinimize)
 		{
