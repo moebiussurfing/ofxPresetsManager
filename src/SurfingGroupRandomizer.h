@@ -171,7 +171,7 @@ private:
 
 	//private:
 public:
-	ofParameter<bool> PLAY_RandomizeTimer; //play randomizer
+	ofParameter<bool> bPLAY_RandomizeTimer; //play randomizer
 	ofParameter<bool> bRandomizeIndex;// trig randomize index
 	ofParameter<float> randomizeDurationBpm; // bpm
 	ofParameter<int> randomizeDuration;
@@ -256,13 +256,13 @@ public:
 	//--------------------------------------------------------------
 	void setPlayRandomizerTimer(bool b)// play randomizer timer
 	{
-		PLAY_RandomizeTimer = b;
+		bPLAY_RandomizeTimer = b;
 		if (b) doRandomIndex();
 	}
 	//--------------------------------------------------------------
 	void setTogglePlayRandomizerPreset()// toggle randomizer timer
 	{
-		PLAY_RandomizeTimer = !PLAY_RandomizeTimer;
+		bPLAY_RandomizeTimer = !bPLAY_RandomizeTimer;
 	}
 	//--------------------------------------------------------------
 	void setRandomizerDuration(float t)
@@ -297,7 +297,7 @@ public:
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsRandomizers() {
 		ofParameterGroup _g{ "RANDOMIZERS" };
-		_g.add(PLAY_RandomizeTimer);
+		_g.add(bPLAY_RandomizeTimer);
 		_g.add(bRandomizeIndex);
 		_g.add(randomizeDurationBpm);
 		_g.add(randomizeDuration);

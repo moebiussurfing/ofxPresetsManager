@@ -486,7 +486,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 			ofParameterGroup _g{ groups[i].getName() };
 			_g.add(index_PresetSelected[i]);// selector
-			_g.add(groupRandomizers[i].PLAY_RandomizeTimer);// play
+			_g.add(groupRandomizers[i].bPLAY_RandomizeTimer);// play
 			_g.add(groupRandomizers[i].randomizeDurationBpm);// bpm
 			//_g.add(groupRandomizers[i].getParamsRandomizers());// all params
 			//_g.add(groupRandomizers[i].bRandomizeIndex);// random index
@@ -538,9 +538,9 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	// Workflow:
 	for (int i = 0; i < groups.size(); i++)
 	{
-		groupRandomizers[i].PLAY_RandomizeTimer.addListener(this, &ofxPresetsManager::Changed_Randomizers);
+		groupRandomizers[i].bPLAY_RandomizeTimer.addListener(this, &ofxPresetsManager::Changed_Randomizers);
 
-		//listeners.push(groupRandomizers[i].PLAY_RandomizeTimer.newListener(this, &ofxPresetsManager::Changed_Randomizers));
+		//listeners.push(groupRandomizers[i].bPLAY_RandomizeTimer.newListener(this, &ofxPresetsManager::Changed_Randomizers));
 	}
 
 	//--
@@ -1823,18 +1823,18 @@ void ofxPresetsManager::keyReleased(ofKeyEventArgs& eventArgs)
 	if (!bDoneSetup) return;
 	if (!bKeys) return;
 
-		// mod keys
-		if (eventArgs.key == modeKeySave && bModKeySave)
-		{
-			bModKeySave = false;
-			ofLogNotice(__FUNCTION__) << "modKey Save FALSE";
-		}
-		
-		else if (eventArgs.key == modKeySwap && bModKeySwap)
-		{
-			bModKeySwap = false;
-			ofLogNotice(__FUNCTION__) << "modKey Swap FALSE";
-		}
+	// mod keys
+	if (eventArgs.key == modeKeySave && bModKeySave)
+	{
+		bModKeySave = false;
+		ofLogNotice(__FUNCTION__) << "modKey Save FALSE";
+	}
+
+	else if (eventArgs.key == modKeySwap && bModKeySwap)
+	{
+		bModKeySwap = false;
+		ofLogNotice(__FUNCTION__) << "modKey Swap FALSE";
+	}
 }
 
 //--------------------------------------------------------------
@@ -2067,6 +2067,7 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 							// browser
 							//if (MODE_StandalonePresets_NEW)
 							{
+								// retrig/reload
 								if (bAutoLoad)
 								{
 									load(index_PresetSelected[g], g);
@@ -2084,28 +2085,69 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 						{
 							ofLogNotice(__FUNCTION__) << "name: " << groups[g].getName() << " preset " << p << " changed";
 
-							//-
+							//--
 
-							// Workflow:
-							// browser mode bypasses autosave
-							//if (bAutoSave && !MODE_StandalonePresets_NEW)
-							if (bAutoSave)
+							// 1. mod save controlled by modeKeySave
+
+							if (bModKeySave)
 							{
-								// Workflow: 
-								// disable autosave when randomizer player enabled
-								// no matters edit mode
-								bool b = groupRandomizers[index_GroupSelected.get()].PLAY_RandomizeTimer.get();
-								if (!b) save(index_PresetSelected_PRE[g], g);
+								ofLogNotice(__FUNCTION__) << "SAVE";
+
+								save(index_PresetSelected[g], g);
+
+								index_PresetSelected_PRE[g] = index_PresetSelected[g];
 							}
 
-							//-
+							//--
 
-							// remember this PRE state to know if changed or not on the next time..
-							index_PresetSelected_PRE[g] = index_PresetSelected[g];
+							// 2. mod swap controlled by modKeySwap
 
-							//-
+							else if (bModKeySwap)
+							{
+								ofLogNotice(__FUNCTION__) << "SWAP";
 
-							if (bAutoLoad) load(index_PresetSelected[g], g);
+								// save pre
+								save(index_PresetSelected_PRE[g], g);
+
+								// swap
+								doSwap(g, index_PresetSelected_PRE[g], index_PresetSelected[g]);// group index, from, to
+
+								index_PresetSelected_PRE[g] = index_PresetSelected[g];
+							}
+
+							//--
+
+							// 3. no key command
+
+							else
+							{
+								// Autosave
+
+								// Workflow:
+								// browser mode bypasses autosave
+								//if (bAutoSave && !MODE_StandalonePresets_NEW)
+								if (bAutoSave)
+								{
+									// Workflow: 
+									// Force disable autosave when randomizer player enabled
+									// no matters edit mode
+									bool b = groupRandomizers[index_GroupSelected.get()].bPLAY_RandomizeTimer.get();
+
+									if (!b) save(index_PresetSelected_PRE[g], g);
+								}
+
+								//-
+
+								// Remember this PRE state 
+								// to know if changed or not on the next time..
+								index_PresetSelected_PRE[g] = index_PresetSelected[g];
+
+								//-
+
+								// Load
+
+								if (bAutoLoad) load(index_PresetSelected[g], g);
+							}
 						}
 					}
 				}
@@ -2125,7 +2167,7 @@ void ofxPresetsManager::Changed_Randomizers(bool& b)
 		if (bMODE_EditLive.get() && b) bMODE_EditLive = false;
 
 		//std::string name = b.getName();
-		//if (name == groupRandomizers[0].PLAY_RandomizeTimer.getName())
+		//if (name == groupRandomizers[0].bPLAY_RandomizeTimer.getName())
 		//{
 		//}
 	}
@@ -2878,7 +2920,7 @@ void ofxPresetsManager::draw_Gui_Parameters()
 
 	IMGUI_SUGAR__WINDOWS_CONSTRAINTS_BIG;
 
-	guiManager.beginWindow(n.c_str(), (bool*)&bGui_Parameters.get(), flagsw);
+	if (guiManager.beginWindow(n.c_str(), (bool*)&bGui_Parameters.get(), flagsw))
 	{
 		float _w100;
 		float _h100;
@@ -3013,8 +3055,9 @@ void ofxPresetsManager::draw_Gui_Parameters()
 
 		// extra params not included into presets
 		if (bAppStateParams) ofxImGuiSurfing::AddGroup(params_AppSettings);
+
+		guiManager.endWindow();
 	}
-	guiManager.endWindow();
 }
 
 ////--------------------------------------------------------------
@@ -3341,10 +3384,12 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 
 		//guiManager.AddSpacing();
 		//guiManager.Add(bGui_PanelsAll, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-	}
-	guiManager.endWindow();
-}
 
+		//--
+
+		guiManager.endWindow();
+	}
+}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::draw_Gui_Main()
@@ -3356,7 +3401,7 @@ void ofxPresetsManager::draw_Gui_Main()
 
 	IMGUI_SUGAR__WINDOWS_CONSTRAINTS;
 
-	guiManager.beginWindow(n.c_str(), NULL, flagsw);
+	if (guiManager.beginWindow(n.c_str(), NULL, flagsw))
 	{
 		float _w100;
 		float _w50;
@@ -3590,7 +3635,7 @@ void ofxPresetsManager::draw_Gui_Main()
 						ImGui::Text(s.c_str());
 
 						// Blink by timer
-						ofxImGuiSurfing::AddBigToggleNamed(groupRandomizers[i].PLAY_RandomizeTimer, _w100, _h, "PLAYING", "PLAY", true, groupRandomizers[i].getPlayerPct());
+						ofxImGuiSurfing::AddBigToggleNamed(groupRandomizers[i].bPLAY_RandomizeTimer, _w100, _h, "PLAYING", "PLAY", true, groupRandomizers[i].getPlayerPct());
 
 						ImGui::PopID();
 					}
@@ -3673,8 +3718,8 @@ void ofxPresetsManager::draw_Gui_Main()
 						{
 							doRedo();
 						}
-			}
-		}
+					}
+				}
 #endif
 
 				//--
@@ -3696,8 +3741,8 @@ void ofxPresetsManager::draw_Gui_Main()
 					bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 					// must be insisde some window
 				}
-	}
-}
+			}
+		}
 
 
 		//--
@@ -3749,8 +3794,8 @@ void ofxPresetsManager::draw_Gui_Main()
 
 		//--
 
+		guiManager.endWindow();
 	}
-	guiManager.endWindow();
 
 	//crash
 	//ImGui::PopStyleColor();
@@ -3807,7 +3852,7 @@ void ofxPresetsManager::draw_Gui_Advanced()
 				}
 
 				ImGui::TreePop();
-		}
+			}
 #endif
 			//--
 
@@ -3855,8 +3900,8 @@ void ofxPresetsManager::draw_Gui_Advanced()
 			}
 
 			ImGui::TreePop();
+		}
 	}
-}
 }
 
 //--
@@ -4064,7 +4109,7 @@ void ofxPresetsManager::draw_Gui_Standalones()
 		flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
 		string n = "STANDALONES";
-		guiManager.beginWindow(n.c_str(), (bool*)&bGui_Standalones.get(), flagsw);
+		if (guiManager.beginWindow(n.c_str(), (bool*)&bGui_Standalones.get(), flagsw))
 		{
 			float _w100;
 			float _w50;
@@ -4494,9 +4539,11 @@ void ofxPresetsManager::draw_Gui_Standalones()
 					ofxImGuiSurfing::AddParameter(bKeys);
 				}
 			}
+
+			//ImGui::Checkbox("Auto-Resize", &auto_resize);
+
+			guiManager.endWindow();
 		}
-		//ImGui::Checkbox("Auto-Resize", &auto_resize);
-		guiManager.endWindow();
 	}
 }
 
@@ -5336,10 +5383,12 @@ void ofxPresetsManager::mousePressed(int x, int y)
 
 				ofLogNotice(__FUNCTION__) << groups[yIndex].getName() << " group: " << yIndex << " preset: " << xIndex;
 
-			//-
+			//--
 
 			if ((xIndex >= 0) && (xIndex < groupsSizes[yIndex]))
 			{
+				//--
+
 				// 1. mod save controlled by modeKeySave
 
 				if (bModKeySave)
@@ -5355,13 +5404,13 @@ void ofxPresetsManager::mousePressed(int x, int y)
 					}
 				}
 
-				//-
+				//--
 
 				// 2. mod swap controlled by modKeySwap
 
 				else if (bModKeySwap)
 				{
-					//ofLogNotice(__FUNCTION__) << "SWAP";
+					ofLogNotice(__FUNCTION__) << "SWAP";
 
 					if (yIndex < index_PresetSelected.size())// a valid group index
 					{
@@ -5378,10 +5427,11 @@ void ofxPresetsManager::mousePressed(int x, int y)
 					}
 				}
 
-				//-
+				//--
 
-				// 3. no mod keys: normal load (not any key modifier pressed)
+				// 3. no mod keys: 
 
+				// normal load (not any key modifier pressed)
 				else
 				{
 					ofLogNotice(__FUNCTION__) << "LOAD";
@@ -5391,9 +5441,11 @@ void ofxPresetsManager::mousePressed(int x, int y)
 				}
 			}
 
-			//-
+			//--
 
-			// 2. last button (save button)
+			// 2. Save 
+
+			// Last Button 
 			else if (xIndex == groupsSizes[yIndex])
 			{
 				//TODO: hide save buttons if bAutoSave 
@@ -5406,11 +5458,13 @@ void ofxPresetsManager::mousePressed(int x, int y)
 			}
 		}
 
-		//-
+		//--
 
+		// 3. Toggle Show Gui
+
+		// (on main group only)
 		if (groups.size() > 0)
 		{
-			// 3. toggle show gui (on main group only)
 			// TODO: hide save button on autosave mode...
 			//int _offset = (bAutoSave ? 0 : 1);
 			int _offset = 1;

@@ -1584,7 +1584,7 @@ public:
 	//--
 
 	ofParameter<bool> getPlayToggle() {
-		return groupRandomizers[0].PLAY_RandomizeTimer;
+		return groupRandomizers[0].bPLAY_RandomizeTimer;
 	}
 
 #ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL

@@ -344,7 +344,7 @@ void SurfingGroupRandomizer::doRandomIndex()
 
 	// 5. Start timer again
 
-	if (PLAY_RandomizeTimer)
+	if (bPLAY_RandomizeTimer)
 	{
 		randomizerTimer = ofGetElapsedTimeMillis();
 	}
@@ -908,7 +908,7 @@ void SurfingGroupRandomizer::update()
 	// Easy callback
 	// Latch mode
 	if (MODE_LatchTrig)
-		if (bIsDoneLoad && !PLAY_RandomizeTimer)
+		if (bIsDoneLoad && !bPLAY_RandomizeTimer)
 		{
 			bIsDoneLoad = false;
 
@@ -926,8 +926,8 @@ void SurfingGroupRandomizer::update()
 
 	//----
 
-	//if (PLAY_RandomizeTimer || MODE_LatchTrig) // ?
-	if (PLAY_RandomizeTimer) // ?
+	//if (bPLAY_RandomizeTimer || MODE_LatchTrig) // ?
+	if (bPLAY_RandomizeTimer) // ?
 	{
 		uint32_t _time = ofGetElapsedTimeMillis();
 		timerRandomizer = _time - randomizerTimer;//elapsed now from last trig
@@ -997,7 +997,7 @@ void SurfingGroupRandomizer::update()
 	//else _prog = timerRandomizer / (float)randomizeDurationShort;
 	// bar relative only to long
 
-	if (PLAY_RandomizeTimer)
+	if (bPLAY_RandomizeTimer)
 	{
 		randomizerProgress = 100 * timerRandomizer / (float)randomizeDuration;
 	}
@@ -1024,8 +1024,8 @@ void SurfingGroupRandomizer::update()
 void SurfingGroupRandomizer::setup_RandomizerIndexes()
 {
 	bRandomizeIndex.set("RANDOMiZE INDEX", false);
-	PLAY_RandomizeTimer.set("PLAY RANDOMIZER", false);
-	PLAY_RandomizeTimer.setSerializable(false);
+	bPLAY_RandomizeTimer.set("PLAY RANDOMIZER", false);
+	bPLAY_RandomizeTimer.setSerializable(false);
 	MODE_DicesProbs.set("ENABLE MODE RANDOMIZER", true);
 	MODE_LatchTrig.set("MODE LATCH-N-BACK", false);
 	MODE_AvoidRandomRepeat.set("MODE AVOID REPEAT", true);
@@ -1073,7 +1073,7 @@ void SurfingGroupRandomizer::setup_RandomizerIndexes()
 
 	params_Randomizer.clear();
 	params_Randomizer.setName("RANDOM INDEX CONTROLS");
-	params_Randomizer.add(PLAY_RandomizeTimer);
+	params_Randomizer.add(bPLAY_RandomizeTimer);
 	params_Randomizer.add(bRandomizeIndex);
 	params_Randomizer.add(MODE_DicesProbs);
 	params_Randomizer.add(randomizeDurationBpm);
@@ -1265,7 +1265,7 @@ void SurfingGroupRandomizer::drawImGui_PlayerRandomizersMain()
 
 			// blink by timer
 
-			ofxImGuiSurfing::AddBigToggleNamed(PLAY_RandomizeTimer, _w100, 2 * _h, "PLAYING", "PLAY", true, getPlayerPct());
+			ofxImGuiSurfing::AddBigToggleNamed(bPLAY_RandomizeTimer, _w100, 2 * _h, "PLAYING", "PLAY", true, getPlayerPct());
 
 			//--
 
@@ -1564,10 +1564,10 @@ void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter& e)
 			doRandomIndex();
 		}
 		// play randomizer
-		else if (name == PLAY_RandomizeTimer.getName())
+		else if (name == bPLAY_RandomizeTimer.getName())
 		{
 			ofLogNotice(__FUNCTION__) << group.getName() << "MODE TIMER: " << e;
-			if (PLAY_RandomizeTimer) {
+			if (bPLAY_RandomizeTimer) {
 				MODE_LatchTrig = false;
 
 				// TODO: new test
@@ -1579,7 +1579,7 @@ void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter& e)
 		{
 			ofLogNotice(__FUNCTION__) << "MODE LATCH: " << e;
 			if (MODE_LatchTrig) {
-				PLAY_RandomizeTimer = false;
+				bPLAY_RandomizeTimer = false;
 			}
 		}
 
