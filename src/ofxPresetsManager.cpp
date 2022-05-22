@@ -85,7 +85,7 @@ ofxPresetsManager::ofxPresetsManager()
 	bKeys = false;
 	bModKeySave = false;
 	bModKeySwap = false;
-	keysNotActivated = true;
+	bKeys_NotYetActivated = true;
 
 	//--
 
@@ -362,6 +362,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 #ifdef USE_PRESETS_MANAGER__IMGUI_LAYOUT 
 	guiManager.setup(); // this instantiates and configurates ofxImGui inside the class object.
+	guiManager.bKeys.makeReferenceTo(bKeys);
 	setupGuiStyles();
 #endif
 
@@ -447,7 +448,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 		bGui_ShowAllGroups.set("Show All", false);
 		//bGui_ShowAllGroups.setSerializable(false);
 
-		index_GroupSelected.set("GROUP SELECT", 0, 0, groups.size() - 1);
+		index_GroupSelected.set("GROUP", 0, 0, groups.size() - 1);
 		index_GroupSelected.addListener(this, &ofxPresetsManager::Changed_Index_GroupSelected);
 
 		groupRandomizers.resize(groups.size());
@@ -886,13 +887,6 @@ void ofxPresetsManager::draw(ofEventArgs& args)
 	}
 #endif
 
-	// help info text: 
-
-	if (bHelp)
-	{
-		draw_Help();
-	}
-
 	//----
 
 	// ImGui
@@ -915,6 +909,13 @@ void ofxPresetsManager::draw(ofEventArgs& args)
 #endif
 
 	//----
+
+	// help info text: 
+
+	if (bHelp)
+	{
+		draw_Help();
+	}
 }
 
 //--------------------------------------------------------------
@@ -991,7 +992,7 @@ void ofxPresetsManager::add(ofParameterGroup _params, vector<int> _keysList)
 		keys[i].push_back(key);
 	}
 
-	if (keysNotActivated) addKeysListeners();
+	if (bKeys_NotYetActivated) addKeysListeners();
 }
 
 //--------------------------------------------------------------
@@ -1010,7 +1011,7 @@ void ofxPresetsManager::add(ofParameterGroup _params, initializer_list<int> _key
 		keys[i].push_back(key);
 	}
 
-	if (keysNotActivated) addKeysListeners();
+	if (bKeys_NotYetActivated) addKeysListeners();
 }
 
 //--
@@ -1637,7 +1638,9 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 			bKeys = !bKeys;
 		}
 
-		else if (bKeys /*&& bKeys */ && !bImGui_mouseOver_PRE)// disable keys when mouse over gui
+		if (!bKeys) return;
+
+		if (!bImGui_mouseOver_PRE)// disable keys when mouse over gui
 		{
 			//-
 
@@ -1662,12 +1665,14 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 			if (false) {}
 
 			// hide/show control gui
-			else if ((key == 'g' || key == 7) && (mod_CONTROL && !mod_ALT && !mod_SHIFT))
+			else if ((key == 'G') && (!mod_CONTROL && !mod_ALT && !mod_SHIFT))
 			{
-				bGui_AdvancedControl = !bGui_AdvancedControl;
-				setVisible_GUI_Internal(bGui_AdvancedControl);
-				setVisible_GUI_ImGui(bGui_AdvancedControl);
-				setVisible_PresetClicker(bGui_AdvancedControl);
+				bGui = !bGui;
+
+				//bGui_AdvancedControl = !bGui_AdvancedControl;
+				//setVisible_GUI_Internal(bGui_AdvancedControl);
+				//setVisible_GUI_ImGui(bGui_AdvancedControl);
+				//setVisible_PresetClicker(bGui_AdvancedControl);
 			}
 			else if (key == 'H')
 			{
@@ -1679,7 +1684,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 			}
 			else if (key == 'P')
 			{
-				setVisible_PresetClicker(!isVisible_PresetClicker());
+				setToggleVisible_PresetClicker();
 			}
 
 			//----
@@ -1804,7 +1809,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 		//// randomizers
 		//if (bMODE_EditLive.get())
 		//{
-		groupRandomizers[index_GroupSelected].keyPressed(key);
+		//groupRandomizers[index_GroupSelected].keyPressed(key);
 		//}
 
 		//--
@@ -1827,13 +1832,13 @@ void ofxPresetsManager::keyReleased(ofKeyEventArgs& eventArgs)
 	if (eventArgs.key == modeKeySave && bModKeySave)
 	{
 		bModKeySave = false;
-		ofLogNotice(__FUNCTION__) << "modKey Save FALSE";
+		ofLogNotice(__FUNCTION__) << "MODKEY SAVE FALSE";
 	}
 
 	else if (eventArgs.key == modKeySwap && bModKeySwap)
 	{
 		bModKeySwap = false;
-		ofLogNotice(__FUNCTION__) << "modKey Swap FALSE";
+		ofLogNotice(__FUNCTION__) << "MODKEY SWAP MODKEY SWAP FALSE";
 	}
 }
 
@@ -1843,7 +1848,7 @@ void ofxPresetsManager::addKeysListeners()
 	ofAddListener(ofEvents().keyPressed, this, &ofxPresetsManager::keyPressed);
 	ofAddListener(ofEvents().keyReleased, this, &ofxPresetsManager::keyReleased);
 
-	keysNotActivated = false;
+	bKeys_NotYetActivated = false;
 	bKeys = true;
 }
 
@@ -3259,7 +3264,7 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 
 		// Reload/Save
 		//if (!bMODE_EditLive)
-		//if (!guiManager.bMinimize)
+		if (!guiManager.bMinimize || !bMODE_EditLive)
 		{
 			if (ImGui::Button("SAVE", ImVec2(_w50, _h)))
 			{
@@ -3623,7 +3628,10 @@ void ofxPresetsManager::draw_Gui_Main()
 
 					if (groups.size() > 1)
 					{
-						ofxImGuiSurfing::AddToggleRoundedButton(bGui_ShowAllGroups);
+						if (ofxImGuiSurfing::AddToggleRoundedButton(bGui_ShowAllGroups)) {
+							// Workflow
+							if (!bGui_Players) bGui_Players = true;
+						}
 					}
 
 					ImGui::Dummy(ImVec2(0.0f, 2.0f));
@@ -3746,8 +3754,9 @@ void ofxPresetsManager::draw_Gui_Main()
 
 
 		//--
-
+		// 
 		// 0. labels
+		if (bGui_AdvancedControl)
 		{
 			if (!guiManager.bMinimize)
 			{
@@ -3792,14 +3801,12 @@ void ofxPresetsManager::draw_Gui_Main()
 			ImGui::Spacing();
 		}
 
+		guiManager.AddSpacingSeparated();
+
 		//--
 
 		guiManager.endWindow();
 	}
-
-	//crash
-	//ImGui::PopStyleColor();
-	//ImGui::PopStyleColor();
 }
 
 //--------------------------------------------------------------
@@ -3852,7 +3859,7 @@ void ofxPresetsManager::draw_Gui_Advanced()
 				}
 
 				ImGui::TreePop();
-			}
+		}
 #endif
 			//--
 
@@ -3900,8 +3907,8 @@ void ofxPresetsManager::draw_Gui_Advanced()
 			}
 
 			ImGui::TreePop();
-		}
 	}
+}
 }
 
 //--
@@ -3911,60 +3918,70 @@ void ofxPresetsManager::buildHelpInfo() {
 
 	// build help info
 
+	bool _bDebug = false;
+
 	helpInfo = "";
-	helpInfo += "USER-KIT\n";
-	//helpInfo += "  ";
-	helpInfo += displayNameUserKit;
+	helpInfo += "PRESETS MANAGER \n\n";
 
-	//// file format
-	//helpInfo += "       ";
-	//#ifdef USE_XML
-	//helpInfo += ".xml";
-	//#else
-	//#ifdef USE_JSON
-	//helpInfo += ".json";
-	//#endif
-	//#endif
+	if (_bDebug)
+	{
+		//helpInfo += "  ";
+		helpInfo += "USER-KIT \n";
+		helpInfo += displayNameUserKit;
 
-	helpInfo += "\n\nPATHS\n";
-	helpInfo += getGroupsPaths();
-	//helpInfo += "                            ";
+		//// file format
+		//helpInfo += "       ";
+		//#ifdef USE_XML
+		//helpInfo += ".xml";
+		//#else
+		//#ifdef USE_JSON
+		//helpInfo += ".json";
+		//#endif
+		//#endif
 
-	//TODO:
-	//bool bKeysinfo = false;
-	//if (bKeysinfo)
-	//{
-	//	//keys[i][k]
-	//	helpInfo += "[keys " + ofToString((char)keys[0][0]) + "|";
-	//	helpInfo += ofToString((char)keys[0][keys[0].size() - 1]) + "]";
-	//}
+		helpInfo += "\n\nPATHS\n";
+		helpInfo += getGroupsPaths();
+		//helpInfo += "                            ";
 
-	helpInfo += "\n";
-	helpInfo += "\n";
+		//TODO:
+		//bool bKeysinfo = false;
+		//if (bKeysinfo)
+		//{
+		//	//keys[i][k]
+		//	helpInfo += "[keys " + ofToString((char)keys[0][0]) + "|";
+		//	helpInfo += ofToString((char)keys[0][keys[0].size() - 1]) + "]";
+		//}
 
-	helpInfo += "KEYS\n";
-	helpInfo += "\n";
+		helpInfo += "\n";
+		helpInfo += "\n";
+	}
 
-	helpInfo += "H                HELP\n";
-	helpInfo += "Ctrl+g           GUI\n";
-	helpInfo += "E                EDIT\n";
-	helpInfo += "\n";
-
-	helpInfo += "P                CLICKER\n";
-	helpInfo += "KEYS & MOUSE     LOAD\n";
-	helpInfo += " +Ctrl           SAVE\n";
-	helpInfo += " +Alt            SWAP\n";
-	helpInfo += "Arrows           EXPLORE\n";
+	helpInfo += "KEYS \n";
 	helpInfo += "\n";
 
-	helpInfo += "Ctrl+Space       PLAY RANDOMIZER\n";
-	helpInfo += "Ctrl+R           PRESET RANDOMIZE\n";
+	helpInfo += "H                HELP \n";
+	helpInfo += "Ctrl+g           GUI \n";
+	helpInfo += "E                EDIT \n";
 	helpInfo += "\n";
 
+	helpInfo += "P                CLICKER \n";
+	helpInfo += "                 LOAD \n";
+	helpInfo += "+Ctrl            SAVE/COPY \n";
+	helpInfo += "+Alt             SWAP \n";
+	helpInfo += "Arrows           EXPLORE \n";
+	helpInfo += "\n";
+
+	helpInfo += "Ctrl+Space       PLAY RANDOM \n";
+	helpInfo += "Ctrl+R           PRESET RANDOM \n";
+	helpInfo += "\n";
+
+	// undo engine
+#ifdef INCLUDE_ofxUndoSimple
 	helpInfo += "Ctrl+Z           UNDO\n";
 	helpInfo += " +Shift          REDO\n";
 	helpInfo += "Ctrl+C           CLEAR\n";
 	helpInfo += "Ctrl+s           STORE\n";
+#endif
 }
 
 //--------------------------------------------------------------

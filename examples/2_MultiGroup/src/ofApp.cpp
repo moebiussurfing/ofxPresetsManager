@@ -3,16 +3,19 @@
 //--------------------------------------------------------------
 void ofApp::setupPresets()
 {
-	// 1. Optional
+	// 1. Optional before adding groups.
 	  
 	// Some API extra tweak controls:
-	//presetsManager.setEnableKeysArrowBrowse(true);
+	// 
+	//presetsManager.setEnableKeysArrowBrowse(disable);// disable browsing using keys
+	
 	//presetsManager.setEnableGroupLinkSelector(false);// disable autocreation of the GROUP_LINK selector.
 	presetsManager.setGroupLinkAmountPresets(3);// set amount of presets for the autocreated GROUP_LINK selector (the lastone).
-
+	// default is 9 presets!
+	
 	//--
 
-	// 2. Initiate
+	// 2. Add many independent and parallel groups.
 
 	// build your presets manager:
 	// add our ofParameterGroup to the preset manager. 
@@ -25,17 +28,17 @@ void ofApp::setupPresets()
 	// group 1
 	presetsManager.add(params1, { 'a', 's', 'd', 'f' });
 
-	//// group 2
-	//presetsManager.add(params2, { 'z', 'x', 'c' });
+	// group 2
+	presetsManager.add(params2, { 'z', 'x', 'c' });
 
-	//// group 3
-	//presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
+	// group 3
+	presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
 
 	//--
 
 	// 3. Setup
 	
-	presetsManager.setup(); // call after adding groups!
+	presetsManager.setup(); // Call after adding groups!
 
 	//--
 	 

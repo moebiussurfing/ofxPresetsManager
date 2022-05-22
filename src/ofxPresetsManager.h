@@ -83,7 +83,7 @@
 #undef INCLUDE_ofxSurfingRandomizer
 #endif
 
-//-'
+//-
 
 //	2. EXTRA FEATURES
 
@@ -95,14 +95,14 @@
 
 //#define INCLUDE_ofxUndoSimple
  
-//-'
+//-
 
 // 3. CUSTOMIZATION
 
 #define USE_PRESETS_MANAGER__IMGUI_LAYOUT // -> Instantiated and using my addon ofxSurfingImGui
 //#define USE_PRESETS_MANAGER__IMGUI_INTERNAL // -> Legacy ImGui without my ofxSurfingImGui addon.
 
-//-'
+//-
  
 //#define USE_IMGUI_EXTERNAL // this is to group all ImGui panels into one unique instance in ofApp
 // currently there's a bug when using more than one single ofxImGui instance!
@@ -378,7 +378,7 @@ private:
 	// group main selector
 	bool bBuildGroupSelector = true;// to allow auto build a group selector to combine all the added groups to the presets manager
 	bool bAllowGroupSelector = true;// to allow disable main group. not allways we need it..
-	int groupLinkSize = 10;// default ammount of presets we want to the group link
+	int groupLinkSize = 9;// default ammount of presets we want to the group link
 
 public:
 
@@ -1396,9 +1396,7 @@ private:
 
 	vector<vector<int>> keys;// queued trigger keys for each group ? (all presets) (size of)
 	vector<vector<string>> labels;//converted to strings
-	//bool ENABLE_Keys;// enabled keys
-	//bool bKeys;// enabled keys
-	bool keysNotActivated;
+	bool bKeys_NotYetActivated;
 
 	// save keys
 	int modeKeySave;// save mod key
