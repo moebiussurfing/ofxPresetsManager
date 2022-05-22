@@ -529,20 +529,21 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	params_Custom.add(pathDirCustom);
 	params_User.add(params_Custom);
 
+	params_User.add(bPLAY_Global);
+
 	ofAddListener(params_User.parameterChangedE(), this, &ofxPresetsManager::Changed_User);
 
 	//----
 
 	// randomizers
 
-	//TODO:
-	// Workflow:
-	for (int i = 0; i < groups.size(); i++)
-	{
-		groupRandomizers[i].bPLAY_RandomizeTimer.addListener(this, &ofxPresetsManager::Changed_Randomizers);
-
-		//listeners.push(groupRandomizers[i].bPLAY_RandomizeTimer.newListener(this, &ofxPresetsManager::Changed_Randomizers));
-	}
+	////TODO:
+	//// Workflow:
+	//for (int i = 0; i < groups.size(); i++)
+	//{
+	//	//groupRandomizers[i].bPLAY_RandomizeTimer.addListener(this, &ofxPresetsManager::Changed_Randomizers);
+	//	////listeners.push(groupRandomizers[i].bPLAY_RandomizeTimer.newListener(this, &ofxPresetsManager::Changed_Randomizers));
+	//}
 
 	//--
 
@@ -1665,15 +1666,10 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 			//if (false) {}
 
 			// hide/show control gui
-			else if ((key == 'G') && (!mod_CONTROL && !mod_ALT && !mod_SHIFT))
+			else if (key == 'G')
 			{
 				bGui = !bGui;
 				return;
-
-				//bGui_AdvancedControl = !bGui_AdvancedControl;
-				//setVisible_GUI_Internal(bGui_AdvancedControl);
-				//setVisible_GUI_ImGui(bGui_AdvancedControl);
-				//setVisible_PresetClicker(bGui_AdvancedControl);
 			}
 			else if (key == 'H')
 			{
@@ -1786,7 +1782,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 			//----
 
 			// presets selectors
-			 
+
 			//if (!mod_CONTROL && !mod_SHIFT && !mod_ALT)// exclude controls do not works bc blocks the mod keys to copy/swap presets...
 			{
 				for (int g = 0; g < keys.size(); g++)
@@ -1809,7 +1805,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 							}
 
 							//--
-							 
+
 							// workflow
 							if (index_GroupSelected != g) index_GroupSelected = g;
 
@@ -2062,15 +2058,35 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 
 		//--
 
-		// presets selectors
+		// Players Randomizers
 
-		if (!bDISABLE_CALLBACKS_Selectors)
+		if (name == bPLAY_Global.getName())
 		{
-			for (int g = 0; g < groups.size(); g++)// iterate each group
+			//TODO:
+			// Workflow:
+			if (bMODE_EditLive) bMODE_EditLive = false;
+
+			for (int i = 0; i < groups.size(); i++)
 			{
-				for (int p = 0; p < groupsSizes[g]; p++)// iterate each preset on each group
+				if (bAllowGroupSelector && i == groups.size() - 1) break;//dont play group link
+				groupRandomizers[i].bPLAY_RandomizeTimer = bPLAY_Global;
+			}
+		}
+
+		//--
+
+		// Presets Selectors
+
+		//TODO:
+		// could be too slow??
+		//if (!bDISABLE_CALLBACKS_Selectors)
+		{
+			for (int g = 0; g < groups.size(); g++) // iterate each group
+			{
+				for (int p = 0; p < groupsSizes[g]; p++) // iterate each preset on each group
 				{
-					if (name == index_PresetSelected[g].getName() && index_PresetSelected[g].get() == p)
+					if (name == index_PresetSelected[g].getName() 
+						&& index_PresetSelected[g].get() == p)
 					{
 						// some preset of any group changed
 
@@ -2089,7 +2105,7 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 							//if (MODE_StandalonePresets_NEW)
 							{
 								// retrig/reload
-								if (bAutoLoad)
+								//if (bAutoLoad)
 								{
 									load(index_PresetSelected[g], g);
 								}
@@ -2108,7 +2124,7 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 
 							//--
 
-							// 1. mod save controlled by modeKeySave
+							// 2.1. mod save controlled by modeKeySave
 
 							if (bModKeySave)
 							{
@@ -2123,7 +2139,7 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 
 							//--
 
-							// 2. mod swap controlled by modKeySwap
+							// 2.2. mod swap controlled by modKeySwap
 
 							else if (bModKeySwap)
 							{
@@ -2142,7 +2158,7 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 
 							//--
 
-							// 3. no key command
+							// 3. no key commands
 
 							else
 							{
@@ -2182,22 +2198,22 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 	}
 }
 
-//--------------------------------------------------------------
-void ofxPresetsManager::Changed_Randomizers(bool& b)
-{
-	if (!bDISABLE_CALLBACKS && groupRandomizers.size() > 0)
-	{
-		ofLogNotice(__FUNCTION__);
-
-		// Workflow:
-		if (bMODE_EditLive.get() && b) bMODE_EditLive = false;
-
-		//std::string name = b.getName();
-		//if (name == groupRandomizers[0].bPLAY_RandomizeTimer.getName())
-		//{
-		//}
-	}
-}
+////--------------------------------------------------------------
+//void ofxPresetsManager::Changed_Randomizers(bool& b)
+//{
+//	//if (!bDISABLE_CALLBACKS && groupRandomizers.size() > 0)
+//	//{
+//	//	ofLogNotice(__FUNCTION__);
+//
+//	//	// Workflow:
+//	//	if (bMODE_EditLive.get() && b) bMODE_EditLive = false;
+//
+//	//	//std::string name = b.getName();
+//	//	//if (name == groupRandomizers[0].bPLAY_RandomizeTimer.getName())
+//	//	//{
+//	//	//}
+//	//}
+//}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
@@ -2232,7 +2248,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 		else if (name == dataRandomizer.bGui.getName())
 		{
 			if (dataRandomizer.bGui) dataTween.bGui = false;
-		}
+	}
 #endif
 #endif
 		//--
@@ -2318,7 +2334,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 				// all app settings
 				//save_ControlSettings();
 				//rectangle_PresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
-			}
+}
 		}
 #endif
 
@@ -2550,12 +2566,12 @@ void ofxPresetsManager::saveAllKitFromMemory()
 			if (!b) ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets > " << _path;
 #endif
 #endif
-		}
+	}
 		else {
 			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
-	}
+}
 
 	// debug params
 	if (true)
@@ -2568,7 +2584,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 #ifdef USE_JSON
 #endif
 #endif
-		}
+	}
 	}
 }
 
@@ -2627,12 +2643,12 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 				mainGroupMemoryFilesPresets[i] = settings;
 #endif
-			}
+		}
 			else {
 				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
-		}
 	}
+}
 
 	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
@@ -2644,7 +2660,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
-		}
+	}
 	}
 }
 
@@ -3275,12 +3291,15 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 			guiManager.Add(bGui_PanelsAll, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 		}
 
-		float _h = (guiManager.bMinimize ? 1.4f : 2) * guiManager.getWidgetsHeight();
+		//float _h = (guiManager.bMinimize ? 1.4f : 2) * guiManager.getWidgetsHeight();
+		float _h = 2 * guiManager.getWidgetsHeight();
 		float _w100 = ImGui::GetContentRegionAvail().x;
 		float _w50 = guiManager.getWidgetsWidth(2);
 
 		// Edit
 		ofxImGuiSurfing::AddBigToggleNamed(bMODE_EditLive, _w100, _h, "EDIT MODE", "LIVE MODE", true);
+		if (bMODE_EditLive) guiManager.AddTooltip("EDIT MODE AUTOSAVES");
+		else guiManager.AddTooltip("LIVE MODE NEEDS MANUAL SAVE");
 
 		// Reload/Save
 		//if (!bMODE_EditLive)
@@ -3295,6 +3314,21 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 			{
 				loadPreset(index_PresetSelected[index_GroupSelected], index_GroupSelected);
 			}
+
+			//{//not works
+			//	static ofParameter<bool> bSave{ "SAVE", false };
+			//	static ofParameter<bool> bLoad{ "LOAD", false };
+			//	guiManager.Add(bSave, OFX_IM_TOGGLE_BIG_BORDER_BLINK, 2, true);
+			//	guiManager.Add(bLoad, OFX_IM_TOGGLE_BIG, 2);
+			//	if (bSave) {
+			//		bSave = false;
+			//		savePreset(index_PresetSelected[index_GroupSelected], index_GroupSelected);
+			//	}
+			//	if (bLoad) {
+			//		bLoad = false;
+			//		loadPreset(index_PresetSelected[index_GroupSelected], index_GroupSelected);
+			//	}
+			//}
 		}
 
 		guiManager.AddSpacingBigSeparated();
@@ -3320,7 +3354,6 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 			ImGui::Columns(2, nullptr, false);
 			ImGui::SetColumnWidth(0, sz2.x + 40);
 			//ImGui::SetColumnWidth(0, 103);
-			//ImGui::SetColumnWidth(0, 60);
 
 			bool bLast = (i == groups.size() - 1);
 			bool b = groups.size() > 1 && bKeys.get();
@@ -3407,8 +3440,9 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 			//guiManager.Add(bResponsive, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);//not works
 		}
 
-		//guiManager.AddSpacing();
-		//guiManager.Add(bGui_PanelsAll, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+		guiManager.AddSpacingSeparated();
+
+		guiManager.Add(bPLAY_Global, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 
 		//--
 
@@ -3746,8 +3780,8 @@ void ofxPresetsManager::draw_Gui_Main()
 						{
 							doRedo();
 						}
-					}
-				}
+			}
+		}
 #endif
 
 				//--
@@ -3769,8 +3803,8 @@ void ofxPresetsManager::draw_Gui_Main()
 					bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 					// must be insisde some window
 				}
-			}
-		}
+	}
+}
 
 
 		//--
@@ -3876,10 +3910,10 @@ void ofxPresetsManager::draw_Gui_Advanced()
 					ImGui::PopItemWidth();
 
 					//if (bHelp)ofxImGuiSurfing::AddParameter(helpPos);
-				}
+		}
 
 				ImGui::TreePop();
-		}
+	}
 #endif
 			//--
 
@@ -3927,7 +3961,7 @@ void ofxPresetsManager::draw_Gui_Advanced()
 			}
 
 			ImGui::TreePop();
-	}
+}
 }
 }
 
@@ -3979,28 +4013,28 @@ void ofxPresetsManager::buildHelpInfo() {
 	helpInfo += "KEYS \n";
 	helpInfo += "\n";
 
-	helpInfo += "H                HELP \n";
-	helpInfo += "Ctrl+g           GUI \n";
-	helpInfo += "E                EDIT \n";
+	helpInfo += "H             HELP \n";
+	helpInfo += "G             GUI \n";
+	helpInfo += "E             EDIT \n";
 	helpInfo += "\n";
 
-	helpInfo += "P                CLICKER \n";
-	helpInfo += "                 LOAD \n";
-	helpInfo += "+Ctrl            SAVE/COPY \n";
-	helpInfo += "+Alt             SWAP \n";
-	helpInfo += "Arrows           EXPLORE \n";
+	helpInfo += "P             CLICKER \n";
+	helpInfo += "              LOAD \n";
+	helpInfo += "+Ctrl         SAVE/COPY \n";
+	helpInfo += "+Alt          SWAP \n";
+	helpInfo += "Arrows        EXPLORE \n";
 	helpInfo += "\n";
 
-	helpInfo += "Ctrl+Space       PLAY RANDOM \n";
-	helpInfo += "Ctrl+R           PRESET RANDOM \n";
+	helpInfo += "Ctrl+SPACE    PLAY \n";
+	//helpInfo += "Ctrl+R        PRESET RANDOM \n";
 	helpInfo += "\n";
 
 	// undo engine
 #ifdef INCLUDE_ofxUndoSimple
-	helpInfo += "Ctrl+Z           UNDO\n";
-	helpInfo += " +Shift          REDO\n";
-	helpInfo += "Ctrl+C           CLEAR\n";
-	helpInfo += "Ctrl+s           STORE\n";
+	helpInfo += "Ctrl+Z        UNDO\n";
+	helpInfo += " +Shift       REDO\n";
+	helpInfo += "Ctrl+C        CLEAR\n";
+	helpInfo += "Ctrl+s        STORE\n";
 #endif
 }
 

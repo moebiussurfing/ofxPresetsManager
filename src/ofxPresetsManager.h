@@ -1433,35 +1433,43 @@ private:
 
 	//----
 
-	// callbacks
+	// Callbacks
 
 private:
+
 	void Changed_Control(ofAbstractParameter& e);
 	void Changed_User(ofAbstractParameter& e);
 
-private:
+	//--
+	
+	//TODO:
+//private:
 	//ofEventListeners listeners;
-	//void Changed_Randomizers(ofAbstractParameter &e);
-	void Changed_Randomizers(bool& b);
+	//void Changed_Randomizers(bool& b);
+	////void Changed_Randomizers(ofAbstractParameter &e);
 
 	//-
 
 private:
-	bool bDISABLE_CALLBACKS_Selectors = false;// to avoid multiple calls on multiple presets selector engine
+
 	bool bDISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
 	// updating some params before save will trigs also the group callbacks
 	// so we disable this callbacks just in case params updatings are required
+	//bool bDISABLE_CALLBACKS_Selectors = false;// to avoid multiple calls on multiple presets selector engine
 
 	//--
 
 public:
+
 	ofParameterGroup params_Control;// to use on external gui
 
 public:
+
 	ofParameter<bool> bAutoSave;// auto save current preset when user clicks to another preset. almost enabled on edit mode
 	ofParameter<bool> bAutoLoad;// auto load the user clicked preset. almost always true
 
 private:
+
 	// internal groups
 	ofParameterGroup params_User;
 	ofParameterGroup params_Gui;
@@ -1472,10 +1480,14 @@ private:
 	//----
 
 	// custom path for preset favourites
+
 private:
+
 	ofParameter<bool> bPathDirCustom;
 	ofParameter<std::string> pathDirCustom;
+
 public:
+
 	// set custom path
 	void doFileDialogProcessSelection(ofFileDialogResult openFileResult);
 	void buildCustomUserKit();
@@ -1486,7 +1498,9 @@ public:
 	// TODO:
 	// not finished yet...
 	// timer autosave
+
 private:
+
 	ofParameter<bool> bAutosaveTimer;
 	uint64_t timerLast_Autosave = 0;
 	int timeToAutosave = 9000;
@@ -1494,7 +1508,9 @@ private:
 	//--
 
 	// check if a folder path exist and creates one if not
+
 private:
+
 	// many times when you try to save a file, this is not possible and do not happens bc the container folder do not exist
 	//--------------------------------------------------------------
 	void CheckFolder(std::string _path)
@@ -1597,6 +1613,12 @@ public:
 		return b;
 	}
 #endif
+
+	//--
+
+	//TODO:
+	//ofParameterGroup params_Plays{ "PLAYERS" };
+	ofParameter<bool> bPLAY_Global{ "PLAY GLOBAL", false };
 };
 
 
