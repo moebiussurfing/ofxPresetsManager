@@ -369,7 +369,7 @@ private:
 	std::vector<SurfingGroupRandomizer> groupRandomizers;
 
 	// selector for last group: is the main group link
-	ofParameterGroup params_Index_GroupSelectorMain{ "GROUP_LINK" };
+	ofParameterGroup params_Index_GroupSelectorMain{ "G_LINK" };
 
 	//--
 
@@ -377,8 +377,8 @@ private:
 
 	// group main selector
 	bool bBuildGroupSelector = true;// to allow auto build a group selector to combine all the added groups to the presets manager
-	bool bAllowGroupSelector = true;// to allow disable main group. not allways we need it..
-	int groupLinkSize = 9;// default ammount of presets we want to the group link
+	bool bAllowGroupSelector = true;// to allow disable main group. not always we need it..
+	int groupLinkSize = 9;// default amount of presets we want to the group link
 
 public:
 

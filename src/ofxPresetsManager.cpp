@@ -439,7 +439,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 	// this is to know if no groups has been added before call setup! 
 	if (_last >= 0) {
 
-		index_GROUP_LINK.set("GROUP_LINK", 0, 0, groupsSizes[_last] - 1);
+		index_GROUP_LINK.set("G_LINK", 0, 0, groupsSizes[_last] - 1);
 		params_User.add(index_GROUP_LINK);
 
 		//----
@@ -2085,7 +2085,7 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 			{
 				for (int p = 0; p < groupsSizes[g]; p++) // iterate each preset on each group
 				{
-					if (name == index_PresetSelected[g].getName() 
+					if (name == index_PresetSelected[g].getName()
 						&& index_PresetSelected[g].get() == p)
 					{
 						// some preset of any group changed
@@ -2248,7 +2248,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 		else if (name == dataRandomizer.bGui.getName())
 		{
 			if (dataRandomizer.bGui) dataTween.bGui = false;
-	}
+		}
 #endif
 #endif
 		//--
@@ -2334,7 +2334,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 				// all app settings
 				//save_ControlSettings();
 				//rectangle_PresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
-}
+			}
 		}
 #endif
 
@@ -2566,12 +2566,12 @@ void ofxPresetsManager::saveAllKitFromMemory()
 			if (!b) ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets > " << _path;
 #endif
 #endif
-	}
+		}
 		else {
 			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
-}
+	}
 
 	// debug params
 	if (true)
@@ -2584,7 +2584,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 #ifdef USE_JSON
 #endif
 #endif
-	}
+		}
 	}
 }
 
@@ -2643,12 +2643,12 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 				mainGroupMemoryFilesPresets[i] = settings;
 #endif
-		}
+			}
 			else {
 				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
+		}
 	}
-}
 
 	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
@@ -2660,7 +2660,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
-	}
+		}
 	}
 }
 
@@ -3274,7 +3274,11 @@ void ofxPresetsManager::draw_Gui_Parameters()
 //--------------------------------------------------------------
 void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 {
-	IMGUI_SUGAR__WINDOWS_CONSTRAINTS_BIG;
+	//IMGUI_SUGAR__WINDOWS_CONSTRAINTS_BIG;
+
+	ImVec2 size_min = ImVec2(300, 300);
+	ImVec2 size_max = ImVec2(500, 500);
+	ImGui::SetNextWindowSizeConstraints(size_min, size_max);
 
 	if (guiManager.beginWindow("PRESETS CLICKER", bGui_Clicker))
 	{
@@ -3293,24 +3297,25 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 
 		//float _h = (guiManager.bMinimize ? 1.4f : 2) * guiManager.getWidgetsHeight();
 		float _h = 2 * guiManager.getWidgetsHeight();
+		float _h2 = 0.6f * _h;
 		float _w100 = ImGui::GetContentRegionAvail().x;
 		float _w50 = guiManager.getWidgetsWidth(2);
 
 		// Edit
 		ofxImGuiSurfing::AddBigToggleNamed(bMODE_EditLive, _w100, _h, "EDIT MODE", "LIVE MODE", true);
-		if (bMODE_EditLive) guiManager.AddTooltip("EDIT MODE AUTOSAVES");
-		else guiManager.AddTooltip("LIVE MODE NEEDS MANUAL SAVE");
+		if (bMODE_EditLive) guiManager.AddTooltip("AUTOSAVES");
+		else guiManager.AddTooltip("NEEDS MANUAL SAVE!");
 
 		// Reload/Save
 		//if (!bMODE_EditLive)
 		if (!guiManager.bMinimize || !bMODE_EditLive)
 		{
-			if (ImGui::Button("SAVE", ImVec2(_w50, _h)))
+			if (ImGui::Button("SAVE", ImVec2(_w50, _h2)))
 			{
 				savePreset(index_PresetSelected[index_GroupSelected], index_GroupSelected);
 			}
 			ImGui::SameLine();
-			if (ImGui::Button("LOAD", ImVec2(_w50, _h)))
+			if (ImGui::Button("LOAD", ImVec2(_w50, _h2)))
 			{
 				loadPreset(index_PresetSelected[index_GroupSelected], index_GroupSelected);
 			}
@@ -3458,7 +3463,7 @@ void ofxPresetsManager::draw_Gui_Main()
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 	string n = "PRESETS MAIN";
 
-	IMGUI_SUGAR__WINDOWS_CONSTRAINTS;
+	//IMGUI_SUGAR__WINDOWS_CONSTRAINTS;
 
 	if (guiManager.beginWindow(n.c_str(), NULL, flagsw))
 	{
@@ -3518,6 +3523,7 @@ void ofxPresetsManager::draw_Gui_Main()
 		//if (!bMODE_EditLive)
 		//if (!guiManager.bMinimize)
 		{
+
 			if (ImGui::Button("SAVE", ImVec2(_w50, _h)))
 			{
 				savePreset(index_PresetSelected[index_GroupSelected], index_GroupSelected);
@@ -3706,7 +3712,8 @@ void ofxPresetsManager::draw_Gui_Main()
 				ImGui::Spacing();
 				guiManager.AddSpacingSeparated();
 
-				if (!guiManager.bMinimize) guiManager.Add(bGui_AdvancedControl, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);
+				if (!guiManager.bMinimize) guiManager.Add(bGui_AdvancedControl, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+				ImGui::Spacing();
 
 				//--
 
@@ -3779,9 +3786,9 @@ void ofxPresetsManager::draw_Gui_Main()
 						if (ImGui::Button("Redo", ImVec2(_w50, _h / 2)))
 						{
 							doRedo();
-						}
 			}
 		}
+	}
 #endif
 
 				//--
@@ -3803,7 +3810,7 @@ void ofxPresetsManager::draw_Gui_Main()
 					bLockMouseByImGui = bLockMouseByImGui | ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 					// must be insisde some window
 				}
-	}
+}
 }
 
 
@@ -4985,7 +4992,7 @@ void ofxPresetsManager::doRefreshUndoParams() {
 		//str += undoStringParams.getUndoStateDescriptor() + "\n";
 
 		ofLogNotice(__FUNCTION__) << str;
-	}
+}
 }
 
 #endif
