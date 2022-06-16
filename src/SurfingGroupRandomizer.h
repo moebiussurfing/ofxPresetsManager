@@ -316,6 +316,7 @@ public:
 	}
 
 private:
+
 	bool bDISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
 
 	//---

@@ -114,7 +114,7 @@ ofxPresetsManager::ofxPresetsManager()
 
 	bGui.set("PRESETS", true);
 	//bGui.set("ofxPresetsManager", true);
-	bGui_PanelsAll.set("PANELS", true);
+	bGui_PanelsAll.set("PANELS", false);
 	bGui_Main.set("MAIN", true);
 	bGui_PresetsParams.set("PRESET PARAMETERS", false);
 	bGui_Selectors.set("SELECTORS", false);
@@ -2064,7 +2064,7 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 		{
 			//TODO:
 			// Workflow:
-			if (bMODE_EditLive) bMODE_EditLive = false;
+			if (bPLAY_Global) if (bMODE_EditLive) bMODE_EditLive = false;
 
 			for (int i = 0; i < groups.size(); i++)
 			{
@@ -2430,7 +2430,8 @@ void ofxPresetsManager::load_AppSettings()
 	// testing to enable here to avoid create empty xml settings on global root?
 	bDISABLE_CALLBACKS = false;
 
-	std::string path3 = filenameMainSettings;
+	std::string path3 = path_UserKit_Folder + "/" + filenameMainSettings;
+	//std::string path3 = filenameMainSettings;
 
 	b = ofxSurfingHelpers::loadGroup(params_User, path3);
 
@@ -2478,7 +2479,7 @@ void ofxPresetsManager::save_ControlSettings()
 		//--
 
 		// user settings
-		path = filenameMainSettings;
+		path = path_UserKit_Folder + "/" + filenameMainSettings;
 		b = ofxSurfingHelpers::saveGroup(params_User, path);
 
 		//--
@@ -2506,7 +2507,9 @@ void ofxPresetsManager::setPath_UserKit_Folder(std::string folder)
 
 	path_UserKit_Folder = folder;
 
-	CheckFolder(folder);
+	//filenameMainSettings = path_UserKit_Folder + "/ofxPresetsManager_Settings" + fileExtension; // default user preset name
+
+	CheckFolder(path_UserKit_Folder);
 
 	// create the folders of each group into main presets folder 
 	std::string _path;
@@ -2585,7 +2588,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 #endif
 #endif
 		}
-	}
+}
 }
 
 //--------------------------------------------------------------
@@ -2643,11 +2646,11 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 				mainGroupMemoryFilesPresets[i] = settings;
 #endif
-			}
+	}
 			else {
 				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
-		}
+}
 	}
 
 	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
@@ -3277,7 +3280,7 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 	//IMGUI_SUGAR__WINDOWS_CONSTRAINTS_BIG;
 
 	ImVec2 size_min = ImVec2(300, 300);
-	ImVec2 size_max = ImVec2(500, 500);
+	ImVec2 size_max = ImVec2(450, 600);
 	ImGui::SetNextWindowSizeConstraints(size_min, size_max);
 
 	if (guiManager.beginWindow("PRESETS CLICKER", bGui_Clicker))
@@ -3297,7 +3300,7 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 
 		//float _h = (guiManager.bMinimize ? 1.4f : 2) * guiManager.getWidgetsHeight();
 		float _h = 2 * guiManager.getWidgetsHeight();
-		float _h2 = 0.6f * _h;
+		float _h2 = 0.7f * _h;
 		float _w100 = ImGui::GetContentRegionAvail().x;
 		float _w50 = guiManager.getWidgetsWidth(2);
 
@@ -3310,10 +3313,28 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 		//if (!bMODE_EditLive)
 		if (!guiManager.bMinimize || !bMODE_EditLive)
 		{
+			// Save button 
+			// Blink when Live Mode!
+			ImGuiStyle* style = &ImGui::GetStyle();
+			bool bBlink = !bMODE_EditLive;
+			if (bBlink)
+			{
+				const ImVec4 c_ = style->Colors[ImGuiCol_TextDisabled];
+				float blinkValue = ofxImGuiSurfing::getFadeBlink();
+				float a = blinkValue;
+				a = ofClamp(a, 0, 1);
+				ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(c_.x, c_.y, c_.z, c_.w * a));
+			}
 			if (ImGui::Button("SAVE", ImVec2(_w50, _h2)))
 			{
 				savePreset(index_PresetSelected[index_GroupSelected], index_GroupSelected);
 			}
+			if (bBlink)
+			{
+				ImGui::PopStyleColor();
+			}
+
+			// Load button
 			ImGui::SameLine();
 			if (ImGui::Button("LOAD", ImVec2(_w50, _h2)))
 			{
@@ -3862,7 +3883,7 @@ void ofxPresetsManager::draw_Gui_Main()
 			ImGui::Spacing();
 		}
 
-		guiManager.AddSpacingSeparated();
+		//guiManager.AddSpacingSeparated();
 
 		//--
 
@@ -3917,10 +3938,10 @@ void ofxPresetsManager::draw_Gui_Advanced()
 					ImGui::PopItemWidth();
 
 					//if (bHelp)ofxImGuiSurfing::AddParameter(helpPos);
-		}
+				}
 
 				ImGui::TreePop();
-	}
+		}
 #endif
 			//--
 
@@ -3968,7 +3989,7 @@ void ofxPresetsManager::draw_Gui_Advanced()
 			}
 
 			ImGui::TreePop();
-}
+	}
 }
 }
 
