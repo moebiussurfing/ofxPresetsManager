@@ -15,17 +15,20 @@
 
 //	TODO:
 //	
+//	++	make special windows to run gui workflow
+//	++  randomizers/players reset preset probs/shorts.
 //	++	split draw from event to be manual!
 //	++	add play toggles on clicker
+//	++	add clicker to name labels like arrows browsing, on clicker window.
 //	
 //	++	add retrig when re click without index change
 //  +	fix keys workflows
 //  +	group randomizers are too big, hardcoded to max sizes... brokes ImGui... must simplify
 //  +	new edit mode: 
-//			mark a param and when modifing current preset, save to all the others and overwrite	
+//			mark a param and when modifying current preset, save to all the others and overwrite	
 //  +		lock (by toggle) params that we want to ignore on changing presets
 //			can be done enabling/disabling serializable for each param with a group of toggles
-//  +	super-lite version with combo list. maybe without any gui at all.
+//  +	super-lite version with combo list. maybe without any GUI at all.
 
 
 //	IDEAS:
