@@ -132,7 +132,7 @@ Both examples runs linked together using **ofxRemoteParameters**.
 This allows you to control the presets on the **Client OF_App**.  
 The **Server OF_App** draws your scene using the *linked/received* parameters from the **Client OF_App**.  
 This is useful because in some scenarios could help to improve the performance or the compiling time reducing dependencies.  
-[VIDEO](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
+[OUTDATED VIDEO](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
 
 ## Dependencies
 * [ofxImGui](https://github.com/Daandelange/ofxImGui/tree/jvcleave) [ FORK ]
@@ -142,9 +142,8 @@ This is useful because in some scenarios could help to improve the performance o
 The below add-ons are already packed into **OF_ADDON/libs/** or into **ofxSurfingHelpers**.  
 No need to add them manually with the **oF PROJECT GENERATOR**:  
 * [ofxUndo](https://github.com/nariakiiwatani/ofxUndo)
-* [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)
-+ [ofxMSAInteractiveObject](https://github.com/moebiussurfing/ofxMSAInteractiveObject) [ FORK ]
-
+* [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect) / _Fork_
+* [ofxMSAInteractiveObject](https://github.com/moebiussurfing/ofxMSAInteractiveObject) / _Fork_
 ## Thanks
 *Thanks to all the above add-ons coders!*  
 *Special Thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector  
