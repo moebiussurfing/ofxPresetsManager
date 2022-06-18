@@ -21,15 +21,14 @@ _then I recommend to use my simpler add-on [ofxSurfingPresets](https://github.co
 - Easy to integrate into your projects.
 - Autogenerates a GUI to tweak all the parameters.
 - GUI based on **Dear ImGui** using a fork of **ofxImGui**.
-- Lot of customizations, **tools, and helpers**:  
-  * Clone, Copy, and **Organize presets**.
-  * Change GUI layout, customize docking windows, button sizes and Dark/Light **Themes**. 
+- Lot of customizations, **Tools, and Helpers**:  
+  * Clone, Copy, Swap and **Organize Presets**.
   * Play BPM Timed **Randomizer** to switch between presets (tweaking probabilities) independent for each group.
-  * **Randomize** some selected **parameters** for a preset.
-  * Handle **many Groups** independently. **Browse** multi groups by arrow **keys**.
+  * **Randomize** some selected **parameters** for a Preset. [Deprecated?]
+  * Handle **Many Groups** independently. **Browse** multi groups and presets by **arrows keys**.
   * **Undo** history engine.
 
-## **Multi groups**  
+## **Multi Groups**  
 
 When adding individually multiple `ofParameterGroup` we can handle them independently.  
 We can use arrow keys to browse the groups and their selectors.  
@@ -48,11 +47,11 @@ Archived and named presets that we can load into and from favorites.
 ## Two Working Modes
 
 1. **Edit Mode**:  
-Auto-saves parameters changes when switching between presets.  
+Auto saves parameters changes when switching between presets.  
 Used to allow fast edition of the parameters.  
 
 2. **Live Mode**:  
-Disables auto-save and hides some GUI sections to simplify and improve performance.  
+Disables auto save and hides some GUI sections to simplify and improve performance.  
 Used when just playing the scenes. (We can save manually.)
 
 ## **Two Randomizer Engines**
@@ -103,8 +102,15 @@ ofApp::setup()
 	presetsManager.setup();
 }
 
-// 5. Done!
-// nothing more!
+ofApp::draw()
+{
+	// 5. Gui
+	presetsManager.draw();
+}
+
+// 6. Done!
+// Nothing more!
+// Your parameters are auto updated.
 ```
 
 ## About the examples
@@ -135,7 +141,7 @@ This is useful because in some scenarios could help to improve the performance o
 [OUTDATED VIDEO](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
 
 ## Dependencies
-* [ofxImGui](https://github.com/Daandelange/ofxImGui/tree/jvcleave) [ FORK ]
+* [ofxImGui](https://github.com/Daandelange/ofxImGui/tree/jvcleave) / _Fork FROM @Daandelange_
 * [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
 * [ofxRemoteParameters](https://github.com/c-mendoza/ofxRemoteParameters) / _Not required. For the examples 3A-3B_  
 
