@@ -202,6 +202,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//params_Gui.add(ImGui_Position);
 	//params_Gui.add(ImGui_Size);
 	params_Gui.add(Gui_Internal_Position);
+	params_Gui.add(guiManager.bDebug);
 
 	//--
 
@@ -215,12 +216,7 @@ ofxPresetsManager::ofxPresetsManager()
 	std::string str;
 
 	sizeTTF = 9;
-	//sizeTTF = 11;
 	str = "telegrama_render.otf";
-
-	//sizeTTF = 10;
-	////str = "overpass-mono-bold.otf";
-	//str = "telegrama_render.otf";
 
 	myTTF = "assets/fonts/" + str;
 	bool bLoaded = myFont.load(myTTF, sizeTTF, true, true);
@@ -410,6 +406,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	params_Gui.add(bGui_Selectors);
 	params_Gui.add(bGui_PresetsParams);
+	params_Gui.add(guiManager.bHelp);
 	params_Gui.add(guiManager.bHelpInternal);
 
 	params_Control.add(params_Options);
@@ -918,7 +915,7 @@ void ofxPresetsManager::draw()
 
 	//----
 
-	// help info text: 
+	// Help info text: 
 
 	if (guiManager.bHelpInternal)
 	{
@@ -2293,6 +2290,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 		//-
 
 #ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
+
 		if (name == bMODE_LockClicker.getName())
 		{
 			if (bMODE_LockClicker.get()) {
@@ -2343,6 +2341,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 				//rectangle_PresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
 			}
 		}
+
 #endif
 
 		//----
@@ -2350,13 +2349,13 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 		//TODO:
 		// memmory mode. not implemented yet..
 
-		else if (name == "LOAD TO MEMORY" && loadToMemory)
+		else if (name == loadToMemory.getName() && loadToMemory)
 		{
 			ofLogNotice(__FUNCTION__) << "loadToMemory:" << e;
 			loadToMemory = false;
 			load_AllKit_ToMemory();
 		}
-		else if (name == "SAVE FROM MEMORY" && saveFromMemory)
+		else if (name == saveFromMemory.getName() && saveFromMemory)
 		{
 			ofLogNotice(__FUNCTION__) << "saveFromMemory:" << e;
 			saveFromMemory = false;
@@ -2389,6 +2388,11 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 		//{
 		//	if (bGui_Selectors) bGui_PresetsParams = false;
 		//}
+
+		else if (name == guiManager.bDebug.getName())
+		{
+			buildHelpInfo();
+		}
 
 		//--
 
@@ -3295,7 +3299,7 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 //--------------------------------------------------------------
 void ofxPresetsManager::draw_Gui_Main()
 {
-	//IMGUI_SUGAR__WINDOWS_CONSTRAINTS;
+	IMGUI_SUGAR__WINDOWS_CONSTRAINTSW;
 
 	if (guiManager.beginWindow(bGui_Main))
 	{
@@ -3305,6 +3309,8 @@ void ofxPresetsManager::draw_Gui_Main()
 		float _w25;
 		float _h;
 		guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
+
+		guiManager.AddLabelBig("Presets");
 
 		_h = (guiManager.bMinimize ? 1.4f : 2) * _h;
 		//if (guiManager.bMinimize) _h *= 0.7f;
@@ -3357,8 +3363,8 @@ void ofxPresetsManager::draw_Gui_Main()
 
 		// 0. Name Group
 
-		//str = "Group Name:";
-		//ImGui::Text(str.c_str());
+		str = "Group";
+		guiManager.AddLabel(str.c_str(), false, true);
 
 		str = index_PresetSelected[index_GroupSelected].getName();
 		guiManager.AddLabelBig(str.c_str(), false, true);
@@ -3373,7 +3379,7 @@ void ofxPresetsManager::draw_Gui_Main()
 			//str = "Group";
 			//ImGui::Text(str.c_str());
 
-			if (bBuildGroupSelector)
+			//if (bBuildGroupSelector)
 			{
 				guiManager.Add(index_GroupSelected); // user selected wich group to edit
 			}
@@ -3406,14 +3412,14 @@ void ofxPresetsManager::draw_Gui_Main()
 		// 2. Selected Preset 
 
 		guiManager.AddSpacing();
-		guiManager.AddLabelBig("Preset", false, true);
+		guiManager.AddLabel("Preset", false, true);
 		//ImGui::Text("Preset");
 
 		// Char key
 		int sel = index_GroupSelected.get();
 		int i = index_PresetSelected[sel];
 		std::string ss = labels[index_GroupSelected][i];
-		ss = " " + ss;
+		//ss = " " + ss;
 		guiManager.AddLabelBig(ss, false, true);
 		guiManager.AddSpacing();
 
@@ -3530,6 +3536,7 @@ void ofxPresetsManager::draw_Gui_Main()
 		{
 			guiManager.AddSpacingSeparated();
 			ImGui::Spacing();
+			guiManager.Add(guiManager.bHelp, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
 			guiManager.Add(guiManager.bHelpInternal, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
 			guiManager.Add(bGui_AdvancedControl, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
 		}
@@ -3789,10 +3796,12 @@ void ofxPresetsManager::buildHelpInfo() {
 
 	// build help info
 
-	bool _bDebug = false;
+	bool _bDebug = guiManager.bDebug;
+	//bool _bDebug = false;
 
 	helpInfo = "";
-	helpInfo += "PRESETS MANAGER \n\n";
+	helpInfo += "PRESETS MANAGER \n";
+	helpInfo += "HELP INTERNAL \n\n";
 
 	if (_bDebug)
 	{
@@ -3823,36 +3832,37 @@ void ofxPresetsManager::buildHelpInfo() {
 		//	helpInfo += ofToString((char)keys[0][keys[0].size() - 1]) + "]";
 		//}
 
-		helpInfo += "\n";
-		helpInfo += "\n";
+		helpInfo += "\n\n";
 	}
 
-	helpInfo += "KEYS \n";
+	helpInfo += "KEY COMMANDS \n";
 	helpInfo += "\n";
 
-	helpInfo += "H             HELP \n";
-	helpInfo += "G             GUI \n";
-	helpInfo += "E             EDIT \n";
+	helpInfo += "H               HELP \n";
+	helpInfo += "G               GUI \n";
+	helpInfo += "E               EDIT \n";
 	helpInfo += "\n";
 
-	helpInfo += "P             CLICKER \n";
-	helpInfo += "              LOAD \n";
-	helpInfo += "+Ctrl         SAVE/COPY \n";
-	helpInfo += "+Alt          SWAP \n";
-	helpInfo += "Arrows        EXPLORE \n";
+	helpInfo += "P               CLICKER \n";
+	helpInfo += "                LOAD \n";
+	helpInfo += "+Ctrl           SAVE/COPY \n";
+	helpInfo += "+Alt            SWAP \n";
+	helpInfo += "Arrows          EXPLORE \n";
 	helpInfo += "\n";
 
-	helpInfo += "Ctrl+SPACE    PLAY \n";
-	//helpInfo += "Ctrl+R        PRESET RANDOM \n";
+	helpInfo += "Ctrl + SPACE    PLAY \n";
+	//helpInfo += "Ctrl + R        PRESET RANDOM \n";
 	helpInfo += "\n";
 
 	// undo engine
 #ifdef INCLUDE_ofxUndoSimple
-	helpInfo += "Ctrl+Z        UNDO\n";
-	helpInfo += " +Shift       REDO\n";
-	helpInfo += "Ctrl+C        CLEAR\n";
-	helpInfo += "Ctrl+s        STORE\n";
+	helpInfo += "Ctrl + Z          UNDO\n";
+	helpInfo += " + Shift          REDO\n";
+	helpInfo += "Ctrl + C          CLEAR\n";
+	helpInfo += "Ctrl + s          STORE\n";
 #endif
+
+	helpTextBoxWidget.setText(helpInfo);
 }
 
 //--------------------------------------------------------------
@@ -4844,10 +4854,10 @@ void ofxPresetsManager::Changed_Index_GroupSelected(int& index)
 //--------------------------------------------------------------
 void ofxPresetsManager::draw_Help()
 {
-	helpTextBoxWidget.setText(helpInfo);
 #ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL
 	helpTextBoxWidget.setTheme(bThemeDarkOrLight);
 #endif
+
 	helpTextBoxWidget.draw();
 }
 
