@@ -13,8 +13,6 @@ public:
     void draw();
     void keyPressed(int key);
 
-	void setupParameters();
-
 	// group0
     ofParameterGroup params0;
     ofParameterGroup params0_Nested;
@@ -56,7 +54,10 @@ public:
 
 	//-
 
-	// scene
+	// Scene
+	
+	void setupScene();
+
 	void drawScene0();
     void drawScene1();
     void drawScene2();

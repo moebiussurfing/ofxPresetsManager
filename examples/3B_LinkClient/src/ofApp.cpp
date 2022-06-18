@@ -28,6 +28,9 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
+	// Gui
+	presetsManager.draw();
+
 	drawRemote();
 }
 

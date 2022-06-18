@@ -44,7 +44,6 @@ void ofApp::setup()
 
 	presetsManager.setGroupLinkSize(4); // customize GROUP_LINK size
 	presetsManager.setup(); // must call after adding all the ofParameterGroup(s)
-	presetsManager.setSizeBox_PresetClicker(50); // a bit smaller
 }
 
 //--------------------------------------------------------------
@@ -95,6 +94,9 @@ void ofApp::draw()
 	}
 	ofPopMatrix();
 	ofPopStyle();
+
+	// Gui
+	presetsManager.draw();
 }
 
 //--------------------------------------------------------------

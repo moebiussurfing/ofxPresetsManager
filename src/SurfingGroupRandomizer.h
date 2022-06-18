@@ -24,6 +24,7 @@ class SurfingGroupRandomizer
 {
 
 public:
+
 	SurfingGroupRandomizer();
 	~SurfingGroupRandomizer();
 
@@ -32,28 +33,39 @@ public:
 	//	ofxSurfingRandomizer randomizer;
 	//#endif
 
-		//clicker layout
+	// clicker layout
+
 private:
+
 	ofParameter<int> amntBtnsClicker{ "Max But", 1, 1, 1 };
 	ofParameter<bool> respBtnsClicker{ "Responsive", true };
 	ofParameter<bool> bExtraClicker{ "Extra", false };
+
+public:
+
 	ofParameter<bool> bGui_PlayerEditor;
 
 public:
+
 	ofParameterGroup params_FloatClicker;
 
 public:
+
 	void setup(ofParameterGroup &g, int _numPresets);
 	void setup(ofParameterGroup &g, vector<int> keysList);
 
 private:
+
 	ofParameterGroup params_PresetsProbs{ "PRESETS PROBS" };
 	ofParameterGroup params_PresetDurations{ "PRESETS DURATION" };
 
 private:
+
 	float timerPlayerPct;
 
 public:
+
+	//--------------------------------------------------------------
 	float getPlayerPct() {
 		return timerPlayerPct;
 	}
@@ -63,7 +75,24 @@ public:
 	//void setSelectorTARGET(ofParameter<int> &index);
 	//ofParameter<int> selectorTARGET;
 
+	//--
+	 
+	// Some Helpers
+	
+	//--------------------------------------------------------------
+	string getNameEditorWindow() {
+		return "EDITOR " + group.getName();
+	}
+
+	//--------------------------------------------------------------
+	string getNameWindowMain() {
+		return "PLAYER " + group.getName();
+	}
+	//--------------------------------------------------------------
+	bool getEditorWindowVisible() { return bGui_PlayerEditor.get(); }
+
 public:
+
 	void startup();
 	void doCheckRandomReady();
 
@@ -72,6 +101,7 @@ public:
 	void exit();
 
 private:
+
 	ofParameterGroup group;
 
 	void doDices();
@@ -79,6 +109,7 @@ private:
 	std::string path_RandomizerSettings;
 
 public:
+
 	void setPath_RandomizerSettings(string folder)
 	{
 		ofLogNotice(__FUNCTION__) << "Path: " << folder;
@@ -88,10 +119,14 @@ public:
 	ofParameter<bool>bMinimize{ "-1",false };
 
 public:
+
 	void drawImGui();
+	void drawImGui_Editor();
+	void drawImGui_Main();
 	void drawImGui_PlayerRandomizersMain();
 
 private:
+
 	void drawImGui_RandomizerEditPlayer();
 	//void drawImGui_RandomizerParams();
 
@@ -114,6 +149,7 @@ public:
 	//----
 
 private:
+
 	ofParameterGroup params_HelperTools;
 	ofParameterGroup params_Randomizer;
 	ofParameterGroup params_Control;// to use on external gui
@@ -130,16 +166,20 @@ private:
 	//--
 
 	//TODO:
-	// should be moved outside...
+	// Should be moved outside...
 
-	// helper tools
+	// Helper tools
+
 private:
+
 	ofParameter<bool> bCloneRight;
 	ofParameter<bool> bCloneAll;
 	ofParameter<bool> bPopulateAll;
 
-	// easy callbacks to avoid listeners..
+	// Easy callbacks to avoid listeners..
+
 public:
+
 	bool is_bCloneRight() {
 		if (bCloneRight) {
 			bCloneRight = false;
@@ -164,13 +204,14 @@ public:
 
 	//----
 
-	// randomizer
+	// Randomizer
 
 private:
+
 	ofParameterGroup params_RandomizerSettings{ "Randomizers" };
 
-	//private:
 public:
+
 	ofParameter<bool> bPLAY_RandomizeTimer; //play randomizer
 	ofParameter<bool> bRandomizeIndex;// trig randomize index
 	ofParameter<float> randomizeDurationBpm; // bpm
@@ -179,6 +220,7 @@ public:
 	ofParameter<float> randomizeDurationShortRatio;
 
 private:
+
 	ofParameter<bool> MODE_DicesProbs;
 	ofParameter<bool> MODE_LatchTrig; // this mode trigs the preset but goes back to preset 0 after duration timer
 	ofParameter<bool> MODE_AvoidRandomRepeat; // this mode re makes randomize again if new index preset it's the same!
@@ -187,6 +229,7 @@ private:
 	bool bLatchRun = false;
 
 private:
+
 	int randomizeSpeed;// real time duration
 	uint32_t randomizerTimer;
 	float MAX_DURATION_RATIO = 2.0f;
@@ -210,9 +253,11 @@ private:
 	//--
 
 private:
+
 	ofParameter<bool> bRandomizeFiltered;
 
 private:
+
 	ofParameter<bool> bRandomizeFiltered_All;// put all toggles/params to true. a randomize will act over all params
 	ofParameter<bool> bRandomizeFiltered_None;// put to disabled all toggles
 	ofParameter<bool> bRandomizeFiltered_PopulateFavs;// create all presets
@@ -223,9 +268,11 @@ private:
 	void Changed_Editor(ofAbstractParameter &e);
 
 public:
+
 	void doRandomPreset();// randomize params of current selected preset
 
 public:
+
 	void doRandomGroup(ofParameterGroup& group);// randomize params of current selected preset
 
 	vector<ofParameter<bool>> randomizersFiltered_TogglesVector;
@@ -235,9 +282,11 @@ public:
 	//--
 
 private:
+
 	ofParameterGroup params_randomizer;
 
 private:
+
 	ofParameter<int> randomizerProgress{ "%", 0, 0, 100 };
 	float _prog;
 
@@ -308,9 +357,12 @@ public:
 	}
 
 public:
+
+	//--------------------------------------------------------------
 	void setModeRandomizeAvoidRepeat(bool b) {
 		MODE_AvoidRandomRepeat = b;
 	}
+	//--------------------------------------------------------------
 	void setModeEditor(bool b) {
 		MODE_Editor = b;
 	}

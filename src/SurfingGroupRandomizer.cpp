@@ -1177,7 +1177,19 @@ void SurfingGroupRandomizer::drawImGui_RandomizerEditPlayer()
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::drawImGui()
 {
+	drawImGui_Main();
+	drawImGui_Editor();
+}
+
+//--------------------------------------------------------------
+void SurfingGroupRandomizer::drawImGui_Main()
+{
 	drawImGui_PlayerRandomizersMain();
+}
+
+//--------------------------------------------------------------
+void SurfingGroupRandomizer::drawImGui_Editor()
+{
 	if (bGui_PlayerEditor) drawImGui_RandomizerEditPlayer();
 }
 

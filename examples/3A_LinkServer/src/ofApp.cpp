@@ -54,6 +54,9 @@ void ofApp::draw()
 	ofPopMatrix();
 	ofPopStyle();
 
+	// Gui
+	presetsManager.draw();
+
 	//-
 
 	/* gui */

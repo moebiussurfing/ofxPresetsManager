@@ -1,26 +1,44 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
+void ofApp::setup()
+{
+	ofSetFrameRate(60);
+	ofSetWindowPosition(-1920, 25);
+	
+	//--
+
+	ofSetCircleResolution(200);
+
+	// Setup your parameters groups before add to the add-on!
+	setupScene();
+
+	//--
+	
+	setupPresets();
+}
+
+//--------------------------------------------------------------
 void ofApp::setupPresets()
 {
 	// 1. Optional before adding groups.
-	  
+
 	// Some API extra tweak controls:
 	// 
-	//presetsManager.setEnableKeysArrowBrowse(disable);// disable browsing using keys
-	
-	//presetsManager.setEnableGroupLinkSelector(false);// disable autocreation of the GROUP_LINK selector.
-	presetsManager.setGroupLinkAmountPresets(3);// set amount of presets for the autocreated GROUP_LINK selector (the lastone).
-	// default is 9 presets!
-	
+	//presetsManager.setEnableKeysArrowBrowse(disable); // disable browsing using keys
+
+	//presetsManager.setEnableGroupLinkSelector(false); // disable auto creation of the GROUP_LINK selector.
+	presetsManager.setGroupLinkAmountPresets(3); // set amount of presets for the auto created GROUP_LINK selector (the lastone).
+	// Default is 9 presets!
+
 	//--
 
 	// 2. Add many independent and parallel groups.
 
-	// build your presets manager:
-	// add our ofParameterGroup to the preset manager. 
-	// also define wich key triggers are associated to each preset. 
-	// the amount of keys will be also the amount of favorites/clickable presets for each group.
+	// Build your presets manager:
+	// Add our ofParameterGroup to the preset manager. 
+	// Also define which key triggers are associated to each preset. 
+	// The amount of keys will be also the amount of favorites/clickable presets for each group.
 
 	// group 0
 	presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' });
@@ -37,47 +55,56 @@ void ofApp::setupPresets()
 	//--
 
 	// 3. Setup
-	
+
 	presetsManager.setup(); // Call after adding groups!
 
 	//--
-	 
+
 	// 4. Optional
-	
-	//// customize user-kit name: 
-	//// then will create this named main settings file: 'bin/data/myKit_01.json'
-	//// must call setup after adding all ofParameterGroup's
+
+	//// Customize user-kit name: 
+	//// Then will create this named main settings file: 'bin/data/myKit_01.json'
+	//// Must call setup after adding all ofParameterGroup's
 	//std::string name = "myKit_01";
 	//presetsManager.setup(name);
 }
 
 //--------------------------------------------------------------
-void ofApp::setup()
+void ofApp::draw()
 {
-	ofSetFrameRate(60);
-	ofSetWindowPosition(-1920, 25);
-	
-	//--
+	// Scene draw 
+	// Linked to grouped parameters
+	if (show0) drawScene0();
+	if (show1) drawScene1();
+	if (show2) drawScene2();
+	if (show3) drawScene3();
 
-	ofSetCircleResolution(200);
-
-	// setup your parameters groups before add to the addon!
-	setupParameters();
-
-	//--
-	
-	setupPresets();
+	// Gui
+	presetsManager.draw();
 }
 
 //--------------------------------------------------------------
-void ofApp::setupParameters()
+void ofApp::keyPressed(int key)
+{
+	if (key == 'g') {
+		bGui = !bGui;
+		presetsManager.setVisible_GUI(bGui);
+	}
+}
+
+//--
+
+// Scene
+
+//--------------------------------------------------------------
+void ofApp::setupScene()
 {
 	//--
 
-	// some useful OF tips with parameters
+	// Some useful OF tips with parameters
 
-	// 1. we can exclude some parameters that we don't want to handle into presets
-	// ie: exclude all colors
+	// 1. We can exclude some parameters that we don't want to handle into presets
+	// e.g.: Exclude all colors
 	color0.setSerializable(false);
 	color1.setSerializable(false);
 	color2.setSerializable(false);
@@ -93,7 +120,7 @@ void ofApp::setupParameters()
 	// 0. ofParameterGroup's
 
 	// group0
-	params0.setName("paramsGroup0");// this is our parent group
+	params0.setName("Group0");// this is our parent group
 	params0.add(show0.set("show0", true));
 	params0.add(color0.set("color0", ofColor(255, 0, 0, _alpha), ofColor(0, 0), ofColor(255, 255)));
 	params0.add(numObjects0.set("numObjects0", 2, 1, 3));
@@ -106,7 +133,7 @@ void ofApp::setupParameters()
 	params0.add(params0_Nested);// add a group to the parent group
 
 	// group1
-	params1.setName("paramsGroup1");
+	params1.setName("Group1");
 	params1.add(show1.set("show1", true));
 	params1.add(color1.set("color1", ofColor(0, 255, 0, _alpha), ofColor(0, 0), ofColor(255, 255)));
 	params1.add(numObjects1.set("numObjects1", 2, 1, 3));
@@ -114,7 +141,7 @@ void ofApp::setupParameters()
 	params1.add(separation1.set("separation1", 100, 1, 100));
 
 	// group2
-	params2.setName("paramsGroup2");
+	params2.setName("Group2");
 	params2.add(show2.set("show2", true));
 	params2.add(color2.set("color2", ofColor(0, 0, 255, _alpha), ofColor(0, 0), ofColor(255, 255)));
 	params2.add(numObjects2.set("numObjects2", 2, 1, 3));
@@ -122,42 +149,13 @@ void ofApp::setupParameters()
 	params2.add(fill2.set("fill2", true));
 
 	// group3
-	params3.setName("paramsGroup3");
+	params3.setName("Group3");
 	params3.add(show3.set("show3", true));
 	params3.add(color3.set("color3", ofColor(255, 255, 0, _alpha), ofColor(0, 0), ofColor(255, 255)));
 	params3.add(numObjects3.set("numObjects3", 2, 1, 3));
 	params3.add(size3.set("size3", 5, 1, 100));
 	params3.add(separation3.set("separation3", 50, 5, 100));
 }
-
-//--------------------------------------------------------------
-void ofApp::draw()
-{
-	ofBackground(64);
-
-	// scene draw 
-	// linked to grouped parameters
-	if (show0) drawScene0();
-	if (show1) drawScene1();
-	if (show2) drawScene2();
-	if (show3) drawScene3();
-}
-
-//--------------------------------------------------------------
-void ofApp::keyPressed(int key)
-{
-	if (key == 'g') {
-		bGui = !bGui;
-		presetsManager.setVisible_GUI(bGui);
-	}
-	if (key == 'h') {
-		presetsManager.setToggleVisible_Help();
-	}
-}
-
-//--
-
-// scene
 
 //--------------------------------------------------------------
 void ofApp::drawScene0()
