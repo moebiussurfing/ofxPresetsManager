@@ -5,14 +5,15 @@ ofxPresetsManager
 
 An **openFrameworks** add-on to handle presets of several `ofParameter`'s nested into single or multiple `ofParameterGroup` containers.  
 
-Also *empowered* with a *nice GUI* and many *helpers* and customizations.
+Also *powered* with a *nice GUI* and many *Helpers* and customizations.
 
 **NOTE**  
-I recommend to use my simpler add-on [ofxSurfingPresets](https://github.com/moebiussurfing/ofxSurfingPresets).  
+_If you don't need multiple and independent and linkeable groups,_  
+_then I recommend to use my simpler add-on [ofxSurfingPresets](https://github.com/moebiussurfing/ofxSurfingPresets)._  
  
 ## Screenshot
 
-![image](/readme_images/Capture_v2.JPG?raw=true "image")  
+![](/examples/1_Basic/Capture.PNG)  
 
 ## Features
 
@@ -34,7 +35,7 @@ When adding individually multiple `ofParameterGroup` we can handle them independ
 We can use arrow keys to browse the groups and their selectors.  
 Also, we will have an extra **Global Selector** called **GROUP_LINK**, which groups all the other group selectors states:  
 
-![image](/readme_images/Capture_multigroupClicker.JPG?raw=true "image")  
+![](examples/2_MultiGroup/Capture.PNG)
 
 ## **Two Types of Presets**
 
@@ -59,7 +60,7 @@ Used when just playing the scenes. (We can save manually.)
 1. **RANDOM SELECTED INDEX**:  
 To select a preset index by random and probabilities, customizable tempo, and two types of preset/states durations: normal and short. 
 
-2. **RANDOM EDIT**:  
+2. **RANDOM EDIT**: [Deprecated?]  
 To randomize some enabled parameters from the current preset.  
 
 ## Usage
@@ -126,8 +127,6 @@ presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
 presetsManager.setup();
 ```
 
-![image](/readme_images/Capture_multigroup.JPG?raw=true "image")  
-
 * **3A_example-LinkServer** and **3B_example-LinkClient**:  
 Both examples runs linked together using **ofxRemoteParameters**.  
 This allows you to control the presets on the **Client OF_App**.  
@@ -138,10 +137,10 @@ This is useful because in some scenarios could help to improve the performance o
 ## Dependencies
 * [ofxImGui](https://github.com/Daandelange/ofxImGui/tree/jvcleave) [ FORK ]
 * [ofxSurfingHelpers](https://github.com/moebiussurfing/ofxSurfingHelpers)  
-* [ofxRemoteParameters](https://github.com/c-mendoza/ofxRemoteParameters) [ Only for the examples 3A-3B ]  
+* [ofxRemoteParameters](https://github.com/c-mendoza/ofxRemoteParameters) / _Not required. For the examples 3A-3B_  
 
 The below add-ons are already packed into **OF_ADDON/libs/** or into **ofxSurfingHelpers**.  
-No need to add them manually with the **OF PROJECT GENERATOR**:  
+No need to add them manually with the **oF PROJECT GENERATOR**:  
 * [ofxUndo](https://github.com/nariakiiwatani/ofxUndo)
 * [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect)
 + [ofxMSAInteractiveObject](https://github.com/moebiussurfing/ofxMSAInteractiveObject) [ FORK ]
@@ -155,11 +154,6 @@ which inspired this add-on a lot. Some of his code is also used here.*
 ## Tested Systems
 - **Windows10** / **VS2017** / **OF ~0.11**
 
-## History of Changes
-**v2.0**
-* Added examples for **ofxRemoteParameters** from **@c-mendoza**.
-* Switched to **ofxImGui** fork from **@Daandelange** allowing multiple ImGui instances, to combine many addons using **ImGui**.
-
 ## Notes / TODO
 * A Better performant version without using hard disk files. **Memory Mode**, using a vector of XML/JSON instead of files.
 * Improve (silent) de-serialization and ofParameter callbacks / triggering to improve speed.
@@ -170,7 +164,7 @@ which inspired this add-on a lot. Some of his code is also used here.*
 
 ## Author
 An addon by **@moebiusSurfing**  
-*( ManuMolina ) 2019-2021*
+*( ManuMolina ) 2019-2022*
 
 ## License
 *MIT License*
