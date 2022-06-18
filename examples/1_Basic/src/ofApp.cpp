@@ -53,8 +53,6 @@ void ofApp::setupScene()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
-	ofBackground(64);
-
 	// scene draw object linked to grouped parameters
 	ofPushStyle();
 	ofPushMatrix();
@@ -80,6 +78,4 @@ void ofApp::draw()
 void ofApp::keyPressed(int key) {
 
 	if (key == ' ') presetsManager.load_Next(0, true);
-
-	//if (key == 'G') presetsManager.setVisible_GUI(true);
 }

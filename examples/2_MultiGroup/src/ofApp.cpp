@@ -8,8 +8,6 @@ void ofApp::setup()
 	
 	//--
 
-	ofSetCircleResolution(200);
-
 	// Setup your parameters groups before add to the add-on!
 	setupScene();
 
@@ -41,7 +39,7 @@ void ofApp::setupPresets()
 	// The amount of keys will be also the amount of favorites/clickable presets for each group.
 
 	// group 0
-	presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' });
+	presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' , 'y' , 'u' , 'i', 'o' }); // 9
 
 	// group 1
 	presetsManager.add(params1, { 'a', 's', 'd', 'f' });
@@ -99,6 +97,8 @@ void ofApp::keyPressed(int key)
 //--------------------------------------------------------------
 void ofApp::setupScene()
 {
+	ofSetCircleResolution(200);
+
 	//--
 
 	// Some useful OF tips with parameters

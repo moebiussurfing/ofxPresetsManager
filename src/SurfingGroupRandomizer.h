@@ -56,8 +56,8 @@ public:
 
 private:
 
-	ofParameterGroup params_PresetsProbs{ "PRESETS PROBS" };
-	ofParameterGroup params_PresetDurations{ "PRESETS DURATION" };
+	ofParameterGroup params_PresetsProbs{ "PROBS" };
+	ofParameterGroup params_PresetDurations{ "DURATION" };
 
 private:
 
@@ -123,14 +123,11 @@ public:
 	void drawImGui();
 	void drawImGui_Editor();
 	void drawImGui_Main();
-	void drawImGui_PlayerRandomizersMain();
 
 private:
 
-	void drawImGui_RandomizerEditPlayer();
-	//void drawImGui_RandomizerParams();
+	//void drawEditor();
 
-	//ofParameter<bool> SHOW_Panel_EditPlayer;
 	//ofParameter<bool> bGui_RandomizerParams;
 
 	//-
@@ -152,6 +149,7 @@ private:
 
 	ofParameterGroup params_HelperTools;
 	ofParameterGroup params_Randomizer;
+	ofParameterGroup params_Timer;
 	ofParameterGroup params_Control;// to use on external gui
 
 	void Changed_Control(ofAbstractParameter &e);
@@ -221,8 +219,8 @@ public:
 
 private:
 
-	ofParameter<bool> MODE_DicesProbs;
-	ofParameter<bool> MODE_LatchTrig; // this mode trigs the preset but goes back to preset 0 after duration timer
+	ofParameter<bool> bDisable;
+	//ofParameter<bool> MODE_LatchTrig; // this mode trigs the preset but goes back to preset 0 after duration timer
 	ofParameter<bool> MODE_AvoidRandomRepeat; // this mode re makes randomize again if new index preset it's the same!
 	ofParameter<bool> bResetDices;
 	ofParameter<int> randomizedDice; // to test
@@ -245,7 +243,7 @@ private:
 	void setup_RandomizerIndexes();// engine to get a random between all posible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
 	void doRandomIndex();// randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
 	int doRandomIndexChanged();
-	void doResetDices();// reset all probs to 0
+	void doReset();// reset all probs to 0
 	int dicesTotalAmount;// total dices summing the prob of any preset probability (PROB1 + PROB2 + ...)
 
 	int timerRandomizer;

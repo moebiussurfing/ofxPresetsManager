@@ -460,7 +460,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 			// link minimized
 			groupRandomizers[i].bMinimize.makeReferenceTo(guiManager.bMinimize);
-		
+
 			groupRandomizers[i].bGui_PlayerEditor.makeReferenceTo(bGui_PlayerEditor);
 
 			//-
@@ -2972,22 +2972,35 @@ void ofxPresetsManager::draw_Gui_Parameters()
 				string s = "#" + ofToString(i);
 				ImGui::Text(s.c_str());
 			}
-			else
-			{
-				//string s = ofToString(groups.back().getName());
-				//ImGui::Text(s.c_str());
-				guiManager.Add(index_PresetSelected.back());
-
-				ImGui::Spacing();
-			}
 
 			// populate group widgets
 			static ImGuiCond cond = ImGuiCond_Appearing;
 			bool bopen = false;
+
+			////TODO: fails hidding some headers..
+			//if (i == index_GroupSelected) {
+			//	bopen = true;
+			//	cond = ImGuiCond_Once;
+			//}
+			//else cond = ImGuiCond_Once;
+
 			guiManager.AddGroup(groups[i], bopen, cond);
 
+			//--
+
+			// Link group selector
+
+			if (bLast)
+			{
+				//string s = ofToString(groups.back().getName());
+				//ImGui::Text(s.c_str());
+
+				ImGui::Spacing();
+				guiManager.Add(index_PresetSelected.back());
+			}
+
 			if (bLast) {}
-			if (!bLast) ImGui::Spacing();
+			//if (!bLast) ImGui::Spacing();
 		}
 
 		//--
@@ -3038,6 +3051,7 @@ void ofxPresetsManager::draw_Gui_Parameters()
 		//--
 
 		// Extra params added but not included into presets
+
 		static ImGuiCond cond = ImGuiCond_Appearing;
 		bool bopen = false;
 		if (bAppStateParams) guiManager.AddGroup(params_AppSettings, bopen, cond);
@@ -3051,7 +3065,7 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 {
 	//IMGUI_SUGAR__WINDOWS_CONSTRAINTS_BIG;
 
-	ImVec2 size_min = ImVec2(300, 300);
+	ImVec2 size_min = ImVec2(330, 300);
 	ImVec2 size_max = ImVec2(450, 900);
 	ImGui::SetNextWindowSizeConstraints(size_min, size_max);
 
@@ -3068,8 +3082,8 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 
 		static ofParameter<bool> bResponsive{ "Responsive", true };//not works
 
-		//guiManager.AddSpacing();
 		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED);
+		guiManager.AddSpacing();
 		guiManager.Add(bGui_PanelsAll, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 
 		//--
@@ -3299,25 +3313,15 @@ void ofxPresetsManager::draw_Gui_Main()
 
 		//---
 
-		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED);
 
 		ImGui::Spacing();
 
 		SurfingImGuiTypes s = OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM;
 
-		//guiManager.Add(bGui_Panels, s);
-
 		guiManager.Add(bGui_Clicker, s);
 		guiManager.Add(bGui_Parameters, s);
 		guiManager.Add(bGui_Players, s);
-
-		//if (bGui_Players)
-		//{
-		//	guiManager.Indent();
-		//	guiManager.Add(bGui_ShowAllGroups, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);
-		//	//guiManager.Add(bGui_PlayerEditor, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
-		//	guiManager.Unindent();
-		//}
 
 		guiManager.AddSpacingSeparated();
 		guiManager.AddSpacing();
@@ -3401,14 +3405,17 @@ void ofxPresetsManager::draw_Gui_Main()
 
 		// 2. Selected Preset 
 
+		guiManager.AddSpacing();
 		guiManager.AddLabelBig("Preset", false, true);
 		//ImGui::Text("Preset");
 
 		// Char key
 		int sel = index_GroupSelected.get();
 		int i = index_PresetSelected[sel];
-		std::string ss = labels[index_GroupSelected][i];					
-		guiManager.AddLabel(ss, false, true);
+		std::string ss = labels[index_GroupSelected][i];
+		ss = " " + ss;
+		guiManager.AddLabelBig(ss, false, true);
+		guiManager.AddSpacing();
 
 		// Index
 		guiManager.Add(index_PresetSelected[index_GroupSelected]);
@@ -3592,8 +3599,8 @@ void ofxPresetsManager::draw_Gui_Main()
 				{
 					doRedo();
 				}
-			}
 		}
+	}
 
 #endif
 
@@ -3670,7 +3677,7 @@ void ofxPresetsManager::draw_Gui_Main()
 		//--
 
 		guiManager.endWindow();
-	}
+}
 }
 
 //--------------------------------------------------------------
@@ -3720,10 +3727,10 @@ void ofxPresetsManager::draw_Gui_Advanced()
 					ImGui::PopItemWidth();
 
 					//if (bHelp)ofxImGuiSurfing::AddParameter(helpPos);
-				}
+		}
 
 				ImGui::TreePop();
-			}
+	}
 #endif
 			//--
 
@@ -3771,8 +3778,8 @@ void ofxPresetsManager::draw_Gui_Advanced()
 			}
 
 			ImGui::TreePop();
-		}
-	}
+}
+}
 }
 
 //--
@@ -4820,8 +4827,8 @@ void ofxPresetsManager::doRefreshUndoParams() {
 		//str += undoStringParams.getUndoStateDescriptor() + "\n";
 
 		ofLogNotice(__FUNCTION__) << str;
+		}
 	}
-}
 
 #endif
 
