@@ -8,11 +8,13 @@ void ofApp::setup()
 	
 	//--
 
-	// Setup your parameters groups before add to the add-on!
+	// Setup your parameters groups 
+	// before add to the add-on!
 	setupScene();
 
 	//--
-	
+
+	// Presets Manager
 	setupPresets();
 }
 
@@ -116,8 +118,8 @@ void ofApp::setupScene()
 	color3.setSerializable(false);
 
 	// 2. we can link some parameters to make them change together
-	// must call makeRefereceTo before params are setted below
-	// note that setted names will be overrided
+	// must call makeRefereceTo before params are settled below
+	// note that settled names will be override
 	//size2.makeReferenceTo(size3);
 
 	//--
@@ -125,17 +127,17 @@ void ofApp::setupScene()
 	// 0. ofParameterGroup's
 
 	// group0
-	params0.setName("Group0");// this is our parent group
+	params0.setName("Group0"); // this is our parent group
 	params0.add(show0.set("show0", true));
 	params0.add(color0.set("color0", ofColor(255, 0, 0, _alpha), ofColor(0, 0), ofColor(255, 255)));
 	params0.add(numObjects0.set("numObjects0", 2, 1, 3));
 	params0.add(shapeType0.set("shapeType0", 1, 1, 2));
 	params0.add(separation0.set("separation0", 100, 1, 100));
 	params0.add(shapeSide0.set("shapeSide0", 50, 5, 200));
-	params0_Nested.setName("styleGroup");// we can use nested groups as ofParameterGroup
+	params0_Nested.setName("styleGroup"); // we can use nested groups as ofParameterGroup
 	params0_Nested.add(fill0.set("fill0", true));
 	params0_Nested.add(lineWidth0.set("lineWidth0", 1, 0.1, 10));
-	params0.add(params0_Nested);// add a group to the parent group
+	params0.add(params0_Nested); // add a group to the parent group
 
 	// group1
 	params1.setName("Group1");
