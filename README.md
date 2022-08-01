@@ -11,8 +11,6 @@ Also *powered* with a *nice GUI* and many *Helpers* and customizations.
 _If you don't need multiple and independent and linkeable groups,_  
 _then I recommend to use my simpler add-on [ofxSurfingPresets](https://github.com/moebiussurfing/ofxSurfingPresets)._  
  
-## Screenshot
-
 #### 1_Basic (only one group)
 ![](/Examples/1_Basic/Capture.PNG)  
 
