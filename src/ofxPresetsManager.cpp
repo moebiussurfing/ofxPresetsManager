@@ -129,7 +129,7 @@ ofxPresetsManager::ofxPresetsManager()
 	//bGui_Panels.set("PANELS", true);
 	//bHelp.set("Help", false);
 	bGui_AdvancedControl.set("Advanced", false);
-	MODE_StandalonePresets_NEW.set("NEW!", false);
+	MODE_StandalonePresets_NEW.set("New!", false);
 	//ENABLE_Keys.setSerializable(false);
 	//bKeys.set("Keys", true);
 	//bKeys.setSerializable(false);
@@ -440,6 +440,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	params_Gui.add(bGui_Selectors);
 	params_Gui.add(bGui_PresetsParams);
+	params_Gui.add(guiManager.bMinimize);
 	params_Gui.add(guiManager.bHelp);
 	params_Gui.add(guiManager.bHelpInternal);
 
@@ -941,10 +942,8 @@ void ofxPresetsManager::draw()
 
 	guiManager.begin();
 	{
-		//if (bGui_PanelsAll) ImGui_Draw_Windows();
 		ImGui_Draw_Windows();
 
-		// ImGui Clicker
 		if (bGui_Clicker) draw_Gui_ClickerPresets_ImGui();
 	}
 	guiManager.end();
@@ -2981,7 +2980,7 @@ void ofxPresetsManager::draw_Gui_Parameters()
 {
 	string n = "PRESETS PARAMETERS";
 
-	IMGUI_SUGAR__WINDOWS_CONSTRAINTSW;
+	IMGUI_SUGAR__WINDOWS_CONSTRAINTSW_MEDIUM;
 
 	if (guiManager.beginWindowSpecial(bGui_Parameters))
 	{
@@ -3128,15 +3127,16 @@ void ofxPresetsManager::draw_Gui_Parameters()
 void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 {
 	//IMGUI_SUGAR__WINDOWS_CONSTRAINTS_BIG;
+
 	if (groups.size() > 1)
 	{
 		ImVec2 size_min = ImVec2(330, 300);
-		ImVec2 size_max = ImVec2(450, 900);
+		ImVec2 size_max = ImVec2(450, ofGetHeight() * 0.95f);
 		ImGui::SetNextWindowSizeConstraints(size_min, size_max);
 	}
 	else {
 		ImVec2 size_min = ImVec2(330, 0);
-		ImVec2 size_max = ImVec2(450, 900);
+		ImVec2 size_max = ImVec2(450, ofGetHeight() * 0.95f);
 		ImGui::SetNextWindowSizeConstraints(size_min, size_max);
 	}
 
@@ -3147,10 +3147,8 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 		guiManager.AddLabelBig("Presets");
 
 		float _h = 2 * guiManager.getWidgetsHeight();
-		//float _h = (guiManager.bMinimize ? 1.4f : 2) * guiManager.getWidgetsHeight();
-
 		float _h2 = 0.7f * _h;
-		float _w100 = ImGui::GetContentRegionAvail().x;
+		float _w100 = guiManager.getWidgetsWidth(1);
 		float _w50 = guiManager.getWidgetsWidth(2);
 
 		static ofParameter<bool> bResponsive{ "Responsive", true }; // not works
@@ -3158,13 +3156,19 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED);
 		guiManager.AddSpacing();
 
-		//deprecated
+		// deprecated
 		//guiManager.Add(bGui_PanelsAll, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 
 		//TODO:
 		guiManager.Add(bGui_Main, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 
-		//--
+		if (!bGui_Main)
+		{
+			guiManager.AddSpacing();
+
+			guiManager.Add(guiManager.bKeys, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+			guiManager.AddTooltip("Enable key commands");
+		}
 
 		guiManager.AddSpacingBigSeparated();
 
@@ -3177,8 +3181,8 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 			// Edit / Live Modes
 
 			ofxImGuiSurfing::AddBigToggleNamed(bMODE_EditLive, _w100, _h, "EDIT MODE", "LIVE MODE", true);
-			if (bMODE_EditLive) guiManager.AddTooltip("Auto saves");
-			else guiManager.AddTooltip("Requires manual save!");
+			if (bMODE_EditLive) guiManager.AddTooltip("Auto Saves \nwhen selector change");
+			else guiManager.AddTooltip("Requires manual save! \nAfter touched params");
 
 			//--
 
@@ -3229,18 +3233,16 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 
 		//--
 
+		// Prepare optimized column sizes
 		// One row per group. 
 		// get and set the max.
 		int maxSz1 = 3;
-		int maxSz2 = 3;
 		ImVec2 sz2;
-
 		for (size_t i = 0; i < keys.size(); ++i)
 		{
-			int sz1 = keys[i].size();
-			if (sz1 > maxSz1) maxSz1 = sz1;
-
-			sz2 = ImGui::CalcTextSize(groups[i].getName().c_str());
+			int sz1 = keys[i].size();//amount toggles on row i
+			if (sz1 > maxSz1) maxSz1 = sz1;//memo the row with max toggles
+			sz2 = ImGui::CalcTextSize(groups[i].getName().c_str());//label size
 		}
 
 		// Iterate groups
@@ -3249,7 +3251,6 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 		{
 			ImGui::Columns(2, nullptr, false);
 			ImGui::SetColumnWidth(0, sz2.x + 40);
-			//ImGui::SetColumnWidth(0, 103);
 
 			bool b = groups.size() > 1 && guiManager.bKeys.get();
 
@@ -3258,11 +3259,15 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 			if (!bAllowGroupSelector) bLast = false;
 			// main merged group, no need to treat different of last group!
 			// last is true if it's the groups merge selector,
-			// named GOROUP_LINK by default!
+			// named GROUP_LINK by default!
 
 			if (bLast && groups.size() > 1)
 			{
+				//ImGui::Dummy(ImVec2(0, 5)); //offset
+				//ImGui::Separator();
 				ImGui::Separator();
+				//ImGui::Spacing();//not working..
+				//ImGui::Spacing();
 			}
 
 			//--
@@ -3273,7 +3278,7 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 
 			if (!guiManager.bMinimize) // not minimized
 			{
-				ImGui::Dummy(ImVec2(0, 2)); //offset
+				ImGui::Dummy(ImVec2(0, 2)); // offset to left labels a bit down
 
 				if (!bLast) // not last
 				{
@@ -3345,53 +3350,16 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 
 		//--
 
-		if (!guiManager.bMinimize)
+		// Hide when main window is visible
+		// to not duplicate controls on the two windows
+		if (!bGui_Main)
 		{
-			guiManager.AddSpacingBig();
-
-			if (groups.size() > 1)
+			if (!guiManager.bMinimize)
 			{
 				guiManager.AddSpacingSeparated();
-				guiManager.AddLabelBig("Players");
 
-				//guiManager.Add(bPLAY_Global, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-
-				// Blink by timer
-				ofxImGuiSurfing::AddBigToggleNamed(bPLAY_Global, _w100, _h,
-					"GLOBAL PLAYING", "GLOBAL PLAY ", true, groupRandomizers.back().getPlayerPct());
-				guiManager.AddTooltip("Play all the group's players");
-
-				guiManager.AddSpacingSeparated();
+				draw_Gui_PlayersWidgets();
 			}
-
-			for (int i = 0; i < groupRandomizers.size(); i++)
-			{
-				if (i == groupRandomizers.size() - 1) {
-					guiManager.AddSpacingSeparated();
-				}
-
-				ImGui::PushID(i);
-				{
-					string s = groups[i].getName();
-					ImGui::Text(s.c_str());
-
-					// Blink by timer
-					ofxImGuiSurfing::AddBigToggleNamed(groupRandomizers[i].bPLAY_RandomizeTimer, _w100, 0.7f * _h,
-						"PLAYING", "PLAY", true, groupRandomizers[i].getPlayerPct());
-				}
-				ImGui::PopID();
-			}
-		}
-
-		if (!guiManager.bMinimize)
-		{
-			guiManager.AddSpacingBigSeparated();
-
-			guiManager.Add(guiManager.bKeys, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-			guiManager.AddTooltip("Enable key commands");
-
-			guiManager.Add(guiManager.bAutoResize, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);
-			guiManager.AddTooltip("Disable to allow window resize \nbut could be constrained");
 		}
 
 		//--
@@ -3407,19 +3375,19 @@ void ofxPresetsManager::draw_Gui_Main()
 
 	if (guiManager.beginWindowSpecial(bGui_Main))
 	{
+		std::string str;
+
 		float _w100;
 		float _w50;
 		float _w33;
 		float _w25;
 		float _h;
+
 		guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
+		guiManager.refreshLayout();
+		_h = (guiManager.bMinimize ? 1.3f : 2) * _h;
 
 		guiManager.AddLabelBig("Presets");
-
-		_h = (guiManager.bMinimize ? 1.4f : 2) * _h;
-		//if (guiManager.bMinimize) _h *= 0.7f;
-
-		std::string str;
 
 		//---
 
@@ -3427,11 +3395,15 @@ void ofxPresetsManager::draw_Gui_Main()
 
 		ImGui::Spacing();
 
-		SurfingImGuiTypes s = OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM;
+		SurfingImGuiTypes s = guiManager.bMinimize ? OFX_IM_TOGGLE_BUTTON_ROUNDED : OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM;
 
 		guiManager.Add(bGui_Clicker, s);
 		guiManager.Add(bGui_Parameters, s);
 		guiManager.Add(bGui_Players, s);
+		if (!guiManager.bMinimize) {
+			guiManager.Add(bGui_Standalones, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+			guiManager.AddTooltip("WIP. Unstable");
+		}
 
 		guiManager.AddSpacingSeparated();
 		guiManager.AddSpacing();
@@ -3441,8 +3413,8 @@ void ofxPresetsManager::draw_Gui_Main()
 		// 0. Edit Mode
 
 		ofxImGuiSurfing::AddBigToggleNamed(bMODE_EditLive, _w100, 2 * _h, "EDIT MODE", "LIVE MODE", true);
-		if (bMODE_EditLive) guiManager.AddTooltip("Auto saves");
-		else guiManager.AddTooltip("Requires manual save!");
+		if (bMODE_EditLive) guiManager.AddTooltip("Auto Saves \nwhen selector change");
+		else guiManager.AddTooltip("Requires manual save! \nAfter touched params");
 
 		//--
 
@@ -3469,97 +3441,110 @@ void ofxPresetsManager::draw_Gui_Main()
 
 		//--
 
-		// 0. Name Group
+		ImGuiTreeNodeFlags flagsTree;
+		flagsTree = ImGuiTreeNodeFlags_Framed;
 
-		str = "Group";
-		guiManager.AddLabel(str.c_str(), false, true);
-
-		str = index_PresetSelected[index_GroupSelected].getName();
-		guiManager.AddLabelBig(str.c_str(), false, true);
-		guiManager.AddSpacing();
-
-		//--
-
-		// 1. Selected Group
-
-		if (groups.size() > 1)
+		if (ImGui::TreeNodeEx("SELECTORS", flagsTree))
 		{
-			//str = "Group";
-			//ImGui::Text(str.c_str());
-
-			//if (bBuildGroupSelector)
-			{
-				guiManager.Add(index_GroupSelected); // user selected which group to edit
-			}
+			guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
+			guiManager.refreshLayout();
 
 			//--
 
+			// 0. Name Group
+
+			str = "Group";
+			guiManager.AddLabel(str.c_str(), false, true);
+
+			str = index_PresetSelected[index_GroupSelected].getName();
+			guiManager.AddLabelBig(str.c_str(), false, true);
+			guiManager.AddSpacing();
+
+			//--
+
+			// 1. Selected Group
+
+			if (groups.size() > 1)
+			{
+				//if (bBuildGroupSelector)
+				{
+					guiManager.Add(index_GroupSelected); // user selected which group to edit
+				}
+
+				//--
+
+				// Next / Previous
+
+				ImGui::PushID("##groupArrow");
+				{
+					if (ImGui::Button("<", ImVec2(_w50, _h)))
+					{
+						index_GroupSelected--;
+					}
+
+					ImGui::SameLine();
+
+					if (ImGui::Button(">", ImVec2(_w50, _h)))
+					{
+						index_GroupSelected++;
+					}
+				}
+				ImGui::PopID();
+
+				guiManager.AddSpacingSeparated();
+			}
+
+			//-
+
+			// 2. Selected Preset 
+
+			guiManager.AddSpacing();
+			guiManager.AddLabel("Preset", false, true);
+
+			// Char key
+			int sel = index_GroupSelected.get();
+			int i = index_PresetSelected[sel];
+			std::string ss = labels[index_GroupSelected][i];
+
+			guiManager.AddLabelBig(ss, false, true);
+			guiManager.AddSpacing();
+
+			// Index
+			guiManager.Add(index_PresetSelected[index_GroupSelected]);
+
+			//-
+
 			// Next / Previous
 
-			ImGui::PushID("##groupArrow");
-
-			if (ImGui::Button("<", ImVec2(_w50, _h)))
+			ImGui::PushButtonRepeat(true);
 			{
-				index_GroupSelected--;
+				ImGui::PushID("##presetsArrow");
+				{
+					if (ImGui::Button("<", ImVec2(_w50, _h)))
+					{
+						int ig = index_GroupSelected.get();
+						load_Previous(ig, true);
+					}
+
+					ImGui::SameLine();
+
+					if (ImGui::Button(">", ImVec2(_w50, _h)))
+					{
+						int ig = index_GroupSelected.get();
+						load_Next(ig, true);
+					}
+				}
+				ImGui::PopID();
 			}
+			ImGui::PopButtonRepeat();
 
-			ImGui::SameLine();
+			//--
 
-			if (ImGui::Button(">", ImVec2(_w50, _h)))
-			{
-				index_GroupSelected++;
-			}
-
-			ImGui::PopID();
-
-			guiManager.AddSpacingSeparated();
+			ImGui::TreePop();
 		}
 
-		//-
-
-		// 2. Selected Preset 
-
-		guiManager.AddSpacing();
-		guiManager.AddLabel("Preset", false, true);
-		//ImGui::Text("Preset");
-
-		// Char key
-		int sel = index_GroupSelected.get();
-		int i = index_PresetSelected[sel];
-		std::string ss = labels[index_GroupSelected][i];
-		//ss = " " + ss;
-
-		guiManager.AddLabelBig(ss, false, true);
-		guiManager.AddSpacing();
-
-		// Index
-		guiManager.Add(index_PresetSelected[index_GroupSelected]);
-
-		//-
-
-		// Next / Previous
-
-		ImGui::PushButtonRepeat(true);
-		{
-			ImGui::PushID("##presetsArrow");
-
-			if (ImGui::Button("<", ImVec2(_w50, _h)))
-			{
-				int ig = index_GroupSelected.get();
-				load_Previous(ig, true);
-			}
-
-			ImGui::SameLine();
-
-			if (ImGui::Button(">", ImVec2(_w50, _h)))
-			{
-				int ig = index_GroupSelected.get();
-				load_Next(ig, true);
-			}
-
-			ImGui::PopID();
-		}
-		ImGui::PopButtonRepeat();
+		guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
+		guiManager.refreshLayout();
 
 		//----
 
@@ -3590,68 +3575,47 @@ void ofxPresetsManager::draw_Gui_Main()
 
 		//--
 
-		//TODO:
 		// 3. Players
 
-		if (!guiManager.bMinimize)
-		{
-			guiManager.AddSpacingBigSeparated();
+		//if (!guiManager.bMinimize)
+		guiManager.AddSpacingBigSeparated();
 
-			std::string name;
-			if (groups.size() <= 1) name = "PLAYER";
-			else name = "PLAYERS";
+		draw_Gui_PlayersWidgets();
 
-			if (ImGui::CollapsingHeader(name.c_str()))
-			{
-				guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
-
-				//ofxImGuiSurfing::AddToggleRoundedButton(bGui_Players);
-				//guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-
-				for (int i = 0; i < groupRandomizers.size(); i++)
-				{
-					if (i == groupRandomizers.size() - 1) {
-						guiManager.AddSpacingSeparated();
-					}
-
-					ImGui::PushID(i);
-					{
-						string s = groups[i].getName();
-						ImGui::Text(s.c_str());
-
-						// Blink by timer
-						ofxImGuiSurfing::AddBigToggleNamed(groupRandomizers[i].bPLAY_RandomizeTimer, _w100, _h, "PLAYING", "PLAY", true, groupRandomizers[i].getPlayerPct());
-					}
-					ImGui::PopID();
-				}
-
-				//ImGui::Dummy(ImVec2(0.0f, 2.0f));
-
-				//if (groups.size() > 1)
-				//{
-				//	if (ofxImGuiSurfing::AddToggleRoundedButton(bGui_ShowAllGroups))
-				//	{
-				//		// Workflow:
-				//		if (!bGui_Players) bGui_Players = true;
-				//	}
-				//}
-			}
-		}
+		guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
+		guiManager.refreshLayout();
 
 		//--
 
-		// 4. Advanced
+		// 4. More
 
 		if (!guiManager.bMinimize)
 		{
 			guiManager.AddSpacingSeparated();
-			ImGui::Spacing();
-			guiManager.Add(guiManager.bHelp, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
-			if (guiManager.isHelpInternalEnable())
-				guiManager.Add(guiManager.bHelpInternal, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+			guiManager.AddSpacing();
+
+			guiManager.Add(guiManager.bKeys, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+			guiManager.AddTooltip("Enable key commands");
+
+			guiManager.Add(guiManager.bHelp, OFX_IM_TOGGLE_BUTTON_ROUNDED);
+			if (guiManager.isHelpInternalEnable()) guiManager.Add(guiManager.bHelpInternal, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+
+			guiManager.Add(guiManager.bAutoResize, OFX_IM_TOGGLE_BUTTON_ROUNDED_MINI);
+			guiManager.AddTooltip("Disable to allow window resize \nbut could be constrained");
+
+			//--
+
 			guiManager.AddSpacingSeparated();
 
-			guiManager.Add(bGui_AdvancedControl, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+			guiManager.Add(bGui_AdvancedControl, OFX_IM_TOGGLE_BUTTON_ROUNDED);
+		}
+		else
+		{
+			guiManager.AddSpacingSeparated();
+			guiManager.AddSpacing();
+
+			guiManager.Add(guiManager.bKeys, s);
+			guiManager.AddTooltip("Enable key commands");
 		}
 
 		ImGui::Spacing();
@@ -3665,21 +3629,23 @@ void ofxPresetsManager::draw_Gui_Main()
 			if (ImGui::CollapsingHeader("TOOLS"))
 			{
 				guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
-				_h *= 2;
+				guiManager.refreshLayout();
 
-				//TODO: select which added group
-				int i = 0;
-				//int ii = index_PresetSelected[i];
+				int i = index_GroupSelected;
 
-				if (ImGui::Button("CLONE ALL", ImVec2(_w100, _h / 2)))
+				if (ImGui::Button("CLONE ALL", ImVec2(_w50, _h)))
 				{
 					doCloneAll(i);
 				}
-				if (ImGui::Button("CLONE >", ImVec2(_w100, _h / 2)))
+				ImGui::SameLine();
+				if (ImGui::Button("CLONE >", ImVec2(_w50, _h)))
 				{
 					doCloneRight(i);
 				}
 			}
+
+			guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
+			guiManager.refreshLayout();
 		}
 
 		//--
@@ -3693,6 +3659,8 @@ void ofxPresetsManager::draw_Gui_Main()
 			if (ImGui::CollapsingHeader("UNDO ENGINE"))
 			{
 				guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
+				guiManager.refreshLayout();
+
 				_h *= 2;
 
 				str = "History: " + ofToString(undoStringsParams[index_GroupSelected].getUndoLength()) + "/";
@@ -3720,6 +3688,9 @@ void ofxPresetsManager::draw_Gui_Main()
 					doRedo();
 				}
 			}
+
+			guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
+			guiManager.refreshLayout();
 		}
 
 #endif
@@ -3731,9 +3702,14 @@ void ofxPresetsManager::draw_Gui_Main()
 		// Workflow: force hide when live mode
 		if (bGui_AdvancedControl) draw_Gui_WidgetsAdvanced();
 
+		guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
+		guiManager.refreshLayout();
+
 		//-
 
 		// 8. Mouse over GUI
+		bLockMouseByImGui = guiManager.isMouseOverGui();
+		/*
 		//TODO: could be removed bc it's already implemented into ofxSurinfgImGui
 		{
 			static bool bAutoLocKeysOnMouseHoverGui = false;
@@ -3746,6 +3722,7 @@ void ofxPresetsManager::draw_Gui_Main()
 				// must be insisde some window
 			}
 		}
+		*/
 
 		//--
 
@@ -3760,15 +3737,14 @@ void ofxPresetsManager::draw_Gui_Main()
 
 				// label for User-Kit folder
 				str = "USER-KIT";
-				//ImGui::Text(str.c_str());
 				guiManager.AddLabelBig(str, true, true);
 
 				str = path_UserKit_Folder;
-				ofStringReplace(str, "/", "/\n"); //split in lines to reduce panel width
+				//split in lines to reduce panel width
+				ofStringReplace(str, "/", "/\n");
 				str += "/";
-				//ImGui::Text(str.c_str());
 				guiManager.AddLabel(str, false, true);
-			}
+	}
 
 			//--
 
@@ -3792,7 +3768,10 @@ void ofxPresetsManager::draw_Gui_Main()
 				str = "Preset " + ofToString(ip) + "/" + ofToString(keys[ig].size() - 1);
 				ImGui::Text(str.c_str());
 			}
-		}
+}
+
+		guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
+		guiManager.refreshLayout();
 
 		//--
 
@@ -3819,7 +3798,7 @@ void ofxPresetsManager::draw_Gui_WidgetsAdvanced()
 
 			//--
 
-			ofxImGuiSurfing::AddParameter(guiManager.bKeys);
+			//ofxImGuiSurfing::AddParameter(guiManager.bKeys);
 			ofxImGuiSurfing::AddParameter(bAutoSave);
 			ofxImGuiSurfing::AddParameter(bAutoLoad);
 
@@ -3898,9 +3877,9 @@ void ofxPresetsManager::draw_Gui_WidgetsAdvanced()
 			}
 
 			ImGui::TreePop();
-		}
-	}
-}
+					}
+				}
+			}
 
 //--
 
@@ -3914,8 +3893,8 @@ void ofxPresetsManager::buildHelpInfo() {
 
 	helpInfo = "";
 	helpInfo += "HELP \n";
-	helpInfo += "\n";
 	helpInfo += "PRESETS MANAGER \n";
+	helpInfo += "\n";
 
 	if (_bDebug)
 	{
@@ -3949,8 +3928,8 @@ void ofxPresetsManager::buildHelpInfo() {
 		helpInfo += "\n\n";
 	}
 
-		helpInfo += "KEY COMMANDS \n";
-		helpInfo += "\n";
+	helpInfo += "KEY COMMANDS \n";
+	helpInfo += "\n";
 
 	if (guiManager.bKeys) {
 		helpInfo += "H               HELP \n";
@@ -3958,14 +3937,17 @@ void ofxPresetsManager::buildHelpInfo() {
 		helpInfo += "E               EDIT \n";
 		helpInfo += "\n";
 
+		helpInfo += "                PRESETS \n";
 		helpInfo += "P               CLICKER \n";
 		helpInfo += "\n";
 		helpInfo += "                LOAD \n";
-		helpInfo += "+Ctrl           SAVE/COPY \n";
-		helpInfo += "+Alt            SWAP \n";
-		helpInfo += "Arrows          EXPLORE \n";
-		helpInfo += "left-right      PRESET \n";
-		if (groups.size() > 1) helpInfo += "up-down         GROUP \n";
+		helpInfo += "+ Ctrl          SAVE/COPY \n";
+		helpInfo += "+ Alt           SWAP \n";
+		helpInfo += "\n";
+
+		helpInfo += "ARROWS          EXPLORE \n";
+		helpInfo += "left right      PRESET \n";
+		if (groups.size() > 1) helpInfo += "up down         GROUP \n";
 		helpInfo += "\n";
 
 		helpInfo += "Ctrl + SPACE    PLAY \n";
@@ -4124,6 +4106,8 @@ void ofxPresetsManager::doFileDialogProcessSelection(ofFileDialogResult openFile
 //--------------------------------------------------------------
 void ofxPresetsManager::draw_Gui_Standalones()
 {
+	IMGUI_SUGAR__WINDOWS_CONSTRAINTSW_SMALL;
+
 	if (guiManager.beginWindowSpecial(bGui_Standalones))
 	{
 		float _w100;
@@ -4146,12 +4130,14 @@ void ofxPresetsManager::draw_Gui_Standalones()
 		ImGui::Spacing();
 
 		// label for User-Kit folder
-		str = "USER-KIT:";
-		ImGui::Text(str.c_str());
+		str = "USER-KIT";
+		guiManager.AddLabelBig(str);
+
 		str = path_UserKit_Folder;
 		ofStringReplace(str, "/", "/\n"); // split in lines to reduce panel width
 		str += "/";
-		ImGui::Text(str.c_str());
+		guiManager.AddLabelBig(str, false, true);
+		//ImGui::Text(str.c_str());
 
 		ImGui::Spacing();
 
@@ -4165,10 +4151,12 @@ void ofxPresetsManager::draw_Gui_Standalones()
 		//--
 
 		// name of selected group
-		str = "Group Name:";
-		ImGui::Text(str.c_str());
+		 
+		//str = "Group Name:";
+		//ImGui::Text(str.c_str());
 		str = index_PresetSelected[index_GroupSelected].getName();
-		ImGui::Text(str.c_str());
+		//ImGui::Text(str.c_str());
+		guiManager.AddLabelBig(str);
 
 		ImGui::Spacing();
 
@@ -4192,12 +4180,13 @@ void ofxPresetsManager::draw_Gui_Standalones()
 
 			// get/copy all favs presets from favs and send/save to browser folder ("archive")
 
-			if (ImGui::Button("CREATE FROM FAVS", ImVec2(_w100, 2 * _h)))
+			if (ImGui::Button("CREATE!", ImVec2(_w100, 2 * _h)))
 			{
-				ofLogNotice(__FUNCTION__) << "CREATE FROM FAVS";
+				ofLogNotice(__FUNCTION__) << "CREATE";
 
 				doStandalonePresetsBuildFromFavs(groupIndex);
 			}
+			guiManager.AddTooltip("Copy all favorite presets \nto Standalone presets folder");
 
 			//-
 
@@ -4330,70 +4319,79 @@ void ofxPresetsManager::draw_Gui_Standalones()
 
 			//--
 
+			//TODO:
 			// update, reload, delete, clear
 			{
 				// 4.2 update
 
 				ImGui::Spacing();
 
-				if (ImGui::Button("UPDATE", ImVec2(_w50, _h)))
+				if (ImGui::Button("Update", ImVec2(_w50, _h)))
 				{
-					//_name = inputText_TEMP;
-					//ofLogNotice(__FUNCTION__) << "UPDATE PRESET NAME: " << _name << endl;
-
-					// 0. get filename of selected
-					std::string _currName = standaloneFiles[groupIndex][standaloneFileIndex[groupIndex]].getBaseName();
-					ofLogNotice(__FUNCTION__) << "UPDATE. filename: " << _currName;
-
-					// 1. delete old file
-					standaloneFiles[groupIndex][standaloneFileIndex[groupIndex]].remove();
-
-					// 2. save "overwrite"
-					doStandalonePresetSave(_currName, groupIndex);
-
-					// Workflow:
-
-					// 3. refresh files
-					doStandalonePresetsRefresh(groupIndex);;
-
-					// 4. reselect last save preset (bc directory sorting changes)
-					ofLogNotice(__FUNCTION__) << "Reload last updated preset:";
-					int _newIndex = -1; // search index for filename
-					for (size_t i = 0; i < standaloneFiles[groupIndex].size(); i++)
+					if (_numfiles != 0)
 					{
-						std::string n = standaloneFiles[groupIndex][i].getBaseName();
-						if (n == _currName) _newIndex = i;
-					}
-					if (_newIndex != -1)
-					{
-						ofLogNotice(__FUNCTION__) << "Index [" << _newIndex << "] " << standaloneFiles[groupIndex][_newIndex].getBaseName();
-						standaloneFileIndex[groupIndex] = _newIndex;
-						_name = standaloneFileNames[groupIndex][standaloneFileIndex[groupIndex]];
+						//_name = inputText_TEMP;
+						//ofLogNotice(__FUNCTION__) << "UPDATE PRESET NAME: " << _name << endl;
 
-						doStandalonePresetLoad(_name, groupIndex);
+						// 0. get filename of selected
+						std::string _currName = standaloneFiles[groupIndex][standaloneFileIndex[groupIndex]].getBaseName();
+						ofLogNotice(__FUNCTION__) << "UPDATE. filename: " << _currName;
+
+						// 1. delete old file
+						standaloneFiles[groupIndex][standaloneFileIndex[groupIndex]].remove();
+
+						// 2. save "overwrite"
+						doStandalonePresetSave(_currName, groupIndex);
+
+						// Workflow:
+
+						// 3. refresh files
+						doStandalonePresetsRefresh(groupIndex);;
+
+						// 4. reselect last save preset (bc directory sorting changes)
+						ofLogNotice(__FUNCTION__) << "Reload last updated preset:";
+						int _newIndex = -1; // search index for filename
+						for (size_t i = 0; i < standaloneFiles[groupIndex].size(); i++)
+						{
+							std::string n = standaloneFiles[groupIndex][i].getBaseName();
+							if (n == _currName) _newIndex = i;
+						}
+						if (_newIndex != -1)
+						{
+							ofLogNotice(__FUNCTION__) << "Index [" << _newIndex << "] " << standaloneFiles[groupIndex][_newIndex].getBaseName();
+							standaloneFileIndex[groupIndex] = _newIndex;
+							_name = standaloneFileNames[groupIndex][standaloneFileIndex[groupIndex]];
+
+							doStandalonePresetLoad(_name, groupIndex);
+						}
+						else ofLogError(__FUNCTION__) << "Not found! Bad Index [" << _newIndex << "]";
 					}
-					else ofLogError(__FUNCTION__) << "Not found! Bad Index [" << _newIndex << "]";
 				}
+				guiManager.AddTooltip("Save current preset\nto apply changes");
 
 				//-
 
 				// 4.3 reload
 
 				ImGui::SameLine();
-				if (ImGui::Button("RELOAD", ImVec2(_w50, _h)))
+				if (ImGui::Button("Reload", ImVec2(_w50, _h)))
 				{
-					_name = standaloneFileNames[groupIndex][standaloneFileIndex[groupIndex]];
-					ofLogNotice(__FUNCTION__) << "RELOAD. filename: " << _name;
+					if (_numfiles != 0)
+					{
+						_name = standaloneFileNames[groupIndex][standaloneFileIndex[groupIndex]];
+						ofLogNotice(__FUNCTION__) << "RELOAD. filename: " << _name;
 
-					doStandalonePresetLoad(_name, groupIndex);
+						doStandalonePresetLoad(_name, groupIndex);
+					}
 				}
+				guiManager.AddTooltip("Reload current presets\nand discard changes");
 
 				//-
 
 				// 4.4 delete
 
 				//ImGui::SameLine();
-				if (ImGui::Button("DELETE", ImVec2(_w50, _h)))// current preset
+				if (ImGui::Button("Delete", ImVec2(_w50, _h)))// current preset
 				{
 					ofLogNotice(__FUNCTION__) << "DELETE. filename: " << _name;
 					ofLogNotice(__FUNCTION__) << "File: " << standaloneFiles[groupIndex][standaloneFileIndex[groupIndex]].getAbsolutePath();
@@ -4417,13 +4415,14 @@ void ofxPresetsManager::draw_Gui_Standalones()
 						ofLogError(__FUNCTION__) << "Error listing directory!";
 					}
 				}
+				guiManager.AddTooltip("Delete selected Standalone presets");
 
 				//-
 
 				// 4.5 clear. delete all!
 
 				ImGui::SameLine();
-				if (ImGui::Button("CLEAR", ImVec2(_w50, _h))) // delete all files
+				if (ImGui::Button("Clear!", ImVec2(_w50, _h))) // delete all files
 				{
 					ofLogNotice(__FUNCTION__) << "CLEAR Presets folder: " << path_UserKit_Folder + "/" + path_PresetsStandalone;
 
@@ -4448,14 +4447,18 @@ void ofxPresetsManager::draw_Gui_Standalones()
 					}
 					else ofLogError(__FUNCTION__) << "Error listing directory!";
 				}
+				guiManager.AddTooltip("WARNING!\nRemove all Standalone presets\nfor current Group!");
 			}
 
 			//----
 
+			guiManager.AddSpacingSeparated();
+			
 			// new preset button
 
 			//ofxImGuiSurfing::AddParameter(MODE_StandalonePresets_NEW);
 			ofxImGuiSurfing::AddBigToggle(MODE_StandalonePresets_NEW, _w100, _h);
+			guiManager.AddTooltip("Create new standalone preset.\n You should disable Keys toggle below!");
 
 			//-
 
@@ -4507,7 +4510,7 @@ void ofxPresetsManager::draw_Gui_Standalones()
 					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.5, 0.0f, 0.5f, a));
 				}
 
-				if (ImGui::Button("SAVE"))
+				if (ImGui::Button("Save", ImVec2(_w50, _h)))
 				{
 					ofLogNotice(__FUNCTION__) << "inputText_NEW: " << inputText_NEW << endl;
 
@@ -4539,7 +4542,7 @@ void ofxPresetsManager::draw_Gui_Standalones()
 				if (bBlink) ImGui::PopStyleColor(1);
 
 				ImGui::SameLine();
-				if (ImGui::Button("CANCEL"))
+				if (ImGui::Button("Cancel", ImVec2(_w50, _h)))
 				{
 					ofLogNotice(__FUNCTION__) << "Cancel";
 					inputText_NEW = "";
@@ -4551,6 +4554,7 @@ void ofxPresetsManager::draw_Gui_Standalones()
 				// workaround
 				// to disable global keys to not collide with ImGui textInput
 				ofxImGuiSurfing::AddParameter(guiManager.bKeys);
+				guiManager.AddTooltip("Workaround. Disable key commands /nto avoid collide with key commands!");
 			}
 		}
 
@@ -4558,6 +4562,98 @@ void ofxPresetsManager::draw_Gui_Standalones()
 
 		guiManager.endWindowSpecial();
 	}
+}
+
+//--------------------------------------------------------------
+void ofxPresetsManager::draw_Gui_PlayersWidgets()
+{
+	//TODO: BUG: fix first toggle draws incomplete sometimes. 
+
+	std::string name;
+	if (groups.size() <= 1) name = "PLAYER";
+	else name = "PLAYERS";
+
+	if (ImGui::CollapsingHeader(name.c_str()))
+	{
+		float _w100;
+		float _w50;
+		float _w33;
+		float _w25;
+		float _h;
+
+		guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
+		guiManager.refreshLayout();
+
+		guiManager.AddSpacing();
+
+		//guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+
+		//--
+
+		ofxImGuiSurfing::AddBigToggleNamed(bPLAY_Global, _w100, _h,
+			"GLOBAL PLAYING", "GLOBAL PLAY ", false);
+		guiManager.AddTooltip("Play all the group's players \nExcept the G_LINK!");
+
+		guiManager.AddSpacingSeparated();
+
+		//--
+
+		// Prepare optimized column sizes
+		// One row per group. 
+		// get and set the max.
+		float maxSz = 0;
+		float pad = 15;
+		for (size_t i = 0; i < groupRandomizers.size(); ++i)
+		{
+			auto _maxSz = ImGui::CalcTextSize(groups[i].getName().c_str()).x;//label width
+			if (_maxSz > maxSz) maxSz = _maxSz;//memo the bigger size label of the group names
+		}
+
+		//--
+
+		// Iterate each group
+		for (int i = 0; i < groupRandomizers.size(); i++)
+		{
+			bool bIsLastOne = (i == groupRandomizers.size() - 1);
+			if (bIsLastOne)
+			{
+				guiManager.AddSpacingSeparated();
+			}
+
+			ImGui::Columns(2, nullptr, false);
+			ImGui::SetColumnWidth(0, maxSz + pad);
+
+			ImGui::PushID(i);
+			{
+				// 1. Group name
+				string s = groups[i].getName();
+				ImGui::Dummy(ImVec2(0, 0)); // offset
+				ImGui::Text(s.c_str());
+
+				//--
+
+				ImGui::NextColumn();
+
+				//float __spcx = 0;
+				float __spcx = ImGui::GetStyle().ItemSpacing.x;
+				float __w100 = ImGui::GetContentRegionAvail().x - __spcx;
+				//ImGui::Dummy(ImVec2(0, 3)); // offset
+
+				// 2. Play toggle
+				// Blink by progress timer
+				ofxImGuiSurfing::AddBigToggleNamed(groupRandomizers[i].bPLAY_RandomizeTimer,
+					__w100, _h, "PLAYING", "PLAY", true, groupRandomizers[i].getPlayerPct());
+
+				if (bIsLastOne) guiManager.AddTooltip("On common workflow,\nthe other PLAY toggles\nshould be disabled..");
+
+				//--
+
+				ImGui::Columns(1);
+			}
+			ImGui::PopID();
+		}
+	}
+
 }
 
 //--------------------------------------------------------------
@@ -4576,7 +4672,6 @@ void ofxPresetsManager::draw_Gui_Players()
 	// Show randomizers of user selected group
 
 	// A. All the groups
-
 	//if (bGui_ShowAllGroups)
 	//{
 	//	for (int i = 0; i < groupRandomizers.size(); i++)
@@ -4584,7 +4679,6 @@ void ofxPresetsManager::draw_Gui_Players()
 	//		if (bGui_Players)
 	//		{
 	//			//groupRandomizers[i].drawImGui();
-
 	//			groupRandomizers[index_GroupSelected.get()].drawImGui_Main();
 	//			groupRandomizers[index_GroupSelected.get()].drawImGui_Editor();
 	//		}
@@ -4592,13 +4686,11 @@ void ofxPresetsManager::draw_Gui_Players()
 	//}
 
 	// B. Only the selected group
-
 	//else
 	{
 		if (bGui_Players)
 		{
-			//groupRandomizers[index_GroupSelected.get()].drawImGui();
-
+			// Main
 			groupRandomizers[index_GroupSelected.get()].drawImGui_Main();
 
 			// Editor
@@ -4610,7 +4702,6 @@ void ofxPresetsManager::draw_Gui_Players()
 					guiManager.setNextWindowAfterWindowNamed(n);
 				}
 			}
-
 			groupRandomizers[index_GroupSelected.get()].drawImGui_Editor();
 		}
 	}
@@ -4952,8 +5043,8 @@ void ofxPresetsManager::doRefreshUndoParams() {
 		//str += undoStringParams.getUndoStateDescriptor() + "\n";
 
 		ofLogNotice(__FUNCTION__) << str;
-		}
 	}
+}
 
 #endif
 

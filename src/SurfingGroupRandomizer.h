@@ -38,7 +38,7 @@ public:
 private:
 
 	ofParameter<int> amntBtnsClicker{ "Max But", 1, 1, 1 };
-	ofParameter<bool> respBtnsClicker{ "Responsive", true };
+	ofParameter<bool> respBtnsClicker{ "Responsive", true };//not used
 	ofParameter<bool> bExtraClicker{ "Extra", false };
 
 public:
@@ -97,7 +97,7 @@ public:
 	void doCheckRandomReady();
 
 	void update();
-	void keyPressed(int key);
+	//void keyPressed(int key);
 	void exit();
 
 private:
@@ -210,16 +210,18 @@ private:
 
 public:
 
-	ofParameter<bool> bPLAY_RandomizeTimer; //play randomizer
+	ofParameter<bool> bPLAY_RandomizeTimer; // play randomizer
 	ofParameter<bool> bRandomizeIndex;// trig randomize index
 	ofParameter<float> randomizeDurationBpm; // bpm
-	ofParameter<int> randomizeDuration;
-	ofParameter<int> randomizeDurationShort;
+	ofParameter<int> durationLong;
+	ofParameter<int> durationShort;
 	ofParameter<float> randomizeDurationShortRatio;
+
+	ofParameter<bool> bModeSequencial; // disable random engine and iterates next index on next timer bang!
 
 private:
 
-	ofParameter<bool> bDisable;
+	//ofParameter<bool> bDisable;
 	//ofParameter<bool> MODE_LatchTrig; // this mode trigs the preset but goes back to preset 0 after duration timer
 	ofParameter<bool> MODE_AvoidRandomRepeat; // this mode re makes randomize again if new index preset it's the same!
 	ofParameter<bool> bResetDices;
@@ -229,7 +231,7 @@ private:
 private:
 
 	int randomizeSpeed;// real time duration
-	uint32_t randomizerTimer;
+	uint32_t timerRandomLast;
 	float MAX_DURATION_RATIO = 2.0f;
 	int randomize_MAX_DURATION = MAX_DURATION_RATIO * 6000;
 	//int randomize_MAX_DURATION_SHORT = 6000 / 2.f;
@@ -241,12 +243,14 @@ private:
 
 	void buildRandomizers();
 	void setup_RandomizerIndexes();// engine to get a random between all posible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
-	void doRandomIndex();// randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
-	int doRandomIndexChanged();
+	void doGoRandomIndex();// randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
+	int doGenerateRandomIndex();
 	void doReset();// reset all probs to 0
 	int dicesTotalAmount;// total dices summing the prob of any preset probability (PROB1 + PROB2 + ...)
 
-	int timerRandomizer;
+	void doGoNextIndex();
+	
+	int timerRandom;
 
 	//--
 
@@ -285,9 +289,6 @@ private:
 
 private:
 
-	ofParameter<int> randomizerProgress{ "%", 0, 0, 100 };
-	float _prog;
-
 	//--
 
 	//----
@@ -304,7 +305,7 @@ public:
 	void setPlayRandomizerTimer(bool b)// play randomizer timer
 	{
 		bPLAY_RandomizeTimer = b;
-		if (b) doRandomIndex();
+		if (b) doGoRandomIndex();
 	}
 	//--------------------------------------------------------------
 	void setTogglePlayRandomizerPreset()// toggle randomizer timer
@@ -314,22 +315,22 @@ public:
 	//--------------------------------------------------------------
 	void setRandomizerDuration(float t)
 	{
-		randomizeDuration = t;
-		randomizeDurationBpm = 60000.f / randomizeDuration;
+		durationLong = t;
+		randomizeDurationBpm = 60000.f / durationLong;
 	}
 	//--------------------------------------------------------------
 	void setRandomizerDurationShort(float t)
 	{
-		randomizeDurationShort = t;
+		durationShort = t;
 	}
 	//--------------------------------------------------------------
 	void setRandomizerBpm(float bpm)
 	{
 		randomizeDurationBpm = bpm;
 		// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
-		randomizeDuration = 60000.f / bpm;
-		randomizeDurationShort = randomizeDuration * randomizeDurationShortRatio;
-		//randomizeDurationShort = randomizeDuration / 2.f;
+		durationLong = 60000.f / bpm;
+		durationShort = durationLong * randomizeDurationShortRatio;
+		//durationShort = durationLong / 2.f;
 	}
 	//--------------------------------------------------------------
 	void doRandomizePresetFromFavs()// trig randomize and select one of the favs presets
@@ -341,18 +342,20 @@ public:
 		ofLogNotice(__FUNCTION__);
 		doRandomPreset();
 	}
-	//--------------------------------------------------------------
-	ofParameterGroup getParamsRandomizers() {
-		ofParameterGroup _g{ "RANDOMIZERS" };
-		_g.add(bPLAY_RandomizeTimer);
-		_g.add(bRandomizeIndex);
-		_g.add(randomizeDurationBpm);
-		_g.add(randomizeDuration);
-		_g.add(randomizeDurationShort);
-		_g.add(randomizeDurationShortRatio);
-		_g.add(randomizerProgress);
-		return _g;
-	}
+
+	////TODO: 
+	////--------------------------------------------------------------
+	//ofParameterGroup getParamsRandomizers() {
+	//	ofParameterGroup _g{ "RANDOMIZERS" };
+	//	_g.add(bPLAY_RandomizeTimer);
+	//	_g.add(bRandomizeIndex);
+	//	_g.add(randomizeDurationBpm);
+	//	_g.add(durationLong);
+	//	_g.add(durationShort);
+	//	_g.add(randomizeDurationShortRatio);
+	//	//_g.add(randomizerProgress);
+	//	return _g;
+	//}
 
 public:
 

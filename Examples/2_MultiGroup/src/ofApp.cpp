@@ -78,11 +78,20 @@ void ofApp::setupPresets()
 void ofApp::draw()
 {
 	// Scene draw 
-	// Linked to grouped parameters
-	if (show0) drawScene0();
-	if (show1) drawScene1();
-	if (show2) drawScene2();
-	if (show3) drawScene3();
+	{
+		// Zoom
+		ofPushMatrix();
+		ofTranslate(-200, -200);
+		ofScale(2.5f);
+
+		// Linked to grouped parameters
+		if (show0) drawScene0();
+		if (show1) drawScene1();
+		if (show2) drawScene2();
+		if (show3) drawScene3();
+		
+		ofPopMatrix();
+	}
 
 	// Gui
 	presetsManager.draw();
@@ -189,7 +198,7 @@ void ofApp::drawScene1()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(600, 400 - shapeSide1 / 10);
+	ofTranslate(400, 400 - shapeSide1 / 10);
 	ofSetColor(color1.get());
 	ofFill();
 	for (int i = 0; i < numObjects1; ++i)
@@ -206,7 +215,7 @@ void ofApp::drawScene2()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(600, 500);
+	ofTranslate(400, 300);
 	ofSetColor(color2.get());
 	if (fill2) ofFill();
 	else ofNoFill();
@@ -224,7 +233,7 @@ void ofApp::drawScene3()
 {
 	ofPushStyle();
 	ofPushMatrix();
-	ofTranslate(700, 600);
+	ofTranslate(400, 100);
 	ofFill();
 	ofSetColor(color3.get());
 	for (int i = 0; i < numObjects3; ++i)

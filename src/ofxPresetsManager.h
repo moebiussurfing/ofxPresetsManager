@@ -1,51 +1,58 @@
 
-/// ofxPresetsManager.h 
-///
-/// ofxPresetsManager 
-/// by moebiusSurfing, 2019 - 2022.
-///
-/// this add-on is based and inspired on the original ofxGuiPresetSelector addon 
-/// by Nicola Pisanti, MIT License, 2016
-/// https://github.com/npisanti/ofxGuiPresetSelector
-///
-/// added modifications and several new features.
-/// my idea is to allow use ofParameterGroup's as managed content instead of ofxGui's panels.
+/*
 
-///------
+	ofxPresetsManager.h 
 
-//	TODO:
-//	
-//	++	make special windows to run GUI workflow
-//	++  randomizers/players reset preset probs/shorts.
-//	++	split draw from event to be manual!
-//	++	add play toggles on clicker
-//	++	add clicker to name labels like arrows browsing, on clicker window.
-//	
-//	++	add retrig when re click without index change
-//  +	fix keys workflows
-//  +	group randomizers are too big, hardcoded to max sizes... brokes ImGui... must simplify
-//  +	new edit mode: 
-//			mark a param and when modifying current preset, save to all the others and overwrite	
-//  +		lock (by toggle) params that we want to ignore on changing presets
-//			can be done enabling/disabling serializable for each param with a group of toggles
-//  +	super-lite version with combo list. maybe without any GUI at all.
+	ofxPresetsManager 
+	by moebiusSurfing, 2019 - 2022.
+
+	this add-on is based and inspired on the original ofxGuiPresetSelector addon 
+	by Nicola Pisanti, MIT License, 2016
+	https://github.com/npisanti/ofxGuiPresetSelector
+
+	added modifications and several new features.
+	my idea is to allow use ofParameterGroup's as managed content instead of ofxGui's panels.
+
+*/
+
+//------
+
+/*
+	TODO:
+	
+	+	fix PArameters window. 
+			ImGui groups weird folder headers on nested groups.
+
+	+	 force each group editor window to the same position.
+	
+	+	add clicker to name labels like arrows browsing, on clicker window.
+	+	add re trig when re click without index change.
+	
+	+	new edit mode: 
+			mark a param and when modifying current preset, save to all the others and overwrite	
+	+		lock (by toggle) params that we want to ignore on changing presets
+			can be done enabling/disabling serializable for each param with a group of toggles.
+	
+	+	super-lite version with combo list. maybe without any GUI at all.
 
 
-//	IDEAS:
-//	
-//	+++		open/save dialog to project User-Kit session in a single file.
-//				or allowed to all the groups?
-//	
-//	++		add populator engine to create all preset files if it's a new empty project
-//				add setter to enable some params to randomize
-//				call populate. disable debug_display red info
-//	
-//	++		performance: 
-//				restore-back memory_mode. (use xml objects into memory vs hd files) to extra groups too
-//	
-//	+		fix auto save timer. exclude log.
+	IDEAS:
+	
+	+		open/save dialog to project User-Kit session in a single file.
+				or allowed to all the groups?
+	
+	+		add populator engine to create all preset files if it's a new empty project
+				add setter to enable some params to randomize
+				call populate. disable debug_display red info
+			-> This is already done on ofxSurfingPresets..
+	
+	+		performance: 
+				restore-back memory_mode. (use xml objects into memory vs hd files) to extra groups too
+	
+	+		fix auto save timer. exclude log.
+*/
 
-///------
+//------
 
 
 #pragma once
@@ -850,15 +857,15 @@ public:
 	{
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
-		groupRandomizers[groupIndex].randomizeDuration = t;
-		groupRandomizers[groupIndex].randomizeDurationBpm = 60000.f / groupRandomizers[groupIndex].randomizeDuration;
+		groupRandomizers[groupIndex].durationLong = t;
+		groupRandomizers[groupIndex].randomizeDurationBpm = 60000.f / groupRandomizers[groupIndex].durationLong;
 	}
 	//--------------------------------------------------------------
 	void setRandomizerDurationShort(float t, int groupIndex = -1)
 	{
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
-		groupRandomizers[groupIndex].randomizeDurationShort = t;
+		groupRandomizers[groupIndex].durationShort = t;
 	}
 	//--------------------------------------------------------------
 	void setRandomizerBpm(float bpm, int groupIndex = -1)
@@ -867,8 +874,8 @@ public:
 		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
 		groupRandomizers[groupIndex].randomizeDurationBpm = bpm;
 		// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
-		groupRandomizers[groupIndex].randomizeDuration = 60000.f / bpm;
-		groupRandomizers[groupIndex].randomizeDurationShort = groupRandomizers[groupIndex].randomizeDuration / 2.f;
+		groupRandomizers[groupIndex].durationLong = 60000.f / bpm;
+		groupRandomizers[groupIndex].durationShort = groupRandomizers[groupIndex].durationLong / 2.f;
 	}
 	////--------------------------------------------------------------
 	//void doRandomizePresetFromFavs()// trig randomize and select one of the favs presets
@@ -1326,6 +1333,7 @@ private:
 public:
 
 	void draw_Gui_Players();
+	void draw_Gui_PlayersWidgets();
 	void draw_Gui_Main();
 	void draw_Gui_WidgetsAdvanced();
 	void draw_Gui_Standalones();
@@ -1409,55 +1417,57 @@ private:
 
 public:
 
-	// This are useful parameters to use in our ofAPp/projects/add-ons gui's
-	//--------------------------------------------------------------
-	ofParameterGroup getParamsControls()
-	{
-		//cout << "displayNameUserKit: " << displayNameUserKit << endl; // TODO: not refreshing well on startup..
+	//TODO:
+	//// This are useful parameters to use in our ofAPp/projects/add-ons gui's
+	////--------------------------------------------------------------
+	//ofParameterGroup getParamsControls()
+	//{
+	//	//cout << "displayNameUserKit: " << displayNameUserKit << endl; // TODO: not refreshing well on startup..
 
-		params_Controls.clear();
-		//params_Controls.setName(displayNameUserKit);
-		//params_Controls.setName("OVERLAY");
+	//	params_Controls.clear();
+	//	//params_Controls.setName(displayNameUserKit);
+	//	//params_Controls.setName("OVERLAY");
 
-		// Windows
-		//params_Controls.add(getParamsPresetSelectors());
-		// macOS casting...
-		ofParameterGroup g1;
-		g1 = getParamsPresetSelectors();
-		params_Controls.add(g1);
+	//	// Windows
+	//	//params_Controls.add(getParamsPresetSelectors());
+	//	// macOS casting...
+	//	ofParameterGroup g1;
+	//	g1 = getParamsPresetSelectors();
+	//	params_Controls.add(g1);
 
-		// Windows
-		//params_Controls.add(getParamsRandomizers());
-		// macOS casting...
-		ofParameterGroup g2;
-		g2 = getParamsRandomizers();
-		params_Controls.add(g2);
+	//	// Windows
+	//	//params_Controls.add(getParamsRandomizers());
+	//	// macOS casting...
+	//	ofParameterGroup g2;
+	//	g2 = getParamsRandomizers();
+	//	params_Controls.add(g2);
 
-		params_Controls.add(bGui_Clicker);
-		params_Controls.add(bMODE_EditLive);
+	//	params_Controls.add(bGui_Clicker);
+	//	params_Controls.add(bMODE_EditLive);
 
-		return params_Controls;
-	}
+	//	return params_Controls;
+	//}
 
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsPresetSelectors() {// selectors index to all the added groups
 		return params_Index_GroupsSelectors;
 	}
 
-	//--------------------------------------------------------------
-	ofParameterGroup getParamsRandomizers() {// important settings to handle randomizers
-		ofParameterGroup _g{ "RANDOMIZERS" };
-		for (int i = 0; i < groups.size(); i++)
-		{
-			// Windows
-			//_g.add(groupRandomizers[i].getParamsRandomizers());
-			// macOS casting...
-			ofParameterGroup g;
-			g = groupRandomizers[i].getParamsRandomizers();
-			_g.add(g);
-		}
-		return _g;
-	}
+	//TODO:
+	////--------------------------------------------------------------
+	//ofParameterGroup getParamsRandomizers() {// Common/important settings to handle randomizers from outer scope.
+	//	ofParameterGroup _g{ "RANDOMIZERS" };
+	//	for (int i = 0; i < groups.size(); i++)
+	//	{
+	//		// Windows
+	//		//_g.add(groupRandomizers[i].getParamsRandomizers());
+	//		// macOS casting...
+	//		ofParameterGroup g;
+	//		g = groupRandomizers[i].getParamsRandomizers();
+	//		_g.add(g);
+	//	}
+	//	return _g;
+	//}
 
 	//----
 
