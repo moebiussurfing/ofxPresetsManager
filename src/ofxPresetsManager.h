@@ -107,8 +107,11 @@
 
 // 3. CUSTOMIZATION
 
-#define USE_PRESETS_MANAGER__IMGUI_LAYOUT // -> Instantiated and using my addon ofxSurfingImGui
-//#define USE_PRESETS_MANAGER__IMGUI_INTERNAL // -> Legacy ImGui without my ofxSurfingImGui addon.
+#define USE_PRESETS_MANAGER__IMGUI_LAYOUT 
+// -> Instantiated and using my addon ofxSurfingImGui
+
+//#define USE_PRESETS_MANAGER__IMGUI_INTERNAL
+// -> Legacy ImGui without my ofxSurfingImGui add-on. Deprected
 
 #define USE_SPECIAL_WINDOWS //TODO:
 

@@ -917,7 +917,8 @@ void ofxPresetsManager::draw()
 
 	//----
 
-	// Clicker boxes preset selector native
+	// Native (no ImGui)
+	// Clicker boxes preset selector 
 
 #ifdef DISABLE__PRESETS_MANAGER__NATIVE_CLICKER
 	if (bGui_Clicker)
@@ -929,34 +930,31 @@ void ofxPresetsManager::draw()
 	//----
 
 	// ImGui
-
-	//if (!bGui_PanelsAll && !bGui_Clicker) return;
-
+	{
 #ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL	
-
-	ImGui_Draw();
-
+		ImGui_Draw();//deprecated
 #endif
 
 #ifdef USE_PRESETS_MANAGER__IMGUI_LAYOUT 
 
-	guiManager.begin();
-	{
-		ImGui_Draw_Windows();
+		guiManager.begin();
+		{
+			ImGui_Draw_Windows();
 
-		if (bGui_Clicker) draw_Gui_ClickerPresets_ImGui();
-	}
-	guiManager.end();
+			if (bGui_Clicker) draw_Gui_ClickerPresets_ImGui();
+		}
+		guiManager.end();
 
 #endif
 
-	//----
+		//----
 
-	// Help info text: 
+		// Help info text: 
 
-	if (guiManager.bHelp)
-	{
-		draw_Help();
+		if (guiManager.bHelp)
+		{
+			draw_Help();
+		}
 	}
 }
 
@@ -2892,7 +2890,7 @@ bool ofxPresetsManager::ImGui_Draw_Windows()
 
 	//if (bGui_PanelsAll)
 	{
-		// Main Panel
+		// 1. Main Panel
 		if (bGui_Main) draw_Gui_Main(); // main control + extra
 
 		//--
@@ -2900,6 +2898,9 @@ bool ofxPresetsManager::ImGui_Draw_Windows()
 		//// All group selectors to set current preset
 		//if (bGui_AllSelectors) draw_Gui_Selectors();
 
+		//--
+
+		// 2. Parameters 
 		// All parameters from all groups
 
 		if (bGui_Parameters)
@@ -2924,6 +2925,12 @@ bool ofxPresetsManager::ImGui_Draw_Windows()
 		}
 
 		//--
+
+		// 3. Players
+
+		//TODO: should force postion next window to last window
+		// main, clicker, parameter or standalone.
+		// the last one at the right..
 
 		if (bGui_Players)
 		{
@@ -2951,7 +2958,7 @@ bool ofxPresetsManager::ImGui_Draw_Windows()
 
 		//--
 
-		// Standalone presets browser
+		// 4. Standalone presets browser
 
 		if (bGui_Standalones) draw_Gui_Standalones();
 
@@ -2978,14 +2985,12 @@ void ofxPresetsManager::setupGuiStyles()
 //--------------------------------------------------------------
 void ofxPresetsManager::draw_Gui_Parameters()
 {
-	string n = "PRESETS PARAMETERS";
-
 	IMGUI_SUGAR__WINDOWS_CONSTRAINTSW_MEDIUM;
 
 	if (guiManager.beginWindowSpecial(bGui_Parameters))
 	{
 		/*
-		// group selector
+		// Group selector
 		// (only when more than one group)
 
 		if (groups.size() > 1) {
@@ -3014,9 +3019,7 @@ void ofxPresetsManager::draw_Gui_Parameters()
 			if (groups.size() > 1) {
 				if (bLast)
 				{
-					//ImGui::Spacing();
-					guiManager.AddSpacingBigSeparated();
-					//ImGui::Spacing();
+					guiManager.AddSpacingSeparated();
 				}
 				else
 				{
@@ -3028,7 +3031,7 @@ void ofxPresetsManager::draw_Gui_Parameters()
 				}
 			}
 
-			if (!bLast)
+			if (!bLast && !guiManager.bMinimize)
 			{
 				string s = "#" + ofToString(i);
 				ImGui::Text(s.c_str());
@@ -3156,10 +3159,6 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 		guiManager.Add(guiManager.bMinimize, OFX_IM_TOGGLE_BUTTON_ROUNDED);
 		guiManager.AddSpacing();
 
-		// deprecated
-		//guiManager.Add(bGui_PanelsAll, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
-
-		//TODO:
 		guiManager.Add(bGui_Main, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
 
 		if (!bGui_Main)
@@ -3744,7 +3743,7 @@ void ofxPresetsManager::draw_Gui_Main()
 				ofStringReplace(str, "/", "/\n");
 				str += "/";
 				guiManager.AddLabel(str, false, true);
-	}
+			}
 
 			//--
 
@@ -3768,7 +3767,7 @@ void ofxPresetsManager::draw_Gui_Main()
 				str = "Preset " + ofToString(ip) + "/" + ofToString(keys[ig].size() - 1);
 				ImGui::Text(str.c_str());
 			}
-}
+		}
 
 		guiManager.refreshWidgetsSizes(_w100, _w50, _w33, _w25, _h);
 		guiManager.refreshLayout();
@@ -3776,8 +3775,8 @@ void ofxPresetsManager::draw_Gui_Main()
 		//--
 
 		guiManager.endWindowSpecial();
+		}
 	}
-}
 
 //--------------------------------------------------------------
 void ofxPresetsManager::draw_Gui_WidgetsAdvanced()
@@ -3877,9 +3876,9 @@ void ofxPresetsManager::draw_Gui_WidgetsAdvanced()
 			}
 
 			ImGui::TreePop();
-					}
-				}
 			}
+		}
+	}
 
 //--
 
@@ -4151,7 +4150,7 @@ void ofxPresetsManager::draw_Gui_Standalones()
 		//--
 
 		// name of selected group
-		 
+
 		//str = "Group Name:";
 		//ImGui::Text(str.c_str());
 		str = index_PresetSelected[index_GroupSelected].getName();
@@ -4453,7 +4452,7 @@ void ofxPresetsManager::draw_Gui_Standalones()
 			//----
 
 			guiManager.AddSpacingSeparated();
-			
+
 			// new preset button
 
 			//ofxImGuiSurfing::AddParameter(MODE_StandalonePresets_NEW);
