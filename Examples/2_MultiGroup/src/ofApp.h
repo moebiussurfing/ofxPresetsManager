@@ -23,6 +23,8 @@ public:
 	//--
 
 	// Scene
+
+	// ofParameters
 	 
 	// group0
 	ofParameter<bool> show0;
@@ -61,8 +63,6 @@ public:
 	ofParameter<int> separation3;
 
 	//--
-
-	// Scene
 	
 	void setupScene();
 

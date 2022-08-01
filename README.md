@@ -12,7 +12,7 @@ _If you don't need multiple and independent and linkeable groups,_
 _then I recommend to use my simpler add-on [ofxSurfingPresets](https://github.com/moebiussurfing/ofxSurfingPresets)._  
  
 #### 1_Basic (only one group)
-![](/Examples/1_Basic/Capture.PNG)  
+![](Examples/1_Basic/Capture.PNG)  
 
 ## Features
 
@@ -115,10 +115,10 @@ ofApp::draw()
 
 ## About the examples
 
-* **1_example-Basic**:  
+* **Examples/1_example-Basic**:  
 Illustrates how to handle some ```ofParameter```'s bundled into one ```ofParameterGroup``` used as a container.  
 
-* **2_example-MultiGroup**:  
+* **Examples/2_example-MultiGroup**:  
 Helps to learn how to handle multiple `ofParameterGroup`'s.  
 ```.cpp
 // group 0
