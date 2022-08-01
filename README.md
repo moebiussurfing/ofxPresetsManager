@@ -77,7 +77,7 @@ The file settings (one file for each preset) will be placed by default into ```/
 
 **ofApp.h**
 
-``.cpp
+```c++
 #include "ofxPresetsManager.h"
 
 ofxPresetsManager presetsManager;
@@ -85,11 +85,11 @@ ofxPresetsManager presetsManager;
 ofParameterGroup params; // group params container
 ofParameter<int> shapeType;
 ofParameter<int> amount;
-``
+```
 
 **ofApp.cpp**
 
-``.cpp
+```c++
 ofApp::setup()
 {
     // 1. Set the scene parameters 
@@ -114,7 +114,7 @@ ofApp::draw()
 // 6. Done!
 // Nothing more!
 // Your parameters are auto updated.
-``
+```
 
 ## About the examples
 
@@ -126,19 +126,18 @@ ofApp::draw()
 #### **Examples/2_example-MultiGroup**:  
   Helps to learn how to handle multiple `ofParameterGroup`'s.  
   
-  ``.cpp
-  // group 0
-  presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' });
-  // group 1
-  presetsManager.add(params1, { 'a', 's', 'd', 'f' });
-  // group 2
-  presetsManager.add(params2, { 'z', 'x', 'c' });
-  // group 3
-  presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
+```.cpp
+// group 0
+presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' });
+// group 1
+presetsManager.add(params1, { 'a', 's', 'd', 'f' });
+// group 2
+presetsManager.add(params2, { 'z', 'x', 'c' });
+// group 3
+presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
 
 presetsManager.setup();
-
-``
+```
 
 ### ExamplesAdvanced
 #### **ExamplesAdvanced/3A_example-LinkServer** and **ExamplesAdvanced/3B_example-LinkClient**: 
@@ -189,4 +188,3 @@ An add-on by **@moebiusSurfing**
 
 ## License
 *MIT License*
-```
