@@ -23,11 +23,16 @@ void ofApp::setupPresets()
 
 	// Some API extra tweak controls:
 	// 
-	//presetsManager.setEnableKeysArrowBrowse(disable); // disable browsing using keys
+	//presetsManager.setEnableKeysArrowBrowse(disable); 
+	// disable browsing using arrow keys 
+	// to avoid collide with other add-ons
 
-	//presetsManager.setEnableGroupLinkSelector(false); // disable auto creation of the GROUP_LINK selector.
-	presetsManager.setGroupLinkAmountPresets(3); // set amount of presets for the auto created GROUP_LINK selector (the lastone).
-	// Default is 9 presets!
+	//presetsManager.setEnableGroupLinkSelector(false); 
+	// disable auto creation of the GROUP_LINK selector.
+
+	presetsManager.setGroupLinkAmountPresets(3);
+	// set amount of presets for the auto created GROUP_LINK selector (the last one).
+	// By default will be created 9 presets!
 
 	//--
 

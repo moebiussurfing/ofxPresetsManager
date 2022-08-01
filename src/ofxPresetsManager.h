@@ -214,36 +214,36 @@ private:
 public:
 
 	// TODO: should use &reference? it's better?
-	void add(ofParameterGroup params, initializer_list<int> keysList);// adds and define keys to trig presets too
-	void add(ofParameterGroup params, vector<int> keysList);// adds and define keys to trig presets too
+	void add(ofParameterGroup params, initializer_list<int> keysList); // adds and define keys to trig presets too
+	void add(ofParameterGroup params, vector<int> keysList); // adds and define keys to trig presets too
 
 private:
 
 	// TODO: BUG:
 	// not working if called from ofApp... must use above 'add' methods
-	void add(ofParameterGroup params, int numPresets = 8);// add a param group for preset saving and how many presets on favs
+	void add(ofParameterGroup params, int numPresets = 8); // add a param group for preset saving and how many presets on favs
 	// could add a correlative keys list {q,w,e,r...}
 
 	//--
 
 public:
 
-	void setup();// must be called after params groups has been added! (above add methods)
-	void setup(std::string name);// TODO: should use char array to avoid collapse with bool..?
+	void setup(); // must be called after params groups has been added! (above add methods)
+	void setup(std::string name); // TODO: should use char array to avoid collapse with bool..?
 	void setup(std::string name, bool _buildGroupSelector);
 	void setup(bool _buildGroupSelector);
 
 private:
 
-	bool bDoneSetup = false;// to ensure all setup process is done and avoid troubles if not after
+	bool bDoneSetup = false; // to ensure all setup process is done and avoid troubles if not after
 
 public:
 
-	void startup();// must be called after setup (who is called after all group adds) to set initial states well
+	void startup(); // must be called after setup (who is called after all group adds) to set initial states well
 
 private:
 
-	void doCheckPresetsFoldersAreEmpty();// used on startup. check if all favorites preset are present, and creates folders and content if not
+	void doCheckPresetsFoldersAreEmpty(); // used on startup. check if all favorites preset are present, and creates folders and content if not
 
 	void setupEngines();
 
@@ -312,7 +312,7 @@ protected:
 
 private:
 
-	ofParameter<bool> bLockMouseByImGui{ "Mouse Locked", false };//mouse is over gui
+	ofParameter<bool> bLockMouseByImGui{ "Mouse Locked", false }; //mouse is over gui
 
 	//--
 
@@ -332,11 +332,11 @@ private:
 	int getPresetIndex(int groupIndex) const;
 	int getPresetIndex(std::string groupName) const;
 
-	int getGuiIndex(std::string name) const;// get index for a name of group
-	std::string getPresetPath(std::string groupName, int presetIndex);// get path of a preset of a group
+	int getGuiIndex(std::string name) const; // get index for a name of group
+	std::string getPresetPath(std::string groupName, int presetIndex); // get path of a preset of a group
 
-	std::string getGroupPath(std::string groupName);// get path of a group. for external monitor only
-	std::string getGroupPath(int index);// get path of a group. for external monitor only
+	std::string getGroupPath(std::string groupName); // get path of a group. for external monitor only
+	std::string getGroupPath(int index); // get path of a group. for external monitor only
 
 	//--
 
@@ -347,8 +347,8 @@ private:
 
 	// main settings/parameters container
 	// all parameters are contained into an ofParameterGroup
-	std::vector<ofParameterGroup> groups;// container to store multiple groups. 
-	std::vector<int> groupsSizes;// this is the amound of presets of each (index correlative) added group
+	std::vector<ofParameterGroup> groups; // container to store multiple groups. 
+	std::vector<int> groupsSizes; // this is the amound of presets of each (index correlative) added group
 
 	//--
 
@@ -357,7 +357,7 @@ private:
 public:
 
 	// exposed to allow external callbacks
-	std::vector<ofParameter<int>> index_PresetSelected;// one selector for each group
+	std::vector<ofParameter<int>> index_PresetSelected; // one selector for each group
 
 public:
 
@@ -379,15 +379,21 @@ public:
 
 private:
 
-	std::vector<int> index_PresetSelected_PRE;// remember previous selector to reduce callbakcs
-	ofParameterGroup params_Index_GroupsSelectors{ "SELECTORS" };// group all group selectors indexes
+	std::vector<int> index_PresetSelected_PRE; // remember previous selector to reduce callbakcs
+	ofParameterGroup params_Index_GroupsSelectors{ "SELECTORS" }; // group all group selectors indexes
 
 	//--
 
 	// select active group 
 	// to show on randomize editor panel
-	ofParameter<int> index_GroupSelected;// only this selected group will be showed on GUI to edit
-	//ofParameter<bool> bGui_ShowAllGroups;//enable to show all, each group panels
+
+public:
+
+	ofParameter<int> index_GroupSelected; // only this selected group will be showed on GUI to edit
+	//ofParameter<bool> bGui_ShowAllGroups; //enable to show all, each group panels
+
+private:
+
 	void Changed_Index_GroupSelected(int& index);
 
 	std::vector<SurfingGroupRandomizer> groupRandomizers;
@@ -397,12 +403,12 @@ private:
 
 	//--
 
-	ofParameter<int> index_GROUP_LINK;// global group selector. this selector will control all linked groups
+	ofParameter<int> index_GROUP_LINK; // global group selector. this selector will control all linked groups
 
 	// group main selector
-	bool bBuildGroupSelector = true;// to allow auto build a group selector to combine all the added groups to the presets manager
-	bool bAllowGroupSelector = true;// to allow disable main group. not always we need it..
-	int groupLinkSize = 9;// default amount of presets we want to the group link
+	bool bBuildGroupSelector = true; // to allow auto build a group selector to combine all the added groups to the presets manager
+	bool bAllowGroupSelector = true; // to allow disable main group. not always we need it..
+	int groupLinkSize = 9; // default amount of presets we want to the group link
 	
 	ofParameter<bool> bGui_PlayerEditor{"Editor", false};
 
@@ -430,7 +436,7 @@ public:
 
 private:
 
-	ofParameter<bool> bSplitGroupFolders{ "MODE SPLIT FOLDERS", true };//on this mode we split every group on his own sub folder
+	ofParameter<bool> bSplitGroupFolders{ "MODE SPLIT FOLDERS", true }; //on this mode we split every group on his own sub folder
 	// finally, we will use all this mode allways, allways enabled
 	// TODO: should remove this variable and use always splitted
 
@@ -496,8 +502,8 @@ private:
 
 public:
 
-	ofParameter<bool> DONE_load;// easy callback to know (in ofApp) that preset LOAD is done 
-	ofParameter<bool> DONE_save;// easy callback to know (in ofApp) that preset SAVE is done
+	ofParameter<bool> DONE_load; // easy callback to know (in ofApp) that preset LOAD is done 
+	ofParameter<bool> DONE_save; // easy callback to know (in ofApp) that preset SAVE is done
 
 	//--
 
@@ -573,7 +579,7 @@ public:
 
 private:
 
-	void draw_Gui_ClickerPresets_Native();// user clickeable box panel preset selector
+	void draw_Gui_ClickerPresets_Native(); // user clickeable box panel preset selector
 
 private:
 
@@ -588,9 +594,9 @@ private:
 	//ofParameter<float> _rectRatio;
 	//ofParameter<bool> bResetRects;
 
-	ofColor _colorText;// lines and text color
-	ofColor _colorButton;// bg selected button
-	ofColor _colorBg;// background color
+	ofColor _colorText; // lines and text color
+	ofColor _colorButton; // bg selected button
+	ofColor _colorBg; // background color
 
 	DoubleClicker doubleClicker;
 
@@ -600,9 +606,9 @@ private:
 	private:
 
 		// preset clicker boxes matrix
-		ofParameter<int> cellSize{ "ButSize", 80, 45, 120 };// default box button size
-		//int cellSize = 80;// default box button size
-		ofVec2f clicker_Pos;// default clicker position
+		ofParameter<int> cellSize{ "ButSize", 80, 45, 120 }; // default box button size
+		//int cellSize = 80; // default box button size
+		ofVec2f clicker_Pos; // default clicker position
 
 	//--
 	 
@@ -666,7 +672,7 @@ public:
 	//	return p;
 	//}
 	////--------------------------------------------------------------
-	//void setPosition_DEBUG(int x, int y);// where to display if we get errors (ie: data files not found) on startup
+	//void setPosition_DEBUG(int x, int y); // where to display if we get errors (ie: data files not found) on startup
 	*/
 
 #endif
@@ -699,8 +705,8 @@ public:
 		//return ENABLE_Keys;
 	}
 	//--------------------------------------------------------------
-	void setModeKeySave(int key);// setup the key you have to hold for saving, default is OF_KEY_CONTROL
-	void setModeKeySwap(int key);// setup the key you have to hold for swap, default is OF_KEY_ALT
+	void setModeKeySave(int key); // setup the key you have to hold for saving, default is OF_KEY_CONTROL
+	void setModeKeySwap(int key); // setup the key you have to hold for swap, default is OF_KEY_ALT
 
 	//--------------------------------------------------------------
 	void setModeEditorOrLive(bool b) {
@@ -725,7 +731,7 @@ private:
 	vector <ofxUndoSimple<std::string>> undoStringsParams;
 	vector <ofXml> undoXmlsParams;
 	void doRefreshUndoParams();
-	void doStoreUndo();// store current point to undo history
+	void doStoreUndo(); // store current point to undo history
 	void doUndo();
 	void doRedo();
 	void doClearUndoHistory();
@@ -740,17 +746,17 @@ private:
 
 	// all folder names must go without ending with '/'
 	//std::string path_Root;
-	std::string path_UserKit_Folder;// User-Kit folder for both other subfolders. 
-	std::string path_PresetsFavourites;// path for kit of favourite presets. live kit
-	std::string path_PresetsStandalone;// path for browse other presets. archive kit
-	std::string path_ControlSettings;// path for app state session settings
+	std::string path_UserKit_Folder; // User-Kit folder for both other subfolders. 
+	std::string path_PresetsFavourites; // path for kit of favourite presets. live kit
+	std::string path_PresetsStandalone; // path for browse other presets. archive kit
+	std::string path_ControlSettings; // path for app state session settings
 
 	std::string filename_ControlSettings;
-	std::string filename_Randomizers;// path for randomizers settings
-	std::string filenamesPrefix;// to add to file names to split names with index
+	std::string filename_Randomizers; // path for randomizers settings
+	std::string filenamesPrefix; // to add to file names to split names with index
 
-	std::string filenameMainSettings;// file for main settings
-	std::string fileExtension;// xml or json
+	std::string filenameMainSettings; // file for main settings
+	std::string fileExtension; // xml or json
 
 	std::string displayNameUserKit;
 
@@ -760,8 +766,8 @@ private:
 
 private:
 
-	void load_AppSettings();// handle group selectors and some settings states
-	void save_ControlSettings();// handle group selectors and some settings states
+	void load_AppSettings(); // handle group selectors and some settings states
+	void save_ControlSettings(); // handle group selectors and some settings states
 
 	//----
 
@@ -772,7 +778,7 @@ private:
 
 private:
 
-	ofParameter<bool> MODE_MemoryLive;// when enabled all presets are handled from a memory vector to avoid lag of loading xml files from hd
+	ofParameter<bool> MODE_MemoryLive; // when enabled all presets are handled from a memory vector to avoid lag of loading xml files from hd
 
 public:
 
@@ -882,8 +888,8 @@ public:
 public:
 
 	//--------------------------------------------------------------
-	void loadPreset(int p, int _indexGroup = -1);// load preset for each group by code from ofApp
-	void savePreset(int p, int _indexGroup = -1);// save preset for each group by code from ofApp
+	void loadPreset(int p, int _indexGroup = -1); // load preset for each group by code from ofApp
+	void savePreset(int p, int _indexGroup = -1); // save preset for each group by code from ofApp
 
 	// legacy/to make coimpatible with ofxSurfingPresets
 	//--------------------------------------------------------------
@@ -1009,7 +1015,7 @@ public:
 	int getAmountGroups()// how many groups we added on setup
 	{
 		if (groups.size() > 0) return groups.size();
-		else return 1;// workaround to set default height before groups are added
+		else return 1; // workaround to set default height before groups are added
 	}
 
 	//--------------------------------------------------------------
@@ -1075,7 +1081,7 @@ public:
 	std::string getGroupsPath()
 	{
 		std::string _names = "";
-		_names = getGroupPath(0);// simpler: get first group bc all groups are in the same parent folder
+		_names = getGroupPath(0); // simpler: get first group bc all groups are in the same parent folder
 		return _names;
 	}
 
@@ -1091,10 +1097,10 @@ public:
 
 public:
 
-	void doCloneRight(int groupIndex);// clone from selected preset of index group to all others to the right
-	void doCloneAll(int groupIndex);// clone all presets from the current index group
-	void doPopulateFavs(int groupIndex);// fast populate random presets of index group
-	void doPopulateFavsALL();// fast populate random presets around all favs of index group
+	void doCloneRight(int groupIndex); // clone from selected preset of index group to all others to the right
+	void doCloneAll(int groupIndex); // clone all presets from the current index group
+	void doPopulateFavs(int groupIndex); // fast populate random presets of index group
+	void doPopulateFavsALL(); // fast populate random presets around all favs of index group
 	//void doResetsParams();
 	//void doResetGroup(ofParameterGroup& group);
 
@@ -1213,9 +1219,9 @@ public:
 	// Customize file paths
 
 	//--------------------------------------------------------------
-	void setPath_UserKit_Folder(std::string folder);// path for root container folder. must be called before setup()!
-	void setPath_PresetsFavourites(std::string folder);// path folder for favourite/live presets
-	void setPath_PresetsStandalone(std::string folder);// path folder for standalone presets kit for the browser
+	void setPath_UserKit_Folder(std::string folder); // path for root container folder. must be called before setup()!
+	void setPath_PresetsFavourites(std::string folder); // path folder for favourite/live presets
+	void setPath_PresetsStandalone(std::string folder); // path folder for standalone presets kit for the browser
 	//--------------------------------------------------------------
 	void setPath_ControlSettings(std::string str)// for the session states settings
 	{
@@ -1262,20 +1268,20 @@ public:
 
 private:
 
-	int PRESET_Selected_IndexMain_PRE = -1;// used as callback
+	int PRESET_Selected_IndexMain_PRE = -1; // used as callback
 
 	//----
 
 private:
 
-	ofParameter<bool> bMODE_EditLive{ "EDIT MODE", true };// this mode improves performance disabling autosave, undo history..etc
+	ofParameter<bool> bMODE_EditLive{ "EDIT MODE", true }; // this mode improves performance disabling autosave, undo history..etc
 
 public:
 
-	ofParameter<bool> bGui_Global;//TODO:
-	ofParameter<bool> bGui;//TODO:
+	ofParameter<bool> bGui_Global; //TODO:
+	ofParameter<bool> bGui; //TODO:
 	ofParameter<bool> bGui_Clicker; // to allow include as toggle parameter into external gui
-	ofParameter<bool> bGui_PanelsAll;//all the windows enablers except the clicker
+	ofParameter<bool> bGui_PanelsAll; //all the windows enablers except the clicker
 	ofParameter<bool> bGui_Main;
 	ofParameter<bool> bGui_Standalones;
 	ofParameter<bool> bGui_Parameters;
@@ -1297,14 +1303,14 @@ private:
 
 private:
 
-	bool bShow_GroupName = true;// draws group name into clicker boxes panel
+	bool bShow_GroupName = true; // draws group name into clicker boxes panel
 	bool bShowClickerInfo = true;
 
 	//--
 
 private:
 
-	std::string helpInfo;// info text to display shortcuts or path settings
+	std::string helpInfo; // info text to display shortcuts or path settings
 	void buildHelpInfo();
 
 	//--
@@ -1378,24 +1384,24 @@ private:
 private:
 
 	// Multi-group files
-	vector <std::vector<std::string>> standaloneFileNames;// all the group standalone preset names
-	vector <std::vector<ofFile>> standaloneFiles;// all the group standalone preset files
-	vector <int> standaloneFileIndex;// selected standalone preset file of the group
+	vector <std::vector<std::string>> standaloneFileNames; // all the group standalone preset names
+	vector <std::vector<ofFile>> standaloneFiles; // all the group standalone preset files
+	vector <int> standaloneFileIndex; // selected standalone preset file of the group
 	vector <std::string> standaloneNamePresetDisplay;
 
 	// Engine handler
 	bool bFilesError = false;
 	ofParameter<bool> MODE_StandalonePresets_NEW;
-	std::string inputText_NEW = "";//user input text
+	std::string inputText_NEW = ""; //user input text
 	//std::string inputText_TEMP = "";
 
 private:
 
-	void doStandalonePresetsBuild(int groupIndex = -1);// standalone presets splitted from favourites presets
+	void doStandalonePresetsBuild(int groupIndex = -1); // standalone presets splitted from favourites presets
 	void doStandalonePresetLoad(std::string name, int groupIndex = -1);
 	void doStandalonePresetSave(std::string name, int groupIndex = -1);
 	bool doStandalonePresetsRefresh(int groupIndex = -1);
-	void doStandalonePresetsBuildFromFavs(int groupIndex = -1);// save all favourites-presets to the standalone-presets (archive) folder
+	void doStandalonePresetsBuildFromFavs(int groupIndex = -1); // save all favourites-presets to the standalone-presets (archive) folder
 
 	//----
 
@@ -1413,7 +1419,7 @@ public:
 	// This are usefull parameters to use in our ofAPp/projects/addons gui's
 	//--------------------------------------------------------------
 	ofParameterGroup getParamsControls() {
-		//cout << "displayNameUserKit: " << displayNameUserKit << endl;// TODO: not refreshing well on startup..
+		//cout << "displayNameUserKit: " << displayNameUserKit << endl; // TODO: not refreshing well on startup..
 
 		params_Controls.clear();
 		//params_Controls.setName(displayNameUserKit);
@@ -1473,19 +1479,19 @@ private:
 	void addKeysListeners();
 	void removeKeysListeners();
 
-	//void removeMouseListeners();// TODO: fix easy remover..
+	//void removeMouseListeners(); // TODO: fix easy remover..
 
-	vector<vector<int>> keys;// queued trigger keys for each group ? (all presets) (size of)
-	vector<vector<string>> labels;//converted to strings
+	vector<vector<int>> keys; // queued trigger keys for each group ? (all presets) (size of)
+	vector<vector<string>> labels; //converted to strings
 	bool bKeys_NotYetActivated;
 
 	// save keys
-	int modeKeySave;// save mod key
-	bool bModKeySave;// save mod key state
+	int modeKeySave; // save mod key
+	bool bModKeySave; // save mod key state
 
 	// swap selected preset with the currently clicked (i.e: 4 -> 7  &  4 <- 7)
-	int modKeySwap;// swap mod key 
-	bool bModKeySwap;// swap mod key state
+	int modKeySwap; // swap mod key 
+	bool bModKeySwap; // swap mod key state
 
 public:
 
@@ -1496,7 +1502,7 @@ public:
 
 private:
 
-	bool bKeys_ArrowBrowse = true;// allow browse presets by arrows keys by default
+	bool bKeys_ArrowBrowse = true; // allow browse presets by arrows keys by default
 
 public:
 
@@ -1512,7 +1518,7 @@ private:
 
 	// font to label clicker boxes
 	ofTrueTypeFont myFont;
-	std::string myTTF;// gui font for all gui theme
+	std::string myTTF; // gui font for all gui theme
 	int sizeTTF;
 	TextBoxWidget helpTextBoxWidget;
 
@@ -1537,21 +1543,21 @@ private:
 
 private:
 
-	bool bDISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
+	bool bDISABLE_CALLBACKS = true; // to avoid startup crashes and objects are not initialized properly
 	// updating some params before save will trigs also the group callbacks
 	// so we disable this callbacks just in case params updatings are required
-	//bool bDISABLE_CALLBACKS_Selectors = false;// to avoid multiple calls on multiple presets selector engine
+	//bool bDISABLE_CALLBACKS_Selectors = false; // to avoid multiple calls on multiple presets selector engine
 
 	//--
 
 public:
 
-	ofParameterGroup params_Control;// to use on external gui
+	ofParameterGroup params_Control; // to use on external gui
 
 public:
 
-	ofParameter<bool> bAutoSave;// auto save current preset when user clicks to another preset. almost enabled on edit mode
-	ofParameter<bool> bAutoLoad;// auto load the user clicked preset. almost always true
+	ofParameter<bool> bAutoSave; // auto save current preset when user clicks to another preset. almost enabled on edit mode
+	ofParameter<bool> bAutoLoad; // auto load the user clicked preset. almost always true
 
 private:
 
@@ -1612,19 +1618,19 @@ private:
 
 		std::string _path;
 
-		_path = path_UserKit_Folder;// current kit-preset main folder
+		_path = path_UserKit_Folder; // current kit-preset main folder
 		CheckFolder(_path);
 
-		_path = path_UserKit_Folder + "/" + path_PresetsFavourites;// current kit-presets favourite presets folder
+		_path = path_UserKit_Folder + "/" + path_PresetsFavourites; // current kit-presets favourite presets folder
 		CheckFolder(_path);
 
-		_path = path_UserKit_Folder + "/" + path_PresetsStandalone;// current kit-presets standalone presets folder
+		_path = path_UserKit_Folder + "/" + path_PresetsStandalone; // current kit-presets standalone presets folder
 		CheckFolder(_path);
 
-		//_path = path_UserKit_Folder + "/" + path_ControlSettings;// for randomizer settings (into his own kit-preset folder)
+		//_path = path_UserKit_Folder + "/" + path_ControlSettings; // for randomizer settings (into his own kit-preset folder)
 		//CheckFolder(_path);
 
-		_path = path_UserKit_Folder + "/" + path_ControlSettings;// app settings (shared from all kit-presets)
+		_path = path_UserKit_Folder + "/" + path_ControlSettings; // app settings (shared from all kit-presets)
 		CheckFolder(_path);
 
 		// create the folders of each group into main presets folder 
@@ -1632,8 +1638,8 @@ private:
 		{
 			for (int i = 0; i < groups.size(); i++)
 			{
-				_path = path_UserKit_Folder + "/" + path_PresetsFavourites;// current kit-presets presets folder
-				_path += "/" + groups[i].getName();// append group name
+				_path = path_UserKit_Folder + "/" + path_PresetsFavourites; // current kit-presets presets folder
+				_path += "/" + groups[i].getName(); // append group name
 
 				CheckFolder(_path);
 			}
