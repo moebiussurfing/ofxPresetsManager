@@ -85,7 +85,6 @@ ofxPresetsManager presetsManager;
 ofParameterGroup params; // group params container
 ofParameter<int> shapeType;
 ofParameter<int> amount;
-...
 ``
 
 **ofApp.cpp**
@@ -167,12 +166,12 @@ No need to add them manually with the **oF PROJECT GENERATOR**:
 
 *Special Thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector  
 
-which inspired this add-on a lot. Some of his code is also used here.*  
-*Special Thanks 2 goes to **@Daandelange**  
-for his work to the DEFINITIVE **ofxImGui** repository. Thanks **Daan**!*
+which inspired this add-on a lot. Some of his code is also used here.
+**Special Thanks 2 goes to **@Daandelange**  
+for his work to the DEFINITIVE **ofxImGui** repository. Thanks **Daan**!
 
 ## Tested Systems
-- **Windows10** / **VS2017** / **OF ~0.11**
+- **Windows10** / **VS2017** / **OF ~0.11+**
 - Should work on **macOS** too.  
 
 ## Notes / TODO
