@@ -13,7 +13,8 @@ _then I recommend to use my simpler add-on [ofxSurfingPresets](https://github.co
  
 ## Screenshot
 
-![](/examples/1_Basic/Capture.PNG)  
+#### 1_Basic (only one group)
+![](/Examples/1_Basic/Capture.PNG)  
 
 ## Features
 
@@ -34,7 +35,8 @@ When adding individually multiple `ofParameterGroup` we can handle them independ
 We can use arrow keys to browse the groups and their selectors.  
 Also, we will have an extra **Global Selector** called **GROUP_LINK**, which groups all the other group selectors states:  
 
-![](examples/2_MultiGroup/Capture.PNG)
+#### 2_MultiGroup
+![](Examples/2_MultiGroup/Capture.PNG)
 
 ## **Two Types of Presets**
 
@@ -66,7 +68,7 @@ To randomize some enabled parameters from the current preset.
 
 1. Set up your scene and `initialize` the related ```ofParameter```'s.
 2. ```Add``` the parameters ```to``` the ```ofParameterGroup container```.
-3. ```Add``` the group ```to the addon```. 
+3. ```Add``` the group ```to the add-on```. 
 4. Set ```how many presets``` you want for the group, ```and what keys``` to associate as triggers.
 5. ```Done!``` Just Play with the addon GUI (or using the API control methods by code).  
 
@@ -79,7 +81,7 @@ The file settings (one file for each preset) will be placed by default into ```/
 
 ofxPresetsManager presetsManager;
 
-ofParameterGroup params;// group params container
+ofParameterGroup params; // group params container
 ofParameter<int> shapeType;
 ofParameter<int> amount;
 ...
@@ -89,15 +91,15 @@ ofParameter<int> amount;
 ```.cpp
 ofApp::setup()
 {
-	// 1. set the scene parameters 
-	// 2. add them to the ofParameterGroup container. 
+	// 1. Set the scene parameters 
+	// 2. Add them to the ofParameterGroup container. 
 	params.setName("sceneParamsGroup");	
 	params.add(shapeType.set("shapeType", 1, 1, 2));
 	params.add(amount.set("amount", 10, 1, 24));
 	...
 
-	// 3. add the group to preset manager
-	// 4. set the amount of presets and each key triggers 
+	// 3. Add the group to preset manager
+	// 4. Set the amount of presets and each key triggers 
 	presetsManager.add(params, { 'a', 'b', '0', '1', '2', '3' });
 	presetsManager.setup();
 }
@@ -133,7 +135,7 @@ presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
 presetsManager.setup();
 ```
 
-* **3A_example-LinkServer** and **3B_example-LinkClient**:  
+* **ExamplesAdvanced/3A_example-LinkServer** and **ExamplesAdvanced/3B_example-LinkClient**:  
 Both examples runs linked together using **ofxRemoteParameters**.  
 This allows you to control the presets on the **Client OF_App**.  
 The **Server OF_App** draws your scene using the *linked/received* parameters from the **Client OF_App**.  
@@ -150,6 +152,7 @@ No need to add them manually with the **oF PROJECT GENERATOR**:
 * [ofxUndo](https://github.com/nariakiiwatani/ofxUndo)
 * [ofxScaleDragRect](https://github.com/moebiussurfing/ofxScaleDragRect) / _Fork_
 * [ofxMSAInteractiveObject](https://github.com/moebiussurfing/ofxMSAInteractiveObject) / _Fork_
+
 ## Thanks
 *Thanks to all the above add-ons coders!*  
 *Special Thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector  
@@ -158,6 +161,7 @@ which inspired this add-on a lot. Some of his code is also used here.*
 
 ## Tested Systems
 - **Windows10** / **VS2017** / **OF ~0.11**
+- Should work on **macOS** too.  
 
 ## Notes / TODO
 * A Better performant version without using hard disk files. **Memory Mode**, using a vector of XML/JSON instead of files.
@@ -168,7 +172,7 @@ which inspired this add-on a lot. Some of his code is also used here.*
 * **Feedback**, **Issues**, **PR**'s, and any kind of help are very welcome!
 
 ## Author
-An addon by **@moebiusSurfing**  
+An add-on by **@moebiusSurfing**  
 *( ManuMolina ) 2019-2022*
 
 ## License
