@@ -141,10 +141,7 @@ presetsManager.setup();
 
 ### /ExamplesAdvanced
 #### **3A_example-LinkServer** and **3B_example-LinkClient**: 
-
-Both examples runs linked together using **ofxRemoteParameters**. This allows you to control the presets on the **Client OF_App**.  
-The **Server OF_App** draws your scene using the *linked/received* parameters from the **Client OF_App**.  
-This is useful because in some scenarios could help to improve the performance or the compiling time reducing dependencies. [OUTDATED VIDEO](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
+Both examples runs linked together using **ofxRemoteParameters**. This allows you to control the presets on the **Client OF_App**. The **Server OF_App** draws your scene using the *linked/received* parameters from the **Client OF_App**. This is useful because in some scenarios could help to improve the performance or the compiling time reducing dependencies. [OUTDATED VIDEO](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
 
 ## Dependencies
 * [ofxImGui](https://github.com/Daandelange/ofxImGui/tree/jvcleave) / _Fork from  @Daandelange_
@@ -158,13 +155,12 @@ No need to add them manually with the **oF PROJECT GENERATOR**:
 * [ofxMSAInteractiveObject](https://github.com/moebiussurfing/ofxMSAInteractiveObject) / _Fork_
 
 ## Thanks
-*Thanks to all the above add-ons coders!*  
+_Thanks to all the above add-ons coders!_  
 
-*Special Thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector  
+_Special Thanks to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector  
+which inspired this add-on a lot. Some of his code is also used here._
 
-which inspired this add-on a lot. Some of his code is also used here.
-**Special Thanks 2 goes to **@Daandelange**  
-for his work to the DEFINITIVE **ofxImGui** repository. Thanks **Daan**!
+_Special Thanks 2 goes to **@Daandelange**_ for his work to the DEFINITIVE **ofxImGui** repository. Thanks **Daan**!  
 
 ## Tested Systems
 - **Windows10** / **VS2017** / **OF ~0.11+**
