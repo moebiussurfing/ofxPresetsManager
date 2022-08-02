@@ -15,44 +15,48 @@
 
 */
 
-//------
+//----
 
 /*
+
 	TODO:
 	
-	+	fix PArameters window. 
-			ImGui groups weird folder headers on nested groups.
+	+	fix Parameters window. 
+		ImGui groups weird folder headers on nested groups.
 
-	+	 force each group editor window to the same position.
+	+	force each group editor window to the same position.
 	
 	+	add clicker to name labels like arrows browsing, on clicker window.
 	+	add re trig when re click without index change.
 	
 	+	new edit mode: 
-			mark a param and when modifying current preset, save to all the others and overwrite	
-	+		lock (by toggle) params that we want to ignore on changing presets
-			can be done enabling/disabling serializable for each param with a group of toggles.
+		mark a param and when modifying current preset, save to all the others and overwrite	
+	+	lock (by toggle) params that we want to ignore on changing presets
+		can be done enabling/disabling serializable for each param with a group of toggles.
 	
-	+	super-lite version with combo list. maybe without any GUI at all.
+	+	super-lite add-on player version with combo list only. maybe without any GUI at all.
 
+	+	small flick on clicker window when minimized and changed to edit 
 
 	IDEAS:
 	
-	+		open/save dialog to project User-Kit session in a single file.
-				or allowed to all the groups?
+	+	open/save dialog to project User-Kit session in a single file.
+		or allowed to all the groups?
 	
-	+		add populator engine to create all preset files if it's a new empty project
-				add setter to enable some params to randomize
-				call populate. disable debug_display red info
-			-> This is already done on ofxSurfingPresets..
+	+	add populator engine to create all preset files if it's a new empty project
+		add settler to enable some params to randomize
+		call populate. disable debug_display red info
+		-> This is already done on ofxSurfingPresets..
 	
-	+		performance: 
-				restore-back memory_mode. (use xml objects into memory vs hd files) to extra groups too
+	+	performance: 
+		restore-back memory_mode. 
+		(use xml objects into memory vs hd files) to extra groups too
 	
-	+		fix auto save timer. exclude log.
+	+	fix auto save timer. exclude log.
+
 */
 
-//------
+//----
 
 
 #pragma once
@@ -63,27 +67,29 @@
 //-----------------------------------------------------------------------------------------------------------------
 //
 //	DEFINES
-//
-//-
+
+//--
 
 //	1. SURFING ENGINES
 
 // GLOBAL BYPASS
-// 
-// -> You can comment this line only and will disable too the above surfing engines directives
+// -> You can comment this line only 
+// and will force disable too the below surfing engines directives.
 //#define INCLUDE_SURFING_ENGINES 
 
 //	Tween/Smooth transitions between presets
-//	We can enable only one of the two! (Tween or Smooth)
-//
-//	1.2 TWEEN 
+//	We can enable only one of the two! 
+// (Tween or Smooth)
+//	1.2 TWEEN (Option 1)
 #define INCLUDE_ofxSurfingTween 
-//
-//	1.1 SMOOTH
+
+//	1.1 SMOOTH (Option 2)
 //#define INCLUDE_ofxSurfingSmooth 
-//
+
 //	1.3 RANDOMIZER
 #define INCLUDE_ofxSurfingRandomizer
+
+//-
 
 #ifndef INCLUDE_SURFING_ENGINES
 #undef INCLUDE_ofxSurfingTween 
@@ -91,57 +97,69 @@
 #undef INCLUDE_ofxSurfingRandomizer
 #endif
 
-//-
+//----
 
 //	2. EXTRA FEATURES
 
-//#define INCLUDE_ofxUndoSimple	// undo engine to store after randomize a preset or manually (to browse history states)
+#define INCLUDE_ofxUndoSimple	
+// undo engine to store after randomize a preset or manually (to browse history states)
 
-//#define USE_JSON	// set the file settings format (xml or json). already defined into ofxSurfingHelpers
+//#define USE_JSON	
+// set the file settings format (xml or json). 
+// already defined into ofxSurfingHelpers
+
 #define NUM_MAX_GROUPS 10
-//TODO: should be better to push to a vector..
-
-//#define INCLUDE_ofxUndoSimple
+//TODO: should be better to push to a vector...
+// but maybe hard coded sizes helps a bit on the performance.
  
-//-
+//----
 
 // 3. CUSTOMIZATION
 
 #define USE_PRESETS_MANAGER__IMGUI_LAYOUT 
-// -> Instantiated and using my addon ofxSurfingImGui
+// -> Instantiated and using my add-on ofxSurfingImGui
 
 //#define USE_PRESETS_MANAGER__IMGUI_INTERNAL
-// -> Legacy ImGui without my ofxSurfingImGui add-on. Deprected
-
-#define USE_SPECIAL_WINDOWS //TODO:
+// -> Legacy ImGui without my ofxSurfingImGui add-on. Deprecated
 
 //-
  
-//#define USE_IMGUI_EXTERNAL // this is to group all ImGui panels into one unique instance in ofApp
+//#define USE_IMGUI_EXTERNAL 
+// this is to group all ImGui panels into one unique instance in ofApp
 // currently there's a bug when using more than one single ofxImGui instance!
 // this line is proposed as debugging when adding this feature (multi instance).
-//
+
+#define USE_SPECIAL_WINDOWS // probably can't be disabled
 
 //--
 
-//#define USE__PRESETS_MANAGER__NATIVE_CLICKER // -> Legacy clicker. Now we use the ImGui toggles matrix!
+//#define USE__PRESETS_MANAGER__NATIVE_CLICKER 
+// -> Legacy clicker. oF Native. 
+// Now we use the ImGui toggles matrix!
 
 //--
 
 //	4. DEBUG
 
-//#define DEBUG_PERFORMANCE_MEASURES			// measure performance ofxTimeMeasurements. not using now. must restore!
-//#define DEBUG_randomTest						// uncomment to debug randimzer. comment to normal use. if enabled, random engine stops working
-//#define DEBUG_BLOCK_SAVE_SETTINGS				// disable save settings//enable this bc sometimes there's crashes on exit...
-//
-//
+//#define DEBUG_PERFORMANCE_MEASURES	
+// measure performance ofxTimeMeasurements. not using now. must restore!
+
+//#define DEBUG_randomTest						
+// uncomment to debug randomizer. 
+// comment to normal use. if enabled, random engine stops working
+
+//#define DEBUG_BLOCK_SAVE_SETTINGS				
+// disable save settings//enable this bc sometimes there's crashes on exit...
+
+
 //-----------------------------------------------------------------------------------------------------------------
 
 
 //--
 
 #include "ofxImGui.h"
-#include "imgui_internal.h" // some imgui internals
+#include "imgui_internal.h"
+// some imgui helpers
 
 //--
 

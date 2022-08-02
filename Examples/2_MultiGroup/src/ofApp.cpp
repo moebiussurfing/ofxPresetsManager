@@ -5,7 +5,7 @@ void ofApp::setup()
 {
 	ofSetFrameRate(60);
 	ofSetWindowPosition(-1920, 25);
-	
+
 	//--
 
 	// Setup your parameters groups 
@@ -89,7 +89,7 @@ void ofApp::draw()
 		if (show1) drawScene1();
 		if (show2) drawScene2();
 		if (show3) drawScene3();
-		
+
 		ofPopMatrix();
 	}
 
@@ -143,10 +143,16 @@ void ofApp::setupScene()
 	params0.add(shapeType0.set("shapeType0", 1, 1, 2));
 	params0.add(separation0.set("separation0", 100, 1, 100));
 	params0.add(shapeSide0.set("shapeSide0", 50, 5, 200));
-	params0_Nested.setName("styleGroup"); // we can use nested groups as ofParameterGroup
+	/*
+	//TODO: BUG: 
+	// nested groups make fail some folding, 
+	// and headers are disappearing...
+	// we can use nested groups as ofParameterGroup
+	params0_Nested.setName("SubGroup0"); 
 	params0_Nested.add(fill0.set("fill0", true));
 	params0_Nested.add(lineWidth0.set("lineWidth0", 1, 0.1, 10));
 	params0.add(params0_Nested); // add a group to the parent group
+	*/
 
 	// group1
 	params1.setName("Group1");
@@ -183,10 +189,10 @@ void ofApp::drawScene0()
 	ofSetLineWidth(lineWidth0);
 	if (fill0) ofFill();
 	else ofNoFill();
-	for (int i = 0; i < numObjects0+1; ++i)
+	for (int i = 0; i < numObjects0 + 1; ++i)
 	{
-		if (shapeType0 == 1) ofDrawRectangle(0, 0, shapeSide0 * i / 2, shapeSide0 * i / 2);
-		else if (shapeType0 == 2) ofDrawCircle(0, 0, shapeSide0 * i / 2);
+		if (shapeType0 == 1) ofDrawRectangle(0, 0, shapeSide0 * i , shapeSide0 * i );
+		else if (shapeType0 == 2) ofDrawCircle(0, 0, shapeSide0 * i );
 		ofTranslate(separation0, 0);
 	}
 	ofPopMatrix();
@@ -219,9 +225,9 @@ void ofApp::drawScene2()
 	ofSetColor(color2.get());
 	if (fill2) ofFill();
 	else ofNoFill();
-	for (int i = 0; i < numObjects2+1; ++i)
+	for (int i = 0; i < numObjects2 + 1; ++i)
 	{
-		ofDrawCircle(0, 0, (size2 + size2 / i) / 4);
+		ofDrawCircle(0, 0, (size2 + size2 / i) / 2);
 		ofTranslate(size2 * i * 1.5, 0);
 	}
 	ofPopMatrix();
@@ -238,7 +244,7 @@ void ofApp::drawScene3()
 	ofSetColor(color3.get());
 	for (int i = 0; i < numObjects3; ++i)
 	{
-		ofDrawRectangle(0, 0, size3 * i / 3, size3 * i / 3);
+		ofDrawRectangle(0, 0, size3 * i, size3 * i);
 		float _tr = i * (separation3 + 20);
 		ofTranslate(_tr, 0);
 	}

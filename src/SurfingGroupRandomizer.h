@@ -45,6 +45,22 @@ public:
 
 	ofParameter<bool> bGui_PlayerEditor;
 
+private:
+
+	bool bLockedPosition = false;
+	glm::vec2 positionGui;
+
+public:
+
+	// Force the position of the ImGui windows.
+	// then they're controlled from the parent scope,
+	// who handles the ImGui context
+	//--------------------------------------------------------------
+	void setGuiPosition(glm::vec2 pos) {
+		bLockedPosition = true;
+		positionGui = pos;
+	}
+
 public:
 
 	ofParameterGroup params_FloatClicker;

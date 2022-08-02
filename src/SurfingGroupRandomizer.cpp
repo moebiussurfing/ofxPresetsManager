@@ -1237,13 +1237,26 @@ void SurfingGroupRandomizer::drawImGui_Main()
 	ImGuiWindowFlags flagsw;
 	flagsw = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : ImGuiWindowFlags_None;
 
+	if (bLockedPosition)
+	{
+		ImGuiCond cond = ImGuiCond_Always;
+		ImGui::SetNextWindowPos(positionGui, cond);
+	}
+
+	//--
+
+	// Window
+	{
 #ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
-	guiManager.beginWindow(str.c_str(), NULL, flagsw);
+		guiManager.beginWindow(str.c_str(), NULL, flagsw);
 #endif
 
 #ifdef USE_RAW_IM_GUI__GROUP_RANDOMIZER
-	ImGui::Begin(str.c_str(), NULL, flagsw);
+		ImGui::Begin(str.c_str(), NULL, flagsw);
 #endif
+	}
+
+	//--
 
 	{
 		float _spcx;
@@ -1344,9 +1357,9 @@ void SurfingGroupRandomizer::drawImGui_Main()
 		_w50 = getWidgetsWidth(2);
 		float _hm = getWidgetsHeightUnit() * 2;
 
-		if (keys.size() == 0) 
+		if (keys.size() == 0)
 			ofxImGuiSurfing::AddMatrixClicker(index_PresetSelected, respBtnsClicker, amntBtnsClicker, true, _hm);
-		else 
+		else
 			ofxImGuiSurfing::AddMatrixClickerLabelsStrings(index_PresetSelected, labels, true, amntBtnsClicker, true, -1);
 
 		ImGui::Spacing();
@@ -1360,12 +1373,30 @@ void SurfingGroupRandomizer::drawImGui_Main()
 			ImGui::Spacing();
 
 			ImGui::Spacing();
-			ImGui::Text("CLOCK TIMERS");
+			ImGui::Text("CLOCK");
 			ImGui::Spacing();
-
+		}
+		{
 			ImGui::PushItemWidth(_w50);
 			ofxImGuiSurfing::AddParameter(randomizeDurationBpm);
 			ImGui::PopItemWidth();
+
+			// Add mouse wheel to the float param
+			{
+				float wheel = ImGui::GetIO().MouseWheel;
+				bool bCtrl = ImGui::GetIO().KeyCtrl; // ctrl to fine tunning
+				{
+					ofParameter<float> p = dynamic_cast<ofParameter<float>&>(randomizeDurationBpm);
+					float resolution = -1;
+					resolution = (p.getMax() - p.getMin()) / 800.f;//make smaller
+					//resolution = (p.getMax() - p.getMin()) / 100.f;
+					// 100 steps for all the param range
+
+					p += wheel * (bCtrl ? resolution : resolution * 10);
+					p = ofClamp(p, p.getMin(), p.getMax()); // clamp
+				}
+			}
+
 			if (ImGui::Button("Half", ImVec2(_w50, _h))) {
 				randomizeDurationBpm = randomizeDurationBpm / 2.0f;
 			}
@@ -1377,7 +1408,9 @@ void SurfingGroupRandomizer::drawImGui_Main()
 			{
 				randomizeDurationBpm = 120;
 			}
-
+		}
+		if (!bMinimize)
+		{
 			ImGui::Spacing();
 			ImGui::Separator();
 			ImGui::Spacing();
@@ -1477,12 +1510,21 @@ void SurfingGroupRandomizer::drawImGui_Main()
 		}
 	}
 
+	//--
+
+	// Window
+
+	{
 #ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER
-	guiManager.endWindow();
+		guiManager.endWindow();
 #endif
+
 #ifdef USE_RAW_IM_GUI__GROUP_RANDOMIZER
-	ImGui::End();
+		ImGui::End();
 #endif
+	}
+
+	//--
 }
 
 //--------------------------------------------------------------
