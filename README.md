@@ -8,12 +8,9 @@ An **openFrameworks** add-on to handle presets of `ofParameter`'s nested into si
 Also powered with a nice GUI, many Helpers, and a complete user workflow.
 
 **NOTE**  
+
 _If you don't need multiple and independent and linkable groups,_  
 _then I recommend to use my simpler add-on [ofxSurfingPresets](https://github.com/moebiussurfing/ofxSurfingPresets)._  
-
-#### 1_Basic (only one group)
-
-![](Examples/1_Basic/Capture.PNG)  
 
 ## Features
 
@@ -27,13 +24,15 @@ _then I recommend to use my simpler add-on [ofxSurfingPresets](https://github.co
 - **Browse** multi groups and presets by **arrows keys**.
 - **Undo** history engine.
 
-## **Multi Groups**
+#### 1_Basic (only one group)
+
+![](Examples/1_Basic/Capture.PNG)  
+
+#### 2_MultiGroup
 
 When adding individually multiple `ofParameterGroup` we can handle them independently.  
 We can use **arrow keys** to browse the Groups (up/down) and their **Selectors** (left/right).  
 Also, we will have an extra **Global Selector** called **GROUP_LINK**, which groups all the other group Selectors indexes:  
-
-#### 2_MultiGroup
 
 ![](Examples/2_MultiGroup/Capture.PNG)
 
