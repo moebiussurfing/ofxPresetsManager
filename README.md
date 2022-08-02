@@ -47,14 +47,14 @@ Also, we will have an extra **Global Selector** called **GROUP_LINK**, which gro
 
 ## Usage
 
-1. Set up your scene and `initialize` the related ```ofParameter```'s.
-2. ```Add``` the parameters ```to``` the ```ofParameterGroup container```.
-3. ```Add``` the group ```to the add-on```. 
-4. Set ```how many presets``` you want for the group, ```and what keys``` to associate as triggers.
-5. ```Done!``` Just Play with the addon GUI (or using the API control methods by code).  
+1. Set up your scene and **initialize** the related **ofParameter**'s.
+2. Add the parameters to the **ofParameterGroup** container.
+3. Add the group to the add-on. 
+4. Set **how many** presets you want for the group, and **what keys** to associate as triggers.
+5. Done! Just Play with the addon GUI (or using the API control methods by code).  
 
-Look at the examples and ```ofxPresetsManager.h``` for more learning.  
-The file settings (one file for each preset) will be placed by default into ```/bin/data```.  
+Look at the examples and **ofxPresetsManager.h** for more learning.  
+The files settings (one file for each preset) will be placed by default into ```/bin/data```.  
 
 **ofApp.h**
 
@@ -73,27 +73,26 @@ ofParameter<int> amount;
 ```c++
 ofApp::setup()
 {
-    // 1. Set the parameters 
-    // 2. Add to the ofParameterGroup container. 
+    // Set the parameters 
+    // and add to the ofParameterGroup container. 
     params.setName("sceneParamsGroup");    
     params.add(shapeType.set("shapeType", 1, 1, 2));
     params.add(amount.set("amount", 10, 1, 24));
 
-    // 3. Add group to preset manager
-    // 4. Set the amount of presets and each key triggers 
+    // Add the group to the Preset Manager
+    // Set the amount of presets and each key trigger 
     presetsManager.add(params, { 'a', 'b', '0', '1', '2', '3' });
     presetsManager.setup();
 }
 
 ofApp::draw()
 {
-    // 5. Gui
+    // Gui
     presetsManager.draw();
 }
 
-// 6. Done!
+// Done!
 // Nothing more!
-// Your parameters are auto updated.
 ```
 
 ## About the examples
@@ -121,7 +120,8 @@ presetsManager.setup();
 
 ### ExamplesAdvanced
 #### 3A_example-LinkServer and 3B_example-LinkClient:
-Both examples runs linked together using **ofxRemoteParameters**. This allows you to control the presets on the **Client OF_App**. The **Server OF_App** draws your scene using the *linked/received* parameters from the **Client OF_App**. This is useful because in some scenarios could help to improve the performance or the compiling time reducing dependencies. [OUTDATED VIDEO](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
+Both examples runs linked together using **ofxRemoteParameters**. This allows you to control the presets on the **Client OF_App**. The **Server OF_App** draws your scene using the *linked/received* parameters from the **Client OF_App**.  
+This is useful because in some scenarios could help to improve the performance or the compiling time reducing dependencies. [OUTDATED VIDEO](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
 
 ## Dependencies
 * [ofxImGui](https://github.com/Daandelange/ofxImGui/tree/jvcleave) / _Fork from  @Daandelange_
