@@ -24,6 +24,8 @@ _then I recommend to use my simpler add-on [ofxSurfingPresets](https://github.co
 - **Browse** multi groups and presets by **arrows keys**.
 - **Undo** history engine.
 
+## Examples
+
 #### 1_Basic (only one group)
 
 ![](Examples/1_Basic/Capture.PNG)  
