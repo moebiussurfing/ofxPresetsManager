@@ -5,10 +5,10 @@ ofxPresetsManager
 
 An **openFrameworks** add-on to handle presets of `ofParameter`'s nested into single or multiple `ofParameterGroup` containers.  
 
-Also powered with a nice GUI, many Helpers and a complete user workflow.
+Also powered with a nice GUI, many Helpers, and a complete user workflow.
 
 **NOTE**  
-_If you don't need multiple and independent and linkeable groups,_  
+_If you don't need multiple and independent and linkable groups,_  
 _then I recommend to use my simpler add-on [ofxSurfingPresets](https://github.com/moebiussurfing/ofxSurfingPresets)._  
 
 #### 1_Basic (only one group)
@@ -20,7 +20,7 @@ _then I recommend to use my simpler add-on [ofxSurfingPresets](https://github.co
 - Easy to integrate into your projects.
 - Auto-generates a GUI to tweak all the parameters.
 - GUI based on **Dear ImGui**, using a fork of **ofxImGui**.
-- Clone, Copy, Swap and **Organize Presets**.
+- Clone, Copy, Swap, and **Organize Presets**.
 - Handle **Many Groups** independently. 
 - **BPM Timed Randomizer** Players to switch between presets independently for each group.
 - Tweaking for **probabilities** and **Short** or **Long** time durations.
@@ -30,8 +30,8 @@ _then I recommend to use my simpler add-on [ofxSurfingPresets](https://github.co
 ## **Multi Groups**
 
 When adding individually multiple `ofParameterGroup` we can handle them independently.  
-We can use arrow keys to browse the groups and their selectors.  
-Also, we will have an extra **Global Selector** called **GROUP_LINK**, which groups all the other group selectors states:  
+We can use **arrow keys** to browse the Groups (up/down) and their **Selectors** (left/right).  
+Also, we will have an extra **Global Selector** called **GROUP_LINK**, which groups all the other group Selectors indexes:  
 
 #### 2_MultiGroup
 
@@ -40,7 +40,7 @@ Also, we will have an extra **Global Selector** called **GROUP_LINK**, which gro
 ## Two Types of Presets
 
 1. Favorite Presets:  
-   Fast clickable-boxes/key-trigged presets.  
+   Fast clickable boxes/key-trigged presets.  
 
 2. Standalone Presets:  
    Archived and named presets that we can load into and from favorites.  
@@ -51,10 +51,10 @@ Also, we will have an extra **Global Selector** called **GROUP_LINK**, which gro
 2. Add the parameters to the **ofParameterGroup** container.
 3. Add the group to the add-on. 
 4. Set **how many** presets you want for the group, and **what keys** to associate as triggers.
-5. Done! Just Play with the addon GUI (or using the API control methods by code).  
+5. Done! Just Play with the addon GUI
 
 Look at the examples and **ofxPresetsManager.h** for more learning.  
-The files settings (one file for each preset) will be placed by default into ```/bin/data```.  
+The file settings (one file for each preset) will be placed by default into ```/bin/data```.  
 
 **ofApp.h**
 
@@ -134,14 +134,14 @@ _Thanks to all the above add-ons coders!_
 _Special Thanks 1 goes to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector  
 which inspired this add-on a lot. Some of his code is also used here._
 
-_Special Thanks 2 goes to **@Daandelange**_ for his work to the DEFINITIVE **ofxImGui** repository. Thanks **Daan**!  
+_Special Thanks 2 goes to **@Daandelange**_ for his work to the DEFINITIVE **ofxImGui** repository. Thanks, **Daan**!  
 
 ## Tested Systems
 - **Windows10** / **VS2017** / **OF ~0.11+**
 - Should work on **macOS** too.  
 
 <details>
-  <summary>Notes / TODO</summary>
+  <summary>TODO</summary>
   <p>
    
 * A Better performant version without using hard disk files.  
