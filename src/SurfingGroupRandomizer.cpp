@@ -569,14 +569,17 @@ void SurfingGroupRandomizer::addGroupToRandomizerFiletered(ofParameterGroup& gro
 	}
 }
 
+//TODO:
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::doRandomPreset() {
 	ofLogNotice(__FUNCTION__);
 
 	//if(params_Filtered_Toggles.size() == 0) params_Filtered_Toggles
 
-	ofParameterGroup _group = group;
-	doRandomGroup(_group);
+	//ofParameterGroup _group = group;
+	//doRandomGroup(_group);
+
+	doRandomGroup(group);
 
 	//#ifdef INCLUDE_ofxUndoSimple
 	//	if (MODE_Editor.get())
@@ -764,32 +767,41 @@ void SurfingGroupRandomizer::doRandomGroup(ofParameterGroup& group) {
 }
 
 //--------------------------------------------------------------
-void SurfingGroupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
+void SurfingGroupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) 
+{
+	//TODO:
+	//bfull is ignored
+	//filtered are ignored
+	// this features are now on ofxSurfingRandomizer
+
 	for (auto parameter : group)
 	{
-		if (parameter->isSerializable())// avoid not serailizable params that will crash
+		if (parameter->isSerializable()) // avoid not serializable params that will crash
 		{
 			// recursive..
 			auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
 			if (parameterGroup)
 			{
-				string name = parameterGroup->getName();
-				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);//TODO: crashes here..
-				//bool b = parameterGroup->isSerializable();//another posible approach to filter..
+				//TODO:
+				//string name = parameterGroup->getName();
+				//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);//TODO: crashes here..
+				////bool b = parameterGroup->isSerializable();//another possible approach to filter..
 
-				//auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
-				//if (parameterBool)
+				////auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
+				////if (parameterBool)
 
-				if (bfull || b) doResetGroup(*parameterGroup, bfull);
+				if (bfull) doResetGroup(*parameterGroup, bfull);
+				//if (bfull || b) doResetGroup(*parameterGroup, bfull);
 				continue;
 			}
 
 			auto parameterInt = std::dynamic_pointer_cast<ofParameter<int>>(parameter);
 			if (parameterInt)
 			{
-				string name = parameterInt->getName();
-				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
-				if (bfull || b) parameterInt->set(parameterInt->getMin());
+				//string name = parameterInt->getName();
+				//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
+				//if (bfull || b) parameterInt->set(parameterInt->getMin());
+				parameterInt->set(parameterInt->getMin());
 				continue;
 			}
 
@@ -797,35 +809,39 @@ void SurfingGroupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			if (parameterFloat)
 			{
 				string name = parameterFloat->getName();
-				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
-				if (bfull || b) parameterFloat->set(parameterFloat->getMin());
+				//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
+				//if (bfull || b) parameterFloat->set(parameterFloat->getMin());
+				parameterFloat->set(parameterFloat->getMin());
 				continue;
 			}
 
 			auto parameterBool = std::dynamic_pointer_cast<ofParameter<bool>>(parameter);
 			if (parameterBool)
 			{
-				string name = parameterBool->getName();
-				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
-				if (bfull || b) parameterBool->set(false);
+				//string name = parameterBool->getName();
+				//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
+				//if (bfull || b) parameterBool->set(false);
+				parameterBool->set(false);
 				continue;
 			}
 
 			auto parameterFloatColor = std::dynamic_pointer_cast<ofParameter<ofFloatColor>>(parameter);
 			if (parameterFloatColor)
 			{
-				string name = parameterFloatColor->getName();
-				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
-				if (bfull || b) parameterFloatColor->set(ofFloatColor(0, 0, 0, 1));
+				//string name = parameterFloatColor->getName();
+				//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
+				//if (bfull || b) parameterFloatColor->set(ofFloatColor(0, 0, 0, 1));
+				parameterFloatColor->set(ofFloatColor(0, 0, 0, 1));
 				continue;
 			}
 
 			auto parameterColor = std::dynamic_pointer_cast<ofParameter<ofColor>>(parameter);
 			if (parameterColor)
 			{
-				string name = parameterColor->getName();
-				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
-				if (bfull || b) parameterColor->set(ofColor(0, 0, 0, 255));
+				//string name = parameterColor->getName();
+				//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
+				//if (bfull || b) parameterColor->set(ofColor(0, 0, 0, 255));
+				parameterColor->set(ofColor(0, 0, 0, 255));
 				continue;
 			}
 
@@ -834,17 +850,19 @@ void SurfingGroupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			auto parameterVec2f = std::dynamic_pointer_cast<ofParameter<glm::vec2>>(parameter);
 			if (parameterVec2f)
 			{
-				string name = parameterVec2f->getName();
-				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
-				if (bfull || b) parameterVec2f->set(glm::vec2(parameterVec2f->getMin().x, parameterVec2f->getMin().y));
+				//string name = parameterVec2f->getName();
+				//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
+				//if (bfull || b) parameterVec2f->set(glm::vec2(parameterVec2f->getMin().x, parameterVec2f->getMin().y));
+				parameterVec2f->set(glm::vec2(parameterVec2f->getMin().x, parameterVec2f->getMin().y));
 				continue;
 			}
 			auto parameterVec3f = std::dynamic_pointer_cast<ofParameter<glm::vec3>>(parameter);
 			if (parameterVec3f)
 			{
-				string name = parameterVec3f->getName();
-				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
-				if (bfull || b)  parameterVec3f->set(glm::vec3(
+				//string name = parameterVec3f->getName();
+				//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
+				//if (bfull || b)  parameterVec3f->set(glm::vec3(
+				parameterVec3f->set(glm::vec3(
 					parameterVec3f->getMin().x,
 					parameterVec3f->getMin().y,
 					parameterVec3f->getMin().z));
@@ -853,9 +871,10 @@ void SurfingGroupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			auto parameterVec4f = std::dynamic_pointer_cast<ofParameter<glm::vec4>>(parameter);
 			if (parameterVec4f)
 			{
-				string name = parameterVec4f->getName();
-				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
-				if (bfull || b) parameterVec4f->set(glm::vec4(
+				//string name = parameterVec4f->getName();
+				//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
+				//if (bfull || b) parameterVec4f->set(glm::vec4(
+				parameterVec4f->set(glm::vec4(
 					parameterVec4f->getMin().x,
 					parameterVec4f->getMin().y,
 					parameterVec4f->getMin().z,
@@ -867,25 +886,28 @@ void SurfingGroupRandomizer::doResetGroup(ofParameterGroup& group, bool bfull) {
 			auto parameterOfVec2f = std::dynamic_pointer_cast<ofParameter<ofVec2f>>(parameter);
 			if (parameterOfVec2f)
 			{
-				string name = parameterOfVec2f->getName();
-				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
-				if (bfull || b) parameterOfVec2f->set(ofVec2f(parameterOfVec2f->getMin().x, parameterOfVec2f->getMin().y));
+				//string name = parameterOfVec2f->getName();
+				//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
+				//if (bfull || b) parameterOfVec2f->set(ofVec2f(parameterOfVec2f->getMin().x, parameterOfVec2f->getMin().y));
+				parameterOfVec2f->set(ofVec2f(parameterOfVec2f->getMin().x, parameterOfVec2f->getMin().y));
 				continue;
 			}
 			auto parameterOfVec3f = std::dynamic_pointer_cast<ofParameter<ofVec3f>>(parameter);
 			if (parameterOfVec3f)
 			{
-				string name = parameterOfVec3f->getName();
-				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
-				if (bfull || b) parameterOfVec3f->set(ofVec3f(parameterOfVec3f->getMin().x, parameterOfVec3f->getMin().y, parameterOfVec3f->getMin().z));
+				//string name = parameterOfVec3f->getName();
+				//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
+				//if (bfull || b) parameterOfVec3f->set(ofVec3f(parameterOfVec3f->getMin().x, parameterOfVec3f->getMin().y, parameterOfVec3f->getMin().z));
+				parameterOfVec3f->set(ofVec3f(parameterOfVec3f->getMin().x, parameterOfVec3f->getMin().y, parameterOfVec3f->getMin().z));
 				continue;
 			}
 			auto parameterOfVec4f = std::dynamic_pointer_cast<ofParameter<ofVec4f>>(parameter);
 			if (parameterOfVec4f)
 			{
-				string name = parameterOfVec4f->getName();
-				ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
-				if (bfull || b) parameterOfVec4f->set(ofVec4f(
+				//string name = parameterOfVec4f->getName();
+				//ofParameter<bool> b = params_Filtered_Toggles.getBool(name);
+				//if (bfull || b) parameterOfVec4f->set(ofVec4f(
+				parameterOfVec4f->set(ofVec4f(
 					parameterOfVec4f->getMin().x,
 					parameterOfVec4f->getMin().y,
 					parameterOfVec4f->getMin().z,

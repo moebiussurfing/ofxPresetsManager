@@ -818,7 +818,7 @@ void ofxPresetsManager::update(ofEventArgs& args)
 
 		// Randomizers groups
 
-		for (int i = 0; i < groups.size(); i++) 
+		for (int i = 0; i < groups.size(); i++)
 		{
 			groupRandomizers[i].update();
 
@@ -1714,11 +1714,6 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 				bGui = !bGui;
 				return;
 			}
-			//else if (key == 'H')
-			//{
-			//	bHelp = !bHelp;
-			//	return;
-			//}
 			else if (key == 'E')
 			{
 				bMODE_EditLive = !bMODE_EditLive;
@@ -1746,7 +1741,8 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 			// randomize enable parameters (look into randomizers panel) to the current selected preset
 			else if ((mod_CONTROL && !mod_ALT) && (key == 'R' || key == 18))
 			{
-				doRandomizePresetSelected(index_GroupSelected);
+				//doRandomizePresetSelected(index_GroupSelected);
+				doRandomFull();
 
 				// workflow
 				// store current point to undo history
@@ -2948,7 +2944,7 @@ bool ofxPresetsManager::ImGui_Draw_Windows()
 		//--
 
 		// Players
-		
+
 		// workaround to reduce weird flicker
 		// Set position
 		//all
@@ -3115,38 +3111,66 @@ void ofxPresetsManager::draw_Gui_Parameters()
 
 		ImGui::Spacing();
 
-		// 2. Tools
-		// random and reset tools
-
-		guiManager.AddSpacingBigSeparated();
-
-		if (ImGui::CollapsingHeader("TOOLS", ImGuiTreeNodeFlags_None))
+		if (!guiManager.bMinimize)
 		{
-			guiManager.refreshLayout();
-			float _h = guiManager.getWidgetsHeight();
-			float _w100 = guiManager.getWidgetsWidth(1);
-			float _w50 = guiManager.getWidgetsWidth(2);
 
-			if (ImGui::Button("Random Params", ImVec2(_w50, _h)))
+			// 2. Tools
+			// random and reset tools
+
+			guiManager.AddSpacingBigSeparated();
+
+			if (ImGui::CollapsingHeader("TOOLS", ImGuiTreeNodeFlags_None))
 			{
-				doRandomFiltered();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Random Full", ImVec2(_w50, _h)))
-			{
-				doRandomFull();
+				guiManager.refreshLayout();
+				float _h = guiManager.getWidgetsHeight();
+				float _w100 = guiManager.getWidgetsWidth(1);
+				float _w50 = guiManager.getWidgetsWidth(2);
+
+				if (ImGui::Button("Random Full", ImVec2(_w50, _h)))
+				{
+					doRandomFull();
+
+					// workflow
+					// store current point to undo history
+#ifdef INCLUDE_ofxUndoSimple
+					doStoreUndo();
+#endif
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Reset Full", ImVec2(_w50, _h)))
+				{
+					doResetFull();
+
+					//				// workflow
+					//				// store current point to undo history
+					//#ifdef INCLUDE_ofxUndoSimple
+					//				doStoreUndo();
+					//#endif
+				}
+
+				//if (ImGui::Button("Random Params", ImVec2(_w50, _h)))
+				//{
+				//	doRandomFiltered();
+				//}
+				//ImGui::SameLine();
+				//if (ImGui::Button("Reset Filter", ImVec2(_w50, _h)))
+				//{
+				//	doResetFiltered();
+				//}
 			}
 
-			if (ImGui::Button("Reset Filter", ImVec2(_w50, _h)))
-			{
-				doResetFiltered();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Reset Full", ImVec2(_w50, _h)))
-			{
-				doResetFull();
-			}
+			//--
+
+			// 6. Undo Engine
+
+#ifdef INCLUDE_ofxUndoSimple
+		//if (!guiManager.bMinimize)
+			draw_Gui_WidgetsUndo();
+#endif
 		}
+
+		//--
+
 		guiManager.refreshLayout();
 
 		//--
@@ -3423,8 +3447,8 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 		{
 			//--
 
-				guiManager.AddSpacing();
-				guiManager.AddSpacingSeparated();
+			guiManager.AddSpacing();
+			guiManager.AddSpacingSeparated();
 
 			if (ofxImGuiSurfing::BeginTree("SELECTORS"))
 			{
@@ -3775,14 +3799,6 @@ void ofxPresetsManager::draw_Gui_Main()
 
 		//--
 
-		// 6. Undo Engine
-
-#ifdef INCLUDE_ofxUndoSimple
-		draw_Gui_WidgetsUndo();
-#endif
-
-		//--
-
 		// 4. More
 
 		if (!guiManager.bMinimize)
@@ -3933,7 +3949,7 @@ void ofxPresetsManager::draw_Gui_Main()
 void ofxPresetsManager::draw_Gui_WidgetsUndo()
 {
 	//if (bMODE_EditLive.get())
-	if (!guiManager.bMinimize)
+	//if (!guiManager.bMinimize)
 	{
 		float _w100;
 		float _w50;
@@ -4039,10 +4055,10 @@ void ofxPresetsManager::draw_Gui_WidgetsAdvanced()
 					ImGui::PopItemWidth();
 
 					//if (bHelp)ofxImGuiSurfing::AddParameter(helpPos);
-		}
+				}
 
 				ImGui::TreePop();
-	}
+			}
 #endif
 			//--
 
@@ -4090,9 +4106,9 @@ void ofxPresetsManager::draw_Gui_WidgetsAdvanced()
 			}
 
 			ImGui::TreePop();
-}
-}
 		}
+	}
+}
 
 //--
 
@@ -4159,12 +4175,13 @@ void ofxPresetsManager::buildHelpInfo() {
 		helpInfo += "\n";
 
 		helpInfo += "ARROWS          EXPLORE \n";
-		helpInfo += "left right      PRESET \n";
-		if (groups.size() > 1) helpInfo += "up down         GROUP \n";
+		if (groups.size() > 1)
+			helpInfo += "up   | down     GROUP \n";
+		helpInfo += "left | right    PRESET \n";
 		helpInfo += "\n";
 
 		helpInfo += "Ctrl + Space    PLAY \n";
-		//helpInfo += "Ctrl + R        PRESET RANDOM \n";
+		helpInfo += "Ctrl + R        RANDOM PARAMS \n";
 		helpInfo += "\n";
 
 		// undo engine

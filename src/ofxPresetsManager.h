@@ -21,10 +21,7 @@
 
 	TODO:
 
-	+	fix Parameters window.
-		ImGui groups weird folder headers on nested groups.
-
-	+	force each group editor window to the same position.
+	+	fix random params and reset params tools (parameters window).
 
 	+	add clicker to name labels like arrows browsing, on clicker window.
 	+	add re trig when re click without index change.
@@ -1666,12 +1663,12 @@ public:
 			groupRandomizers[ig].doResetGroup(groups[ig], true);
 	}
 
-	//--------------------------------------------------------------
-	void doResetFiltered() {//reset filter enabled params to random min/max
-		int ig = index_GroupSelected.get();
-		if (ig < groups.size())
-			groupRandomizers[ig].doResetGroup(groups[ig], false);
-	}
+	////--------------------------------------------------------------
+	//void doResetFiltered() {//reset filter enabled params to random min/max
+	//	int ig = index_GroupSelected.get();
+	//	if (ig < groups.size())
+	//		groupRandomizers[ig].doResetGroup(groups[ig], false);
+	//}
 
 	//--------------------------------------------------------------
 	void doRandomFull() {//random all params to min
@@ -1680,12 +1677,12 @@ public:
 			groupRandomizers[ig].doRandomGroupFull(groups[ig]);
 	}
 
-	//--------------------------------------------------------------
-	void doRandomFiltered() {//random filter enabled params to random min/max
-		int ig = index_GroupSelected.get();
-		if (ig < groups.size())
-			groupRandomizers[ig].doRandomPreset();
-	}
+	////--------------------------------------------------------------
+	//void doRandomFiltered() {//random filter enabled params to random min/max
+	//	int ig = index_GroupSelected.get();
+	//	if (ig < groups.size())
+	//		groupRandomizers[ig].doRandomPreset();
+	//}
 
 	//--
 
