@@ -3,8 +3,7 @@ ofxPresetsManager
 
 # Overview
 
-An **openFrameworks** add-on to handle presets of `ofParameter`'s nested into single or multiple `ofParameterGroup` containers.  
-Also powered with a nice GUI, many Helpers, and a complete user workflow.
+An **openFrameworks** add-on to handle presets of `ofParameter`'s nested into single or multiple `ofParameterGroup` containers. Also powered with a nice GUI, many Helpers, and a complete user workflow.
 
 **NOTE**  
 _If you don't need multiple and independent and linkable groups,_  
@@ -92,6 +91,8 @@ ofApp::draw()
 // Done!
 // Nothing more!
 ```
+</p>
+</details>
 
 ### 2_MultiGroup
 
