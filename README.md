@@ -48,6 +48,7 @@ Illustrates how to handle some `ofParameter`'s bundled into one `ofParameterGrou
   <p>
 
 **ofApp.h**
+
 ```.c++
 #include "ofxPresetsManager.h"
 
@@ -59,6 +60,7 @@ ofParameter<int> amount;
 ```
 
 **ofApp.cpp**
+
 ```.c++
 ofApp::setup()
 {
@@ -80,8 +82,7 @@ ofApp::draw()
     presetsManager.draw();
 }
 
-// Done!
-// Nothing more!
+// Done! Nothing more!
 ```
 </p>
 </details>
@@ -136,16 +137,13 @@ This is useful because in some scenarios could help to improve the performance o
 
 ## Thanks
 _Thanks to all the above add-ons coders!_  
-
 _Special Thanks 1 goes to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector  
 which inspired this add-on a lot. Some of his code is also used here._
-
 _Special Thanks 2 goes to **@Daandelange**_ for his work to the DEFINITIVE **ofxImGui** repository. Thanks, **Daan**!  
 
 ## Tested Systems
 - **Windows10** / **VS2017** / **OF ~0.11+**
 - Should work on **macOS** too.  
-
 
 ## Author
 An add-on by **@moebiusSurfing**  
@@ -159,18 +157,11 @@ An add-on by **@moebiusSurfing**
   <p>
 
 * A Better performant version without using hard disk files.  
-
 * **Memory Mode**, using a vector of XML/JSON instead of files.
-
 * Improve (silent) de-serialization and ofParameter callbacks / triggering to improve speed.
-
 * Add params tweening or filtering to ease transitions between presets when switching.
-
 * Add a minimal/lite class to play compatible preset files but without any GUI or using a tiny **ofxGui**/**ImGui** version.
-
 * More ideas noted into **ofxPresetsManager.h**.   
-
 * **Feedback**, **Issues**, **PR**'s, and any kind of help are very welcome!
-  
   </p>
   </details>
