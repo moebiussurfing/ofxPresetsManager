@@ -11,9 +11,9 @@ _then I recommend using my simpler add-on [ofxSurfingPresets](https://github.com
 
 ## Features
 
-- Easy to integrate into your projects.
+- Easy to integrate.
 - Auto-generates a **GUI** to tweak all the parameters.
-- GUI based on **Dear ImGui**, using a fork of **ofxImGui**.
+- GUI based on **Dear ImGui**.
 - Clone, Copy, Swap, and **Organize Presets**.
 - Handle **Many Groups** independently. 
   - **Browse** multi Groups and Presets by **arrows keys**.
@@ -35,12 +35,6 @@ _then I recommend using my simpler add-on [ofxSurfingPresets](https://github.com
 4. Set **how many** presets you want for the group, and **what keys** to associate as triggers.
 5. Done! Just Play with the addon GUI
 
-Look at the examples and **ofxPresetsManager.h** for more learning.  
-The file settings (one file for each preset) will be placed by default into ```/bin/data```.  
-
-</p>
-</details>
-
 ## Examples
 
 ### 1_Basic (only one group)
@@ -54,8 +48,7 @@ Illustrates how to handle some `ofParameter`'s bundled into one `ofParameterGrou
   <p>
 
 **ofApp.h**
-
-```c++
+```.c++
 #include "ofxPresetsManager.h"
 
 ofxPresetsManager presetsManager;
@@ -66,8 +59,7 @@ ofParameter<int> amount;
 ```
 
 **ofApp.cpp**
-
-```c++
+```.c++
 ofApp::setup()
 {
     // Set the parameters 
@@ -109,13 +101,13 @@ Also, we will have an extra **Global Selector** called **GROUP_LINK**, which gro
   <p>
 
 ```.cpp
-// group 0
+// Group 0
 presetsManager.add(params0, { 'q', 'w', 'e', 'r', 't' });
-// group 1
+// Group 1
 presetsManager.add(params1, { 'a', 's', 'd', 'f' });
-// group 2
+// Group 2
 presetsManager.add(params2, { 'z', 'x', 'c' });
-// group 3
+// Group 3
 presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
 
 presetsManager.setup();
