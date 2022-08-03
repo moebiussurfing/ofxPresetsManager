@@ -5,7 +5,7 @@ ofxPresetsManager
 
 An **openFrameworks** add-on to handle presets of `ofParameter`'s nested into single or multiple `ofParameterGroup` containers. Also powered with a nice GUI, many Helpers, and a complete user workflow.
 
-**NOTE**  
+#### NOTE  
 _If you don't need multiple and independent and linkable groups,_  
 _then I recommend using my simpler add-on [ofxSurfingPresets](https://github.com/moebiussurfing/ofxSurfingPresets)._  
 
