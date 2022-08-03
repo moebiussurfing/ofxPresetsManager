@@ -135,7 +135,6 @@ This is useful because in some scenarios could help to improve the performance o
 * [ofxRemoteParameters](https://github.com/c-mendoza/ofxRemoteParameters) / _Not required. For the examples 3A-3B_  
 
 ## Thanks
-
 _Thanks to all the above add-ons coders!_  
 
 _Special Thanks 1 goes to **Nicola Pisanti** for the original https://github.com/npisanti/ofxGuiPresetSelector  
@@ -144,9 +143,16 @@ which inspired this add-on a lot. Some of his code is also used here._
 _Special Thanks 2 goes to **@Daandelange**_ for his work to the DEFINITIVE **ofxImGui** repository. Thanks, **Daan**!  
 
 ## Tested Systems
-
 - **Windows10** / **VS2017** / **OF ~0.11+**
 - Should work on **macOS** too.  
+
+
+## Author
+An add-on by **@moebiusSurfing**  
+*( ManuMolina ) 2019-2022*
+
+## License
+*MIT License*
 
 <details>
   <summary>IDEAS / TODO</summary>
@@ -168,12 +174,3 @@ _Special Thanks 2 goes to **@Daandelange**_ for his work to the DEFINITIVE **ofx
   
   </p>
   </details>
-
-## Author
-
-An add-on by **@moebiusSurfing**  
-*( ManuMolina ) 2019-2022*
-
-## License
-
-*MIT License*
