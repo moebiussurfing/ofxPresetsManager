@@ -35,6 +35,7 @@
 
 	+	small flick on clicker window when minimized and changed to edit
 
+
 	IDEAS:
 
 	+	open/save dialog to project User-Kit session in a single file.
@@ -51,6 +52,10 @@
 
 	+	fix auto save timer. exclude log.
 
+
+	BUG:
+
+	-	Play state is not recalled on settings ?
 */
 
 //----

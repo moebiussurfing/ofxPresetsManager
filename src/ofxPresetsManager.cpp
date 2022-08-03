@@ -456,8 +456,8 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	params_User.setName("USER-KIT");
 
-	////TODO: BUG:
-	//// includes all selectors
+	// Includes all selectors
+	// Required to feed the callback!
 	params_User.add(params_Index_GroupsSelectors);
 
 	// Main group link selector
@@ -518,8 +518,8 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 			//TODO: BUG:
 			ofParameterGroup _g{ groups[i].getName() };
 			_g.add(index_PresetSelected[i]); // selector
-			_g.add(groupRandomizers[i].bPLAY_RandomizeTimer); // play
-			_g.add(groupRandomizers[i].randomizeDurationBpm); // bpm
+			//_g.add(groupRandomizers[i].bPLAY_RandomizeTimer); // play. 
+			//_g.add(groupRandomizers[i].randomizeDurationBpm); // bpm
 			//_g.add(groupRandomizers[i].getParamsRandomizers()); // all params
 			//_g.add(groupRandomizers[i].bRandomizeIndex); // random index
 			params_Index_GroupsSelectors.add(_g);
@@ -1009,7 +1009,8 @@ void ofxPresetsManager::add(ofParameterGroup _params, int _amountPresets)
 
 	// preset selectors
 	ofParameter<int> p{ groups[_size].getName(), 0, 0,  _amountPresets - 1 };
-	//p.setSerializable(false); // exclude saving all selectors except last one, that will be enalbed at setup
+	//p.setSerializable(false); 
+	// exclude saving all selectors except last one, that will be enabled at setup
 	index_PresetSelected.push_back(p);
 
 	// add this new param (last one)
@@ -2110,15 +2111,17 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 				if (bLinkedSelectorGroupEnabled && i == groups.size() - 1) break; //dont play group link
 				groupRandomizers[i].bPLAY_RandomizeTimer = bPLAY_Global;
 			}
+
+			return;
 		}
 
-		//--
+		//----
 
 		// Presets Selectors
-
+		// for the selectors group index_PresetSelected
+		 
 		//TODO:
 		// could be too slow??
-		//if (!bDISABLE_CALLBACKS_Selectors)
 		{
 			for (int g = 0; g < groups.size(); g++) // iterate each group
 			{
@@ -2264,10 +2267,6 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 		std::string name = e.getName();
 
 		if ((name != "exclude") //&&
-			//(name != ImGui_Position.getName()) &&
-			//(name != ImGui_Size.getName())// &&
-			//(name != "DICE") &&
-			//(name != "PRESET")
 			)
 		{
 			ofLogNotice(__FUNCTION__) << name << " : " << e;
@@ -2295,7 +2294,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 		//--
 
 		// Mode Edit
-		// 
+		 
 		//when false, we disabled autosave to allow faster performance ! 
 
 		else if (name == bMODE_EditLive.getName())
@@ -2748,9 +2747,7 @@ void ofxPresetsManager::exit()
 	//ofRemoveListener(params_Randomizer.parameterChangedE(), this, &ofxPresetsManager::Changed_Control);
 	//ofRemoveListener(params_RandomizersFiltered.parameterChangedE(), this, &ofxPresetsManager::Changed_Params_Editor);
 
-	// TODO: required?
 	ofRemoveListener(ofEvents().update, this, &ofxPresetsManager::update);
-	//ofRemoveListener(ofEvents().draw, this, &ofxPresetsManager::draw);
 
 	index_GroupSelected.removeListener(this, &ofxPresetsManager::Changed_Index_GroupSelected);
 
@@ -5319,7 +5316,7 @@ void ofxPresetsManager::doRefreshUndoParams() {
 void ofxPresetsManager::Changed_Index_GroupSelected(int& index)
 {
 	index_GroupSelected = (int)ofClamp(index_GroupSelected.get(), 0, index_GroupSelected.getMax());
-	ofLogWarning(__FUNCTION__) << index_GroupSelected;
+	ofLogNotice(__FUNCTION__) << index_GroupSelected;
 }
 
 //--------------------------------------------------------------
