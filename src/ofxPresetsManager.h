@@ -941,8 +941,8 @@ public:
 public:
 
 	//--------------------------------------------------------------
-	void doSaveCurrent() {
-		saveCurrentPreset(0);//for first group only
+	void doSaveCurrent(int gindex = 0) {
+		saveCurrentPreset(gindex);//for first group only
 	}
 
 	//--------------------------------------------------------------
@@ -953,11 +953,11 @@ public:
 		save(index_PresetSelected[groupIndex].get(), groupIndex);
 	}
 
-//public:
 private:
 
 	//--------------------------------------------------------------
-	void saveCurrentPreset(std::string groupName) {
+	void saveCurrentPreset(std::string groupName) //preset for a group
+	{
 		int _groupIndex = -1;
 		for (int i = 0; i < groups.size(); i++) {
 			if (groups[i].getName() == groupName) _groupIndex = i;
@@ -974,7 +974,7 @@ private:
 	// presets browsing by code from ofApp
 	// default if not defined, is the last one: main group link
 	//--------------------------------------------------------------
-	void load_Previous(int groupIndex = -1, bool cycled = false)
+	void load_Previous(int groupIndex = -1, bool cycled = false)//preset for a group
 	{
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		groupIndex = (int)ofClamp(groupIndex, 0, groups.size() - 1);
@@ -997,7 +997,7 @@ private:
 
 	// default if not defined, is the last one: main group link
 	//--------------------------------------------------------------
-	void load_Next(int groupIndex = -1, bool cycled = false)
+	void load_Next(int groupIndex = -1, bool cycled = false)//preset for a group
 	{
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		groupIndex = (int)ofClamp(groupIndex, 0, groups.size() - 1);
@@ -1018,13 +1018,13 @@ private:
 	}
 
 	//--------------------------------------------------------------
-	void load_Previous(bool cycled)
+	void load_Previous(bool cycled)//preset
 	{
 		load_Previous(index_GroupSelected, cycled);
 	}
 
 	//--------------------------------------------------------------
-	void load_Next(bool cycled)
+	void load_Next(bool cycled)//preset
 	{
 		ofLogNotice(__FUNCTION__);
 		load_Next(index_GroupSelected, cycled);
@@ -1034,7 +1034,7 @@ public:
 
 	// Legacy	
 	//--------------------------------------------------------------
-	void doLoadPrevious(/*bool cycled = false*/)
+	void doLoadPrevious(/*bool cycled = false*/)//preset
 	{
 		ofLogNotice(__FUNCTION__);
 		//load_Previous(true, cycled);
@@ -1047,7 +1047,7 @@ public:
 		index_PresetSelected[sel] = (int)ofClamp(i, 0, index_PresetSelected[sel].getMax());
 	}
 	//--------------------------------------------------------------
-	void doLoadNext(/*bool cycled = false*/)
+	void doLoadNext(/*bool cycled = false*/)//preset
 	{
 		ofLogNotice(__FUNCTION__);
 		//load_Next(true, cycled);
@@ -1726,8 +1726,20 @@ public:
 	//--
 
 	//--------------------------------------------------------------
-	ofParameter<bool> getPlayToggle() {
-		return groupRandomizers[0].bPLAY_RandomizeTimer;
+	ofParameter<bool> getPlayToggle(int index = 0) {
+		return groupRandomizers[index].bPLAY_RandomizeTimer;
+	}
+
+	//--------------------------------------------------------------
+	bool getAllPlayersAreStop() {
+		for (int i = 0; i < groups.size(); i++)
+		{
+			if (getPlayToggle(i).get()) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 #ifdef USE_PRESETS_MANAGER__IMGUI_INTERNAL

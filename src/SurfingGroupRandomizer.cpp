@@ -1296,7 +1296,17 @@ void SurfingGroupRandomizer::drawImGui_Main()
 	}
 
 	//--
+	
+	//IMGUI_SUGAR__WINDOWS_CONSTRAINTSW;
+	// weird resizes..
 
+	//workaround
+	ImVec2 size_min = ImVec2(150, -1);
+	ImVec2 size_max = ImVec2(150, -1);
+	ImGui::SetNextWindowSizeConstraints(size_min, size_max);
+
+	//--
+	
 	// Window
 	{
 #ifdef USE_GUI_MANAGER__GROUP_RANDOMIZER

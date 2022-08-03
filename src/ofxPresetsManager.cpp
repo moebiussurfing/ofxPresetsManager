@@ -1673,16 +1673,6 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 
 		//--
 
-		// TODO: TEST: to force disable engine
-		//bImGui_mouseOver = false;
-
-		//// always listening to K to avoid can be blocked
-		//// restore keys control
-		//if (key == 'K' && !bImGui_mouseOver_PRE)
-		//{
-		//	bKeys = !bKeys;
-		//}
-
 		if (!guiManager.bKeys) return;
 
 		//if (!bImGui_mouseOver_PRE)// disable keys when mouse over gui
@@ -1780,17 +1770,17 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 
 			//----
 
-			// navigate kit/favorites presets
+			// Browse kit/favorites Clicker
+
 			if (bKeys_ArrowBrowse && (!mod_CONTROL && !mod_ALT))
 			{
-				// browse groups
+				// Browse Groups
 				if (key == OF_KEY_UP)
 				{
 					index_GroupSelected--;
 
 					return;
 				}
-
 				else if (key == OF_KEY_DOWN)
 				{
 					index_GroupSelected++;
@@ -1798,16 +1788,10 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 					return;
 				}
 
+				// Browse Presets 
 				else if (key == OF_KEY_LEFT)
 				{
 					doLoadPrevious();
-
-					//bDISABLE_CALLBACKS = true;
-					//int sel = index_GroupSelected.get();
-					//int i = index_PresetSelected[sel];
-					//i--;
-					//bDISABLE_CALLBACKS = false;
-					//index_PresetSelected[sel] = (int)ofClamp(i, 0, index_PresetSelected[sel].getMax());
 
 					return;
 				}
@@ -1816,20 +1800,13 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 				{
 					doLoadNext();
 
-					//bDISABLE_CALLBACKS = true;
-					//int sel = index_GroupSelected.get();
-					//int i = index_PresetSelected[sel];
-					//i++;
-					//bDISABLE_CALLBACKS = false;
-					//index_PresetSelected[sel] = (int)ofClamp(i, 0, index_PresetSelected[sel].getMax());
-
 					return;
 				}
 			}
 
 			//----
 
-			// presets selectors
+			// Presets Selectors
 
 			//if (!mod_CONTROL && !mod_SHIFT && !mod_ALT)// exclude controls do not works bc blocks the mod keys to copy/swap presets...
 			{
@@ -1854,8 +1831,10 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 
 							//--
 
-							// workflow
-							if (index_GroupSelected != g) index_GroupSelected = g;
+							//// workflow
+							//if (index_GroupSelected != g)
+							//	if (getAllPlayersAreStop())//avoid apply workflow if some group is playing!
+							//		index_GroupSelected = g;
 
 							return;
 						}
@@ -1866,7 +1845,7 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 
 		//--
 
-		//// randomizers
+		//// Randomizers
 		//if (bMODE_EditLive.get())
 		//{
 		//groupRandomizers[index_GroupSelected].keyPressed(key);
@@ -2129,7 +2108,8 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 		// for the selectors group index_PresetSelected
 
 		//TODO:
-		// could be too slow??
+		// could be too slow bc the iterations ??
+		// should make a dedicated callback to this selectors
 		{
 			for (int g = 0; g < groups.size(); g++) // iterate each group
 			{
@@ -2174,6 +2154,19 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 
 							//--
 
+							//TODO: 
+							// workflow
+							// there's a BUG that as we change the G_LINK index,
+							// that group is settled to another one,
+							// bc all the groups are changed..
+							
+							// workflow
+							if (index_GroupSelected != g)
+								if (getAllPlayersAreStop())//avoid apply workflow if some group is playing!
+									index_GroupSelected = g;
+
+							//--
+
 							// 2.1. mod save controlled by modeKeySave
 
 							if (bModKeySave)
@@ -2201,14 +2194,15 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 								save(index_PresetSelected_PRE[g], g);
 
 								// swap
-								doSwap(g, index_PresetSelected_PRE[g], index_PresetSelected[g]); // group index, from, to
+								doSwap(g, index_PresetSelected_PRE[g], index_PresetSelected[g]); 
+								// group index, from, to
 
 								index_PresetSelected_PRE[g] = index_PresetSelected[g];
 							}
 
 							//--
 
-							// 3. no key commands
+							// 3. no key commands modifiers
 
 							else
 							{
@@ -2301,7 +2295,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 		else if (name == dataRandomizer.bGui.getName())
 		{
 			if (dataRandomizer.bGui) dataTween.bGui = false;
-		}
+	}
 #endif
 #endif
 		//--
@@ -2390,7 +2384,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 				//save_ControlSettings();
 				//rectangle_PresetClicker.saveSettings(path_RectanglePresetClicker, path_UserKit_Folder + "/" + path_ControlSettings + "/", false);
 			}
-		}
+}
 
 #endif
 
@@ -2639,12 +2633,12 @@ void ofxPresetsManager::saveAllKitFromMemory()
 			if (!b) ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets > " << _path;
 #endif
 #endif
-		}
+	}
 		else {
 			ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 		}
 
-	}
+}
 
 	// debug params
 	if (true)
@@ -2657,7 +2651,7 @@ void ofxPresetsManager::saveAllKitFromMemory()
 #ifdef USE_JSON
 #endif
 #endif
-		}
+	}
 	}
 }
 
@@ -2716,12 +2710,12 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 				mainGroupMemoryFilesPresets[i] = settings;
 #endif
-			}
+		}
 			else {
 				ofLogError(__FUNCTION__) << "mainGroupMemoryFilesPresets OUT OF RANGE";
 			}
-		}
 	}
+}
 
 	ofLogNotice(__FUNCTION__) << "-------------------------------------------------------------------------------------------------------";
 
@@ -2733,7 +2727,7 @@ void ofxPresetsManager::load_AllKit_ToMemory()
 #ifdef USE_XML
 			ofLogNotice(__FUNCTION__) << "mainGroupMemoryFilesPresets[" << i << "] " << ofToString(mainGroupMemoryFilesPresets[i].toString());
 #endif
-		}
+	}
 	}
 }
 
@@ -2899,26 +2893,23 @@ bool ofxPresetsManager::ImGui_Draw_Windows()
 {
 	// Windows:
 	// 
-	// 1. main
-	// 2. parameters
-	// 3. standalone
-	// 4. players
+	// 1. Main
+	// 2. Parameters
+	// 3. Standalone
+	// 4. Players
 
 	//--
 
 	//if (bGui_PanelsAll)
 	{
 		// 1. Main Panel
+
 		if (bGui_Main) draw_Gui_Main(); // main control + extra
 
 		//--
 
-		//// All group selectors to set current preset
-		//if (bGui_AllSelectors) draw_Gui_Selectors();
-
-		//--
-
-		// 2. Parameters 
+		// 2. Parameters
+		 
 		// All parameters from all groups
 
 		if (bGui_Parameters) draw_Gui_Parameters();
@@ -3224,10 +3215,11 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 		guiManager.AddSpacing();
 
 #define USE_COLUMNS
-		bool bDoTable = !bGui_Main;
+		bool bDoTable = true;
+		//bool bDoTable = !bGui_Main;
 
 #ifdef USE_COLUMNS
-		float _w = 118;//first column width
+		float _w = 119; // first column width
 		if (bDoTable)
 		{
 			ImGui::Columns(2, "##tab1", false);
@@ -3239,6 +3231,11 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 		guiManager.AddSpacing();
 
 		guiManager.Add(bGui_Main, OFX_IM_TOGGLE_BUTTON_ROUNDED_MEDIUM);
+
+		if (!bGui_Main && !guiManager.bMinimize) {
+			guiManager.Add(bGui_Parameters, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+			guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED_SMALL);
+		}
 
 		if (bDoTable)
 		{
@@ -3272,7 +3269,7 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 
 		// Edit / Live Modes
 		bool _b = (bMODE_EditLive && guiManager.bMinimize);
-		float _hb = _h * 1.5f;
+		float _hb = _h * 1.f;
 		//float _hb = (_b ? (_h * 1.5f) : _h);//workaround: disabled to avoid weird flickering
 
 		ofxImGuiSurfing::AddBigToggleNamed(bMODE_EditLive, _w100, _hb,
@@ -3334,14 +3331,11 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 			_w50 = guiManager.getWidgetsWidth(2);
 		}
 #endif
-
 		//--
 
 		guiManager.AddSpacingBigSeparated();
 
-
 		//----
-
 
 		// Preset Clickers
 
@@ -3415,7 +3409,9 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 			}
 			else // minimized. name only
 			{
-				ImGui::Dummy(ImVec2(0, 10)); //offset
+				ImGui::Dummy(ImVec2(0, 2)); // offset to left labels a bit down
+
+				//ImGui::Dummy(ImVec2(0, 10)); // offset label but adds to all the row
 
 				//info = ((index_GroupSelected.get() == i && b) ? "> " : "  ") + groups[i].getName();
 
@@ -3440,7 +3436,7 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 			// Matrix Clicker for each Group!
 			// one row per group only.
 
-			if (guiManager.bMinimize) ImGui::Dummy(ImVec2(0, 4)); //offset
+			//if (guiManager.bMinimize) ImGui::Dummy(ImVec2(0, 4)); //offset
 
 			float _hm = guiManager.bMinimize ? 0.8f * _h2 : _h;
 
@@ -3448,23 +3444,24 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 				bResponsive.get(), maxSz1, true, _hm, false);
 
 			//inline bool AddMatrixClickerLabelsStrings(ofParameter<int>& _index, const std::vector<string> labels, bool bResponsive = true, int amountBtRow = 3, const bool bDrawBorder = true, float __h = -1, bool bSpaced = true, string toolTip = "")
-			// 
+			 
 			//--
 
 			ImGui::Columns(1);
 		}
 
-		//--
+		//----
 
 		// Selectors
 
 		// Hide when main window is visible
 		// to not duplicate controls on the two windows
+
 		if (!bGui_Main)
 		{
 			//--
 
-			guiManager.AddSpacing();
+			//guiManager.AddSpacing();
 			guiManager.AddSpacingSeparated();
 
 			if (ofxImGuiSurfing::BeginTree("SELECTORS"))
@@ -3542,12 +3539,11 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 					}
 
 					// Index
-					if (index_GroupSelected < index_PresetSelected.size()) 
+					if (index_GroupSelected < index_PresetSelected.size())
 					{
-						//guiManager.Add(index_PresetSelected[index_GroupSelected], OFX_IM_HSLIDER_MINI_NO_NAME);
 						guiManager.Add(index_PresetSelected[index_GroupSelected]);
+						//guiManager.Add(index_PresetSelected[index_GroupSelected], OFX_IM_HSLIDER_MINI_NO_NAME);
 						//guiManager.Add(index_PresetSelected[index_GroupSelected], OFX_IM_STEPPER);
-
 					}
 				}
 
@@ -4098,10 +4094,10 @@ void ofxPresetsManager::draw_Gui_WidgetsAdvanced()
 					ImGui::PopItemWidth();
 
 					//if (bHelp)ofxImGuiSurfing::AddParameter(helpPos);
-		}
+				}
 
 				ImGui::TreePop();
-	}
+		}
 #endif
 			//--
 
@@ -4149,7 +4145,7 @@ void ofxPresetsManager::draw_Gui_WidgetsAdvanced()
 			}
 
 			ImGui::TreePop();
-}
+	}
 }
 }
 
@@ -4876,8 +4872,8 @@ void ofxPresetsManager::draw_Gui_PlayersWidgets()
 		guiManager.refreshLayout();
 
 		guiManager.AddSpacing();
-		guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED);
-		guiManager.AddSpacing();
+		//guiManager.Add(bGui_Players, OFX_IM_TOGGLE_BUTTON_ROUNDED);
+		//guiManager.AddSpacing();
 
 		//--
 
@@ -5362,6 +5358,7 @@ void ofxPresetsManager::doRefreshUndoParams() {
 //--------------------------------------------------------------
 void ofxPresetsManager::Changed_Index_GroupSelected(int& index)
 {
+	//clamp
 	index_GroupSelected = (int)ofClamp(index_GroupSelected.get(), 0, index_GroupSelected.getMax());
 	ofLogNotice(__FUNCTION__) << index_GroupSelected;
 }
