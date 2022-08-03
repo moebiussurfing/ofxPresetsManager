@@ -11,7 +11,7 @@ _then I recommend using my simpler add-on [ofxSurfingPresets](https://github.com
 
 ## Features
 
-- Easy to integrate.
+- **Easy** to integrate.
 - Auto-generates a **GUI** to tweak all the parameters.
 - GUI based on **Dear ImGui**.
 - Clone, Copy, Swap, and **Organize Presets**.
