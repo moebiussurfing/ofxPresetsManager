@@ -458,7 +458,7 @@ void ofxPresetsManager::setup(bool _buildGroupSelector)
 
 	////TODO: BUG:
 	//// includes all selectors
-	//params_User.add(params_Index_GroupsSelectors);
+	params_User.add(params_Index_GroupsSelectors);
 
 	// Main group link selector
 	int _last = groups.size() - 1;
