@@ -1,12 +1,12 @@
 
 /*
 
-	ofxPresetsManager.h 
+	ofxPresetsManager.h
 
-	ofxPresetsManager 
+	ofxPresetsManager
 	by moebiusSurfing, 2019 - 2022.
 
-	this add-on is based and inspired on the original ofxGuiPresetSelector addon 
+	this add-on is based and inspired on the original ofxGuiPresetSelector addon
 	by Nicola Pisanti, MIT License, 2016
 	https://github.com/npisanti/ofxGuiPresetSelector
 
@@ -20,38 +20,38 @@
 /*
 
 	TODO:
-	
-	+	fix Parameters window. 
+
+	+	fix Parameters window.
 		ImGui groups weird folder headers on nested groups.
 
 	+	force each group editor window to the same position.
-	
+
 	+	add clicker to name labels like arrows browsing, on clicker window.
 	+	add re trig when re click without index change.
-	
-	+	new edit mode: 
-		mark a param and when modifying current preset, save to all the others and overwrite	
+
+	+	new edit mode:
+		mark a param and when modifying current preset, save to all the others and overwrite
 	+	lock (by toggle) params that we want to ignore on changing presets
 		can be done enabling/disabling serializable for each param with a group of toggles.
-	
+
 	+	super-lite add-on player version with combo list only. maybe without any GUI at all.
 
-	+	small flick on clicker window when minimized and changed to edit 
+	+	small flick on clicker window when minimized and changed to edit
 
 	IDEAS:
-	
+
 	+	open/save dialog to project User-Kit session in a single file.
 		or allowed to all the groups?
-	
+
 	+	add populator engine to create all preset files if it's a new empty project
 		add settler to enable some params to randomize
 		call populate. disable debug_display red info
 		-> This is already done on ofxSurfingPresets..
-	
-	+	performance: 
-		restore-back memory_mode. 
+
+	+	performance:
+		restore-back memory_mode.
 		(use xml objects into memory vs hd files) to extra groups too
-	
+
 	+	fix auto save timer. exclude log.
 
 */
@@ -111,7 +111,7 @@
 #define NUM_MAX_GROUPS 10
 //TODO: should be better to push to a vector...
 // but maybe hard coded sizes helps a bit on the performance.
- 
+
 //----
 
 // 3. CUSTOMIZATION
@@ -123,7 +123,7 @@
 // -> Legacy ImGui without my ofxSurfingImGui add-on. Deprecated
 
 //-
- 
+
 //#define USE_IMGUI_EXTERNAL 
 // this is to group all ImGui panels into one unique instance in ofApp
 // currently there's a bug when using more than one single ofxImGui instance!
@@ -219,21 +219,17 @@ public:
 
 	void update(ofEventArgs& args);
 	void draw();
-	//void draw(ofEventArgs& args);
-
 	void windowResized(int w, int h);
 	void exit();
-
-	//--
-
-public:
-
-	void clear();
 
 private:
 
 	void ImGui_Draw();
 	void draw_Help();
+
+public:
+
+	void clear();
 
 	//----
 	//
@@ -411,18 +407,23 @@ public:
 
 private:
 
-	std::vector<int> index_PresetSelected_PRE; // remember previous selector to reduce callbakcs
-	ofParameterGroup params_Index_GroupsSelectors{ "SELECTORS" }; // group all group selectors indexes
+	std::vector<int> index_PresetSelected_PRE; // remember previous selector to reduce callbacks
+
+	// Useful to expose on externals gui's only.
+	// group all group selectors indexes
+	ofParameterGroup params_Index_GroupsSelectors{ "SELECTORS" };
+
+
+	ofParameter<bool> bSoloSelector;
 
 	//--
 
-	// select active group 
-	// to show on randomize editor panel
+	// Select active Group 
+	// to show on randomize players
 
 public:
 
-	ofParameter<int> index_GroupSelected; // only this selected group will be showed on GUI to edit
-	//ofParameter<bool> bGui_ShowAllGroups; //enable to show all, each group panels
+	ofParameter<int> index_GroupSelected;
 
 private:
 
@@ -439,10 +440,10 @@ private:
 
 	// group main selector
 	bool bBuildGroupSelector = true; // to allow auto build a group selector to combine all the added groups to the presets manager
-	bool bAllowGroupSelector = true; // to allow disable main group. not always we need it..
+	bool bLinkedSelectorGroupEnabled = true; // to allow disable main group. not always we need it..
 	int groupLinkSize = 9; // default amount of presets we want to the group link
-	
-	ofParameter<bool> bGui_PlayerEditor{"Editor", false};
+
+	ofParameter<bool> bGui_PlayerEditor{ "Editor", false };
 
 public:
 
@@ -458,12 +459,12 @@ public:
 
 	//--------------------------------------------------------------
 	void setEnableGroupLinkSelector(bool b) {// disable the use of main group selector. must call before setup. enabled by default
-		bAllowGroupSelector = b;
+		bLinkedSelectorGroupEnabled = b;
 	}
 
 	//--------------------------------------------------------------
 	void setDisableGroupLinkSelector() {// disable the use of main group selector. must call before setup. enabled by default
-		bAllowGroupSelector = false;
+		bLinkedSelectorGroupEnabled = false;
 	}
 
 private:
@@ -635,16 +636,16 @@ private:
 	ofParameter<bool> bThemeDarkOrLight{ "Theme B/W", true };
 	ofParameter<bool> bMODE_LockClicker{ "Lock Clicker", false };
 
-	private:
+private:
 
-		// preset clicker boxes matrix
-		ofParameter<int> cellSize{ "ButSize", 80, 45, 120 }; // default box button size
-		//int cellSize = 80; // default box button size
-		ofVec2f clicker_Pos; // default clicker position
+	// preset clicker boxes matrix
+	ofParameter<int> cellSize{ "ButSize", 80, 45, 120 }; // default box button size
+	//int cellSize = 80; // default box button size
+	ofVec2f clicker_Pos; // default clicker position
 
-	//--
-	 
-	// mouse
+//--
+
+// mouse
 
 private:
 
@@ -804,7 +805,7 @@ private:
 
 private:
 
-	ofParameter<bool> MODE_MemoryLive; 
+	ofParameter<bool> MODE_MemoryLive;
 	// when enabled all presets are handled from a memory vector to avoid lag of loading xml files from hd
 
 public:
@@ -893,7 +894,10 @@ public:
 	{
 		if (groupIndex == -1) groupIndex = groups.size() - 1;
 		ofLogNotice(__FUNCTION__) << "group: " << groupIndex;
+
+		//TODO:
 		groupRandomizers[groupIndex].randomizeDurationBpm = bpm;
+
 		// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
 		groupRandomizers[groupIndex].durationLong = 60000.f / bpm;
 		groupRandomizers[groupIndex].durationShort = groupRandomizers[groupIndex].durationLong / 2.f;
@@ -1156,62 +1160,19 @@ public:
 	{
 		guiManager.bHelp = !guiManager.bHelp;
 	}
-	//--------------------------------------------------------------
-	void setVisible_GUI(bool b)
-	{
-		bGui = b;
-		bGui_Clicker = b;
 
-		//bGui_PanelsAll = b;
+	//--------------------------------------------------------------
+	void setVisibleGui(bool b)
+	{
+		//bGui_Global = b;
+		bGui = b;
 	}
 	//--------------------------------------------------------------
-	void setToggleVisible_GUI()
+	void setToggleVisibleGui()
 	{
 		bGui = !bGui;
-		bGui_Clicker = bGui;
-
-		//bGui_PanelsAll = !bGui_PanelsAll;
-		//bGui_Clicker = bGui_PanelsAll;
-	}
-	////--------------------------------------------------------------
-	//void setVisible_GUI_ImGui(bool b)
-	//{
-	//	bGui_PanelsAll = b;
-	//}
-	////--------------------------------------------------------------
-	//void setToggleVisible_GUI_ImGui()
-	//{
-	//	bGui_PanelsAll = !bGui_PanelsAll;
-	//}
-	////--------------------------------------------------------------
-	//bool getVisible_GUI_ImGui()
-	//{
-	//	return bGui_PanelsAll;
-	//}
-	
-	//--------------------------------------------------------------
-	void setVisible_GUI_Internal(bool visible)
-	{
-		bGui_AdvancedControl = visible;
-	}
-	//--------------------------------------------------------------
-	bool isVisible_GUI_Internal()
-	{
-		return bGui_AdvancedControl;
-	}
-	//--------------------------------------------------------------
-	void setToggleVisible_GUI_Internal()
-	{
-		bGui_AdvancedControl = !bGui_AdvancedControl;
 	}
 
-	////--------------------------------------------------------------
-	//void setPosition_PresetClicker(int x, int y, int _cellSize)
-	//{
-	//	clicker_Pos.x = x;
-	//	clicker_Pos.y = y;
-	//	cellSize = _cellSize;
-	//}
 	//--------------------------------------------------------------
 	void setVisible_PresetClicker(bool visible)
 	{
@@ -1222,6 +1183,7 @@ public:
 	{
 		bGui_Clicker = !bGui_Clicker;
 	}
+	//deprecated
 	//--------------------------------------------------------------
 	bool getVisible_PresetClicker()
 	{
@@ -1233,33 +1195,40 @@ public:
 		return bGui_Clicker;
 	}
 
-	//--------------------------------------------------------------
-	float getGroupNamesWidth() {
-		float _maxw = 0;
-		for (int i = 0; i < groups.size(); i++)
-		{
-			float _w;
-			std::string info = groups[i].getName() + "* ";
-			if (myFont.isLoaded()) { _w = myFont.getStringBoundingBox(info, 0, 0).width; }
-			else { _w = 200; }
+	////--------------------------------------------------------------
+	//float getGroupNamesWidth() {
+	//	float _maxw = 0;
+	//	for (int i = 0; i < groups.size(); i++)
+	//	{
+	//		float _w;
+	//		std::string info = groups[i].getName() + "* ";
+	//		if (myFont.isLoaded()) { _w = myFont.getStringBoundingBox(info, 0, 0).width; }
+	//		else { _w = 200; }
+	//		if (_w > _maxw) _maxw = _w;
+	//	}
+	//	return _maxw + 22;
+	//}
 
-			if (_w > _maxw) _maxw = _w;
-		}
-		return _maxw + 22;
-	}
+	////--------------------------------------------------------------
+	//void setPosition_PresetClicker(int x, int y, int _cellSize)
+	//{
+	//	clicker_Pos.x = x;
+	//	clicker_Pos.y = y;
+	//	cellSize = _cellSize;
+	//}
 
 	//----
 
 	// Customize file paths
 
 	//--------------------------------------------------------------
-	void setPath_UserKit_Folder(std::string folder); 
+	void setPath_UserKit_Folder(std::string folder);
 	// path for root container folder. must be called before setup()!
 
-	void setPath_PresetsFavorites(std::string folder); 
+	void setPath_PresetsFavorites(std::string folder);
 	// path folder for favorite/live presets
 
-	void setPath_PresetsStandalone(std::string folder); 
+	void setPath_PresetsStandalone(std::string folder);
 	// path folder for standalone presets kit for the browser
 	//--------------------------------------------------------------
 	void setPath_ControlSettings(std::string str)// for the session states settings
@@ -1307,14 +1276,14 @@ public:
 
 private:
 
-	int PRESET_Selected_IndexMain_PRE = -1; 
+	int PRESET_Selected_IndexMain_PRE = -1;
 	// used as callback
 
 	//----
 
 private:
 
-	ofParameter<bool> bMODE_EditLive{ "EDIT MODE", true }; 
+	ofParameter<bool> bMODE_EditLive{ "EDIT MODE", true };
 	// this mode improves performance disabling autosave, undo history..etc
 
 public:
@@ -1322,18 +1291,16 @@ public:
 	ofParameter<bool> bGui_Global; //TODO:
 	ofParameter<bool> bGui; //TODO:
 	ofParameter<bool> bGui_Clicker; // to allow include as toggle parameter into external gui
-	//ofParameter<bool> bGui_PanelsAll; //all the windows enablers except the clicker
 	ofParameter<bool> bGui_Main;
 	ofParameter<bool> bGui_Standalones;
 	ofParameter<bool> bGui_Parameters;
 	ofParameter<bool> bGui_Players;
 	ofParameter<bool> bGui_PresetsParams;
-	ofParameter<bool> bGui_Selectors;
 	ofParameter<bool> bGui_AdvancedControl;
 
-private:
+//private:
 
-	ofParameter<glm::vec2> Gui_Internal_Position;
+	//ofParameter<glm::vec2> Gui_Internal_Position;
 
 private:
 
@@ -1357,6 +1324,9 @@ public:
 	void draw_Gui_PlayersWidgets();
 	void draw_Gui_Main();
 	void draw_Gui_WidgetsAdvanced();
+#ifdef INCLUDE_ofxUndoSimple
+	void draw_Gui_WidgetsUndo();
+#endif
 	void draw_Gui_Standalones();
 	void draw_Gui_Parameters();
 	void draw_Gui_ClickerPresets_ImGui();
@@ -1470,7 +1440,7 @@ public:
 	//}
 
 	//--------------------------------------------------------------
-	ofParameterGroup getParamsPresetSelectors() {// selectors index to all the added groups
+	ofParameterGroup getParamsPresetSelectors() { // selectors index to all the added groups
 		return params_Index_GroupsSelectors;
 	}
 
@@ -1542,9 +1512,12 @@ public:
 private:
 
 	// font to label clicker boxes
+#ifdef USE__PRESETS_MANAGER__NATIVE_CLICKER
 	ofTrueTypeFont myFont;
 	std::string myTTF; // gui font for all gui theme
 	int sizeTTF;
+#endif
+
 	TextBoxWidget helpTextBoxWidget;
 
 	//----
@@ -1573,10 +1546,10 @@ public:
 
 public:
 
-	ofParameter<bool> bAutoSave; 
+	ofParameter<bool> bAutoSave;
 	// auto save current preset when user clicks to another preset. almost enabled on edit mode
-	
-	ofParameter<bool> bAutoLoad; 
+
+	ofParameter<bool> bAutoLoad;
 	// auto load the user clicked preset. almost always true
 
 private:
@@ -1669,8 +1642,9 @@ private:
 	//--
 
 	//TODO:
-	//extra params not included into presets
-	//but sometimes is useful to centralize all params together
+	// extra params not included into presets
+	// but sometimes is useful to centralize all params together
+	// to use the populated widgets together
 
 private:
 
@@ -1679,7 +1653,7 @@ private:
 
 public:
 
-	void addExtra(ofParameterGroup& g);
+	void addExtra(ofParameterGroup& g); // Extra params added but not included into presets
 
 	//--
 

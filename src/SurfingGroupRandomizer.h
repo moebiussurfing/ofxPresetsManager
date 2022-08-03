@@ -28,12 +28,48 @@ public:
 	SurfingGroupRandomizer();
 	~SurfingGroupRandomizer();
 
+public:
+
+	void startup();
+	void update();
+	void exit();
+
+	void doCheckRandomReady();
+
+private:
+
+	ofParameterGroup group;
+
+	void doDices();
+
+	std::string path_RandomizerSettings;
+
+public:
+
+	void setPath_RandomizerSettings(string folder)
+	{
+		ofLogNotice(__FUNCTION__) << "Path: " << folder;
+
+		path_RandomizerSettings = folder;
+	}
+	ofParameter<bool>bMinimize{ "-1",false };
+
+public:
+
+	void drawImGui();
+	void drawImGui_Editor();
+	void drawImGui_Main();
+
+	//--
+
 	//#ifdef INCLUDE_ofxSurfingRandomizer
 	//private:
 	//	ofxSurfingRandomizer randomizer;
 	//#endif
 
-	// clicker layout
+	//--
+	
+	// Clicker layout
 
 private:
 
@@ -67,13 +103,13 @@ public:
 
 public:
 
-	void setup(ofParameterGroup &g, int _numPresets);
-	void setup(ofParameterGroup &g, vector<int> keysList);
+	void setup(ofParameterGroup& g, int _numPresets);
+	void setup(ofParameterGroup& g, vector<int> keysList);
 
 private:
 
 	ofParameterGroup params_PresetsProbs{ "PROBS" };
-	ofParameterGroup params_PresetDurations{ "DURATION" };
+	ofParameterGroup params_PresetsDurations{ "DURATIONS" };
 
 private:
 
@@ -92,9 +128,9 @@ public:
 	//ofParameter<int> selectorTARGET;
 
 	//--
-	 
+
 	// Some Helpers
-	
+
 	//--------------------------------------------------------------
 	string getNameEditorWindow() {
 		return "EDITOR " + group.getName();
@@ -107,44 +143,21 @@ public:
 	//--------------------------------------------------------------
 	bool getEditorWindowVisible() { return bGui_PlayerEditor.get(); }
 
-public:
-
-	void startup();
-	void doCheckRandomReady();
-
-	void update();
-	//void keyPressed(int key);
-	void exit();
-
-private:
-
-	ofParameterGroup group;
-
-	void doDices();
-
-	std::string path_RandomizerSettings;
-
-public:
-
-	void setPath_RandomizerSettings(string folder)
+	// If some preset is settled to true (short) 
+	// then it will return false!
+	//--------------------------------------------------------------
+	bool getAllAreLong()
 	{
-		ofLogNotice(__FUNCTION__) << "Path: " << folder;
+		bool b = true;
+		for (size_t i = 0; i < presetsRandomModeShort.size(); i++)
+		{
+			if (presetsRandomModeShort[i]) b = false;
+		}
 
-		path_RandomizerSettings = folder;
+		return b;
 	}
-	ofParameter<bool>bMinimize{ "-1",false };
-
-public:
-
-	void drawImGui();
-	void drawImGui_Editor();
-	void drawImGui_Main();
 
 private:
-
-	//void drawEditor();
-
-	//ofParameter<bool> bGui_RandomizerParams;
 
 	//-
 
@@ -157,7 +170,7 @@ public:
 	ofxSurfing_ImGui_Manager guiManager;
 #endif
 
-	ofParameter<int> index_PresetSelected;// main group preset selector (current)
+	ofParameter<int> index_PresetSelected; // main group preset selector (current)
 
 	//----
 
@@ -166,15 +179,17 @@ private:
 	ofParameterGroup params_HelperTools;
 	ofParameterGroup params_Randomizer;
 	ofParameterGroup params_Timer;
-	ofParameterGroup params_Control;// to use on external gui
+	ofParameterGroup params_Control; // to use on external gui
 
-	void Changed_Control(ofAbstractParameter &e);
+	void Changed_Control(ofAbstractParameter& e);
 
-	int amountPresets;// amount of box-clickable handled presets on current favorites/kit
+	int amountPresets;
+	// amount of box-clickable handled presets on current favorites/kit
 	bool bIsDoneLoad = false;
 	void loadPreset(int p);
-	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };// this mode improves performance disabling autosave, undo history..etc
-	vector<int> keys;// queued trigger keys for each group ? (all presets) (size of)
+	ofParameter<bool> MODE_Editor{ "MODE EDIT", true };
+	// this mode improves performance disabling autosave, undo history..etc
+	vector<int> keys; // queued trigger keys for each group ? (all presets) (size of)
 	vector<string> labels;//converted to strings
 
 	//--
@@ -227,45 +242,52 @@ private:
 public:
 
 	ofParameter<bool> bPLAY_RandomizeTimer; // play randomizer
-	ofParameter<bool> bRandomizeIndex;// trig randomize index
+	ofParameter<bool> bRandomizeIndex; // trig randomize index
 	ofParameter<float> randomizeDurationBpm; // bpm
 	ofParameter<int> durationLong;
 	ofParameter<int> durationShort;
 	ofParameter<float> randomizeDurationShortRatio;
 
-	ofParameter<bool> bModeSequencial; // disable random engine and iterates next index on next timer bang!
+	ofParameter<bool> bModeSequencial;
+	// disable random engine and iterates next index on next timer bang!
 
 private:
 
 	//ofParameter<bool> bDisable;
-	//ofParameter<bool> MODE_LatchTrig; // this mode trigs the preset but goes back to preset 0 after duration timer
-	ofParameter<bool> MODE_AvoidRandomRepeat; // this mode re makes randomize again if new index preset it's the same!
+	//ofParameter<bool> MODE_LatchTrig; 
+	// this mode trigs the preset but goes back to preset 0 after duration timer
+
+	ofParameter<bool> MODE_AvoidRandomRepeat;
+	// this mode re makes randomize again if new index preset it's the same!
+
 	ofParameter<bool> bResetDices;
 	ofParameter<int> randomizedDice; // to test
 	bool bLatchRun = false;
 
 private:
 
-	int randomizeSpeed;// real time duration
+	int randomizeSpeed; // real time duration
 	uint32_t timerRandomLast;
 	float MAX_DURATION_RATIO = 2.0f;
 	int randomize_MAX_DURATION = MAX_DURATION_RATIO * 6000;
 	//int randomize_MAX_DURATION_SHORT = 6000 / 2.f;
 
-	vector<ofParameter<int>> presetsRandomFactor;// probability of every preset
-	vector<ofParameter<bool>> presetsRandomModeShort;// mode short for ebvery preset
+	vector<ofParameter<int>> presetsRandomFactor; // probability of every preset
+	vector<ofParameter<bool>> presetsRandomModeShort; // mode short for every preset
 
 	vector<int> randomFactorsDices;
 
 	void buildRandomizers();
-	void setup_RandomizerIndexes();// engine to get a random between all posible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
-	void doGoRandomIndex();// randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
+	void setup_RandomizerIndexes();
+	// engine to get a random between all possible dices (from 0 to dicesTotalAmount) and then select the preset associated to the resulting dice.
+
+	void doGoRandomIndex(); // randomize wich preset (usually 1 to 8) is selected (not the params of the preset)
 	int doGenerateRandomIndex();
-	void doReset();// reset all probs to 0
-	int dicesTotalAmount;// total dices summing the prob of any preset probability (PROB1 + PROB2 + ...)
+	void doReset(); // reset all probs to 0
+	int dicesTotalAmount; // total dices summing the prob of any preset probability (PROB1 + PROB2 + ...)
 
 	void doGoNextIndex();
-	
+
 	int timerRandom;
 
 	//--
@@ -276,22 +298,31 @@ private:
 
 private:
 
-	ofParameter<bool> bRandomizeFiltered_All;// put all toggles/params to true. a randomize will act over all params
-	ofParameter<bool> bRandomizeFiltered_None;// put to disabled all toggles
-	ofParameter<bool> bRandomizeFiltered_PopulateFavs;// create all presets
+	ofParameter<bool> bRandomizeFiltered_All;
+	// put all toggles/params to true. a randomize will act over all params
+
+	ofParameter<bool> bRandomizeFiltered_None;
+	// put to disabled all toggles
+
+	ofParameter<bool> bRandomizeFiltered_PopulateFavs;
+	// create all presets
 
 	// system to select what params of current selected preset to: clone, randomize etc
 	void setup_RandomizerFiletered();
-	void addGroupToRandomizerFiletered(ofParameterGroup& group);// queue all contained params inside the paramGroup and nested too
-	void Changed_Editor(ofAbstractParameter &e);
+	void addGroupToRandomizerFiletered(ofParameterGroup& group);
+	// queue all contained params inside the paramGroup and nested too
+
+	void Changed_Editor(ofAbstractParameter& e);
 
 public:
 
-	void doRandomPreset();// randomize params of current selected preset
+	void doRandomPreset();
+	// randomize params of current selected preset
 
 public:
 
-	void doRandomGroup(ofParameterGroup& group);// randomize params of current selected preset
+	void doRandomGroup(ofParameterGroup& group);
+	// randomize params of current selected preset
 
 	vector<ofParameter<bool>> randomizersFiltered_TogglesVector;
 	ofParameterGroup params_RandomizersFiltered;
@@ -342,19 +373,21 @@ public:
 	//--------------------------------------------------------------
 	void setRandomizerBpm(float bpm)
 	{
+		//TODO:
 		randomizeDurationBpm = bpm;
+
 		// 60,000 ms (1 minute) / Tempo (BPM) = Delay Time in ms for quarter-note beats
 		durationLong = 60000.f / bpm;
 		durationShort = durationLong * randomizeDurationShortRatio;
 		//durationShort = durationLong / 2.f;
 	}
 	//--------------------------------------------------------------
-	void doRandomizePresetFromFavs()// trig randomize and select one of the favs presets
+	void doRandomizePresetFromFavs() // trig randomize and select one of the favs presets
 	{
 		bRandomizeIndex = true;
 	}
 	//--------------------------------------------------------------
-	void doRandomizePresetSelected() {// randomize params of current selected preset
+	void doRandomizePresetSelected() { // randomize params of current selected preset
 		ofLogNotice(__FUNCTION__);
 		doRandomPreset();
 	}
@@ -386,7 +419,7 @@ public:
 
 private:
 
-	bool bDISABLE_CALLBACKS = true;// to avoid startup crashes and objects are not initialized properly
+	bool bDISABLE_CALLBACKS = true; // to avoid startup crashes and objects are not initialized properly
 
 	//---
 
@@ -401,7 +434,7 @@ public:
 	inline void doRandomGroupFull(ofParameterGroup& group) {
 		for (auto parameter : group)
 		{
-			if (parameter->isSerializable())// avoid not serailizable params that will crash
+			if (parameter->isSerializable())// avoid not serializable params that will crash
 			{
 				// recursive..
 				auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);

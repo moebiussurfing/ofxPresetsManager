@@ -70,8 +70,8 @@ void SurfingGroupRandomizer::setup(ofParameterGroup& _group, int _numPresets)
 	params_RandomizerSettings.add(params_RandomizersFiltered);
 	params_RandomizerSettings.add(bGui_PlayerEditor);
 
-	//params_RandomizerSettings.add(respBtnsClicker);
 	params_RandomizerSettings.add(amntBtnsClicker);
+	//params_RandomizerSettings.add(respBtnsClicker);
 
 	//-
 
@@ -591,7 +591,7 @@ void SurfingGroupRandomizer::doRandomPreset() {
 void SurfingGroupRandomizer::doRandomGroup(ofParameterGroup& group) {
 	for (auto parameter : group)
 	{
-		if (parameter->isSerializable())// avoid not serailizable params that will crash
+		if (parameter->isSerializable())// avoid not serializable params that will crash
 		{
 			// recursive..
 			auto parameterGroup = std::dynamic_pointer_cast<ofParameterGroup>(parameter);
@@ -1080,8 +1080,8 @@ void SurfingGroupRandomizer::setup_RandomizerIndexes()
 	//MODE_LatchTrig.set("LATCH", false);
 
 	// exclude
-	bPLAY_RandomizeTimer.setSerializable(false);
-	durationShort.setSerializable(false); // lock
+	//bPLAY_RandomizeTimer.setSerializable(false);
+	durationShort.setSerializable(false); // locked to bpm and ratio
 	bRandomizeIndex.setSerializable(false);
 	bResetDices.setSerializable(false);
 
@@ -1107,12 +1107,12 @@ void SurfingGroupRandomizer::setup_RandomizerIndexes()
 	}
 
 	// toggles to enable short duration mode
-	params_PresetDurations.clear();
+	params_PresetsDurations.clear();
 	i = 0;
 	for (auto& p : presetsRandomModeShort) {
 		string n = "SHORT " + ofToString(i++);
 		p.set(n, false);
-		params_PresetDurations.add(p);
+		params_PresetsDurations.add(p);
 	}
 
 	params_Randomizer.clear();
@@ -1133,7 +1133,7 @@ void SurfingGroupRandomizer::setup_RandomizerIndexes()
 	params_Randomizer.add(params_Timer);
 
 	params_Randomizer.add(params_PresetsProbs); // probs
-	params_Randomizer.add(params_PresetDurations); // toggles
+	params_Randomizer.add(params_PresetsDurations); // toggles
 
 #ifdef DEBUG_randomTest
 	params_Randomizer.add(randomizedDice);
@@ -1191,15 +1191,45 @@ void SurfingGroupRandomizer::drawImGui_Editor()
 		ofxImGuiSurfing::AddSpacingSeparated();
 
 		// Groups
-		ofxImGuiSurfing::AddGroup(params_Timer, flags); // timers
+
+		// Timers
+		//ofxImGuiSurfing::AddGroup(params_Timer, flags); 
+
+		if (ofxImGuiSurfing::BeginTree("CLOCK TIMERS"))
+		{
+			ofxImGuiSurfing::AddParameter(randomizeDurationBpm);
+			ofxImGuiSurfing::AddParameter(durationLong);
+
+			if (!getAllAreLong())
+			{
+				ofxImGuiSurfing::AddParameter(durationShort); // locked
+				ofxImGuiSurfing::AddParameter(randomizeDurationShortRatio);
+
+				static float _div[]{ 1.0f, 0.5f, 1 / 3.f, 1 / 4.f , 1 / 8.f };
+				static int _idiv = 0;
+				if (ofxImGuiSurfing::AddButtonMini("BPM Stepped"))
+				{
+					_idiv++;
+					if (_idiv == 5)_idiv = 0;
+					randomizeDurationShortRatio = _div[_idiv];
+				}
+			}
+
+			ofxImGuiSurfing::EndTree();
+		}
+
+
 		ofxImGuiSurfing::AddSpacingSeparated();
 
-		if (!bModeSequencial) {
-			ofxImGuiSurfing::AddGroup(params_PresetsProbs, flags); // probs
+		// Probabilities
+		if (!bModeSequencial)
+		{
+			ofxImGuiSurfing::AddGroup(params_PresetsProbs, flags);
 			ofxImGuiSurfing::AddSpacingSeparated();
 		}
 
-		ofxImGuiSurfing::AddGroup(params_PresetDurations, flags); // toggles
+		// Duration toggles
+		ofxImGuiSurfing::AddGroup(params_PresetsDurations, flags);
 		ofxImGuiSurfing::AddSpacingSeparated();
 
 		// Reset
@@ -1300,7 +1330,8 @@ void SurfingGroupRandomizer::drawImGui_Main()
 
 		// Blink by timer
 
-		ofxImGuiSurfing::AddBigToggleNamed(bPLAY_RandomizeTimer, _w100, 2 * _h, "PLAYING", "PLAY", true, getPlayerPct());
+		ofxImGuiSurfing::AddBigToggleNamed(bPLAY_RandomizeTimer, _w100, 2 * _h,
+			"PLAYING", "PLAY", true, getPlayerPct());
 
 		ImGui::Spacing();
 
@@ -1316,7 +1347,6 @@ void SurfingGroupRandomizer::drawImGui_Main()
 			ImGui::PushStyleColor(ImGuiCol_PlotHistogram, color);
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 0));//transparent
 			ImGui::ProgressBar(timerPlayerPct);
-			//ImGui::ProgressBar(_prog);
 			ImGui::PopStyleColor();
 			ImGui::PopStyleColor();
 			ImGui::PopID();
@@ -1332,18 +1362,13 @@ void SurfingGroupRandomizer::drawImGui_Main()
 		{
 			ImGui::Spacing();
 
-			////string str = "User-Kit: " + displayNameUserKit;
-			//str = "  Group    " + group.getName();
-			//ImGui::Text(str.c_str());
-
 			// label
-
-			str = "Preset " + ofToString(index_PresetSelected.get());
+			str = "PRESET";
+			//str = "Preset " + ofToString(index_PresetSelected.get());
 			ImGui::Text(str.c_str());
 			ImGui::Spacing();
 
 			// index
-
 			ImGui::PushItemWidth(_w33);
 			ofxImGuiSurfing::AddParameter(index_PresetSelected);
 			ImGui::PopItemWidth();
@@ -1366,16 +1391,17 @@ void SurfingGroupRandomizer::drawImGui_Main()
 
 		//--
 
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+		ImGui::Spacing();
+
 		if (!bMinimize)
 		{
-			ImGui::Spacing();
-			ImGui::Separator();
-			ImGui::Spacing();
-
-			ImGui::Spacing();
 			ImGui::Text("CLOCK");
 			ImGui::Spacing();
 		}
+
 		{
 			ImGui::PushItemWidth(_w50);
 			ofxImGuiSurfing::AddParameter(randomizeDurationBpm);
@@ -1480,7 +1506,7 @@ void SurfingGroupRandomizer::drawImGui_Main()
 
 				//--
 
-				// 1.2 randomizers fillter editor
+				// 1.2 randomizers filter editor
 
 				//drawImGui_RandomizerParams();
 				ofxImGui::AddGroup(params_RandomizersFiltered, settings);
@@ -1584,6 +1610,8 @@ void SurfingGroupRandomizer::doDices()// calculate all probabilities for all pre
 //--------------------------------------------------------------
 void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter& e)
 {
+	return;
+
 	if (!bDISABLE_CALLBACKS)
 	{
 		string name = e.getName();
@@ -1596,11 +1624,12 @@ void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter& e)
 			ofLogNotice(__FUNCTION__) << "name: " << group.getName() << " " << name << ": " << e;
 		}
 
-		if (false) {}
+		if (0) {}
 
 		//----
 
 		// index preset selector
+		/*
 		else if (name == index_PresetSelected.getName())
 		{
 			ofLogNotice(__FUNCTION__) << group.getName() << " index: " << index_PresetSelected.get();
@@ -1608,6 +1637,7 @@ void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter& e)
 			// TODO:
 			//selectorTARGET = index_PresetSelected;
 		}
+		*/
 
 		//--
 
@@ -1643,6 +1673,7 @@ void SurfingGroupRandomizer::Changed_Control(ofAbstractParameter& e)
 			bRandomizeIndex = false;
 			doGoRandomIndex();
 		}
+
 		// play randomizer
 		else if (name == bPLAY_RandomizeTimer.getName())
 		{
@@ -1737,7 +1768,7 @@ void SurfingGroupRandomizer::loadPreset(int p)
 
 	//TODO: 
 	// workaround
-	//bc the done-loading happens out of the class...
+	// bc the done-loading happens out of the class...
 	bIsDoneLoad = true;
 
 	// TODO:
