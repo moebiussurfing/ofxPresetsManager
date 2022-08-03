@@ -3164,7 +3164,6 @@ void ofxPresetsManager::draw_Gui_Parameters()
 			// 6. Undo Engine
 
 #ifdef INCLUDE_ofxUndoSimple
-		//if (!guiManager.bMinimize)
 			draw_Gui_WidgetsUndo();
 #endif
 		}
