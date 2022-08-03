@@ -1787,34 +1787,42 @@ void ofxPresetsManager::keyPressed(ofKeyEventArgs& eventArgs)
 				if (key == OF_KEY_UP)
 				{
 					index_GroupSelected--;
+
 					return;
 				}
 
 				else if (key == OF_KEY_DOWN)
 				{
 					index_GroupSelected++;
+
 					return;
 				}
 
 				else if (key == OF_KEY_LEFT)
 				{
-					bDISABLE_CALLBACKS = true;
-					int sel = index_GroupSelected.get();
-					int i = index_PresetSelected[sel];
-					i--;
-					bDISABLE_CALLBACKS = false;
-					index_PresetSelected[sel] = (int)ofClamp(i, 0, index_PresetSelected[sel].getMax());
+					doLoadPrevious();
+
+					//bDISABLE_CALLBACKS = true;
+					//int sel = index_GroupSelected.get();
+					//int i = index_PresetSelected[sel];
+					//i--;
+					//bDISABLE_CALLBACKS = false;
+					//index_PresetSelected[sel] = (int)ofClamp(i, 0, index_PresetSelected[sel].getMax());
+
 					return;
 				}
 
 				else if (key == OF_KEY_RIGHT)
 				{
-					bDISABLE_CALLBACKS = true;
-					int sel = index_GroupSelected.get();
-					int i = index_PresetSelected[sel];
-					i++;
-					bDISABLE_CALLBACKS = false;
-					index_PresetSelected[sel] = (int)ofClamp(i, 0, index_PresetSelected[sel].getMax());
+					doLoadNext();
+
+					//bDISABLE_CALLBACKS = true;
+					//int sel = index_GroupSelected.get();
+					//int i = index_PresetSelected[sel];
+					//i++;
+					//bDISABLE_CALLBACKS = false;
+					//index_PresetSelected[sel] = (int)ofClamp(i, 0, index_PresetSelected[sel].getMax());
+
 					return;
 				}
 			}
@@ -2119,7 +2127,7 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 
 		// Presets Selectors
 		// for the selectors group index_PresetSelected
-		 
+
 		//TODO:
 		// could be too slow??
 		{
@@ -2214,6 +2222,11 @@ void ofxPresetsManager::Changed_User(ofAbstractParameter& e)
 									// Workflow: 
 									// Force disable autosave when randomizer player enabled
 									// no matters edit mode
+
+									// protect to vector range!
+									if (index_GroupSelected >= groupRandomizers.size() - 1)
+										index_GroupSelected = groupRandomizers.size() - 1;
+
 									bool b = groupRandomizers[index_GroupSelected.get()].bPLAY_RandomizeTimer.get();
 
 									if (!b) save(index_PresetSelected_PRE[g], g);
@@ -2294,7 +2307,7 @@ void ofxPresetsManager::Changed_Control(ofAbstractParameter& e)
 		//--
 
 		// Mode Edit
-		 
+
 		//when false, we disabled autosave to allow faster performance ! 
 
 		else if (name == bMODE_EditLive.getName())
@@ -3422,20 +3435,28 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 
 			ImGui::NextColumn();
 
-			//--
+			//----
 
 			// Matrix Clicker for each Group!
+			// one row per group only.
 
-			ofxImGuiSurfing::AddMatrixClickerLabelsStrings(
-				index_PresetSelected[i], labels[i],
-				bResponsive.get(), maxSz1, true, -1, false);
+			if (guiManager.bMinimize) ImGui::Dummy(ImVec2(0, 4)); //offset
 
+			float _hm = guiManager.bMinimize ? 0.8f * _h2 : _h;
+
+			ofxImGuiSurfing::AddMatrixClickerLabelsStrings(index_PresetSelected[i], labels[i],
+				bResponsive.get(), maxSz1, true, _hm, false);
+
+			//inline bool AddMatrixClickerLabelsStrings(ofParameter<int>& _index, const std::vector<string> labels, bool bResponsive = true, int amountBtRow = 3, const bool bDrawBorder = true, float __h = -1, bool bSpaced = true, string toolTip = "")
+			// 
 			//--
 
 			ImGui::Columns(1);
 		}
 
 		//--
+
+		// Selectors
 
 		// Hide when main window is visible
 		// to not duplicate controls on the two windows
@@ -3448,7 +3469,6 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 
 			if (ofxImGuiSurfing::BeginTree("SELECTORS"))
 			{
-
 				string str;
 
 				// 0. Name Group
@@ -3459,7 +3479,13 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 					guiManager.AddLabelBig(str.c_str(), false, true);
 
 					// Group selected name
+
+					// protect to vector range!
+					if (index_GroupSelected >= index_PresetSelected.size() - 1)
+						index_GroupSelected = index_PresetSelected.size() - 1;
+
 					str = index_PresetSelected[index_GroupSelected].getName();
+
 					guiManager.AddLabelBig(str.c_str(), false, true);
 					guiManager.AddSpacing();
 				}
@@ -3481,7 +3507,8 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 					ImGui::PushID("##groupSelectorClicker");
 					{
 						//guiManager.Add(index_GroupSelected, OFX_IM_HSLIDER_MINI_NO_NAME);//hidden?
-						guiManager.Add(index_GroupSelected);
+						//guiManager.Add(index_GroupSelected);
+						guiManager.Add(index_GroupSelected, OFX_IM_STEPPER);
 					}
 					ImGui::PopID();
 				}
@@ -3499,17 +3526,29 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 						guiManager.AddLabelBig("PRESET", false, true);
 
 						// Char key
-						int sel = index_GroupSelected.get();
-						int i = index_PresetSelected[sel];
-						std::string ss = labels[index_GroupSelected][i];
+						std::string ss;
+						if (index_GroupSelected < index_PresetSelected.size()) // take care of vector ranges
+						{
+							int sel = index_GroupSelected.get();
+							int i = index_PresetSelected[sel];
 
-						guiManager.AddLabelBig(ss, false, true);
-						guiManager.AddSpacing();
+							if (index_GroupSelected < labels.size()) {// take care of vector ranges
+								ss = labels[index_GroupSelected][i];
+							}
+
+							guiManager.AddLabelBig(ss, false, true);
+							guiManager.AddSpacing();
+						}
 					}
 
 					// Index
-					guiManager.Add(index_PresetSelected[index_GroupSelected]);
-					//guiManager.Add(index_PresetSelected[index_GroupSelected], OFX_IM_HSLIDER_MINI_NO_NAME);
+					if (index_GroupSelected < index_PresetSelected.size()) 
+					{
+						//guiManager.Add(index_PresetSelected[index_GroupSelected], OFX_IM_HSLIDER_MINI_NO_NAME);
+						guiManager.Add(index_PresetSelected[index_GroupSelected]);
+						//guiManager.Add(index_PresetSelected[index_GroupSelected], OFX_IM_STEPPER);
+
+					}
 				}
 
 				ofxImGuiSurfing::EndTree();
@@ -3519,7 +3558,7 @@ void ofxPresetsManager::draw_Gui_ClickerPresets_ImGui()
 
 			// Players
 
-			if (!guiManager.bMinimize)
+			//if (!guiManager.bMinimize)
 			{
 				guiManager.AddSpacingSeparated();
 
@@ -3645,6 +3684,10 @@ void ofxPresetsManager::draw_Gui_Main()
 			str = "GROUP";
 			guiManager.AddLabelBig(str.c_str(), false, true);
 
+			// protect to vector range!
+			if (index_GroupSelected >= index_PresetSelected.size() - 1)
+				index_GroupSelected = index_PresetSelected.size() - 1;
+
 			str = index_PresetSelected[index_GroupSelected].getName();
 			guiManager.AddLabelBig(str.c_str(), false, true);
 			guiManager.AddSpacing();
@@ -3704,6 +3747,10 @@ void ofxPresetsManager::draw_Gui_Main()
 
 			guiManager.AddSpacing();
 			guiManager.AddLabelBig("PRESET", false, true);
+
+			// protect to vector range!
+			if (index_GroupSelected >= index_PresetSelected.size() - 1)
+				index_GroupSelected = index_PresetSelected.size() - 1;
 
 			// Char key
 			int sel = index_GroupSelected.get();
@@ -4051,10 +4098,10 @@ void ofxPresetsManager::draw_Gui_WidgetsAdvanced()
 					ImGui::PopItemWidth();
 
 					//if (bHelp)ofxImGuiSurfing::AddParameter(helpPos);
-				}
+		}
 
 				ImGui::TreePop();
-			}
+	}
 #endif
 			//--
 
@@ -4102,8 +4149,8 @@ void ofxPresetsManager::draw_Gui_WidgetsAdvanced()
 			}
 
 			ImGui::TreePop();
-		}
-	}
+}
+}
 }
 
 //--

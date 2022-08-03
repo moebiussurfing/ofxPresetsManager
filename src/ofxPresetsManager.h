@@ -53,9 +53,15 @@
 	+	fix auto save timer. exclude log.
 
 
-	BUG:
+	BUGS:
 
 	-	Play state is not recalled on settings ?
+	-	When disabled G_LINK must fix some vector ranges..
+		(presetsManager.setDisableGroupLinkSelector();)
+		// protect to vector range!
+		if (index_GroupSelected >= groupRandomizers.size() - 1)
+			index_GroupSelected = groupRandomizers.size() - 1;
+
 */
 
 //----
@@ -947,7 +953,8 @@ public:
 		save(index_PresetSelected[groupIndex].get(), groupIndex);
 	}
 
-public:
+//public:
+private:
 
 	//--------------------------------------------------------------
 	void saveCurrentPreset(std::string groupName) {
@@ -1023,17 +1030,42 @@ public:
 		load_Next(index_GroupSelected, cycled);
 	}
 
+public:
+
 	// Legacy	
 	//--------------------------------------------------------------
-	void doLoadNext()
+	void doLoadPrevious(/*bool cycled = false*/)
 	{
 		ofLogNotice(__FUNCTION__);
-		load_Next(true);
+		//load_Previous(true, cycled);
+
+		bDISABLE_CALLBACKS = true;
+		int sel = index_GroupSelected.get();
+		int i = index_PresetSelected[sel];
+		i--;
+		bDISABLE_CALLBACKS = false;
+		index_PresetSelected[sel] = (int)ofClamp(i, 0, index_PresetSelected[sel].getMax());
+	}
+	//--------------------------------------------------------------
+	void doLoadNext(/*bool cycled = false*/)
+	{
+		ofLogNotice(__FUNCTION__);
+		//load_Next(true, cycled);
+
+		bDISABLE_CALLBACKS = true;
+		int sel = index_GroupSelected.get();
+		int i = index_PresetSelected[sel];
+		i++;
+		bDISABLE_CALLBACKS = false;
+		index_PresetSelected[sel] = (int)ofClamp(i, 0, index_PresetSelected[sel].getMax());
 	}
 
 	//--
 
 	// Extra API methods
+
+//public:
+private:
 
 	// Helpers for external layout or other workflow purposes
 
@@ -1058,14 +1090,6 @@ public:
 		int _size = -1;
 		if (g < groups.size()) _size = groupsSizes[g];
 		return _size;
-	}
-
-	//--------------------------------------------------------------
-	std::string getGroupName(int i = 0)
-	{
-		std::string _name = "ERROR UNKNOWN";
-		if (i < groups.size()) _name = groups[i];
-		return _name;
 	}
 
 	//--------------------------------------------------------------
@@ -1123,6 +1147,16 @@ public:
 	void setVisible_GroupName(bool b) // disabler for minimal design
 	{
 		bShow_GroupName = b;
+	}
+
+public:
+
+	//--------------------------------------------------------------
+	std::string getGroupName(int i = 0)
+	{
+		std::string _name = "ERROR. Index out of range of vector Groups";
+		if (i < groups.size()) _name = groups[i];
+		return _name;
 	}
 
 	//----
@@ -1300,9 +1334,9 @@ public:
 	ofParameter<bool> bGui_PresetsParams;
 	ofParameter<bool> bGui_AdvancedControl;
 
-//private:
+	//private:
 
-	//ofParameter<glm::vec2> Gui_Internal_Position;
+		//ofParameter<glm::vec2> Gui_Internal_Position;
 
 private:
 
@@ -1479,7 +1513,7 @@ private:
 	//void removeMouseListeners(); // TODO: fix easy remover..
 
 	vector<vector<int>> keys; // queued trigger keys for each group ? (all presets) (size of)
-	vector<vector<string>> labels; //converted to strings
+	vector<vector<string>> labels; // converted to strings
 	bool bKeys_NotYetActivated;
 
 	// save keys
