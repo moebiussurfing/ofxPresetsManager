@@ -4,11 +4,9 @@ ofxPresetsManager
 # Overview
 
 An **openFrameworks** add-on to handle presets of `ofParameter`'s nested into single or multiple `ofParameterGroup` containers.  
-
 Also powered with a nice GUI, many Helpers, and a complete user workflow.
 
 **NOTE**  
-
 _If you don't need multiple and independent and linkable groups,_  
 _then I recommend using my simpler add-on [ofxSurfingPresets](https://github.com/moebiussurfing/ofxSurfingPresets)._  
 
@@ -40,6 +38,17 @@ _then I recommend using my simpler add-on [ofxSurfingPresets](https://github.com
 
 Look at the examples and **ofxPresetsManager.h** for more learning.  
 The file settings (one file for each preset) will be placed by default into ```/bin/data```.  
+
+</p>
+</details>
+
+## Examples
+
+### 1_Basic (only one group)
+
+Illustrates how to handle some `ofParameter`'s bundled into one `ofParameterGroup` used as a container.  
+
+![](Examples/1_Basic/Capture.PNG)  
 
 <details>
   <summary>CODE</summary>
@@ -84,18 +93,7 @@ ofApp::draw()
 // Nothing more!
 ```
 
-</p>
-</details>
-
-## Examples
-
-#### 1_Basic (only one group)
-
-Illustrates how to handle some `ofParameter`'s bundled into one `ofParameterGroup` used as a container.  
-
-![](Examples/1_Basic/Capture.PNG)  
-
-#### 2_MultiGroup
+### 2_MultiGroup
 
 Helps to learn how to handle multiple `ofParameterGroup`'s.  
 
@@ -121,6 +119,8 @@ presetsManager.add(params3, { 'b', 'n', 'm', ',', '.' });
 
 presetsManager.setup();
 ```
+</p>
+</details>
 
 <details>
   <summary>ExamplesAdvanced</summary>
@@ -132,7 +132,6 @@ Both examples run linked together using **ofxRemoteParameters**.
 This allows you to control the presets on the **Client OF_App**.  
 The **Server OF_App** draws your scene using the *linked/received* parameters from the **Client OF_App**.  
 This is useful because in some scenarios could help to improve the performance or the compiling time reducing dependencies. [OUTDATED VIDEO](http://www.youtube.com/watch?v=kV-t8lIdNRg "VIDEO") 
-
 </p>
 </details>
 
